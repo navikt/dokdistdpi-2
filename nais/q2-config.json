@@ -1,0 +1,29 @@
+{
+  "ADMINISTRERFORSENDELSE_V1_URL": "https://app-q2.adeo.no/dokdist/rest/v1/administrerforsendelse",
+  "DOKUMENTTYPEINFO_V4_URL": "https://app-q2.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
+  "VARSELINFO_V1_URL": "https://app-q2.adeo.no/dokkat/rest/varselinfo/v1",
+  "DKI_API_URL": "https://dkif.dev.intern.nav.no/",
+  "LAGREJURIDISKLOGG_REST_URL": "https://app-q1.adeo.no/juridisklogg/api/rest/logg",
+  "SAF_GRAPHQL_URL": "https://saf.dev.intern.nav.no/graphql",
+  "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
+  "STORAGE_S3_URL": "https://objectstore.nais.preprod.local",
+  "DOKDISTDPI_CHANNEL_NAME": "Q2_DOKDISTDPI",
+  "MQGATEWAY01_HOSTNAME": "b27apvl219.preprod.local",
+  "MQGATEWAY01_PORT": "1413",
+  "MQGATEWAY01_NAME": "MQLS01",
+  "DOKDISTDPI_QDIST011_DIST_TIL_DPI_QUEUENAME": "QA.Q2_DOKDISTDPI.QDIST011_DIST_TIL_DPI",
+  "DOKDISTDPI_QDIST011_FUNK_FEIL_QUEUENAME": "QA.Q2_DOKDISTDPI.QDIST011_FUNK_FEIL",
+  "DOKDISTDPI_QDIST014_KVITTERING_FRA_DPI_QUEUENAME": "QA.Q2_DOKDISTDPI.QDIST014_KVITTERING_FRA_DPI",
+  "DOKDISTDPI_QDIST014_FUNK_FEIL_QUEUENAME": "QA.Q2_DOKDISTDPI.QDIST014_KVITTERING_FUNK_FEIL",
+  "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.Q1_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
+  "SRVDOKDISTDPI": "/serviceuser/data/dev/srvdokdistdpi-2",
+  "DOKDISTDPI_VAULT": "/kv/preprod/fss/dokdistdpi-2/teamdokumenthandtering",
+  "VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/preprod/shared",
+  "APP_NAME": "dokdistdpi-2",
+  "NAMESPACE": "teamdokumenthandtering",
+  "MIN_REPLICAS": "1",
+  "MAX_REPLICAS": "2",
+  "INGRESSES": [
+    "https://dokdistdpi.dev.intern.nav.no"
+  ]
+}
