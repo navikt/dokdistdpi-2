@@ -1,4 +1,6 @@
 {
+  "MASKINPORTEN_TOKEN_ENDPOINT": "https://ver2.maskinporten.no/token",
+  "MASKINPORTEN_ISSUER": "https://ver2.maskinporten.no/",
   "ADMINISTRERFORSENDELSE_V1_URL": "https://app-q2.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "DOKUMENTTYPEINFO_V4_URL": "https://app-q2.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "VARSELINFO_V1_URL": "https://app-q2.adeo.no/dokkat/rest/varselinfo/v1",
@@ -20,10 +22,9 @@
   "DOKDISTDPI_VAULT": "/kv/preprod/fss/dokdistdpi-2/teamdokumenthandtering",
   "VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/preprod/shared",
   "APP_NAME": "dokdistdpi-2",
-  "NAMESPACE": "teamdokumenthandtering",
   "MIN_REPLICAS": "1",
   "MAX_REPLICAS": "2",
   "INGRESSES": [
-    "https://dokdistdpi.dev.intern.nav.no"
+    "https://dokdistdpi-2.dev.intern.nav.no"
   ]
 }
