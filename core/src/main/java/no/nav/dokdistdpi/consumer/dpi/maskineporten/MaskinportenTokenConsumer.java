@@ -39,12 +39,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
 
 @Slf4j
 @Component
 public class MaskinportenTokenConsumer {
-	private static final String SCOPE_DPO = "move/dpo.read";
+	private static final String SCOPE_DPI = "digitalpostinnbygger:send";
 	public static final String FUNKSJONELL_FEIL_ERROR_MESSAGE = "Klarte ikke hente AccessToken fra maskinporten. Funksjonell feil: ";
 	public static final String TEKNISK_FEIL_ERROR_MESSAGE = "Klarte ikke hente AccessToken fra maskinporten. Teknisk feil: ";
 
@@ -62,8 +63,8 @@ public class MaskinportenTokenConsumer {
 				.messageConverters(new FormHttpMessageConverter(),
 						new MappingJackson2HttpMessageConverter())
 				.errorHandler(new OidcErrorHandler())
-				.setReadTimeout(Duration.ofSeconds(30))
-				.setConnectTimeout(Duration.ofSeconds(5))
+				.setReadTimeout(ofSeconds(30))
+				.setConnectTimeout(ofSeconds(5))
 				.build();
 	}
 
@@ -142,7 +143,7 @@ public class MaskinportenTokenConsumer {
 
 	public String getCurrentScopes() {
 		ArrayList<String> scopeList = new ArrayList<>();
-		scopeList.add(SCOPE_DPO);
+		scopeList.add(SCOPE_DPI);
 		return scopeList.stream().reduce((a, b) -> a + " " + b).orElse("");
 	}
 }
