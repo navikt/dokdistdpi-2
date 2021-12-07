@@ -45,6 +45,8 @@ spec:
       value: {{ MASKINPORTEN_TOKEN_ENDPOINT }}
     - name: MASKINPORTEN_ISSUER
       value: {{ MASKINPORTEN_ISSUER }}
+    - name: SERVICEREGISTRY_URL
+      value: { { SERVICEREGISTRY_URL } }
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}

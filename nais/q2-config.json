@@ -1,6 +1,7 @@
 {
-  "MASKINPORTEN_TOKEN_ENDPOINT": "https://ver2.maskinporten.no/token",
-  "MASKINPORTEN_ISSUER": "https://ver2.maskinporten.no/",
+  "MASKINPORTEN_URL": "https://oidc-ver1.difi.no/idporten-oidc-provider/token",
+  "MASKINPORTEN_AUDIENCE": "https://oidc-ver1.difi.no/idporten-oidc-provider/",
+  "SERVICEREGISTRY_URL": "https://qa-meldingsutveksling.difi.no/serviceregistry/",
   "ADMINISTRERFORSENDELSE_V1_URL": "https://app-q2.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "DOKUMENTTYPEINFO_V4_URL": "https://app-q2.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "VARSELINFO_V1_URL": "https://app-q2.adeo.no/dokkat/rest/varselinfo/v1",
