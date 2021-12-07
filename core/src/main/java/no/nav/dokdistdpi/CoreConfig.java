@@ -5,6 +5,7 @@ import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.config.prop.ServiceRegistryProperties;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 @EnableConfigurationProperties({
 		ServiceuserProperties.class,
@@ -12,5 +13,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 		MaskinportenProperties.class,
 		ServiceRegistryProperties.class
 })
+@Configuration
 public class CoreConfig {
 }
