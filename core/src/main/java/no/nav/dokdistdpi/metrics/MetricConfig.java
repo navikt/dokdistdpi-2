@@ -6,9 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MetricConfig {
-
     @Bean
-    DokTimedAspect timedAspect(MeterRegistry meterRegistry) {
-        return new DokTimedAspect(meterRegistry);
+    DokMonitoringAspect timedAspect(MeterRegistry meterRegistry) {
+        return new DokMonitoringAspect(meterRegistry);
     }
 }

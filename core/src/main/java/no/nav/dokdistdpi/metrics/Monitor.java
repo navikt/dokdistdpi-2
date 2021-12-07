@@ -14,11 +14,7 @@ public @interface Monitor {
 
     double[] percentiles() default {};
 
-    String description() default "";
-
     boolean histogram() default false;
 
-    boolean logExceptions() default true;
-
-    boolean createErrorMetric() default false;
+    String description() default "";
 }
