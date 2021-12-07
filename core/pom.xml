@@ -57,6 +57,10 @@
 			<artifactId>activemq-jms-pool</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-spring-boot-starter</artifactId>
 		</dependency>
@@ -81,6 +85,10 @@
 			<artifactId>com.ibm.mq.allclient</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+		</dependency>
 		<!--Caching-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -89,11 +97,6 @@
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<!--test-->

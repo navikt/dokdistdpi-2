@@ -1,22 +1,22 @@
-package no.nav.dokdistdpi.config;
+package no.nav.dokdistdpi.config.prop;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.annotation.Validated;
 
-@Getter
-@Setter
+import java.net.URL;
+
+@Data
 @ToString
-@ConfigurationProperties("serviceuser")
+@ConfigurationProperties("maskinporten")
 @Validated
-public class ServiceuserProperties {
-
+public class MaskinportenProperties {
 	@NonNull
-	private String username;
+	private URL url;
 	@NonNull
-	private String password;
-
+	private String audience;
+	@NonNull
+	private String clientid;
 }
