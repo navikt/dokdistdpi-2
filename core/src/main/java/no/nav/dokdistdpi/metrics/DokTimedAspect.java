@@ -6,7 +6,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.Timer;
-import io.micrometer.core.lang.NonNullApi;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,9 +21,9 @@ import static java.util.Arrays.asList;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.MDC_REQUEST_ID;
 
 @Aspect
-@NonNullApi
 @Incubating(since = "1.0.0")
 @Slf4j
+@SuppressWarnings("Duplicates")
 public class DokTimedAspect {
 
     private final MeterRegistry registry;
