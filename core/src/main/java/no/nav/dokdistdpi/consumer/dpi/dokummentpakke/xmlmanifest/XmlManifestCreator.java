@@ -1,29 +1,32 @@
 package no.nav.dokdistdpi.consumer.dpi.dokummentpakke.xmlmanifest;
 
-import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.DigitalPostInfo;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 
-public class ManifestCreator {
+public class XmlManifestCreator {
 
 	private static final String DOKUMENT_LANG = "no";
 
-	public String createManifest(Dokumentpakke dokumentpakke, final SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo) {
+	public String createManifest(Forsendelse forsendelse) {
+		Dokumentpakke dokumentpakke = forsendelse.getDokumentpakke();
+		DigitalPostInfo digitalPostInfo = forsendelse.getDigitalPostInfo();
+
 		Avsender avsender = Avsender.builder()
 				.virksomhetsidentifikator(asIso6523(NAV_ORGNUMMER))
 				.avsenderindentifikator(NAV_ORGNUMMER)
 				.build();
 		Mottaker mottaker = Mottaker.builder()
 				.person(Person.builder()
-						.personidentifikator(sikkerDigitalKontaktInfo.getPersonident())
-						.postkasseadresse(sikkerDigitalKontaktInfo.getBrukerAdresse())
+						.personidentifikator(digitalPostInfo.getMotakeridentifikator())
+						.postkasseadresse(digitalPostInfo.getPostkasseadresse())
 						.build())
 				.build();
 		Dokument hoveddokument = Dokument.builder()
@@ -48,7 +51,7 @@ public class ManifestCreator {
 						.mime(vedlegg.getMimeType())
 						.href(vedlegg.getFilnavn())
 						.build()
-		).collect(Collectors.toList());
+		).toList();
 		Manifest xmlManifest = Manifest.builder()
 				.avsender(avsender)
 				.mottaker(mottaker)

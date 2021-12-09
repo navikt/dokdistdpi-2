@@ -85,6 +85,11 @@
 			<artifactId>com.ibm.mq.allclient</artifactId>
 		</dependency>
 
+		<!--Encryption-->
+		<dependency>
+			<groupId>no.difi.commons</groupId>
+			<artifactId>commons-asic</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>

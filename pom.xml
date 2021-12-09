@@ -6,6 +6,7 @@
 	<modules>
 		<module>core</module>
 		<module>app</module>
+		<module>schema</module>
 	</modules>
 
 	<parent>
@@ -26,6 +27,7 @@
 		<aws-s3.version>1.12.125</aws-s3.version>
 		<bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
 		<camel.version>3.13.0</camel.version>
+		<commons-asic.version>0.9.5</commons-asic.version>
 		<commons-io.version>2.11.0</commons-io.version>
 		<dokkat.version>11.0.5</dokkat.version>
 		<ibm-mq.version>9.2.4.0</ibm-mq.version>
@@ -50,7 +52,11 @@
 				<artifactId>app</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>no.nav.dokdistdpi</groupId>
+				<artifactId>schema</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!--Apache -->
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
@@ -98,6 +104,11 @@
 			</dependency>
 
 			<!--Encryption-->
+			<dependency>
+				<groupId>no.difi.commons</groupId>
+				<artifactId>commons-asic</artifactId>
+				<version>${commons-asic.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>
