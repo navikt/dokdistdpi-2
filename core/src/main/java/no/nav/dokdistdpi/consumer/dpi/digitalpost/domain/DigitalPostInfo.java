@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.consumer.dpi.digitalpost;
+package no.nav.dokdistdpi.consumer.dpi.digitalpost.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ public class DigitalPostInfo {
 	private Virksomhetmottaker virksomhetmottaker;
 	private String avsenderidentifikator;
 	/*Person som er mottaker av en sikker digital post */
-	private Personmottaker  personmottaker;
+	private Personmottaker personmottaker;
 	private Identifikator virksomhetsidentifikator;
 	private Identifikator personidentifikator;
 	private String postkasseadresse;

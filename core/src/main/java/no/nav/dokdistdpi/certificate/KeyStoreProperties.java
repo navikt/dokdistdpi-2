@@ -1,6 +1,7 @@
 package no.nav.dokdistdpi.certificate;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
@@ -13,6 +14,7 @@ import java.security.KeyStore;
 @ConfigurationProperties("virksomhetssertifikat")
 @ToString(exclude = "password")
 @Validated
+@NoArgsConstructor
 public class KeyStoreProperties {
 
 	/**
@@ -48,4 +50,5 @@ public class KeyStoreProperties {
 	 * keyStore for crypto operations on the keys from the keystore.
 	 */
 	private Boolean lockProvider = false;
+
 }

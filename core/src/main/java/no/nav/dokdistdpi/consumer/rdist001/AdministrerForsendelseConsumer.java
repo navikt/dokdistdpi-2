@@ -36,13 +36,11 @@ public class AdministrerForsendelseConsumer {
 
 	private final String url;
 	private final RestTemplate restTemplate;
-	private final AdministrerForsendelseMapper administrerForsendelseMapper;
 
 	@Autowired
 	public AdministrerForsendelseConsumer(RestTemplateBuilder restTemplateBuilder, ServiceuserProperties serviceuser,
 										  @Value("${administrerforsendelse.url}") String url) {
 		this.url = url;
-		this.administrerForsendelseMapper = new AdministrerForsendelseMapper();
 		this.restTemplate = restTemplateBuilder
 				.basicAuthentication(serviceuser.getUsername(), serviceuser.getPassword())
 				.setConnectTimeout(ofSeconds(5))
@@ -52,11 +50,11 @@ public class AdministrerForsendelseConsumer {
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "hentIdent"}, percentiles = {0.5, 0.95}, histogram = true)
-	public String hentMottaker(final String forsendelseId) {
+	public HentForsendelseResponse hentMottaker(final String forsendelseId) {
 		try {
 			HttpEntity<?> httpEntity = new HttpEntity<>(createHeader());
-			ResponseEntity<HentMottakerResponse> response = restTemplate.exchange(url + "/" + forsendelseId, GET, httpEntity, HentMottakerResponse.class);
-			return administrerForsendelseMapper.map(response.getBody());
+			ResponseEntity<HentForsendelseResponse> response = restTemplate.exchange(url + "/" + forsendelseId, GET, httpEntity, HentForsendelseResponse.class);
+			return response.getBody();
 		} catch (HttpClientErrorException e) {
 			log.error("Kall mot rdist001 feilet funksjonell med forsendelseId={}, feilmelding={}", forsendelseId, e.getMessage());
 			throw new AdminstrerForsendelseFunctionalException(format("Kall mot rdist001 - hentForsendelse feilet med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()), e);

@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.consumer.dpi.digitalpost;
+package no.nav.dokdistdpi.consumer.dpi.digitalpost.domain;
 
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +10,6 @@ public class Forsendelse {
 	private String mottakerSertifikat;
 	private final String conversationId;
 	private final String bestillingsId;
-	private DigitalPostInfo digitalPostInfo;
+	private DigitalPostInfo digital;
 	private Dokumentpakke dokumentpakke;
 }

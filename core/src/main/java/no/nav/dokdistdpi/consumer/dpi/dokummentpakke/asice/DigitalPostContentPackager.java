@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.consumer.dpi.dokummentpakke.asice;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.Forsendelse;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.exception.technical.DokumentpakkingException;
 import no.nav.dokdistdpi.exception.technical.SertifikatException;
 import org.springframework.beans.factory.annotation.Autowired;

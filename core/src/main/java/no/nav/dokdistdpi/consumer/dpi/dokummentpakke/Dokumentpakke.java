@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @Builder
 public class Dokumentpakke {
-	private final DigitalPostDokument hoveddokument;
+	private final DpiDokument hoveddokument;
 	@Builder.Default
-	private final List<DigitalPostDokument> vedlegg = new ArrayList<>();
+	private final List<DpiDokument> vedlegg = new ArrayList<>();
 }

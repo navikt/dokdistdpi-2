@@ -6,8 +6,8 @@ import no.difi.asic.AsicWriterFactory;
 import no.difi.asic.MimeType;
 import no.difi.asic.SignatureHelper;
 import no.nav.dokdistdpi.certificate.AppCertificate;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.Forsendelse;
-import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.DigitalPostDokument;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
+import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.DpiDokument;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.xmlmanifest.XmlManifestCreator;
 import no.nav.dokdistdpi.exception.technical.DokumentpakkingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static no.difi.asic.MimeType.forString;
+import static no.difi.asic.SignatureMethod.XAdES;
 
 @Slf4j
 @Component
@@ -37,17 +38,18 @@ public class AsiceCreator {
 	}
 
 	OutputStream createAsiceStreamed(Forsendelse forsendelse, AppCertificate appCertificate) throws IOException {
-		DigitalPostDokument hoveddokument = forsendelse.getDokumentpakke().getHoveddokument();
-		List<DigitalPostDokument> vedleggs = forsendelse.getDokumentpakke().getVedlegg();
+		DpiDokument hoveddokument = forsendelse.getDokumentpakke().getHoveddokument();
+		List<DpiDokument> vedleggs = forsendelse.getDokumentpakke().getVedlegg();
 		ByteArrayOutputStream asiceArchive = new ByteArrayOutputStream();
 
 		log.info("Creating ASiC-E manifest");
 		String xmlManifest = xmlManifestCreator.createManifest(forsendelse);
-		AsicWriter asicWriter = AsicWriterFactory.newFactory().newContainer(asiceArchive)
+
+		AsicWriter asicWriter = AsicWriterFactory.newFactory(XAdES).newContainer(asiceArchive)
 				.add(new BufferedInputStream(new ByteArrayInputStream(xmlManifest.getBytes())), MANIFEST_NAVN, MimeType.XML);
 		List<InputStream> streamsToClose = new ArrayList<>();
 
-		try(InputStream forsendelseMeldingInputStream = new BufferedInputStream(hoveddokument.getContents())) {
+		try (InputStream forsendelseMeldingInputStream = new BufferedInputStream(hoveddokument.getContents())) {
 			// Skriv hoveddokument til Asice
 			streamsToClose.add(forsendelseMeldingInputStream);
 			asicWriter.add(forsendelseMeldingInputStream, hoveddokument.getFilnavn(), forString(hoveddokument.getMimeType()));

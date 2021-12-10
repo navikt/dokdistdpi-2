@@ -1,7 +1,7 @@
 package no.nav.dokdistdpi.consumer.dpi.dokummentpakke.xmlmanifest;
 
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.DigitalPostInfo;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.Forsendelse;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPostInfo;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
 
 import java.io.ByteArrayOutputStream;
@@ -17,7 +17,7 @@ public class XmlManifestCreator {
 
 	public String createManifest(Forsendelse forsendelse) {
 		Dokumentpakke dokumentpakke = forsendelse.getDokumentpakke();
-		DigitalPostInfo digitalPostInfo = forsendelse.getDigitalPostInfo();
+		DigitalPostInfo digitalPostInfo = forsendelse.getDigital();
 
 		Avsender avsender = Avsender.builder()
 				.virksomhetsidentifikator(asIso6523(NAV_ORGNUMMER))
@@ -35,7 +35,7 @@ public class XmlManifestCreator {
 						.mime(dokumentpakke.getHoveddokument().getMimeType())
 						.build())
 				.tittel(Dokument.Tittel.builder()
-						.tittel(dokumentpakke.getHoveddokument().getTitle())
+						.tittel(dokumentpakke.getHoveddokument().getTittle())
 						.lang(DOKUMENT_LANG)
 						.build())
 				.mime(dokumentpakke.getHoveddokument().getMimeType())
@@ -46,7 +46,7 @@ public class XmlManifestCreator {
 								.build())
 						.tittel(Dokument.Tittel.builder()
 								.lang(DOKUMENT_LANG)
-								.tittel(vedlegg.getTitle())
+								.tittel(vedlegg.getTittle())
 								.build())
 						.mime(vedlegg.getMimeType())
 						.href(vedlegg.getFilnavn())
@@ -61,6 +61,6 @@ public class XmlManifestCreator {
 
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		MarshalManifest.marshal(xmlManifest, os);
-		return new String(os.toByteArray(), StandardCharsets.UTF_8);
+		return os.toString(StandardCharsets.UTF_8);
 	}
 }

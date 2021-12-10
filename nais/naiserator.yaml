@@ -15,6 +15,10 @@ spec:
       value: {{ VARSELINFO_V1_URL }}
     - name: DKI_API_URL
       value: {{ DKI_API_URL }}
+    - name: MASKINPORTEN_URL
+      value: {{ MASKINPORTEN_URL }}
+    - name: MASKINPORTEN_AUDIENCE
+      value: {{ MASKINPORTEN_AUDIENCE }}
     - name: STORAGE_S3_URL
       value: {{ STORAGE_S3_URL }}
     - name: SAF_GRAPHQL_URL

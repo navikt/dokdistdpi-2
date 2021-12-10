@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.consumer.dpi.digitalpost;
+package no.nav.dokdistdpi.consumer.dpi.digitalpost.domain;
 
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
