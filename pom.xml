@@ -6,7 +6,6 @@
 	<modules>
 		<module>core</module>
 		<module>app</module>
-		<module>schema</module>
 	</modules>
 
 	<parent>
