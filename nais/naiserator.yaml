@@ -79,9 +79,6 @@ spec:
       memory: 1024Mi
   maskinporten:
     enabled: true
-    scopes:
-      consumes:
-        - name: digitalpostinnbygger:send
   vault:
     enabled: true
     paths:
