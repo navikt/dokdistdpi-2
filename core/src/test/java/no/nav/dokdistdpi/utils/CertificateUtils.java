@@ -39,10 +39,10 @@ import java.util.Objects;
 
 public class CertificateUtils {
 
-	public static final String SELF_SIGNED_PEM = "secrets/testcert.pem";
-	public static final String SELF_SIGNED_RSA_PRIVATE_KEY = "secrets/testkey.pem";
-	public static final String SELF_SIGNED_PKCS12 = "secrets/testcert.p12";
-	public static final String SELF_SIGNED_PKCS12_BASE64 = "secrets/testcert.p12.b64";
+	public static final String SELF_SIGNED_PEM = "secrets/cert.pem";
+	public static final String SELF_SIGNED_RSA_PRIVATE_KEY = "secrets/key.key";
+	public static final String SELF_SIGNED_PKCS12 = "secrets/cert.p12";
+	public static final String SELF_SIGNED_PKCS12_BASE64 = "secrets/cert.p12.b64";
 	public static final String PKCS_12 = "PKCS12";
 	public static final String SELF_SIGNED_PKCS12_ALIAS = "1";
 	public static final String SELF_SIGNED_PKCS12_PASSWORD = "dokdistdpi";

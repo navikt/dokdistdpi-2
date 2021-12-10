@@ -7,9 +7,10 @@ import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
 @Data
 @Builder
 public class Forsendelse {
+	private String personidentifikator;
 	private String mottakerSertifikat;
 	private final String conversationId;
 	private final String bestillingsId;
-	private DigitalPostInfo digital;
+	private DigitalPost digital;
 	private Dokumentpakke dokumentpakke;
 }

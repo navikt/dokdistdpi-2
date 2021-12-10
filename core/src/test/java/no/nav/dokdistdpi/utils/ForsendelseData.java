@@ -1,13 +1,12 @@
 package no.nav.dokdistdpi.utils;
 
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Avsender;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.CommonVarsel;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPostInfo;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Virksomhetmottaker;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
 
 import java.time.LocalDate;
@@ -15,7 +14,7 @@ import java.time.LocalDate;
 import static java.util.Arrays.asList;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
-import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPostInfo.Sikkerhetsnivaa.NIVAA_3;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost.Sikkerhetsnivaa.NIVAA_3;
 
 public class ForsendelseData {
 
@@ -37,7 +36,7 @@ public class ForsendelseData {
 	}
 
 
-	public static DigitalPostInfo digitalPost() {
+	public static DigitalPost digitalPost() {
 
 
 		EpostVarsel epostVarsel = EpostVarsel.builder()
@@ -56,21 +55,19 @@ public class ForsendelseData {
 						.build())
 				.build();
 
-		DigitalPostInfo.Personmottaker personmottaker = DigitalPostInfo.Personmottaker.builder()
+		DigitalPost.Personmottaker personmottaker = DigitalPost.Personmottaker.builder()
 						.postkasseadresse(POSTKASSEADRESSE)
 						.build();
 
 
-		return DigitalPostInfo.builder()
-				.avsender(Avsender.builder()
-						.avsenderindentifikator(NAV_ORGNUMMER)
-						.virksomhetsidentifikator(asIso6523(NAV_ORGNUMMER))
+		return DigitalPost.builder()
+				.avsender(DigitalPost.Avsender.builder()
+						.virksomhetsidentifikator(Identifikator.builder()
+								.authority(Identifikator.Authority.ISO_6523_ACTORID_UPIS)
+								.value(asIso6523(NAV_ORGNUMMER))
+								.build())
 						.build())
-				.virksomhetmottaker(Virksomhetmottaker
-						.builder().virksomhetsidentifikator(asIso6523(VIRKSOMHETMOTTAKER))
-						.motakeridentifikator(POSTKASSEADRESSE)
-						.build())
-				.personmottaker(personmottaker)
+				.mottaker(personmottaker)
 				.virkningsdato(LocalDate.now())
 				.aapningskvittering(false)
 				.sikkerhetsnivaa(NIVAA_3)

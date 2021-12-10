@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.consumer.dpi.dokummentpakke.xmlmanifest;
 
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPostInfo;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
 
@@ -17,7 +17,7 @@ public class XmlManifestCreator {
 
 	public String createManifest(Forsendelse forsendelse) {
 		Dokumentpakke dokumentpakke = forsendelse.getDokumentpakke();
-		DigitalPostInfo digitalPostInfo = forsendelse.getDigital();
+		DigitalPost digitalPostInfo = forsendelse.getDigital();
 
 		Avsender avsender = Avsender.builder()
 				.virksomhetsidentifikator(asIso6523(NAV_ORGNUMMER))
@@ -25,8 +25,8 @@ public class XmlManifestCreator {
 				.build();
 		Mottaker mottaker = Mottaker.builder()
 				.person(Person.builder()
-						.personidentifikator(digitalPostInfo.getMotakeridentifikator())
-						.postkasseadresse(digitalPostInfo.getPostkasseadresse())
+						.personidentifikator(forsendelse.getPersonidentifikator())
+						.postkasseadresse(digitalPostInfo.getMottaker().getPostkasseadresse())
 						.build())
 				.build();
 		Dokument hoveddokument = Dokument.builder()

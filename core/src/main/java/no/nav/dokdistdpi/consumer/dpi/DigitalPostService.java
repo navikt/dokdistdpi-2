@@ -2,9 +2,9 @@ package no.nav.dokdistdpi.consumer.dpi;
 
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPostInfo;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.map.DigitalPostMapper;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.map.ForsendelseMapper;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.HentForsendelseResponse;
@@ -22,7 +22,7 @@ public class DigitalPostService {
 	private final MaskinportenTokenConsumer maskinportenTokenConsumer;
 	private final AdministrerForsendelseConsumer administrerForsendelseConsumer;
 	private final DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer;
-	private final DigitalPostMapper digitalPostMapper;
+	private final ForsendelseMapper digitalPostMapper;
 
 	@Autowired
 	public DigitalPostService(MaskinportenTokenConsumer maskinportenTokenConsumer,
@@ -31,7 +31,7 @@ public class DigitalPostService {
 		this.maskinportenTokenConsumer = maskinportenTokenConsumer;
 		this.administrerForsendelseConsumer = administrerForsendelseConsumer;
 		this.digitalKontaktinformasjonConsumer = digitalKontaktinformasjonConsumer;
-		this.digitalPostMapper = new DigitalPostMapper();
+		this.digitalPostMapper = new ForsendelseMapper();
 	}
 
 	//Sender digital post melding til hjørne-2
@@ -39,7 +39,7 @@ public class DigitalPostService {
 
 	}
 
-	public DigitalPostInfo digitalPostInfo(String forsendelseId) {
+	public DigitalPost digitalPostInfo(String forsendelseId) {
 		assertNotBlank("forsendelseId", forsendelseId);
 		HentForsendelseResponse hentForsendelseResponse = administrerForsendelseConsumer.hentMottaker(forsendelseId);
 		String mottakerId = getMottakerId(hentForsendelseResponse);

@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class Virksomhetmottaker {
-	private String virksomhetsidentifikator;
+	private Identifikator virksomhetsidentifikator;
 	private String motakeridentifikator;
 }
