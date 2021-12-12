@@ -6,7 +6,6 @@ import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.utils.CertificateUtils;
 import no.nav.dokdistdpi.utils.TestUtils.ZipFile;
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -22,7 +21,6 @@ import static no.nav.dokdistdpi.utils.TestUtils.zipEntries;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled
 class AsiceCreatorTest {
 
 	private static final String HOVEDDOKUMENT_NAME = "hoveddokument.pdf";

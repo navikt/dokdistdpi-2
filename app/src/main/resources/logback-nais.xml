@@ -23,8 +23,4 @@
 	<logger name="no.nav.dokdistdpi" level="INFO" additivity="false">
 		<appender-ref ref="applikasjonslogg"/>
 	</logger>
-	<logger name="mf.logger.translog" level="INFO" additivity="false">
-		<appender-ref ref="applikasjonslogg"/>
-	</logger>
-
 </included>
