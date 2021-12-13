@@ -2,19 +2,23 @@ kind: Application
 apiVersion: nais.io/v1alpha1
 metadata:
   name: {{ APP_NAME }}
-  namespace: {{ NAMESPACE }}
+  namespace: teamdokumenthandtering
   labels:
     team: teamdokumenthandtering
 spec:
   env:
-    - name: ADMINISTRERFORSENDELSE_V1_URL
-      value: {{ ADMINISTRERFORSENDELSE_V1_URL }}
+    - name: ADMINISTRERFORSENDELSE_URL
+      value: {{ ADMINISTRERFORSENDELSE_URL }}
     - name: DOKUMENTTYPEINFO_V4_URL
       value: {{ DOKUMENTTYPEINFO_V4_URL }}
     - name: VARSELINFO_V1_URL
       value: {{ VARSELINFO_V1_URL }}
     - name: DKI_API_URL
       value: {{ DKI_API_URL }}
+    - name: MASKINPORTEN_URL
+      value: {{ MASKINPORTEN_URL }}
+    - name: MASKINPORTEN_AUDIENCE
+      value: {{ MASKINPORTEN_AUDIENCE }}
     - name: STORAGE_S3_URL
       value: {{ STORAGE_S3_URL }}
     - name: SAF_GRAPHQL_URL
@@ -41,8 +45,6 @@ spec:
       value: {{ DOKDISTDPI_QDIST014_FUNK_FEIL_QUEUENAME }}
     - name: DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME
       value: {{ DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME }}
-    - name: APPD_NAME
-      value: {{ APPD_NAME }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -75,11 +77,16 @@ spec:
     requests:
       cpu: 60m
       memory: 1024Mi
+  maskinporten:
+    enabled: true
+    scopes:
+      consumes:
+        - name: digitalpostinnbygger:send
   vault:
     enabled: true
     paths:
       - kvPath: {{ SRVDOKDISTDPI }}
-        mountPath: "/secrets/serviceuser/srvdokdistdpi"
+        mountPath: "/secrets/serviceuser/srvdokdistdpi-2"
       - kvPath: {{ DOKDISTDPI_VAULT }}
         mountPath: "/var/run/secrets/nais.io/vault"
       - kvPath: {{ VIRKSOMHETSSERTIFIKAT_VAULT }}

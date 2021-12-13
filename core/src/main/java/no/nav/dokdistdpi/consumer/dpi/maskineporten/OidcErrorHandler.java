@@ -1,0 +1,27 @@
+package no.nav.dokdistdpi.consumer.dpi.maskineporten;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
+
+import java.io.IOException;
+
+public class OidcErrorHandler extends DefaultResponseErrorHandler {
+	@Override
+	protected void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
+		switch (statusCode.series()) {
+			case CLIENT_ERROR:
+				throw new HttpClientErrorException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			case SERVER_ERROR:
+				throw new HttpServerErrorException(statusCode, response.getStatusText(),
+						response.getHeaders(), getResponseBody(response), getCharset(response));
+			default:
+				throw new RestClientException("Unknown status code [" + statusCode + "]");
+
+		}
+	}
+}
