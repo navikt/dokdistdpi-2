@@ -7,7 +7,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.map.ForsendelseMapper;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,7 +41,7 @@ public class DigitalPostService {
 
 	public DigitalPost digitalPostInfo(String forsendelseId) {
 		assertNotBlank("forsendelseId", forsendelseId);
-		HentForsendelseResponse hentForsendelseResponse = administrerForsendelseConsumer.hentMottaker(forsendelseId);
+		HentForsendelseResponse hentForsendelseResponse = administrerForsendelseConsumer.hentForsendelse(forsendelseId);
 		String mottakerId = getMottakerId(hentForsendelseResponse);
 		assertNotBlank("mottakerId", mottakerId);
 		SikkerDigitalKontaktInfo digitalKontaktInfo = digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(mottakerId);

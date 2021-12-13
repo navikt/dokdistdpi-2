@@ -5,7 +5,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
-import no.nav.dokdistdpi.consumer.rdist001.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 
 import java.util.Optional;
 
