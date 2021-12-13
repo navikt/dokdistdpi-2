@@ -1,16 +1,18 @@
 package no.nav.dokdistdpi;
 
-import no.nav.dokdistdpi.certificate.KeyStoreProperties;
-import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
-import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-@EnableConfigurationProperties({
-		ServiceuserProperties.class,
-		KeyStoreProperties.class,
-		MaskinportenProperties.class,
-})
+import java.time.Clock;
+
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
+
+@ComponentScan
 @Configuration
 public class CoreConfig {
+	@Bean
+	Clock clock() {
+		return Clock.system(DEFAULT_ZONE_ID);
+	}
 }

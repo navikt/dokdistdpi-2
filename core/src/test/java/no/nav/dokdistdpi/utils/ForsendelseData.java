@@ -10,26 +10,34 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost.Sikkerhetsnivaa.NIVAA_3;
+import static no.nav.dokdistdpi.utils.TestUtils.classpathToString;
 
 public class ForsendelseData {
 
-	private static final String BESTILLINGS_ID = "bestillingsId";
+	public static final String BESTILLINGS_ID = UUID.randomUUID().toString();
 	private static final String MOTTAKER_FNR = "04036125433";
-	private static final String  POSTKASSEADRESSE="ove.jonsen#6K5A";
+	private static final String POSTKASSEADRESSE = "ove.jonsen#6K5A";
 	private static final String EPOSTADRESSE = "example@email.org";
-	private static final String MOBILTELEFONNUMMER ="4799999999";
+	private static final String MOBILTELEFONNUMMER = "4799999999";
 	private static final String VARSLINGSTEKST = "Du har mottatt brev i din digitale postkasse";
-	private static final String  VIRKSOMHETMOTTAKER = "984661185";
+	public static final String VIRKSOMHETMOTTAKER = "984661185";
 	private static final String TITTLE = "Ikke-sensitiv tittel for forsendelsen";
-
+	public static final String MOTTAKER_ORGNO = "988015814";
+	public static final String CONVERSATION_ID = UUID.randomUUID().toString();
 
 	public static Forsendelse forsendelse(Dokumentpakke dokumentpakke) {
 		return Forsendelse.builder()
+				.conversationId(CONVERSATION_ID)
+				.bestillingsId(BESTILLINGS_ID)
+				.personidentifikator(MOTTAKER_FNR)
+				.mottakerSertifikat(classpathToString("secrets/mottakercertificate"))
+				.mottakerOrgNo(MOTTAKER_ORGNO)
 				.digital(digitalPost())
 				.dokumentpakke(dokumentpakke)
 				.build();
@@ -37,8 +45,6 @@ public class ForsendelseData {
 
 
 	public static DigitalPost digitalPost() {
-
-
 		EpostVarsel epostVarsel = EpostVarsel.builder()
 				.epostadresse(EPOSTADRESSE)
 				.varslingstekst(VARSLINGSTEKST)
@@ -56,8 +62,8 @@ public class ForsendelseData {
 				.build();
 
 		DigitalPost.Personmottaker personmottaker = DigitalPost.Personmottaker.builder()
-						.postkasseadresse(POSTKASSEADRESSE)
-						.build();
+				.postkasseadresse(POSTKASSEADRESSE)
+				.build();
 
 
 		return DigitalPost.builder()

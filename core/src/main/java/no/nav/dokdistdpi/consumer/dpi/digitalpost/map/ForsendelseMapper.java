@@ -7,7 +7,6 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.rdist001.HentForsendelseResponse;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
