@@ -1,10 +1,9 @@
 package no.nav.dokdistdpi.consumer.dpi.dokummentpakke;
 
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
+import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.sbdh.Partner;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.sbdh.PartnerIdentification;
-import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.sbdh.Receiver;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.sbdh.Scope;
-import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.sbdh.Sender;
 import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.sbdh.StandardBusinessDocument;
 import no.nav.dokdistdpi.utils.ForsendelseData;
 import org.junit.jupiter.api.Test;
@@ -44,16 +43,16 @@ class StandardBusinessDocumentMapperTest {
 
 
 		assertThat(sbd.getStandardBusinessDocumentHeader().getSender())
-				.extracting(Sender::getIdentifier)
+				.extracting(Partner::getIdentifier)
 				.extracting(PartnerIdentification::getAuthority).contains(IDENTIFIER_AUTHORITY);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getSender())
-				.extracting(Sender::getIdentifier)
+				.extracting(Partner::getIdentifier)
 				.extracting(PartnerIdentification::getValue).contains(asIso6523(NAV_ORGNUMMER));
 		assertThat(sbd.getStandardBusinessDocumentHeader().getReceiver())
-				.extracting(Receiver::getIdentifier)
+				.extracting(Partner::getIdentifier)
 				.extracting(PartnerIdentification::getAuthority).contains(IDENTIFIER_AUTHORITY);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getReceiver())
-				.extracting(Receiver::getIdentifier)
+				.extracting(Partner::getIdentifier)
 				.extracting(PartnerIdentification::getValue).contains(asIso6523(ForsendelseData.MOTTAKER_ORGNO));
 		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getStandard()).isEqualTo(DOCUMENT_IDENTIFICATOR_STANDARD);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getTypeVersion()).isEqualTo(TYPE_VERSION);
