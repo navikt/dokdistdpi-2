@@ -1,6 +1,7 @@
 package no.nav.dokdistdpi.config.prop;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.lang.NonNull;
@@ -8,7 +9,8 @@ import org.springframework.validation.annotation.Validated;
 
 import java.net.URL;
 
-@Data
+@Getter
+@Setter
 @ToString
 @ConfigurationProperties("maskinporten")
 @Validated
@@ -17,6 +19,5 @@ public class MaskinportenProperties {
 	private URL url;
 	@NonNull
 	private String audience;
-	@NonNull
 	private String clientid;
 }

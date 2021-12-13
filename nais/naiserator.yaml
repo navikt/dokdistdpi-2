@@ -7,8 +7,8 @@ metadata:
     team: teamdokumenthandtering
 spec:
   env:
-    - name: ADMINISTRERFORSENDELSE_V1_URL
-      value: {{ ADMINISTRERFORSENDELSE_V1_URL }}
+    - name: ADMINISTRERFORSENDELSE_URL
+      value: {{ ADMINISTRERFORSENDELSE_URL }}
     - name: DOKUMENTTYPEINFO_V4_URL
       value: {{ DOKUMENTTYPEINFO_V4_URL }}
     - name: VARSELINFO_V1_URL

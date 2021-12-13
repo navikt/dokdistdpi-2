@@ -32,9 +32,10 @@ public class DigitalPostContentPackager {
 		this.createCMSDocument = createCMSDocument;
 	}
 
-	InputStream createPackage(Forsendelse forsendelse, AppCertificate appCertificate) {
+	InputStream createDokumentpakke(Forsendelse forsendelse, AppCertificate appCertificate) {
 		X509Certificate mottakerCertificate = fraBase64X509String(forsendelse.getMottakerSertifikat());
 		try (final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse, appCertificate)) {
+			log.info("Opretter CMS dokument");
 			byte[] cmsByte = createCMSDocument.createCMSByte(((ByteArrayOutputStream) asiceStreamed).toByteArray(), mottakerCertificate);
 			return new ByteArrayInputStream(cmsByte);
 		} catch (IOException e) {
