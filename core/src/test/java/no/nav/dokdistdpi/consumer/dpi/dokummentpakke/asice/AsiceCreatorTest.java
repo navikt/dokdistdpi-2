@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AsiceCreatorTest {
 
 	private static final String HOVEDDOKUMENT_NAME = "hoveddokument.pdf";
-	private static final String TITTLE = "Ikke-sensitiv tittel for forsendelsen";
+	private static final String TITTEL = "Ikke-sensitiv tittel for forsendelsen";
 	private static final String HOVEDDOKUMENT_CONTENTS = "digitalpost";
 	private static final String DOKUMENT_1_NAME = "test1.pdf";
 	private static final String DOKUMENT_1_CONTENTS = "test1pdf";
@@ -36,9 +36,9 @@ class AsiceCreatorTest {
 	@Test
 	void shouldCreateAndSignAsice() throws Exception {
 		Dokumentpakke dokumentpakke = Dokumentpakke.builder()
-				.hoveddokument(fromHoveddokument(TITTLE, HOVEDDOKUMENT_NAME, new ByteArrayInputStream(HOVEDDOKUMENT_CONTENTS.getBytes())))
-				.vedlegg(Arrays.asList(fromVedlegg(TITTLE, DOKUMENT_1_NAME, new ByteArrayInputStream(DOKUMENT_1_CONTENTS.getBytes())),
-						fromVedlegg(TITTLE, DOKUMENT_2_NAME, new ByteArrayInputStream(DOKUMENT_2_CONTENTS.getBytes()))))
+				.hoveddokument(fromHoveddokument(TITTEL, HOVEDDOKUMENT_NAME, new ByteArrayInputStream(HOVEDDOKUMENT_CONTENTS.getBytes())))
+				.vedlegg(Arrays.asList(fromVedlegg(TITTEL, DOKUMENT_1_NAME, new ByteArrayInputStream(DOKUMENT_1_CONTENTS.getBytes())),
+						fromVedlegg(TITTEL, DOKUMENT_2_NAME, new ByteArrayInputStream(DOKUMENT_2_CONTENTS.getBytes()))))
 				.build();
 		final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse(dokumentpakke),
 				new AppCertificate(CertificateUtils.itestVirksomhetssertifikatProperties()));

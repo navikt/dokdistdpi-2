@@ -15,6 +15,7 @@ import static java.util.Arrays.asList;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost.Sikkerhetsnivaa.NIVAA_3;
+import static no.nav.dokdistdpi.utils.TestUtils.classpathToString;
 
 public class ForsendelseData {
 
@@ -25,11 +26,13 @@ public class ForsendelseData {
 	private static final String MOBILTELEFONNUMMER ="4799999999";
 	private static final String VARSLINGSTEKST = "Du har mottatt brev i din digitale postkasse";
 	private static final String  VIRKSOMHETMOTTAKER = "984661185";
-	private static final String TITTLE = "Ikke-sensitiv tittel for forsendelsen";
+	private static final String TITTEL = "Ikke-sensitiv tittel for forsendelsen";
 
 
 	public static Forsendelse forsendelse(Dokumentpakke dokumentpakke) {
 		return Forsendelse.builder()
+				.personidentifikator(MOTTAKER_FNR)
+				.mottakerSertifikat(classpathToString("secrets/mottakercertificate"))
 				.digital(digitalPost())
 				.dokumentpakke(dokumentpakke)
 				.build();
