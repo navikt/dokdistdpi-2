@@ -19,7 +19,8 @@ public class DokdistdpiConstant {
 
 	public static final String STS_CACHE = "stsCache";
 	public static final String PROCESS = "process";
-	public static final String DOK_REQUEST = "dok_consumer_request";
+	public static final String DOK_REQUEST = "dok_request";
+	public static final String DISTRIBUSJONS_SDP_KANAL = "SDP";
 
 	public static final int BACKOFF_DELAY = 500;
 	public static final int BACKOFF_MULTIPLIER = 3;

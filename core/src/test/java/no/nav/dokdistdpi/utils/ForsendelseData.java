@@ -33,11 +33,11 @@ public class ForsendelseData {
 
 	public static Forsendelse forsendelse(Dokumentpakke dokumentpakke) {
 		return Forsendelse.builder()
-				.conversationId(CONVERSATION_ID)
+				.konversasjonId(CONVERSATION_ID)
 				.bestillingsId(BESTILLINGS_ID)
 				.personidentifikator(MOTTAKER_FNR)
 				.mottakerSertifikat(classpathToString("secrets/mottakercertificate"))
-				.mottakerOrgNo(MOTTAKER_ORGNO)
+				.digitalPostLeverandoerAdresse(MOTTAKER_ORGNO)
 				.digital(digitalPost())
 				.dokumentpakke(dokumentpakke)
 				.build();

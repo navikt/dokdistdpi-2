@@ -30,10 +30,10 @@ public class StandardBusinessDocumentMapper {
 		StandardBusinessDocumentHeader standardBusinessDocumentHeader = new StandardBusinessDocumentHeader();
 		standardBusinessDocumentHeader.setHeaderVersion(HEADER_VERSION);
 		standardBusinessDocumentHeader.addSender(createSender());
-		standardBusinessDocumentHeader.addReceiver(createReceiver(forsendelse.getMottakerOrgNo()));
+		standardBusinessDocumentHeader.addReceiver(createReceiver(forsendelse.getDigitalPostLeverandoerAdresse()));
 		standardBusinessDocumentHeader.setDocumentIdentification(createDocumentIdentification(forsendelse.getBestillingsId()));
 		BusinessScope businessScope = new BusinessScope();
-		businessScope.addScope(createConversationIdScope(forsendelse.getConversationId()));
+		businessScope.addScope(createConversationIdScope(forsendelse.getKonversasjonId()));
 		standardBusinessDocumentHeader.setBusinessScope(businessScope);
 		return StandardBusinessDocument.builder()
 				.standardBusinessDocumentHeader(standardBusinessDocumentHeader)

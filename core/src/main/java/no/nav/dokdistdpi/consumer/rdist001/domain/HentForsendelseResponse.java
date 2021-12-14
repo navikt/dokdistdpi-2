@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.consumer.rdist001;
+package no.nav.dokdistdpi.consumer.rdist001.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

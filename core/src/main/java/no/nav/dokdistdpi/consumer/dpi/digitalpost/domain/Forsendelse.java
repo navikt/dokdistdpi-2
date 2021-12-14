@@ -9,8 +9,8 @@ import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
 public class Forsendelse {
 	private String personidentifikator;
 	private String mottakerSertifikat;
-	private String mottakerOrgNo;
-	private final String conversationId;
+	private String digitalPostLeverandoerAdresse;
+	private final String konversasjonId;
 	private final String bestillingsId;
 	private DigitalPost digital;
 	private Dokumentpakke dokumentpakke;
