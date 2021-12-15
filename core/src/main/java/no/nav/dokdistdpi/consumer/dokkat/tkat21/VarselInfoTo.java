@@ -10,9 +10,9 @@ import java.util.Set;
 @Value
 @Builder
 public class VarselInfoTo {
-	private final String varselTypeId;
-	private final boolean stoppRepeterendeVarsel;
-	private final Map<String, String> varslingsTekst;
-	private final List<Integer> antallDagerListe;
-	private final Set<String> preferertKanal;
+	  String varselTypeId;
+	  boolean stoppRepeterendeVarsel;
+	  Map<String, String> varslingsTekst;
+	  List<Integer> antallDagerListe;
+	  Set<String> preferertKanal;
 }

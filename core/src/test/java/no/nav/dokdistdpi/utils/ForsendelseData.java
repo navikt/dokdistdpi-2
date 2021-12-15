@@ -7,7 +7,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
-import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
+import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -15,7 +15,7 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
-import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost.Sikkerhetsnivaa.NIVAA_3;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_3;
 import static no.nav.dokdistdpi.utils.TestUtils.classpathToString;
 
 public class ForsendelseData {
@@ -76,7 +76,7 @@ public class ForsendelseData {
 				.mottaker(personmottaker)
 				.virkningsdato(LocalDate.now())
 				.aapningskvittering(false)
-				.sikkerhetsnivaa(NIVAA_3)
+				.sikkerhetsnivaa(NIVAA_3.getValue())
 				.varsler(Varsler.builder()
 						.smsvarsel(smsVarsel)
 						.epostvarsel(epostVarsel)

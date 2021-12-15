@@ -6,6 +6,7 @@
 	<modules>
 		<module>core</module>
 		<module>app</module>
+		<module>qdist011</module>
 	</modules>
 
 	<parent>

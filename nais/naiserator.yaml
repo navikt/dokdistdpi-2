@@ -7,6 +7,8 @@ metadata:
     team: teamdokumenthandtering
 spec:
   env:
+    - name: DPI_URL
+      value: {{DPI_URL}}
     - name: ADMINISTRERFORSENDELSE_URL
       value: {{ ADMINISTRERFORSENDELSE_URL }}
     - name: DOKUMENTTYPEINFO_V4_URL
@@ -19,8 +21,8 @@ spec:
       value: {{ MASKINPORTEN_URL }}
     - name: MASKINPORTEN_AUDIENCE
       value: {{ MASKINPORTEN_AUDIENCE }}
-    - name: STORAGE_S3_URL
-      value: {{ STORAGE_S3_URL }}
+    - name: S3_STORAGE_URL
+      value: {{ S3_STORAGE_URL }}
     - name: SAF_GRAPHQL_URL
       value: {{ SAF_GRAPHQL_URL }}
     - name: LAGREJURIDISKLOGG_REST_URL

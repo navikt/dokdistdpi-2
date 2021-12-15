@@ -1,0 +1,21 @@
+package no.nav.dokdistdpi.saf;
+
+import lombok.Builder;
+import lombok.Value;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Value
+@Builder
+public class JournalpostQdist011 {
+	@Builder.Default
+	private final List<DokumentInfo> dokumenter = new ArrayList<>();
+
+	@Value
+	@Builder
+	public static class DokumentInfo {
+		private final String dokumentInfoId;
+		private final String tittel;
+	}
+}

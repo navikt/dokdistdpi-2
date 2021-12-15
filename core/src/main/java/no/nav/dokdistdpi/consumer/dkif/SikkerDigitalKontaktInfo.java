@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 public class SikkerDigitalKontaktInfo {
 
-	private String personident;
+	private String personidentifikator;
 	private String epostadresse;
 	private boolean kanVarsles;
 	private String mobiltelefonnummer;

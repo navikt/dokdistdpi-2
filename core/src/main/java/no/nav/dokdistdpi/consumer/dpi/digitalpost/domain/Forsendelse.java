@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.consumer.dpi.digitalpost.domain;
 
 import lombok.Builder;
 import lombok.Data;
-import no.nav.dokdistdpi.consumer.dpi.dokummentpakke.Dokumentpakke;
+import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 
 @Data
 @Builder

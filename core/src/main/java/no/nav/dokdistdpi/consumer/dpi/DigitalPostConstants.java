@@ -9,6 +9,8 @@ public class DigitalPostConstants {
 	public static final String SCOPE_CONVERSATION_ID = "ConversationId";
 	public static final String SCOPE_CONVERSATION_ID_IDENTIFIER = "urn:fdc:digdir.no:2020:profile:egovernment:innbyggerpost:digital:ver1.0";
 	public static final String DIGITALPOST_FORRETNINGSMELDING = "digital";
+	public static final String KANAL = "kanal";
+	public static final String KANAL_NAVN = NAV_ORGNUMMER + "-dokdistdpi";
 	private DigitalPostConstants() {
 	}
 }

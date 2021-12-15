@@ -32,7 +32,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 
 @Slf4j
 @Component
-public class VarselInfoConsumer implements VarselInfo{
+public class VarselInfoConsumer implements VarselInfo {
 
 	private final RestTemplate restTemplate;
 	private final String varselInfoUrl;
@@ -66,7 +66,6 @@ public class VarselInfoConsumer implements VarselInfo{
 	}
 
 	private VarselInfoTo mapResponse(final VarselInfoRestTo response) {
-
 		return response == null ? null : VarselInfoTo.builder()
 				.varselTypeId(response.getVarseltypeId())
 				.stoppRepeterendeVarsel(response.getRevarslingIntervall() != null)
@@ -92,7 +91,6 @@ public class VarselInfoConsumer implements VarselInfo{
 						antallDagerListe.add(varselInfoRestTo.getRevarslingIntervall() * (i + 1))
 
 				);
-
 		return antallDagerListe;
 	}
 }
