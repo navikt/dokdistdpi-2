@@ -24,5 +24,4 @@ public class Person {
 	protected String personidentifikator;
 	@XmlElement(required = true)
 	protected String postkasseadresse;
-
 }

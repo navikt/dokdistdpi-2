@@ -13,7 +13,7 @@ import java.io.OutputStream;
 final class MarshalManifest {
 	static void marshal(Manifest doc, OutputStream os) {
 		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance(new Class[]{Manifest.class}, null);
+			JAXBContext jaxbContext = JAXBContext.newInstance(Manifest.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			jaxbMarshaller.marshal(doc, os);

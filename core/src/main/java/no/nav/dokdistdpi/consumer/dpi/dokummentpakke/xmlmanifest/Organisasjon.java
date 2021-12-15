@@ -1,6 +1,9 @@
 package no.nav.dokdistdpi.consumer.dpi.dokummentpakke.xmlmanifest;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -9,22 +12,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
-import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.ISO6523_AUTHORITY;
-import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.ISO6523_PREFIX;
-
 @Data
+@Builder
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Organisasjon")
 @XmlRootElement(name = "organisasjon")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Organisasjon {
 	@XmlAttribute
 	private String authority;
 	@XmlValue
 	private String orgNummer;
-
-	public Organisasjon(String orgNummer) {
-		super();
-		this.authority = ISO6523_AUTHORITY;
-		this.orgNummer = ISO6523_PREFIX + orgNummer;
-	}
 }

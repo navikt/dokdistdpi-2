@@ -17,7 +17,7 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
 		name = "Manifest",
-		propOrder = {"mottaker", "avsender", "hoveddokument", "vedleggs"}
+		propOrder = {"mottaker", "avsender", "hoveddokument", "vedlegg"}
 )
 @XmlRootElement(
 		name = "manifest"
@@ -32,5 +32,5 @@ public class Manifest {
 	@XmlElement(required = true)
 	private Dokument hoveddokument;
 	@XmlElement
-	private List<Dokument>  vedleggs;
+	private List<Dokument>  vedlegg;
 }
