@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
+import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.ISO6523_AUTHORITY;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 
 public class XmlManifestCreator {
@@ -20,8 +21,11 @@ public class XmlManifestCreator {
 		DigitalPost digitalPostInfo = forsendelse.getDigital();
 
 		Avsender avsender = Avsender.builder()
-				.virksomhetsidentifikator(asIso6523(NAV_ORGNUMMER))
-				.avsenderindentifikator(NAV_ORGNUMMER)
+				.organisasjon(Organisasjon.builder()
+						.authority(ISO6523_AUTHORITY)
+						.orgNummer(asIso6523(NAV_ORGNUMMER))
+						.build())
+				.avsenderidentifikator(NAV_ORGNUMMER)
 				.build();
 		Mottaker mottaker = Mottaker.builder()
 				.person(Person.builder()
@@ -35,28 +39,26 @@ public class XmlManifestCreator {
 						.mime(dokumentpakke.getHoveddokument().getMimeType())
 						.build())
 				.tittel(Dokument.Tittel.builder()
-						.tittel(dokumentpakke.getHoveddokument().getTittle())
+						.tittel(dokumentpakke.getHoveddokument().getTittel())
 						.lang(DOKUMENT_LANG)
 						.build())
 				.mime(dokumentpakke.getHoveddokument().getMimeType())
 				.build();
-		List<Dokument> vedleggs = dokumentpakke.getVedlegg().stream().map(vedlegg ->
+		List<Dokument> vedlegg = dokumentpakke.getVedlegg().stream().map(dokument ->
 				Dokument.builder()
-						.data(DokumentData.builder()
-								.build())
 						.tittel(Dokument.Tittel.builder()
 								.lang(DOKUMENT_LANG)
-								.tittel(vedlegg.getTittle())
+								.tittel(dokument.getTittel())
 								.build())
-						.mime(vedlegg.getMimeType())
-						.href(vedlegg.getFilnavn())
+						.mime(dokument.getMimeType())
+						.href(dokument.getFilnavn())
 						.build()
 		).toList();
 		Manifest xmlManifest = Manifest.builder()
 				.avsender(avsender)
 				.mottaker(mottaker)
 				.hoveddokument(hoveddokument)
-				.vedleggs(vedleggs)
+				.vedlegg(vedlegg)
 				.build();
 
 		ByteArrayOutputStream os = new ByteArrayOutputStream();

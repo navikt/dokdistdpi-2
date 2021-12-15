@@ -15,15 +15,15 @@ import javax.xml.bind.annotation.XmlType;
 @Builder
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Avsender",
-		propOrder = {"virksomhetsidentifikator", "avsenderindentifikator", "fakturaReferanse"})
+		propOrder = {"organisasjon", "avsenderidentifikator", "fakturaReferanse"})
 @XmlRootElement(name = "avsender")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Avsender {
 	@XmlElement
-	private String virksomhetsidentifikator;
+	private Organisasjon organisasjon;
 	@XmlElement
-	private String avsenderindentifikator;
+	private String avsenderidentifikator;
 	@XmlElement
 	private String fakturaReferanse;
 }

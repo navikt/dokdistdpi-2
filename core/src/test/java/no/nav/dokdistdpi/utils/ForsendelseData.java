@@ -18,6 +18,7 @@ import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_3;
 import static no.nav.dokdistdpi.utils.TestUtils.classpathToString;
 
+
 public class ForsendelseData {
 
 	public static final String BESTILLINGS_ID = UUID.randomUUID().toString();
@@ -27,9 +28,10 @@ public class ForsendelseData {
 	private static final String MOBILTELEFONNUMMER = "4799999999";
 	private static final String VARSLINGSTEKST = "Du har mottatt brev i din digitale postkasse";
 	public static final String VIRKSOMHETMOTTAKER = "984661185";
-	private static final String TITTLE = "Ikke-sensitiv tittel for forsendelsen";
 	public static final String MOTTAKER_ORGNO = "988015814";
 	public static final String CONVERSATION_ID = UUID.randomUUID().toString();
+	private static final String TITTEL = "Ikke-sensitiv tittel for forsendelsen";
+
 
 	public static Forsendelse forsendelse(Dokumentpakke dokumentpakke) {
 		return Forsendelse.builder()
@@ -45,6 +47,8 @@ public class ForsendelseData {
 
 
 	public static DigitalPost digitalPost() {
+
+
 		EpostVarsel epostVarsel = EpostVarsel.builder()
 				.epostadresse(EPOSTADRESSE)
 				.varslingstekst(VARSLINGSTEKST)
@@ -62,8 +66,8 @@ public class ForsendelseData {
 				.build();
 
 		DigitalPost.Personmottaker personmottaker = DigitalPost.Personmottaker.builder()
-				.postkasseadresse(POSTKASSEADRESSE)
-				.build();
+						.postkasseadresse(POSTKASSEADRESSE)
+						.build();
 
 
 		return DigitalPost.builder()
