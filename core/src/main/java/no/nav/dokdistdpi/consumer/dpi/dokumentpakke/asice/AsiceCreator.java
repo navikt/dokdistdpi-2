@@ -24,7 +24,8 @@ import java.util.List;
 import static no.difi.asic.MimeType.XML;
 import static no.difi.asic.MimeType.forString;
 import static no.difi.asic.SignatureMethod.XAdES;
-import static no.nav.dokdistdpi.consumer.dpi.dokummentpakke.DpiDokument.MIMETYPE_PDF;
+import static no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument.MIMETYPE_PDF;
+
 
 @Slf4j
 @Component

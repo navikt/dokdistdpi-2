@@ -80,6 +80,7 @@ public class ForsendelseData {
 				.mottaker(personmottaker)
 				.virkningsdato(LocalDate.now())
 				.aapningskvittering(false)
+				.ikkesensitivtittel(TITTEL)
 				.sikkerhetsnivaa(NIVAA_3.getValue())
 				.varsler(Varsler.builder()
 						.smsvarsel(smsVarsel)
