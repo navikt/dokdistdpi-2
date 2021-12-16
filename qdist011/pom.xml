@@ -16,6 +16,15 @@
 			<groupId>no.nav.dokdistdpi</groupId>
 			<artifactId>core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<!-- dokdistfordeling -->
+		<dependency>
+			<groupId>no.nav.meldinger.virksomhet</groupId>
+			<artifactId>melding-virksomhet-dokdistfordeling</artifactId>
+		</dependency>
 	</dependencies>
 
 </project>
