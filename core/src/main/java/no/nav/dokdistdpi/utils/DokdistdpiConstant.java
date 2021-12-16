@@ -7,9 +7,10 @@ public class DokdistdpiConstant {
 	public static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone("Europe/Oslo");
 	public static final ZoneId DEFAULT_ZONE_ID = DEFAULT_TIME_ZONE.toZoneId();
 
+	public static final String QDIST011_SERVICE_ID = "qdist011";
+
 	public static final String CALL_ID = "callId";
 	public static final String MDC_REQUEST_ID = "requestId";
-	public static final String NAV_CONSUMER_TOKEN = "Nav-Consumer-Token";
 	public static final String NAV_CALL_ID = "Nav-Call-Id";
 	public static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";
 	public static final String APP_NAME = "dokdistdpi";
@@ -30,6 +31,7 @@ public class DokdistdpiConstant {
 
 	public static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";
 	public static final String PROPERTY_FORSENDELSE_ID = "forsendelseId";
+	public static final String PROPERTY_CONVERSATION_ID = "konversasjonId";
 
 	public static final int BACKOFF_DELAY = 500;
 	public static final int BACKOFF_MULTIPLIER = 3;

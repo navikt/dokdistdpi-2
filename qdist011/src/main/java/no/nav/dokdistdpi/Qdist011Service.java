@@ -15,13 +15,14 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
-import no.nav.dokdistdpi.domain.DistribuerForsendelseTilDpi;
+import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDeserialisereS3PayloadException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeFinneDokumentException;
 import no.nav.dokdistdpi.s3storage.DokDistDokumentFraS3;
 import no.nav.dokdistdpi.s3storage.JsonSerializer;
 import no.nav.dokdistdpi.s3storage.Storage;
 import no.nav.dokdistdpi.saf.JournalpostQdist011;
+import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +34,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator.Authority.ISO_6523_ACTORID_UPIS;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_EKSPEDERT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG_TITTEL_PREFIX;
@@ -46,6 +49,9 @@ import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.isBlank;
 
+/**
+ * @author Tsigab A. Gebremedhin, NAV
+ */
 @Slf4j
 @Component
 public class Qdist011Service {
@@ -66,11 +72,19 @@ public class Qdist011Service {
 	}
 
 	@Handler
-	public Forsendelse createForsendelse(DistribuerForsendelseTilDpi distribuerForsendelseTilDpi, Exchange exchange) {
-		validateDistribuerForsendelseTilDpi(distribuerForsendelseTilDpi);
-		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(distribuerForsendelseTilDpi.getForsendelseId());
-		exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerForsendelseTilDpi.getForsendelseId());
-
+	public Forsendelse createForsendelse(DistribuerTilKanal distribuerTilKanal, Exchange exchange) {
+		validateDistribuerForsendelseTilDpi(distribuerTilKanal);
+		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(distribuerTilKanal.getForsendelseId());
+		exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
+		if(FORSENDELSE_STATUS_EKSPEDERT.equals(hentForsendelseResponse.getForsendelseStatus())){
+			log.info("Forsendelse med forsendelseId={}, status={} er ekspdert og behandlingen avsluttes",
+					distribuerTilKanal.getForsendelseId(), hentForsendelseResponse.getForsendelseStatus());
+			throw new ForsendelseStatusExpedertKanIkkeDistribuereException(format("Forsendelse med forsendelseId=%s, status=%s er ekspdert og behandlingen avsluttes",
+					distribuerTilKanal.getForsendelseId(), hentForsendelseResponse.getForsendelseStatus()));
+		}
+		String konversasjonId = getConversationId(hentForsendelseResponse, distribuerTilKanal.getForsendelseId());
+		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
+		exchange.setProperty(PROPERTY_CONVERSATION_ID, konversasjonId);
 		String maskinportenToken = digitalPostService.getMaskinportenToken();
 
 		DokumenttypeInfoTo dokumenttypeInfo = digitalPostService.getDokumenttypeInfo(hentForsendelseResponse);
@@ -81,33 +95,32 @@ public class Qdist011Service {
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfoTo);
 
 		Varsler varsler = digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo);
-
-		return Forsendelse.builder()
-				.personidentifikator(sikkerDigitalKontaktInfo.getPersonidentifikator())
-				.mottakerSertifikat(sikkerDigitalKontaktInfo.getLeverandoerSertifikat())
-				.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())
-				.bestillingsId(hentForsendelseResponse.getBestillingsId())
-				.konversasjonId(getConversationId(hentForsendelseResponse, distribuerForsendelseTilDpi.getForsendelseId()))
-				.digital(DigitalPost.builder()
-						.avsender(DigitalPost.Avsender.builder()
-								.virksomhetsidentifikator(Identifikator.builder()
-										.authority(ISO_6523_ACTORID_UPIS)
-										.value(Organisasjonsnummer.asIso6523(NAV_ORGNUMMER))
-										.build())
-								.build())
-						.mottaker(DigitalPost.Personmottaker.builder()
-								.postkasseadresse(sikkerDigitalKontaktInfo.getBrukerAdresse())
-								.build())
-						.maskinportentoken(maskinportenToken)
-						.sikkerhetsnivaa(dokumenttypeInfo.getSikkerhetsnivaa())
-						.virkningsdato(LocalDate.now())
-						.aapningskvittering(false)
-						.ikkesensitivtittel(hentForsendelseResponse.getForsendelseTittel())
-						.spraak(SPRAAK)
-						.varsler(varsler)
-						.build())
-				.dokumentpakke(getDocumentpakkeFromS3(hentForsendelseResponse))
-				.build();
+			return Forsendelse.builder()
+					.personidentifikator(sikkerDigitalKontaktInfo.getPersonidentifikator())
+					.mottakerSertifikat(sikkerDigitalKontaktInfo.getLeverandoerSertifikat())
+					.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())
+					.bestillingsId(hentForsendelseResponse.getBestillingsId())
+					.konversasjonId(konversasjonId)
+					.digital(DigitalPost.builder()
+							.avsender(DigitalPost.Avsender.builder()
+									.virksomhetsidentifikator(Identifikator.builder()
+											.authority(ISO_6523_ACTORID_UPIS)
+											.value(Organisasjonsnummer.asIso6523(NAV_ORGNUMMER))
+											.build())
+									.build())
+							.mottaker(DigitalPost.Personmottaker.builder()
+									.postkasseadresse(sikkerDigitalKontaktInfo.getBrukerAdresse())
+									.build())
+							.maskinportentoken(maskinportenToken)
+							.sikkerhetsnivaa(dokumenttypeInfo.getSikkerhetsnivaa())
+							.virkningsdato(LocalDate.now())
+							.aapningskvittering(false)
+							.ikkesensitivtittel(hentForsendelseResponse.getForsendelseTittel())
+							.spraak(SPRAAK)
+							.varsler(varsler)
+							.build())
+					.dokumentpakke(getDocumentpakkeFromS3(hentForsendelseResponse))
+					.build();
 	}
 
 
@@ -152,7 +165,7 @@ public class Qdist011Service {
 							new ByteArrayInputStream(dokDistDokumentFraS3.getPdf())
 					);
 				})
-				.collect(Collectors.toList());
+				.toList();
 
 		return Dokumentpakke.builder()
 				.hoveddokument(hovedDokument)
@@ -197,9 +210,9 @@ public class Qdist011Service {
 				.getTittel();
 	}
 
-	private void validateDistribuerForsendelseTilDpi(DistribuerForsendelseTilDpi distribuerForsendelseTilDpi) {
-		assertNotNull("DistribuerForsendelseTilDpi", distribuerForsendelseTilDpi);
-		assertNotBlank("forsendelseId", distribuerForsendelseTilDpi.getForsendelseId());
+	private void validateDistribuerForsendelseTilDpi(DistribuerTilKanal distribuerTilKanal) {
+		assertNotNull("DistribuerTilKanal", distribuerTilKanal);
+		assertNotBlank("forsendelseId", distribuerTilKanal.getForsendelseId());
 	}
 
 	private void assertForsendelseNotNull(HentForsendelseResponse hentForsendelseResponse) {

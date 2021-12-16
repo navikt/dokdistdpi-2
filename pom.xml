@@ -90,6 +90,11 @@
 				<artifactId>camel-core</artifactId>
 				<version>${camel.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.camel</groupId>
+				<artifactId>camel-json-validator</artifactId>
+				<version>${camel.version}</version>
+			</dependency>
 			<!--IBM MQ -->
 			<dependency>
 				<groupId>com.ibm.mq</groupId>

@@ -24,6 +24,10 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.SMS;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 
+/**
+ * @author Tsigab A. Gebremedhin, NAV
+ */
+
 @Component
 public class DigitalPostService {
 

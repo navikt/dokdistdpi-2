@@ -56,4 +56,6 @@ public class ForsendelseMapper {
 				.map(HentForsendelseResponse.MottakerTo::getMottakerId)
 				.orElseThrow(() -> new IllegalArgumentException("MottakerId kan ikke være null"));
 	}
+
+
 }

@@ -9,6 +9,7 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.StandardBusinessDocumentMapp
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.StandardBusinessDocument;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.metrics.Monitor;
+import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.retry.annotation.Backoff;
@@ -41,7 +43,9 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
-
+/**
+ * @author Tsigab A. Gebremedhin, NAV
+ */
 @Slf4j
 @Component
 public class DpiMeldingsformidler {
@@ -65,9 +69,10 @@ public class DpiMeldingsformidler {
 				.build();
 	}
 
+	@Handler
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "sendMelding"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public ResponseEntity sendMelding(Forsendelse forsendelse) throws IOException {
+	public HttpStatus sendMelding(Forsendelse forsendelse) throws IOException {
 		InputStream dokumentpakke = digitalPostContentPackager.createDokumentpakke(forsendelse, appCertificate);
 
 		String dokumentpakkefingeravtrykk = getDokumentpakkefingeravtrykk(dokumentpakke);
@@ -84,9 +89,9 @@ public class DpiMeldingsformidler {
 		multipartBodyBuilder.part("forretningsmelding", standardBusinessDocument);
 		multipartBodyBuilder.part("dokumentpakke", dokumentpakke);
 
-		restTemplate.exchange(uri, HttpMethod.POST, new HttpEntity<>(headers(forsendelse.getDigital().getMaskinportentoken())) , String.class);
+		ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, new HttpEntity<>(headers(forsendelse.getDigital().getMaskinportentoken())), String.class);
 
-		return null;
+		return response.getStatusCode();
 
 	}
 
@@ -102,13 +107,12 @@ public class DpiMeldingsformidler {
 	public String getDokumentpakkefingeravtrykk(InputStream asicStream) throws IOException {
 		MessageDigest digest = new SHA256.Digest();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		InputStream asicToRead = asicStream;
 
 		try(DigestOutputStream digestStream = new DigestOutputStream(baos, digest)) {
-			copy(asicToRead, digestStream);
+			copy(asicStream, digestStream);
 		} finally  {
-			if (asicToRead != null) {
-				asicToRead.close();
+			if (asicStream != null) {
+				asicStream.close();
 
 			}
 		}
