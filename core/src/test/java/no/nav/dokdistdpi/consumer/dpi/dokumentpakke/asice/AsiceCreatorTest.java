@@ -2,6 +2,7 @@ package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.asice;
 
 
 import no.nav.dokdistdpi.certificate.AppCertificate;
+import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.utils.CertificateUtils;
 import no.nav.dokdistdpi.utils.TestUtils.ZipFile;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +22,7 @@ import static no.nav.dokdistdpi.utils.ForsendelseData.forsendelse;
 import static no.nav.dokdistdpi.utils.TestUtils.zipEntries;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class AsiceCreatorTest {
 
@@ -32,14 +35,12 @@ class AsiceCreatorTest {
 	private static final String DOKUMENT_2_CONTENTS = "test2pdf";
 
 	AsiceCreator asiceCreator = new AsiceCreator();
+	CreateCMSDocument createCMSDocument = new CreateCMSDocument();
+	DigitalPostContentPackager digitalPostContentPackage = new DigitalPostContentPackager(asiceCreator, createCMSDocument);
 
 	@Test
 	void shouldCreateAndSignAsice() throws Exception {
-		Dokumentpakke dokumentpakke = Dokumentpakke.builder()
-				.hoveddokument(fromHoveddokument(TITTEL, HOVEDDOKUMENT_NAME, new ByteArrayInputStream(HOVEDDOKUMENT_CONTENTS.getBytes())))
-				.vedlegg(Arrays.asList(fromVedlegg(TITTEL, DOKUMENT_1_NAME, new ByteArrayInputStream(DOKUMENT_1_CONTENTS.getBytes())),
-						fromVedlegg(TITTEL, DOKUMENT_2_NAME, new ByteArrayInputStream(DOKUMENT_2_CONTENTS.getBytes()))))
-				.build();
+		Dokumentpakke dokumentpakke = getDokumentpakke();
 		final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse(dokumentpakke),
 				new AppCertificate(CertificateUtils.itestVirksomhetssertifikatProperties()));
 
@@ -58,6 +59,24 @@ class AsiceCreatorTest {
 		assertFileContents(zipEntries, HOVEDDOKUMENT_NAME, HOVEDDOKUMENT_CONTENTS);
 		assertFileContents(zipEntries, DOKUMENT_1_NAME, DOKUMENT_1_CONTENTS);
 		assertFileContents(zipEntries, DOKUMENT_2_NAME, DOKUMENT_2_CONTENTS);
+	}
+
+	@Test
+	void shouldGenerateEncryptedDokumentpakke() {
+		Dokumentpakke dokumentpakke = getDokumentpakke();
+
+		InputStream dokumentpakkeStream = digitalPostContentPackage.createDokumentpakke(forsendelse(dokumentpakke),
+				new AppCertificate(CertificateUtils.itestVirksomhetssertifikatProperties()));
+
+		assertNotNull(dokumentpakkeStream);
+	}
+
+	private Dokumentpakke getDokumentpakke() {
+		return Dokumentpakke.builder()
+				.hoveddokument(fromHoveddokument(TITTEL, HOVEDDOKUMENT_NAME, new ByteArrayInputStream(HOVEDDOKUMENT_CONTENTS.getBytes())))
+				.vedlegg(Arrays.asList(fromVedlegg(TITTEL, DOKUMENT_1_NAME, new ByteArrayInputStream(DOKUMENT_1_CONTENTS.getBytes())),
+						fromVedlegg(TITTEL, DOKUMENT_2_NAME, new ByteArrayInputStream(DOKUMENT_2_CONTENTS.getBytes()))))
+				.build();
 	}
 
 	private void assertFileContents(List<ZipFile> zipEntries, String filename, String expectedFileContents) {
