@@ -13,10 +13,10 @@ import no.nav.dokdistdpi.saf.JournalpostQdist011;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.dokdistdpi.TestUtil.buildHentForsendelseResponseWithDokumentAndArkivSystemAsJoark;
+import static no.nav.dokdistdpi.TestUtil.createJournalpostQdist011;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -47,19 +47,17 @@ class Qdist011ServiceTest {
 		dokumentkatalog = mock(Dokumentkatalog.class);
 
 		digitalKontaktInformasjonValidator = new DigitalKontaktInformasjonValidator();
-		digitalPostService = new DigitalPostService(maskinportenTokenConsumer,digitalKontaktInformasjonValidator,
-				digitalKontaktinformasjonConsumer, varselInfo, dokumentkatalog );
+		digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
+				digitalKontaktinformasjonConsumer, varselInfo, dokumentkatalog);
 
 		qdist011Service = new Qdist011Service(s3Storage, administrerForsendelse, digitalPostService, safJournalpostQueryService);
 
 	}
 
 	@Test
-	void ShouldTestSomething(){
+	void shouldTestSomething() {
 		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndArkivSystemAsJoark());
-		when(safJournalpostQueryService.hentJournalpost(anyString())).thenReturn(TestUtil.)
-
-
+		when(safJournalpostQueryService.hentJournalpost(anyString())).thenReturn(createJournalpostQdist011());
 	}
 
 }

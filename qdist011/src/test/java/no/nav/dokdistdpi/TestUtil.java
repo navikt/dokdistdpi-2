@@ -8,7 +8,6 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,27 +35,11 @@ public final class TestUtil {
 	public static final String VEDLEGG_2_DOKUMENT_INFO_ID = "3";
 	public static final String VEDLEGG_2_DOKUMENT_REF = "ref-3";
 
-	public static final String TITTEL = "Tittel";
-	public static final String DOKUMENTINFO_ID = "4";
-
 	public static List<JournalpostQdist011.DokumentInfo> buildDokumentInfo() {
 		List<JournalpostQdist011.DokumentInfo> dokumenter = new ArrayList<>();
-		dokumenter.add(
-				JournalpostQdist011
-						.DokumentInfo
-						.builder()
-						.dokumentInfoId("2")
-						.tittel("Joark vedlegg tittel 1")
-						.build()
-		);
-		dokumenter.add(
-				JournalpostQdist011
-						.DokumentInfo
-						.builder()
-						.dokumentInfoId("3")
-						.tittel("Joark vedlegg tittel 2")
-						.build()
-		);
+		dokumenter.add(JournalpostQdist011.DokumentInfo.builder().dokumentInfoId("2").tittel("Joark vedlegg tittel 1").build());
+		dokumenter.add(JournalpostQdist011.DokumentInfo.builder().dokumentInfoId("3").tittel("Joark vedlegg tittel 2").build());
+
 		return dokumenter;
 	}
 
@@ -150,8 +133,6 @@ public final class TestUtil {
 	}
 
 	public static JournalpostQdist011 createJournalpostQdist011(){
-		return JournalpostQdist011.builder()
-				.dokumenter(Arrays.asList(JournalpostQdist011.DokumentInfo.builder().dokumentInfoId(HOVED_DOKUMENT_INFO_ID).tittel(TITTEL).build()))
-				.build();
+		return JournalpostQdist011.builder().dokumenter(buildDokumentInfo()).build();
 	}
 }
