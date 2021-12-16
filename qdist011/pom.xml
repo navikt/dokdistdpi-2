@@ -25,6 +25,10 @@
 			<groupId>no.nav.meldinger.virksomhet</groupId>
 			<artifactId>melding-virksomhet-dokdistfordeling</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-json-validator</artifactId>
+		</dependency>
 	</dependencies>
 
 </project>

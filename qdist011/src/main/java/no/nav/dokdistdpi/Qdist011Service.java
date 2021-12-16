@@ -49,6 +49,9 @@ import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.isBlank;
 
+/**
+ * @author Tsigab A. Gebremedhin, NAV
+ */
 @Slf4j
 @Component
 public class Qdist011Service {

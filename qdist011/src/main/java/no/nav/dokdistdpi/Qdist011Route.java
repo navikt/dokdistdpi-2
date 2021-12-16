@@ -27,7 +27,9 @@ import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
 
-
+/**
+ * @author Tsigab A. Gebremedhin, NAV
+ */
 @Component
 public class Qdist011Route extends RouteBuilder {
 
@@ -60,6 +62,7 @@ public class Qdist011Route extends RouteBuilder {
 				.logExhaustedMessageHistory(false)
 				.logStackTrace(true)
 				.loggingLevel(ERROR));
+
 		onException(ForsendelseStatusExpedertKanIkkeDistribuereException.class)
 				.handled(true).logExhaustedMessageBody(false)
 				.log(INFO, log, "${exception}" + logForsendelseId());
