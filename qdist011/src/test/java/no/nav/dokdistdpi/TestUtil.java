@@ -68,7 +68,7 @@ public final class TestUtil {
 	public static final String DOKUMENTTYPE_ID = "DokumenttypeId";
 
 	public static final String BESTILLINGS_ID = UUID.randomUUID().toString();
-	private static final String MOTTAKER_FNR = "04036125433";
+	public static final String MOTTAKER_FNR = "04036125433";
 	private static final String MOTTAKER_TYPE = "Person";
 	private static final String POSTKASSEADRESSE = "ove.jonsen#6K5A";
 	private static final String EPOSTADRESSE = "example@email.org";
@@ -88,6 +88,7 @@ public final class TestUtil {
 
 	public static SikkerDigitalKontaktInfo createSikkerDigitalKontaktInfo(){
 		return SikkerDigitalKontaktInfo.builder()
+				.personidentifikator(MOTTAKER_FNR)
 				.brukerAdresse(POSTKASSEADRESSE)
 				.reservasjon(RESERVASJON)
 				.epostadresse(EPOST_VALUE)

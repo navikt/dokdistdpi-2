@@ -17,7 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.dokdistdpi.TestUtil.HENT_FORSENDELSE_RESPONSE_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.TestUtil.MASKINPORTEN_TOKEN;
+import static no.nav.dokdistdpi.TestUtil.MOTTAKER_FNR;
 import static no.nav.dokdistdpi.TestUtil.buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon;
 import static no.nav.dokdistdpi.TestUtil.classpathToString;
 import static no.nav.dokdistdpi.TestUtil.createDistribuerTilKanal;
@@ -26,6 +28,7 @@ import static no.nav.dokdistdpi.TestUtil.createOidcTokenResponse;
 import static no.nav.dokdistdpi.TestUtil.createSikkerDigitalKontaktInfo;
 import static no.nav.dokdistdpi.TestUtil.createVarselInfoTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -77,30 +80,21 @@ class Qdist011ServiceTest {
 	@Test
 	void skalLageForsendelse() {
 		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon());
-//		when(safJournalpostQueryService.hentJournalpost(anyString())).thenReturn(TestUtil.createJournalpostQdist011());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse());
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
 		when(dokumentkatalog.getDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
 
-//		private String personidentifikator;
-//		private String mottakerSertifikat;
-//		private String digitalPostLeverandoerAdresse;
-//		private final String konversasjonId;
-//		private final String bestillingsId;
-//		private DigitalPost digital;
-//		private Dokumentpakke dokumentpakke;
-
 		Forsendelse forsendelse = qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange);
-		assertEquals(forsendelse.getPersonidentifikator(), "04036125433");
-		assertEquals(forsendelse.getMottakerSertifikat(), classpathToString("sertifikat/mottakercertificate"));
-		assertEquals(forsendelse.getDigitalPostLeverandoerAdresse(), "988015814");
-		assertEquals(forsendelse.getKonversasjonId(), "988015814");
-//		konversasjonId;
-//		bestillingsId;
-//		digital;
-//		dokumentpakke;
+
+		assertEquals(MOTTAKER_FNR, forsendelse.getPersonidentifikator());
+		assertEquals(classpathToString("sertifikat/mottakercertificate"), forsendelse.getMottakerSertifikat());
+		assertEquals("988015814", forsendelse.getDigitalPostLeverandoerAdresse());
+		assertEquals(36, forsendelse.getKonversasjonId().length());
+		assertEquals(HENT_FORSENDELSE_RESPONSE_BESTILLINGS_ID, forsendelse.getBestillingsId());
+		assertNotNull(forsendelse.getDigital());
 		assertEquals(MASKINPORTEN_TOKEN, forsendelse.getDigital().getMaskinportentoken());
+		assertNotNull(forsendelse.getDokumentpakke());
 	}
 
 }
