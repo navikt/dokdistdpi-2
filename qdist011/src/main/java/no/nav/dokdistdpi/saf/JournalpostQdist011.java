@@ -10,12 +10,12 @@ import java.util.List;
 @Builder
 public class JournalpostQdist011 {
 	@Builder.Default
-	private final List<DokumentInfo> dokumenter = new ArrayList<>();
+	List<DokumentInfo> dokumenter = new ArrayList<>();
 
 	@Value
 	@Builder
 	public static class DokumentInfo {
-		private final String dokumentInfoId;
-		private final String tittel;
+		String dokumentInfoId;
+		String tittel;
 	}
 }

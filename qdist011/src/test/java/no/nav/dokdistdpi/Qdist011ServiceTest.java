@@ -32,7 +32,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class Qdist011ServiceTest {
 
-	//@MockBean
 	private Storage s3Storage;
 	private AdministrerForsendelseConsumer administrerForsendelse;
 	private SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService;
@@ -79,7 +78,7 @@ class Qdist011ServiceTest {
 	@Test
 	void ShouldTestSomething() {
 		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon());
-		when(safJournalpostQueryService.hentJournalpost(anyString())).thenReturn(TestUtil.createJournalpostQdist011());
+//		when(safJournalpostQueryService.hentJournalpost(anyString())).thenReturn(TestUtil.createJournalpostQdist011());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse());
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
