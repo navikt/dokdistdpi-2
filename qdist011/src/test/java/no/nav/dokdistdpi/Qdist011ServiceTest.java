@@ -36,32 +36,28 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class Qdist011ServiceTest {
 
-	private Storage s3Storage;
 	private AdministrerForsendelseConsumer administrerForsendelse;
-	private SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService;
-	private DigitalPostService digitalPostService;
 	private Qdist011Service qdist011Service;
 
 	private MaskinportenTokenConsumer maskinportenTokenConsumer;
 	private DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer;
 	private VarselInfo varselInfo;
-	private DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator;
 	private Dokumentkatalog dokumentkatalog;
 	private Exchange exchange;
 
 	@BeforeEach
 	void setup() {
 		administrerForsendelse = mock(AdministrerForsendelseConsumer.class);
-		safJournalpostQueryService = mock(SafJournalpostQueryService.class);
+		SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService = mock(SafJournalpostQueryService.class);
 		maskinportenTokenConsumer = mock(MaskinportenTokenConsumer.class);
 		digitalKontaktinformasjonConsumer = mock(DigitalKontaktinformasjonConsumer.class);
 		varselInfo = mock(VarselInfo.class);
 		dokumentkatalog = mock(DokumentkatalogConsumer.class);
 		exchange = mock(Exchange.class);
-		s3Storage = mock(Storage.class);
+		Storage s3Storage = mock(Storage.class);
 
-		digitalKontaktInformasjonValidator = new DigitalKontaktInformasjonValidator();
-		digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
+		DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator = new DigitalKontaktInformasjonValidator();
+		DigitalPostService digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
 				digitalKontaktinformasjonConsumer, varselInfo, dokumentkatalog);
 
 		qdist011Service = new Qdist011Service(s3Storage, administrerForsendelse, digitalPostService, safJournalpostQueryService);

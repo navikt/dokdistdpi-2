@@ -30,6 +30,7 @@
 			<artifactId>camel-json-validator</artifactId>
 		</dependency>
 
+		<!-- Test -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>

@@ -73,7 +73,7 @@ public class DpiMeldingsformidler {
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "sendMelding"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public HttpStatus sendMelding(Forsendelse forsendelse) throws IOException {
-		InputStream dokumentpakke = digitalPostContentPackager.createDokumentpakke(forsendelse, appCertificate);
+		InputStream dokumentpakke = digitalPostContentPackager.createKryptertDokumentpakke(forsendelse, appCertificate);
 
 		String dokumentpakkefingeravtrykk = getDokumentpakkefingeravtrykk(dokumentpakke);
 

@@ -65,7 +65,7 @@ class AsiceCreatorTest {
 	void shouldGenerateEncryptedDokumentpakke() {
 		Dokumentpakke dokumentpakke = getDokumentpakke();
 
-		InputStream dokumentpakkeStream = digitalPostContentPackage.createDokumentpakke(forsendelse(dokumentpakke),
+		InputStream dokumentpakkeStream = digitalPostContentPackage.createKryptertDokumentpakke(forsendelse(dokumentpakke),
 				new AppCertificate(CertificateUtils.itestVirksomhetssertifikatProperties()));
 
 		assertNotNull(dokumentpakkeStream);

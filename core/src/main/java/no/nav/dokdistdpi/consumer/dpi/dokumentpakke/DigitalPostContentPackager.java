@@ -38,7 +38,7 @@ public class DigitalPostContentPackager {
 		this.createCMSDocument = createCMSDocument;
 	}
 
-	public InputStream createDokumentpakke(Forsendelse forsendelse, AppCertificate appCertificate) {
+	public InputStream createKryptertDokumentpakke(Forsendelse forsendelse, AppCertificate appCertificate) {
 		X509Certificate mottakerCertificate = fraBase64X509String(forsendelse.getMottakerSertifikat());
 		try (final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse, appCertificate)) {
 			log.info("Oppretter CMS dokument");
