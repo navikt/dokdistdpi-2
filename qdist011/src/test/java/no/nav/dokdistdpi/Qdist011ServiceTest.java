@@ -12,7 +12,6 @@ import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.s3storage.Storage;
 import no.nav.dokdistdpi.saf.JournalpostQdist011;
 import org.apache.camel.Exchange;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,11 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.dokdistdpi.TestUtil.MASKINPORTEN_TOKEN;
 import static no.nav.dokdistdpi.TestUtil.buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon;
+import static no.nav.dokdistdpi.TestUtil.classpathToString;
 import static no.nav.dokdistdpi.TestUtil.createDistribuerTilKanal;
 import static no.nav.dokdistdpi.TestUtil.createDokumenttypeInfoTo;
 import static no.nav.dokdistdpi.TestUtil.createOidcTokenResponse;
 import static no.nav.dokdistdpi.TestUtil.createSikkerDigitalKontaktInfo;
 import static no.nav.dokdistdpi.TestUtil.createVarselInfoTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -62,21 +63,19 @@ class Qdist011ServiceTest {
 
 		qdist011Service = new Qdist011Service(s3Storage, administrerForsendelse, digitalPostService, safJournalpostQueryService);
 
-		when(s3Storage.get(anyString()))
-				.thenReturn("""
-						{
-							"pdf":"SE9WRURET0tfVEVTVF9DT05URU5U",
-							"dokumentObjektReferanse":"ref-1",
-							"dokumentInfoId":"123"
-						}
-						""");
-//				.thenReturn("{'pdf':'SE9WRURET0tfVEVTVF9DT05URU5U','dokumentObjektReferanse':'ref-1','dokumentInfoId':'123'}");
-
-
+		when(s3Storage.get(anyString())).thenReturn(
+			"""
+				{
+					"pdf":"SE9WRURET0tfVEVTVF9DT05URU5U",
+					"dokumentObjektReferanse":"ref-1",
+					"dokumentInfoId":"123"
+				}
+			"""
+		);
 	}
 
 	@Test
-	void ShouldTestSomething() {
+	void skalLageForsendelse() {
 		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon());
 //		when(safJournalpostQueryService.hentJournalpost(anyString())).thenReturn(TestUtil.createJournalpostQdist011());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse());
@@ -84,8 +83,24 @@ class Qdist011ServiceTest {
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
 		when(dokumentkatalog.getDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
 
+//		private String personidentifikator;
+//		private String mottakerSertifikat;
+//		private String digitalPostLeverandoerAdresse;
+//		private final String konversasjonId;
+//		private final String bestillingsId;
+//		private DigitalPost digital;
+//		private Dokumentpakke dokumentpakke;
+
 		Forsendelse forsendelse = qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange);
-		Assertions.assertEquals(MASKINPORTEN_TOKEN, forsendelse.getDigital().getMaskinportentoken());
+		assertEquals(forsendelse.getPersonidentifikator(), "04036125433");
+		assertEquals(forsendelse.getMottakerSertifikat(), classpathToString("sertifikat/mottakercertificate"));
+		assertEquals(forsendelse.getDigitalPostLeverandoerAdresse(), "988015814");
+		assertEquals(forsendelse.getKonversasjonId(), "988015814");
+//		konversasjonId;
+//		bestillingsId;
+//		digital;
+//		dokumentpakke;
+		assertEquals(MASKINPORTEN_TOKEN, forsendelse.getDigital().getMaskinportentoken());
 	}
 
 }
