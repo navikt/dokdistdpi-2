@@ -5,6 +5,8 @@ import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.isBlank;
+import static no.nav.dokdistdpi.utils.DokdistdpiUtils.notBlank;
+import static org.springframework.util.StringUtils.hasText;
 
 public class DigitalKontaktInformasjonValidator {
 
@@ -26,7 +28,7 @@ public class DigitalKontaktInformasjonValidator {
 				(digitalKontaktInfo.getLeverandoerSertifikat().length() > 0);
 
 		boolean hasLeverandorAdresse =
-				isBlank(digitalKontaktInfo.getLeverandoerAdresse());
+				notBlank(digitalKontaktInfo.getLeverandoerAdresse());
 		boolean hasBrukerAdresse = StringUtils.isNotBlank(digitalKontaktInfo.getBrukerAdresse());
 
 		return (hasSertifikat && hasLeverandorAdresse && hasBrukerAdresse);

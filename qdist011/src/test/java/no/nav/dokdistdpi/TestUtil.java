@@ -1,7 +1,14 @@
 package no.nav.dokdistdpi;
 
+import lombok.SneakyThrows;
+import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
+import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
+import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa;
+import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.saf.JournalpostQdist011;
+import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 
@@ -14,7 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.ARKIV_SYSTEM_JOARK;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.EPOST;
@@ -38,6 +47,78 @@ public final class TestUtil {
 
 	public static final String TITTEL = "Tittel";
 	public static final String DOKUMENTINFO_ID = "4";
+
+	public static final String MASKINPORTEN_TOKEN = "aølkdsølkdsj==";
+	public static final String MASKINPORTEN_SCOPE = "digitalpostinnbygger:send";
+
+	private static final boolean HAS_SERTIFIKAT = true;
+	private static final boolean RESERVASJON = false;
+	private static final String EPOST_VALUE = "epostValue";
+	private static final String MOBIL_VALUE = "mobilValue";
+	private static final String LEVERANDOER_ADRESSE = "leverandoerAdresse";
+
+	private static final String VARSEL_TYPE_ID = "varselTypeId";
+	private static final boolean STOPP_REPETERENDE_VARSEL = false;
+	private static final String EPOST_VARSLINGS_TEKST = "epostVarslingsTekst";
+	private static final String SMS_VARSLINGS_TEKST = "smsVarslingsTekst";
+	private static final List<Integer> ANTALL_DAGER_LISTE = Arrays.asList(1, 2, 3);
+	private static final String PREFERERT_KANAL_SMS = "SMS";
+	private static final String PREFERERT_KANAL_EPOST = "EPOST";
+
+	public static final String DOKUMENTTYPE_ID = "DokumenttypeId";
+
+	public static final String BESTILLINGS_ID = UUID.randomUUID().toString();
+	private static final String MOTTAKER_FNR = "04036125433";
+	private static final String MOTTAKER_TYPE = "Person";
+	private static final String POSTKASSEADRESSE = "ove.jonsen#6K5A";
+	private static final String EPOSTADRESSE = "example@email.org";
+	private static final String MOBILTELEFONNUMMER = "4799999999";
+	private static final String VARSLINGSTEKST = "Du har mottatt brev i din digitale postkasse";
+	public static final String VIRKSOMHETMOTTAKER = "984661185";
+	public static final String MOTTAKER_ORGNO = "988015814";
+	public static final String CONVERSATION_ID = UUID.randomUUID().toString();
+
+	public static OidcTokenResponse createOidcTokenResponse(){
+		OidcTokenResponse oidcTokenResponse = new OidcTokenResponse();
+		oidcTokenResponse.setAccessToken(MASKINPORTEN_TOKEN);
+		oidcTokenResponse.setScope(MASKINPORTEN_SCOPE);
+		oidcTokenResponse.setExpiresIn(30);
+		return oidcTokenResponse;
+	}
+
+	public static SikkerDigitalKontaktInfo createSikkerDigitalKontaktInfo(){
+		return SikkerDigitalKontaktInfo.builder()
+				.brukerAdresse(POSTKASSEADRESSE)
+				.reservasjon(RESERVASJON)
+				.epostadresse(EPOST_VALUE)
+				.mobiltelefonnummer(MOBIL_VALUE)
+				.leverandoerAdresse(MOTTAKER_ORGNO)
+				.leverandoerSertifikat(classpathToString("sertifikat/mottakercertificate"))
+				.sertifikat(HAS_SERTIFIKAT)
+				.build();
+	}
+	public static VarselInfoTo createVarselInfoTo() {
+		return VarselInfoTo.builder()
+				.varselTypeId(VARSEL_TYPE_ID)
+				.stoppRepeterendeVarsel(STOPP_REPETERENDE_VARSEL)
+				.varslingsTekst(varslingsTekster(EPOST_VARSLINGS_TEKST, SMS_VARSLINGS_TEKST))
+				.antallDagerListe(ANTALL_DAGER_LISTE)
+				.preferertKanal(makePreferertKanalSet(PREFERERT_KANAL_EPOST, PREFERERT_KANAL_SMS))
+				.build();
+	}
+
+	public static DokumenttypeInfoTo createDokumenttypeInfoTo(){
+		return DokumenttypeInfoTo.builder()
+				.sikkerhetsnivaa(Sikkerhetsnivaa.NIVAA_4.getValue())
+				.varselTypeId(VARSEL_TYPE_ID)
+				.build();
+	}
+
+	public static DistribuerTilKanal createDistribuerTilKanal(){
+		DistribuerTilKanal distribuerTilKanal = new DistribuerTilKanal();
+		distribuerTilKanal.setForsendelseId("1");
+		return distribuerTilKanal;
+	}
 
 	public static List<JournalpostQdist011.DokumentInfo> buildDokumentInfo() {
 		List<JournalpostQdist011.DokumentInfo> dokumenter = new ArrayList<>();
@@ -73,6 +154,15 @@ public final class TestUtil {
 				.builder()
 				.dokumenter(buildHovedDokumentWithVedlegg())
 				.bestillingsId(HENT_FORSENDELSE_RESPONSE_BESTILLINGS_ID)
+				.mottaker(createMottakerTo())
+				.build();
+	}
+
+	public static HentForsendelseResponse.MottakerTo createMottakerTo(){
+		return HentForsendelseResponse.MottakerTo.builder()
+				.mottakerId(MOTTAKER_FNR)
+				.mottakerNavn(MOTTAKER_TYPE)
+				.mottakerType(MOTTAKER_TYPE)
 				.build();
 	}
 
@@ -109,6 +199,7 @@ public final class TestUtil {
 						.tilknyttetSom(HOVEDDOKUMENT)
 						.arkivDokumentInfoId(HOVED_DOKUMENT_INFO_ID)
 						.dokumentObjektReferanse(HOVED_DOKUMENT_REF)
+						.dokumenttypeId(DOKUMENTTYPE_ID)
 						.build()
 		);
 		dokumenter.add(
@@ -126,11 +217,6 @@ public final class TestUtil {
 						.build()
 		);
 		return dokumenter;
-	}
-
-	public static String classpathToString(String classpathResource) throws IOException {
-		InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
-		return IOUtils.toString(inputStream, UTF_8);
 	}
 
 	public static Set<String> makePreferertKanalSet(String... preferertKanal) {
@@ -153,5 +239,18 @@ public final class TestUtil {
 		return JournalpostQdist011.builder()
 				.dokumenter(Arrays.asList(JournalpostQdist011.DokumentInfo.builder().dokumentInfoId(HOVED_DOKUMENT_INFO_ID).tittel(TITTEL).build()))
 				.build();
+	}
+
+	@SneakyThrows
+	public static String classpathToString(String classpathResource) {
+		try {
+
+			InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
+			String message = IOUtils.toString(inputStream, UTF_8);
+			IOUtils.closeQuietly(inputStream);
+			return message;
+		} catch (IOException e) {
+			throw new IOException(format("Kunne ikke åpne classpath-ressurs %s", classpathResource), e);
+		}
 	}
 }
