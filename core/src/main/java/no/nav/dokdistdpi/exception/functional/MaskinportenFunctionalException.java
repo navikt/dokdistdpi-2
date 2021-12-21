@@ -4,4 +4,8 @@ public class MaskinportenFunctionalException extends AbstractDokdistdpiFunctiona
 	public MaskinportenFunctionalException(String message, Throwable cause) {
 		super(message, cause);
 	}
+
+	public MaskinportenFunctionalException(String message) {
+		super(message);
+	}
 }

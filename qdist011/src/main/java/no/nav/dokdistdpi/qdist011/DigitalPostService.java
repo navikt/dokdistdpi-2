@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi;
+package no.nav.dokdistdpi.qdist011;
 
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
@@ -12,10 +12,15 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
+import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
+import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
+import no.nav.dokdistdpi.exception.functional.Tkat020FunctionalException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
@@ -38,10 +43,8 @@ public class DigitalPostService {
 	private final Dokumentkatalog dokumentkatalog;
 
 	@Autowired
-	public DigitalPostService(MaskinportenTokenConsumer maskinportenTokenConsumer,
-							  DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator,
-							  DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer,
-							  VarselInfo varselInfo,
+	public DigitalPostService(MaskinportenTokenConsumer maskinportenTokenConsumer, DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator,
+							  DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer, VarselInfo varselInfo,
 							  Dokumentkatalog dokumentkatalog) {
 		this.maskinportenTokenConsumer = maskinportenTokenConsumer;
 		this.digitalKontaktInformasjonValidator = digitalKontaktInformasjonValidator;
@@ -59,7 +62,9 @@ public class DigitalPostService {
 	}
 
 	public String getMaskinportenToken() {
-		return requireNonNull(maskinportenTokenConsumer.fetchToken().getAccessToken(), "maskinportenToken kan ikke være null");
+		return Optional.of(maskinportenTokenConsumer.fetchToken())
+				.map(OidcTokenResponse::getAccessToken)
+				.orElseThrow(() -> new MaskinportenFunctionalException("MaskinportenToken kan ikke være null"));
 	}
 
 	public VarselInfoTo getVarselInfo(DokumenttypeInfoTo dokumenttypeInfo) {
@@ -69,8 +74,8 @@ public class DigitalPostService {
 	public DokumenttypeInfoTo getDokumenttypeInfo(HentForsendelseResponse forsendelseResponse) {
 		return forsendelseResponse.getDokumenter().stream()
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
-				.map(dokument -> dokumentkatalog.getDokumenttypeInfo(dokument.getDokumenttypeId()))
-				.findAny().orElse(null);
+				.map(dokument -> dokumentkatalog.getDokumenttypeInfo(dokument.getDokumenttypeId())).findAny()
+				.orElseThrow(() -> new Tkat020FunctionalException("DokumenttypeInfo kan ikke være null"));
 	}
 
 	public Varsler mapVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo) {
@@ -83,8 +88,8 @@ public class DigitalPostService {
 	private SmsVarsel mapSMSVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo) {
 		return SmsVarsel.builder()
 				.mobiltelefonnummer(digitalKontaktInfo.getMobiltelefonnummer())
-				.varslingstekst(varselInfoTo.getVarslingsTekst().get(SMS))
-				.repetisjoner(CommonVarsel.Repetisjoner.builder()
+				.varslingstekst(varselInfoTo.getVarslingsTekst()
+						.get(SMS)).repetisjoner(CommonVarsel.Repetisjoner.builder()
 						.dagerEtters(varselInfoTo.getAntallDagerListe())
 						.build())
 				.build();
@@ -94,8 +99,7 @@ public class DigitalPostService {
 		return EpostVarsel.builder()
 				.epostadresse(digitalKontaktInfo.getEpostadresse())
 				.varslingstekst(varselInfoTo.getVarslingsTekst().get(EPOST))
-				.repetisjoner(CommonVarsel.Repetisjoner.builder()
-						.dagerEtters(varselInfoTo.getAntallDagerListe())
+				.repetisjoner(CommonVarsel.Repetisjoner.builder().dagerEtters(varselInfoTo.getAntallDagerListe())
 						.build())
 				.build();
 	}

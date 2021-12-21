@@ -1,13 +1,12 @@
-package no.nav.dokdistdpi;
+package no.nav.dokdistdpi.qdist011;
 
 import lombok.SneakyThrows;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
-import no.nav.dokdistdpi.saf.JournalpostQdist011;
+import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -17,14 +16,16 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.singletonList;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_4;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.ARKIV_SYSTEM_JOARK;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.EPOST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
@@ -54,7 +55,7 @@ public final class TestUtil {
 	private static final boolean HAS_SERTIFIKAT = true;
 	private static final boolean RESERVASJON = false;
 	private static final String EPOST_VALUE = "epostValue";
-	private static final String MOBIL_VALUE = "mobilValue";
+	public static final String MOBIL_VALUE = "mobilValue";
 	private static final String LEVERANDOER_ADRESSE = "leverandoerAdresse";
 
 	private static final String VARSEL_TYPE_ID = "varselTypeId";
@@ -70,23 +71,24 @@ public final class TestUtil {
 	public static final String BESTILLINGS_ID = UUID.randomUUID().toString();
 	public static final String MOTTAKER_FNR = "04036125433";
 	private static final String MOTTAKER_TYPE = "Person";
-	private static final String POSTKASSEADRESSE = "ove.jonsen#6K5A";
+	public static final String POSTKASSEADRESSE = "ove.jonsen#6K5A";
 	private static final String EPOSTADRESSE = "example@email.org";
 	private static final String MOBILTELEFONNUMMER = "4799999999";
 	private static final String VARSLINGSTEKST = "Du har mottatt brev i din digitale postkasse";
 	public static final String VIRKSOMHETMOTTAKER = "984661185";
 	public static final String MOTTAKER_ORGNO = "988015814";
-	public static final String CONVERSATION_ID = UUID.randomUUID().toString();
+	public static final String KONVERSASJON_ID = UUID.randomUUID().toString();
 
-	public static OidcTokenResponse createOidcTokenResponse(){
+	public static OidcTokenResponse createOidcTokenResponse(String accessToken) {
 		OidcTokenResponse oidcTokenResponse = new OidcTokenResponse();
-		oidcTokenResponse.setAccessToken(MASKINPORTEN_TOKEN);
+		oidcTokenResponse.setAccessToken(accessToken);
 		oidcTokenResponse.setScope(MASKINPORTEN_SCOPE);
 		oidcTokenResponse.setExpiresIn(30);
 		return oidcTokenResponse;
 	}
 
-	public static SikkerDigitalKontaktInfo createSikkerDigitalKontaktInfo(){
+
+	public static SikkerDigitalKontaktInfo createSikkerDigitalKontaktInfo() {
 		return SikkerDigitalKontaktInfo.builder()
 				.personidentifikator(MOTTAKER_FNR)
 				.brukerAdresse(POSTKASSEADRESSE)
@@ -98,6 +100,7 @@ public final class TestUtil {
 				.sertifikat(HAS_SERTIFIKAT)
 				.build();
 	}
+
 	public static VarselInfoTo createVarselInfoTo() {
 		return VarselInfoTo.builder()
 				.varselTypeId(VARSEL_TYPE_ID)
@@ -108,14 +111,14 @@ public final class TestUtil {
 				.build();
 	}
 
-	public static DokumenttypeInfoTo createDokumenttypeInfoTo(){
+	public static DokumenttypeInfoTo createDokumenttypeInfoTo() {
 		return DokumenttypeInfoTo.builder()
-				.sikkerhetsnivaa(Sikkerhetsnivaa.NIVAA_4.getValue())
+				.sikkerhetsnivaa(NIVAA_4.getValue())
 				.varselTypeId(VARSEL_TYPE_ID)
 				.build();
 	}
 
-	public static DistribuerTilKanal createDistribuerTilKanal(){
+	public static DistribuerTilKanal createDistribuerTilKanal() {
 		DistribuerTilKanal distribuerTilKanal = new DistribuerTilKanal();
 		distribuerTilKanal.setForsendelseId("1");
 		return distribuerTilKanal;
@@ -151,15 +154,16 @@ public final class TestUtil {
 	}
 
 	public static HentForsendelseResponse buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon() {
-		return HentForsendelseResponse
-				.builder()
-				.dokumenter(buildHovedDokumentWithVedlegg())
-				.bestillingsId(HENT_FORSENDELSE_RESPONSE_BESTILLINGS_ID)
+		return HentForsendelseResponse.builder()
+				.bestillingsId(BESTILLINGS_ID)
+				.konversasjonId(KONVERSASJON_ID)
 				.mottaker(createMottakerTo())
+				.forsendelseTittel(TITTEL)
+				.dokumenter(buildHovedDokumentWithVedlegg())
 				.build();
 	}
 
-	public static HentForsendelseResponse.MottakerTo createMottakerTo(){
+	public static HentForsendelseResponse.MottakerTo createMottakerTo() {
 		return HentForsendelseResponse.MottakerTo.builder()
 				.mottakerId(MOTTAKER_FNR)
 				.mottakerNavn(MOTTAKER_TYPE)
@@ -221,31 +225,28 @@ public final class TestUtil {
 	}
 
 	public static Set<String> makePreferertKanalSet(String... preferertKanal) {
-		Set<String> set = new HashSet<String>();
-
-		for (String kanal : preferertKanal) {
-			set.add(kanal);
-		}
-		return set;
+		return Arrays.stream(preferertKanal).collect(Collectors.toSet());
 	}
 
 	public static Map<String, String> varslingsTekster(String epostVarslingsTekst, String smsVarslingsTekst) {
-		Map<String, String> varslingsMap = new HashMap<String, String>();
+		Map<String, String> varslingsMap = new HashMap<>();
 		varslingsMap.put(EPOST, epostVarslingsTekst);
 		varslingsMap.put(SMS, smsVarslingsTekst);
 		return varslingsMap;
 	}
 
-	public static JournalpostQdist011 createJournalpostQdist011(){
+	public static JournalpostQdist011 createJournalpostQdist011() {
 		return JournalpostQdist011.builder()
-				.dokumenter(Arrays.asList(JournalpostQdist011.DokumentInfo.builder().dokumentInfoId(HOVED_DOKUMENT_INFO_ID).tittel(TITTEL).build()))
+				.dokumenter(singletonList(JournalpostQdist011.DokumentInfo.builder()
+						.dokumentInfoId(HOVED_DOKUMENT_INFO_ID)
+						.tittel(TITTEL)
+						.build()))
 				.build();
 	}
 
 	@SneakyThrows
 	public static String classpathToString(String classpathResource) {
 		try {
-
 			InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
 			String message = IOUtils.toString(inputStream, UTF_8);
 			IOUtils.closeQuietly(inputStream);

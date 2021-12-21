@@ -1,11 +1,10 @@
-package no.nav.dokdistdpi;
+package no.nav.dokdistdpi.qdist011;
 
 import com.amazonaws.SdkClientException;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
-import no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator;
@@ -18,10 +17,10 @@ import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDeserialisereS3PayloadException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeFinneDokumentException;
+import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.dokdistdpi.s3storage.DokDistDokumentFraS3;
 import no.nav.dokdistdpi.s3storage.JsonSerializer;
 import no.nav.dokdistdpi.s3storage.Storage;
-import no.nav.dokdistdpi.saf.JournalpostQdist011;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
@@ -37,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.String.format;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
+import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_EKSPEDERT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
@@ -76,7 +76,7 @@ public class Qdist011Service {
 		validateDistribuerForsendelseTilDpi(distribuerTilKanal);
 		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(distribuerTilKanal.getForsendelseId());
 		exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
-		if(FORSENDELSE_STATUS_EKSPEDERT.equals(hentForsendelseResponse.getForsendelseStatus())){
+		if (FORSENDELSE_STATUS_EKSPEDERT.equals(hentForsendelseResponse.getForsendelseStatus())) {
 			log.info("Forsendelse med forsendelseId={}, status={} er ekspdert og behandlingen avsluttes",
 					distribuerTilKanal.getForsendelseId(), hentForsendelseResponse.getForsendelseStatus());
 			throw new ForsendelseStatusExpedertKanIkkeDistribuereException(format("Forsendelse med forsendelseId=%s, status=%s er ekspdert og behandlingen avsluttes",
@@ -95,32 +95,33 @@ public class Qdist011Service {
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfoTo);
 
 		Varsler varsler = digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo);
-			return Forsendelse.builder()
-					.personidentifikator(sikkerDigitalKontaktInfo.getPersonidentifikator())
-					.mottakerSertifikat(sikkerDigitalKontaktInfo.getLeverandoerSertifikat())
-					.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())
-					.bestillingsId(hentForsendelseResponse.getBestillingsId())
-					.konversasjonId(konversasjonId)
-					.digital(DigitalPost.builder()
-							.avsender(DigitalPost.Avsender.builder()
-									.virksomhetsidentifikator(Identifikator.builder()
-											.authority(ISO_6523_ACTORID_UPIS)
-											.value(Organisasjonsnummer.asIso6523(NAV_ORGNUMMER))
-											.build())
-									.build())
-							.mottaker(DigitalPost.Personmottaker.builder()
-									.postkasseadresse(sikkerDigitalKontaktInfo.getBrukerAdresse())
-									.build())
-							.maskinportentoken(maskinportenToken)
-							.sikkerhetsnivaa(dokumenttypeInfo.getSikkerhetsnivaa())
-							.virkningsdato(LocalDate.now())
-							.aapningskvittering(false)
-							.ikkesensitivtittel(hentForsendelseResponse.getForsendelseTittel())
-							.spraak(SPRAAK)
-							.varsler(varsler)
-							.build())
-					.dokumentpakke(getDocumentpakkeFromS3(hentForsendelseResponse))
-					.build();
+		return Forsendelse.builder()
+				.personidentifikator(sikkerDigitalKontaktInfo.getPersonidentifikator())
+				.mottakerSertifikat(sikkerDigitalKontaktInfo.getLeverandoerSertifikat())
+				.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())
+				.bestillingsId(hentForsendelseResponse.getBestillingsId())
+				.konversasjonId(konversasjonId)
+				.digital(DigitalPost.builder()
+						.avsender(DigitalPost.Avsender.builder()
+								.virksomhetsidentifikator(Identifikator.builder()
+										.authority(ISO_6523_ACTORID_UPIS)
+										.value(asIso6523(NAV_ORGNUMMER))
+										.build())
+								.avsenderindentifikator(NAV_ORGNUMMER)
+								.build())
+						.mottaker(DigitalPost.Personmottaker.builder()
+								.postkasseadresse(sikkerDigitalKontaktInfo.getBrukerAdresse())
+								.build())
+						.maskinportentoken(maskinportenToken)
+						.sikkerhetsnivaa(dokumenttypeInfo.getSikkerhetsnivaa())
+						.virkningsdato(LocalDate.now())
+						.aapningskvittering(false)
+						.ikkesensitivtittel(hentForsendelseResponse.getForsendelseTittel())
+						.spraak(SPRAAK)
+						.varsler(varsler)
+						.build())
+				.dokumentpakke(getDocumentpakkeFromS3(hentForsendelseResponse))
+				.build();
 	}
 
 

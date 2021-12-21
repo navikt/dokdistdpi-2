@@ -125,7 +125,9 @@ public class DpiMeldingsformidler {
 		while ((n = source.read(buf)) > 0) {
 			sink.write(buf, 0, n);
 		}
-
 	}
+
+
+
 
 }

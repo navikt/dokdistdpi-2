@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.map;
+package no.nav.dokdistdpi.qdist011.map;
 
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;

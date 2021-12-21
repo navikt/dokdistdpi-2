@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi;
+package no.nav.dokdistdpi.qdist011;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -69,7 +69,7 @@ public class Qdist011MetricsRoutePolicy extends RoutePolicySupport {
 
 	private Exception getException(Exchange exchange) {
 		Exception exception = exchange.getProperty(EXCEPTION_CAUGHT, Exception.class);
-		if (exception == null && exchange.getException() instanceof Exception) {
+		if (exception == null && (exchange.getException() instanceof Exception)) {
 			exception = (Exception) exchange.getException().getCause();
 		}
 		return exception;

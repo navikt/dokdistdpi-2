@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.saf;
+package no.nav.dokdistdpi.qdist011.saf;
 
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.consumer.saf.graphql.GraphQLRequest;

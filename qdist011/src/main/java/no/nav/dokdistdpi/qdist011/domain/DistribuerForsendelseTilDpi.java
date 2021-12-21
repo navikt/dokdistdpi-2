@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.domain;
+package no.nav.dokdistdpi.qdist011.domain;
 
 import lombok.Builder;
 import lombok.Value;

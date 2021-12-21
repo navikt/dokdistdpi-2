@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi;
+package no.nav.dokdistdpi.qdist011;
 
 import com.ibm.msg.client.jms.DetailedJMSException;
 import no.nav.dokdistdpi.common.IdsProcessor;
