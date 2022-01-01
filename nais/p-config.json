@@ -5,7 +5,7 @@
   "DKI_API_URL": "https://dkif.intern.nav.no",
   "LAGREJURIDISKLOGG_REST_URL": "https://app.adeo.no/juridisklogg/api/rest/logg",
   "MASKINPORTEN_URL": "https://maskinporten.no/token",
-  "MASKINPORTEN_AUDIENCE": "https://maskinporten.no/",
+  "MASKINPORTEN_AUDIENCE": "https://api.aksesspunktleverandør.no/",
   "SAF_GRAPHQL_URL": "https://saf.intern.nav.no/graphql",
   "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
   "STORAGE_S3_URL": "http://objectstore.rook-ceph.svc.nais.local",

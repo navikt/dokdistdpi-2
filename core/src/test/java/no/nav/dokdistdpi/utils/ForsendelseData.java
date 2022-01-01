@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import static java.util.Arrays.asList;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost.Sikkerhetsnivaa.NIVAA_3;
 import static no.nav.dokdistdpi.utils.TestUtils.classpathToString;
 
@@ -21,11 +22,11 @@ public class ForsendelseData {
 
 	private static final String BESTILLINGS_ID = "bestillingsId";
 	private static final String MOTTAKER_FNR = "04036125433";
-	private static final String  POSTKASSEADRESSE="ove.jonsen#6K5A";
+	private static final String POSTKASSEADRESSE = "ove.jonsen#6K5A";
 	private static final String EPOSTADRESSE = "example@email.org";
-	private static final String MOBILTELEFONNUMMER ="4799999999";
+	private static final String MOBILTELEFONNUMMER = "4799999999";
 	private static final String VARSLINGSTEKST = "Du har mottatt brev i din digitale postkasse";
-	private static final String  VIRKSOMHETMOTTAKER = "984661185";
+	private static final String VIRKSOMHETMOTTAKER = "984661185";
 	private static final String TITTEL = "Ikke-sensitiv tittel for forsendelsen";
 
 
@@ -59,14 +60,14 @@ public class ForsendelseData {
 				.build();
 
 		DigitalPost.Personmottaker personmottaker = DigitalPost.Personmottaker.builder()
-						.postkasseadresse(POSTKASSEADRESSE)
-						.build();
+				.postkasseadresse(POSTKASSEADRESSE)
+				.build();
 
 
 		return DigitalPost.builder()
 				.avsender(DigitalPost.Avsender.builder()
 						.virksomhetsidentifikator(Identifikator.builder()
-								.authority(Identifikator.Authority.ISO_6523_ACTORID_UPIS)
+								.authority(ISO_6523_ACTORID_UPIS)
 								.value(asIso6523(NAV_ORGNUMMER))
 								.build())
 						.build())

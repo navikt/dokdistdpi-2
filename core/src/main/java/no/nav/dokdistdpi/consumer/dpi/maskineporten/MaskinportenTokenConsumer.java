@@ -34,12 +34,16 @@ import java.net.URISyntaxException;
 import java.security.cert.CertificateEncodingException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import static java.time.Duration.ofSeconds;
+import static java.util.Date.from;
+import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
+import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
 @Slf4j
 @Component
@@ -69,14 +73,6 @@ public class MaskinportenTokenConsumer {
 
 	@Monitor(value = "dok_consumer", extraTags = {"process", "maskinporten_fetchtoken"}, percentiles = {0.5, 0.95}, histogram = true)
 	public OidcTokenResponse fetchToken() {
-		LinkedMultiValueMap<String, String> attrMap = new LinkedMultiValueMap<>();
-		attrMap.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
-		attrMap.add("assertion", generateJWT());
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(attrMap, headers);
-
 		URI accessTokenUri;
 		try {
 			accessTokenUri = maskinportenProperties.getUrl().toURI();
@@ -86,6 +82,16 @@ public class MaskinportenTokenConsumer {
 		}
 
 		final String maskinportenUrl = maskinportenProperties.getUrl().toString();
+
+		LinkedMultiValueMap<String, String> attrMap = new LinkedMultiValueMap<>();
+		attrMap.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
+		attrMap.add("assertion", generateJWT(maskinportenUrl));
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(APPLICATION_FORM_URLENCODED);
+		HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(attrMap, headers);
+
+
 		try {
 			log.info("Henter accessToken fra maskinporten på url={}", maskinportenUrl);
 			ResponseEntity<OidcTokenResponse> response = restTemplate.exchange(accessTokenUri, HttpMethod.POST,
@@ -103,7 +109,7 @@ public class MaskinportenTokenConsumer {
 		}
 	}
 
-	private String generateJWT() {
+	private String generateJWT(String issuer) {
 		List<Base64> certChain = new ArrayList<>();
 		try {
 			certChain.add(Base64.encode(appCertificate.getX509Certificate().getEncoded()));
@@ -114,14 +120,17 @@ public class MaskinportenTokenConsumer {
 
 		JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(certChain).build();
 
-		String clientId = maskinportenProperties.getClientid();
 		JWTClaimsSet claims = new JWTClaimsSet.Builder()
 				.audience(maskinportenProperties.getAudience())
-				.issuer(clientId)
+				.issuer(issuer)
 				.claim("scope", getCurrentScopes())
+				.claim("consumer", Consumer.builder()
+						.authority(ISO_6523_ACTORID_UPIS.getValue())
+						.id(asIso6523(NAV_ORGNUMMER))
+						.build())
 				.jwtID(UUID.randomUUID().toString())
-				.issueTime(Date.from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant()))
-				.expirationTime(Date.from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant().plusSeconds(120)))
+				.issueTime(from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant()))
+				.expirationTime(from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant().plusSeconds(30)))
 				.build();
 
 		RSASSASigner signer = new RSASSASigner(appCertificate.loadPrivateKey());
@@ -140,7 +149,7 @@ public class MaskinportenTokenConsumer {
 		return signedJWT.serialize();
 	}
 
-	public String getCurrentScopes() {
+	private String getCurrentScopes() {
 		ArrayList<String> scopeList = new ArrayList<>();
 		scopeList.add(SCOPE_DPI);
 		return scopeList.stream().reduce((a, b) -> a + " " + b).orElse("");
