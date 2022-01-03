@@ -11,7 +11,7 @@ import java.util.Optional;
 
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
-import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator.Authority.ISO_6523_ACTORID_UPIS;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 
 
 public class ForsendelseMapper {

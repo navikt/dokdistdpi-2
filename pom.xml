@@ -32,10 +32,12 @@
 		<commons-lang3.version>3.12.0</commons-lang3.version>
 		<dokkat.version>11.0.5</dokkat.version>
 		<ibm-mq.version>9.2.4.0</ibm-mq.version>
+		<java.version>17</java.version>
 		<lombok.version>1.18.22</lombok.version>
 		<logstash-logback-encoder.version>7.0.1</logstash-logback-encoder.version>
 		<melding-virksomhet-dokdistfordeling.version>2.1.2</melding-virksomhet-dokdistfordeling.version>
 		<maven-toolchains-plugin.version>3.0.0</maven-toolchains-plugin.version>
+		<maven-plugin.version>3.0.0-M5</maven-plugin.version>
 		<bnimbus-jose-jwt.version>9.15.2</bnimbus-jose-jwt.version>
 		<spring-cloud-contract-wiremock.version>3.1.0</spring-cloud-contract-wiremock.version>
 	</properties>
@@ -210,6 +212,14 @@
 			</resource>
 		</resources>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-toolchains-plugin</artifactId>
