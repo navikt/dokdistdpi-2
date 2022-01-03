@@ -19,5 +19,4 @@ public class MaskinportenProperties {
 	private URL url;
 	@NonNull
 	private String audience;
-	private String clientid;
 }

@@ -1,0 +1,22 @@
+{
+  "ADMINISTRERFORSENDELSE_V1_URL": "https://app.adeo.no/dokdist/rest/v1/administrerforsendelse",
+  "DOKUMENTTYPEINFO_V4_URL": "https://app.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
+  "VARSELINFO_V1_URL": "https://app.adeo.no/dokkat/rest/varselinfo/v1",
+  "DKI_API_URL": "https://dkif.intern.nav.no",
+  "LAGREJURIDISKLOGG_REST_URL": "https://app.adeo.no/juridisklogg/api/rest/logg",
+  "MASKINPORTEN_URL": "https://maskinporten.no/token",
+  "MASKINPORTEN_AUDIENCE": "https://api.aksesspunktleverandør.no/",
+  "SAF_GRAPHQL_URL": "https://saf.intern.nav.no/graphql",
+  "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
+  "STORAGE_S3_URL": "http://objectstore.rook-ceph.svc.nais.local",
+  "SRVDOKDISTDPI": "/serviceuser/data/prod/srvdokdistdpi-2",
+  "DOKDISTDPI_VAULT": "/kv/prod/fss/dokdistdpi-2/default",
+  "VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/prod/sdp",
+  "APP_NAME": "dokdistdpi-2",
+  "NAMESPACE": "teamdokumenthandtering",
+  "MIN_REPLICAS": "2",
+  "MAX_REPLICAS": "10",
+  "INGRESSES": [
+    "https://dokdistdpi-2.intern.nav.no"
+  ]
+}
