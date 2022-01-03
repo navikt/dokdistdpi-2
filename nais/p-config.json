@@ -1,5 +1,5 @@
 {
-  "ADMINISTRERFORSENDELSE_V1_URL": "https://app.adeo.no/dokdist/rest/v1/administrerforsendelse",
+  "ADMINISTRERFORSENDELSE_URL": "https://app.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "DOKUMENTTYPEINFO_V4_URL": "https://app.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "VARSELINFO_V1_URL": "https://app.adeo.no/dokkat/rest/varselinfo/v1",
   "DKI_API_URL": "https://dkif.intern.nav.no",
