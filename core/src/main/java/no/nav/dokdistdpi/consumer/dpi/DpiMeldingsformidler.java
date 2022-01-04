@@ -52,6 +52,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 @Component
 public class DpiMeldingsformidler {
 
+	public static final String SEND_PATH = "/out";
 	private final StandardBusinessDocumentMapper sbdMapper;
 	private final DigitalPostContentPackager digitalPostContentPackager;
 	private final AppCertificate appCertificate;
@@ -81,6 +82,7 @@ public class DpiMeldingsformidler {
 
 		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse);
 		String uri = UriComponentsBuilder.fromHttpUrl(dpiClientProperties.getUrl())
+				.path(SEND_PATH)
 				.queryParam(KANAL, dpiClientProperties.getMpckanal())
 				.toUriString();
 
