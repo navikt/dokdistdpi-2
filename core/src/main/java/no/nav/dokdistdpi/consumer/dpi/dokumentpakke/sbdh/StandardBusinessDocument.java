@@ -29,9 +29,8 @@ public class StandardBusinessDocument {
 
 	@JsonIgnore
 	public final String getBestillingsId() {
-		return findScope(ScopeType.BESTILLINGS_ID)
-				.map(Scope::getInstanceIdentifier)
-				.orElse("");
+		return getStandardBusinessDocumentHeader().getDocumentIdentification()
+				.getInstanceIdentifier();
 	}
 
 	@JsonIgnore

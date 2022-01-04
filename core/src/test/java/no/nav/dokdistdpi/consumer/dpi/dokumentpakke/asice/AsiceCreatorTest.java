@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -65,7 +64,7 @@ class AsiceCreatorTest {
 	void shouldGenerateEncryptedDokumentpakke() {
 		Dokumentpakke dokumentpakke = getDokumentpakke();
 
-		InputStream dokumentpakkeStream = digitalPostContentPackage.createKryptertDokumentpakke(forsendelse(dokumentpakke),
+		byte[] dokumentpakkeStream = digitalPostContentPackage.createKryptertDokumentpakke(forsendelse(dokumentpakke),
 				new AppCertificate(CertificateUtils.itestVirksomhetssertifikatProperties()));
 
 		assertNotNull(dokumentpakkeStream);

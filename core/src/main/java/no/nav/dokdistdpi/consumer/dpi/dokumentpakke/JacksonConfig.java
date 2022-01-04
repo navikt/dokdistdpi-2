@@ -1,6 +1,8 @@
-package no.nav.dokdistdpi.consumer.dpi;
+package no.nav.dokdistdpi.consumer.dpi.dokumentpakke;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -11,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -19,19 +22,17 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQueries;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
 
 @Configuration
 public class JacksonConfig {
-
 	@Bean
 	@Qualifier("dpiObjectMapper")
-	public ObjectMapper dpiObjectMapper() {
+	public ObjectMapper eformidlingObjectMapper() {
 		return new Jackson2ObjectMapperBuilder()
 				.deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer())
 				.modulesToInstall(new JavaTimeModule())
-				.serializationInclusion(NON_NULL)
+				.serializationInclusion(JsonInclude.Include.NON_NULL)
 				.featuresToEnable(
 						SerializationFeature.INDENT_OUTPUT,
 						MapperFeature.DEFAULT_VIEW_INCLUSION)

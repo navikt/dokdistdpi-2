@@ -68,4 +68,8 @@ public class Qdist011IT {
 		when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2)))
 				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraS3.builder().pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build()));
 	}
+
+
+
+
 }

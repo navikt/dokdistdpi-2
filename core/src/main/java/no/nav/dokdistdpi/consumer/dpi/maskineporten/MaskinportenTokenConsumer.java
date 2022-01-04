@@ -1,15 +1,10 @@
 package no.nav.dokdistdpi.consumer.dpi.maskineporten;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
+import no.nav.dokdistdpi.consumer.dpi.GenerateJwt;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.exception.technical.MaskinportenTechnicalException;
 import no.nav.dokdistdpi.metrics.Monitor;
@@ -18,7 +13,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -31,10 +25,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.cert.CertificateEncodingException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static java.time.Duration.ofSeconds;
@@ -110,15 +102,6 @@ public class MaskinportenTokenConsumer {
 	}
 
 	private String generateJWT(String issuer) {
-		List<Base64> certChain = new ArrayList<>();
-		try {
-			certChain.add(Base64.encode(appCertificate.getX509Certificate().getEncoded()));
-		} catch (CertificateEncodingException e) {
-			log.error("Could not get encoded certificate", e);
-			throw new RuntimeException(e);
-		}
-
-		JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(certChain).build();
 
 		JWTClaimsSet claims = new JWTClaimsSet.Builder()
 				.audience(maskinportenProperties.getAudience())
@@ -133,20 +116,7 @@ public class MaskinportenTokenConsumer {
 				.expirationTime(from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant().plusSeconds(30)))
 				.build();
 
-		RSASSASigner signer = new RSASSASigner(appCertificate.loadPrivateKey());
-
-		if (appCertificate.shouldLockProvider()) {
-			signer.getJCAContext().setProvider(appCertificate.getKeyStore().getProvider());
-		}
-
-		SignedJWT signedJWT = new SignedJWT(jwsHeader, claims);
-		try {
-			signedJWT.sign(signer);
-		} catch (JOSEException e) {
-			log.error("Error occured during signing of JWT", e);
-		}
-
-		return signedJWT.serialize();
+		return GenerateJwt.generateJWT(claims, appCertificate);
 	}
 
 	private String getCurrentScopes() {

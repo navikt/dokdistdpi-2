@@ -10,12 +10,21 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_3;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.EPOST;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.SMS;
 import static no.nav.dokdistdpi.utils.TestUtils.classpathToString;
 
 
@@ -66,14 +75,14 @@ public class ForsendelseData {
 				.build();
 
 		DigitalPost.Personmottaker personmottaker = DigitalPost.Personmottaker.builder()
-						.postkasseadresse(POSTKASSEADRESSE)
-						.build();
+				.postkasseadresse(POSTKASSEADRESSE)
+				.build();
 
 
 		return DigitalPost.builder()
 				.avsender(DigitalPost.Avsender.builder()
 						.virksomhetsidentifikator(Identifikator.builder()
-								.authority(Identifikator.Authority.ISO_6523_ACTORID_UPIS)
+								.authority(ISO_6523_ACTORID_UPIS)
 								.value(asIso6523(NAV_ORGNUMMER))
 								.build())
 						.build())
@@ -87,6 +96,17 @@ public class ForsendelseData {
 						.epostvarsel(epostVarsel)
 						.build())
 				.build();
+	}
+
+	public static Set<String> makePreferertKanalSet(String... preferertKanal) {
+		return Arrays.stream(preferertKanal).collect(Collectors.toSet());
+	}
+
+	public static java.util.Map<String, String> varslingsTekster(String epostVarslingsTekst, String smsVarslingsTekst) {
+		Map<String, String> varslingsMap = new HashMap<>();
+		varslingsMap.put(EPOST, epostVarslingsTekst);
+		varslingsMap.put(SMS, smsVarslingsTekst);
+		return varslingsMap;
 	}
 
 }

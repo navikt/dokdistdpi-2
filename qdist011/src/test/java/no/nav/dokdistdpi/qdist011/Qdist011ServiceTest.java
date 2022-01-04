@@ -2,6 +2,7 @@ package no.nav.dokdistdpi.qdist011;
 
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
+import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat20.Dokumentkatalog;
 import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumentkatalogConsumer;
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfo;
@@ -10,6 +11,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
+import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.dokdistdpi.qdist011.saf.SafJournalpostQueryServiceImplQdist011;
@@ -24,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
-import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator.Authority.ISO_6523_ACTORID_UPIS;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_4;
 import static no.nav.dokdistdpi.qdist011.TestUtil.BESTILLINGS_ID;
 import static no.nav.dokdistdpi.qdist011.TestUtil.KONVERSASJON_ID;
@@ -121,6 +123,22 @@ class Qdist011ServiceTest {
 		MaskinportenFunctionalException ex = assertThrows(MaskinportenFunctionalException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
 
 		assertEquals("MaskinportenToken kan ikke være null", ex.getMessage());
+	}
+
+	@Test
+	void shoudThrowExceptionIfLeverandoerSertifikatIsNull() {
+		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = createSikkerDigitalKontaktInfo();
+		sikkerDigitalKontaktInfo.setLeverandoerSertifikat(null);
+
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon());
+		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
+		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(sikkerDigitalKontaktInfo);
+		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
+		when(dokumentkatalog.getDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
+
+		IllegalKontaktInformasjonFunctionalException e = assertThrows(IllegalKontaktInformasjonFunctionalException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
+
+		assertEquals("Manglende sertifikat, leverandoerAdresse eller brukerAdresse", e.getMessage());
 	}
 
 	private void assertDigitalMapping(DigitalPost digitalPost) {

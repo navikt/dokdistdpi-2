@@ -1,12 +1,10 @@
 package no.nav.dokdistdpi.consumer.dkif;
 
-import io.micrometer.core.instrument.util.StringUtils;
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 
-import static no.nav.dokdistdpi.utils.DokdistdpiUtils.isBlank;
-import static no.nav.dokdistdpi.utils.DokdistdpiUtils.notBlank;
-import static org.springframework.util.StringUtils.hasText;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DigitalKontaktInformasjonValidator {
 
@@ -20,18 +18,11 @@ public class DigitalKontaktInformasjonValidator {
 		if (varselInfoTo != null) {
 			verifyEmailAndPhone(digitalKontaktInfo);
 		}
-
 	}
 
 	private boolean hasValidSertifikatAndAdresses(SikkerDigitalKontaktInfo digitalKontaktInfo) {
-		boolean hasSertifikat = (digitalKontaktInfo.getLeverandoerSertifikat() != null) &&
-				(digitalKontaktInfo.getLeverandoerSertifikat().length() > 0);
-
-		boolean hasLeverandorAdresse =
-				notBlank(digitalKontaktInfo.getLeverandoerAdresse());
-		boolean hasBrukerAdresse = StringUtils.isNotBlank(digitalKontaktInfo.getBrukerAdresse());
-
-		return (hasSertifikat && hasLeverandorAdresse && hasBrukerAdresse);
+		return isNotBlank(digitalKontaktInfo.getLeverandoerSertifikat()) && isNotBlank(digitalKontaktInfo.getLeverandoerAdresse())
+				&& isNotBlank(digitalKontaktInfo.getBrukerAdresse());
 	}
 
 	private void verifyEmailAndPhone(SikkerDigitalKontaktInfo digitalKontaktInfo) {

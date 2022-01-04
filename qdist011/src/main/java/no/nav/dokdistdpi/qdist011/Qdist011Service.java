@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.String.format;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
-import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator.Authority.ISO_6523_ACTORID_UPIS;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_EKSPEDERT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;

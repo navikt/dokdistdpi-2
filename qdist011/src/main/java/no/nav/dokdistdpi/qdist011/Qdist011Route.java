@@ -26,6 +26,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.QDIST011_SERVICE_ID;
 import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
+import static org.springframework.http.HttpStatus.CREATED;
 
 /**
  * @author Tsigab A. Gebremedhin, NAV
@@ -94,9 +95,12 @@ public class Qdist011Route extends RouteBuilder {
 				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
 				.bean(qdist011Service)
 				.bean(dpiMeldingsformidler)
-				.log(LoggingLevel.INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
-				.bean(administrerForsendelseUpdater, "updateStatusAndConversationId")
-				.log(LoggingLevel.INFO, log, "qdist011 har oppdatert dokdistDb med forsendelseStatus=OVERSENDT og konversasjonId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} og avslutter behandling av forsendelse med " + getIdsForLogging());
+				.choice()
+					.when(simple("${body}").isEqualTo(CREATED))
+					.log(LoggingLevel.INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
+					.bean(administrerForsendelseUpdater, "updateStatusAndConversationId")
+					.log(LoggingLevel.INFO, log, "qdist011 har oppdatert dokdistDb med forsendelseStatus=OVERSENDT og konversasjonId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} og avslutter behandling av forsendelse med " + getIdsForLogging())
+				.endChoice();
 	}
 
 	public static String getIdsForLogging() {

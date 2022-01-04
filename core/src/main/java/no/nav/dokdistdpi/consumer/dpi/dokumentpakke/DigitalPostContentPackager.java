@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -38,7 +37,7 @@ public class DigitalPostContentPackager {
 		this.createCMSDocument = createCMSDocument;
 	}
 
-	public InputStream createKryptertDokumentpakke(Forsendelse forsendelse, AppCertificate appCertificate) {
+	public byte[] createKryptertDokumentpakke(Forsendelse forsendelse, AppCertificate appCertificate) {
 		X509Certificate mottakerCertificate = fraBase64X509String(forsendelse.getMottakerSertifikat());
 		try (final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse, appCertificate)) {
 			log.info("Oppretter CMS dokument");
@@ -46,15 +45,15 @@ public class DigitalPostContentPackager {
 
 			validateDokumentpakkeSize(cmsByte);
 
-			return new ByteArrayInputStream(cmsByte);
+			return cmsByte;
 		} catch (IOException e) {
 			throw new DokumentpakkingException("Klarte ikke lage asic eller kryptere dokumentpakke.", e);
 		}
 	}
 
 	private void validateDokumentpakkeSize(byte[] cmsByte) {
-		int dokumentpakkeSize = cmsByte.length/(int) pow(1024,2);
-		if(dokumentpakkeSize > DOKUMENTPAKKE_SIZE_LIMIT_MB){
+		int dokumentpakkeSize = cmsByte.length / (int) pow(1024, 2);
+		if (dokumentpakkeSize > DOKUMENTPAKKE_SIZE_LIMIT_MB) {
 			throw new FileSizeLimitExceededException(format("Dokumentpakken kan ikke overstige 30Mb. Faktisk størrelse er %sMb", dokumentpakkeSize));
 		}
 	}
