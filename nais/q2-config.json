@@ -1,5 +1,6 @@
 {
   "DPI_URL": "https://qaoffentlig.meldingsformidler.digipost.no/api/",
+  "DPI_MPCKANAL": "dokdistdpi-q",
   "ADMINISTRERFORSENDELSE_URL": "https://app-q2.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "DOKUMENTTYPEINFO_V4_URL": "https://app-q2.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "VARSELINFO_V1_URL": "https://app-q2.adeo.no/dokkat/rest/varselinfo/v1",

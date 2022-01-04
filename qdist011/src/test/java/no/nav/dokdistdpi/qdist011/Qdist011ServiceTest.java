@@ -75,7 +75,7 @@ class Qdist011ServiceTest {
 		varselInfo = mock(VarselInfo.class);
 		dokumentkatalog = mock(DokumentkatalogConsumer.class);
 		exchange = mock(Exchange.class);
-		Storage s3Storage = mock(AmazonS3Storage.class);
+		s3Storage = mock(AmazonS3Storage.class);
 
 		DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator = new DigitalKontaktInformasjonValidator();
 		DigitalPostService digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
+import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
@@ -18,7 +19,6 @@ import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,14 +31,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Base64;
 
 import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.KANAL;
-import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.KANAL_NAVN;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
@@ -58,13 +56,15 @@ public class DpiMeldingsformidler {
 	private final DigitalPostContentPackager digitalPostContentPackager;
 	private final AppCertificate appCertificate;
 	private final RestTemplate restTemplate;
-	private final String dpiUrl;
+	private final DpiClientProperties dpiClientProperties;
 	private final ObjectMapper objectMapper;
 
 	@Autowired
-	public DpiMeldingsformidler(@Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper, @Value("${dpi.url}") String dpiUrl, StandardBusinessDocumentMapper sbdMapper, RestTemplateBuilder restTemplateBuilder, DigitalPostContentPackager digitalPostContentPackager, AppCertificate appCertificate) {
+	public DpiMeldingsformidler(@Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper, DpiClientProperties dpiClientProperties,
+								StandardBusinessDocumentMapper sbdMapper, RestTemplateBuilder restTemplateBuilder,
+								DigitalPostContentPackager digitalPostContentPackager, AppCertificate appCertificate) {
 		this.objectMapper = dpiObjectMapper;
-		this.dpiUrl = dpiUrl;
+		this.dpiClientProperties = dpiClientProperties;
 		this.sbdMapper = sbdMapper;
 		this.digitalPostContentPackager = digitalPostContentPackager;
 		this.appCertificate = appCertificate;
@@ -80,7 +80,10 @@ public class DpiMeldingsformidler {
 		forsendelse.getDigital().setDokumentpakkefingeravtrykk(getDokumentpakkefingeravtrykk(dokumentpakke));
 
 		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse);
-		String uri = UriComponentsBuilder.fromHttpUrl(dpiUrl).queryParam(KANAL, KANAL_NAVN).toUriString();
+		String uri = UriComponentsBuilder.fromHttpUrl(dpiClientProperties.getUrl())
+				.queryParam(KANAL, dpiClientProperties.getMpckanal())
+				.toUriString();
+
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
 		multipartBodyBuilder.part("forretningsmelding", generateStandardBusinessDocumentJWT(standardBusinessDocument));
 		multipartBodyBuilder.part("dokumentpakke", dokumentpakke);

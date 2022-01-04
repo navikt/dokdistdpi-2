@@ -8,7 +8,9 @@ metadata:
 spec:
   env:
     - name: DPI_URL
-      value: {{DPI_URL}}
+      value: {{ DPI_URL }}
+    - name: DPI_MPCKANAL
+      value: {{ DPI_MPCKANAL }}
     - name: ADMINISTRERFORSENDELSE_URL
       value: {{ ADMINISTRERFORSENDELSE_URL }}
     - name: DOKUMENTTYPEINFO_V4_URL

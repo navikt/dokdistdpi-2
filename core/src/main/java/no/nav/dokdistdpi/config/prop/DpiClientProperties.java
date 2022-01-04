@@ -15,4 +15,6 @@ import org.springframework.validation.annotation.Validated;
 public class DpiClientProperties {
 	@NonNull
 	private String url;
+	@NonNull
+	private String mpckanal;
 }
