@@ -1,5 +1,6 @@
 package no.nav.dokdistdpi;
 
+import no.nav.dokdistdpi.certificate.KeyStoreProperties;
 import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.config.prop.MqGatewayProperties;
@@ -14,7 +15,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 		ServiceuserProperties.class,
 		MaskinportenProperties.class,
 		MqGatewayProperties.class,
-		DpiClientProperties.class
+		DpiClientProperties.class,
+		KeyStoreProperties.class
 })
 @EnableRetry
 @EnableScheduling

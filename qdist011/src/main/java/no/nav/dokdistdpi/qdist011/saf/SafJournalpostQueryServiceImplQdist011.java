@@ -9,15 +9,16 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 
-@Component
-public class SafJournalpostQueryServiceImplQdist011  implements SafJournalpostQueryService<JournalpostQdist011> {
+@Component("SafJournalpostQueryServiceQdist011")
+public class SafJournalpostQueryServiceImplQdist011 implements SafJournalpostQueryService<JournalpostQdist011> {
 
 	private final SafGraphqlConsumer safGraphqlConsumer;
 	private final SafJournalpostValidatorQdist011 safJournalpostValidatorQdist011;
 	private final JournalpostQdist011Mapper journalpostQdist011Mapper;
 
 	@Autowired
-	public SafJournalpostQueryServiceImplQdist011(SafGraphqlConsumer safGraphqlConsumer, SafJournalpostValidatorQdist011 safJournalpostValidatorQdist011,
+	public SafJournalpostQueryServiceImplQdist011(SafGraphqlConsumer safGraphqlConsumer,
+												  SafJournalpostValidatorQdist011 safJournalpostValidatorQdist011,
 												  JournalpostQdist011Mapper journalpostQdist011Mapper) {
 		this.safGraphqlConsumer = safGraphqlConsumer;
 		this.safJournalpostValidatorQdist011 = safJournalpostValidatorQdist011;

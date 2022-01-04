@@ -11,7 +11,7 @@
   "SECURITY_TOKEN_SERVICE_TOKEN_URL": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
   "MASKINPORTEN_URL": "https://ver2.maskinporten.no/token",
   "MASKINPORTEN_AUDIENCE": "https://ver2.maskinporten.no/",
-  "DOKDISTDPI_CHANNEL_NAME": "Q2_DOKDISTDPI",
+  "MQGATEWAY01_CHANNELNAME": "Q2_DOKDISTDPI",
   "MQGATEWAY01_HOSTNAME": "b27apvl219.preprod.local",
   "MQGATEWAY01_PORT": "1413",
   "MQGATEWAY01_NAME": "MQLS01",

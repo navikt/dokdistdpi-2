@@ -2,10 +2,12 @@ package no.nav.dokdistdpi.consumer.dkif;
 
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
+import org.springframework.stereotype.Component;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@Component
 public class DigitalKontaktInformasjonValidator {
 
 	public void validateKontaktinfo(SikkerDigitalKontaktInfo digitalKontaktInfo, VarselInfoTo varselInfoTo) {

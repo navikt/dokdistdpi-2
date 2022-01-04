@@ -18,6 +18,10 @@
 			<groupId>no.nav.dokdistdpi</groupId>
 			<artifactId>core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>no.nav.dokdistdpi</groupId>
+			<artifactId>qdist011</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

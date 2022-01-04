@@ -2,15 +2,17 @@ package no.nav.dokdistdpi.consumer.rdist001.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class HentForsendelseResponse {
 
 	public static final String ARKIV_SYSTEM_JOARK = "JOARK";
@@ -32,8 +34,11 @@ public class HentForsendelseResponse {
 		return getArkivInformasjon() == null || !ARKIV_SYSTEM_JOARK.equals(getArkivInformasjon().getArkivSystem());
 	}
 
-	@Data
+	@Getter
+	@Setter
 	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class MottakerTo {
 		private String mottakerId;
 		private String mottakerNavn;
@@ -51,8 +56,11 @@ public class HentForsendelseResponse {
 		private String arkivId;
 	}
 
-	@Data
+	@Getter
+	@Setter
 	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class PostadresseTo {
 		private String adresselinje1;
 		private String adresselinje2;
@@ -62,8 +70,11 @@ public class HentForsendelseResponse {
 		private String landkode;
 	}
 
-	@Data
+	@Getter
+	@Setter
 	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class DokumentTo {
 		private String tilknyttetSom;
 		private String dokumentObjektReferanse;

@@ -83,15 +83,7 @@ class Qdist011ServiceTest {
 
 		qdist011Service = new Qdist011Service(s3Storage, administrerForsendelse, digitalPostService, safJournalpostQueryService);
 
-		when(s3Storage.get(anyString())).thenReturn(
-				"""
-						    {
-						        "pdf":"SE9WRURET0tfVEVTVF9DT05URU5U",
-						        "dokumentObjektReferanse":"ref-1",
-						        "dokumentInfoId":"123"
-						    }
-						"""
-		);
+		when(s3Storage.get(anyString())).thenReturn("{\"pdf\":\"SE9WRURET0tfVEVTVF9DT05URU5U\",\"dokumentObjektReferanse\":null,\"dokumentInfoId\":null}");
 	}
 
 	@Test
