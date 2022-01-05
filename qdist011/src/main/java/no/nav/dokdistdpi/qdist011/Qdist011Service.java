@@ -193,11 +193,8 @@ public class Qdist011Service {
 				.concat(".pdf");
 	}
 
-	private String getVedleggTittel(
-			JournalpostQdist011 journalpostQdist011,
-			HentForsendelseResponse.DokumentTo dokumentTo,
-			int vedleggIdx
-	) {
+	private String getVedleggTittel(JournalpostQdist011 journalpostQdist011,
+									HentForsendelseResponse.DokumentTo dokumentTo, int vedleggIdx) {
 		if (journalpostQdist011 == null) {
 			return VEDLEGG_TITTEL_PREFIX + vedleggIdx;
 		}
