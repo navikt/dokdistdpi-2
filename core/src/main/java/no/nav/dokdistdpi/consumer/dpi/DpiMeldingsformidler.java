@@ -6,7 +6,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.config.prop.DpiClientProperties;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Dokumentpakkefingeravtrykk;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.StandardBusinessDocumentMapper;
@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.xml.crypto.dsig.DigestMethod;
 import java.security.MessageDigest;
 import java.util.Base64;
 
@@ -78,9 +79,8 @@ public class DpiMeldingsformidler {
 	public HttpStatus sendMelding(Forsendelse forsendelse, Exchange exchange) {
 		byte[] dokumentpakke = digitalPostContentPackager.createKryptertDokumentpakke(forsendelse, appCertificate);
 
-		forsendelse.getDigital().setDokumentpakkefingeravtrykk(getDokumentpakkefingeravtrykk(dokumentpakke));
-
-		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse);
+		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse,
+				getDokumentpakkefingeravtrykk(dokumentpakke));
 		String uri = UriComponentsBuilder.fromHttpUrl(dpiClientProperties.getUrl())
 				.path(SEND_PATH)
 				.queryParam(KANAL, dpiClientProperties.getMpckanal())
@@ -96,17 +96,18 @@ public class DpiMeldingsformidler {
 		exchange.setProperty("DigitalPostStatus", response.getStatusCode());
 
 		if (!CREATED.equals(response.getStatusCode())) {
-			throw new KanIkkeDistribuereForsendelseException(format("kunne ikke sende til digdir hjorne2 med status=%s", response.getStatusCode()));
+			throw new KanIkkeDistribuereForsendelseException(format("kunne ikke sende til DigDir-hjorne2 med status=%s, bestillingsId=%s og konversasjonId=%s",
+					response.getStatusCode(), forsendelse.getBestillingsId(), forsendelse.getKonversasjonId()));
 		}
 
 		return response.getStatusCode();
 	}
 
-	public DigitalPost.Dokumentpakkefingeravtrykk getDokumentpakkefingeravtrykk(byte[] asicStream) {
+	public Dokumentpakkefingeravtrykk getDokumentpakkefingeravtrykk(byte[] asicStream) {
 		MessageDigest messageDigest = new SHA256.Digest();
 		byte[] digest = messageDigest.digest(asicStream);
-		return DigitalPost.Dokumentpakkefingeravtrykk.builder()
-				.digestMethod("")
+		return Dokumentpakkefingeravtrykk.builder()
+				.digestMethod(DigestMethod.SHA256)
 				.digestValue(Base64.getEncoder().encodeToString(digest))
 				.build();
 	}

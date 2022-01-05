@@ -13,10 +13,8 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("serviceuser")
 @Validated
 public class ServiceuserProperties {
-
 	@NonNull
 	private String username;
 	@NonNull
 	private String password;
-
 }

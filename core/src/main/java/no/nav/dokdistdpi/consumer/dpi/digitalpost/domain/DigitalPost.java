@@ -29,8 +29,6 @@ public class DigitalPost {
 
 	private Kvittering kvittering;
 
-
-
 	@Data
 	@Builder
 	public static class Avsender {
@@ -51,12 +49,5 @@ public class DigitalPost {
 	@Builder
 	public static class Personmottaker {
 		private String postkasseadresse;
-	}
-
-	@Data
-	@Builder
-	public static class Dokumentpakkefingeravtrykk {
-		private String digestMethod;
-		private String digestValue;
 	}
 }

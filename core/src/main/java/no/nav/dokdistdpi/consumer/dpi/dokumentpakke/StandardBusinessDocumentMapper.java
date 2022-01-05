@@ -1,5 +1,7 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke;
 
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Dokumentpakkefingeravtrykk;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.BusinessScope;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.DocumentIdentification;
@@ -26,7 +28,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
 @Component
 public class StandardBusinessDocumentMapper {
 
-	public StandardBusinessDocument mapDigitalPostEnvelope(Forsendelse forsendelse) {
+	public StandardBusinessDocument mapDigitalPostEnvelope(Forsendelse forsendelse, Dokumentpakkefingeravtrykk fingeravtrykk) {
 		StandardBusinessDocumentHeader standardBusinessDocumentHeader = new StandardBusinessDocumentHeader();
 		standardBusinessDocumentHeader.setHeaderVersion(HEADER_VERSION);
 		standardBusinessDocumentHeader.addSender(createSender());
@@ -37,8 +39,14 @@ public class StandardBusinessDocumentMapper {
 		standardBusinessDocumentHeader.setBusinessScope(businessScope);
 		return StandardBusinessDocument.builder()
 				.standardBusinessDocumentHeader(standardBusinessDocumentHeader)
-				.any(forsendelse.getDigital())
+				.any(digitalPost(forsendelse, fingeravtrykk))
 				.build();
+	}
+
+	private DigitalPost digitalPost(Forsendelse forsendelse, Dokumentpakkefingeravtrykk fingeravtrykk) {
+		DigitalPost digitalPost = forsendelse.getDigital();
+		digitalPost.setDokumentpakkefingeravtrykk(fingeravtrykk);
+		return digitalPost;
 	}
 
 	private DocumentIdentification createDocumentIdentification(final String instanceIdentifier) {

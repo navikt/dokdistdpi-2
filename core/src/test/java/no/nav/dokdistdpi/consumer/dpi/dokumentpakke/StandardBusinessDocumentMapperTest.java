@@ -1,6 +1,7 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke;
 
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Dokumentpakkefingeravtrykk;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.Partner;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.PartnerIdentification;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.Scope;
@@ -24,15 +25,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StandardBusinessDocumentMapperTest {
-	private static final String KONVERSASJON_ID = "konversasjonId1";
-	private static final String FIXED_TIME = "2020-01-01T12:00:00Z";
-	private static final String TEN_SECONDS_BEFORE = "2020-01-01T12:59:50+01:00";
-	private static final String TWENTY_FOUR_HOURS_LATER = "2020-01-06T13:00:00+01:00";
 	private final StandardBusinessDocumentMapper mapper = new StandardBusinessDocumentMapper();
 
 	@Test
 	void shouldMapDigitalPostKonvolutt() {
-		final StandardBusinessDocument sbd = mapper.mapDigitalPostEnvelope(forsendelse(Dokumentpakke.builder().build()));
+		final StandardBusinessDocument sbd = mapper.mapDigitalPostEnvelope(forsendelse(Dokumentpakke.builder().build()), Dokumentpakkefingeravtrykk
+				.builder()
+						.digestMethod("")
+						.digestValue("fsdfsdfsdfsdfsd")
+				.build());
 		assertThat(sbd.getStandardBusinessDocumentHeader().getHeaderVersion()).isEqualTo(HEADER_VERSION);
 		assertEquals(HEADER_VERSION, sbd.getStandardBusinessDocumentHeader().getHeaderVersion());
 

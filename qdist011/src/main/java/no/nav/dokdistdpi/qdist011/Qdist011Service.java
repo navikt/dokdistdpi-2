@@ -55,12 +55,12 @@ import static no.nav.dokdistdpi.utils.DokdistdpiUtils.isBlank;
 @Slf4j
 @Component
 public class Qdist011Service {
+	private static final String SPRAAK = "NO";
 
 	private final Storage s3Storage;
 	private final AdministrerForsendelseConsumer administrerForsendelse;
 	private final SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService;
 	private final DigitalPostService digitalPostService;
-	private static final String SPRAAK = "NO";
 
 	@Autowired
 	public Qdist011Service(Storage s3Storage, AdministrerForsendelseConsumer administrerForsendelse, DigitalPostService digitalPostService,
@@ -123,7 +123,6 @@ public class Qdist011Service {
 				.dokumentpakke(getDocumentpakkeFromS3(hentForsendelseResponse))
 				.build();
 	}
-
 
 	private JournalpostQdist011 getJournalpostQdist011(HentForsendelseResponse HentForsendelseResponse) {
 		if (HentForsendelseResponse.isIkkeArkivertIJoark()) {
