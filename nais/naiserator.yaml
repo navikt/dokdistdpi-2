@@ -90,6 +90,8 @@ spec:
     enabled: true
     paths:
       - kvPath: {{ SRVDOKDISTDPI }}
+        mountPath: "/secrets/serviceuser/srvdokdistdpi"
+      - kvPath: {{ SRVDOKDISTDPI2 }}
         mountPath: "/secrets/serviceuser/srvdokdistdpi-2"
       - kvPath: {{ DOKDISTDPI_VAULT }}
         mountPath: "/var/run/secrets/nais.io/vault"
