@@ -3,7 +3,7 @@ package no.nav.dokdistdpi.config.jms;
 import com.ibm.mq.jms.MQConnectionFactory;
 import com.ibm.mq.jms.MQQueue;
 import no.nav.dokdistdpi.config.prop.MqGatewayProperties;
-import no.nav.dokdistdpi.config.prop.MqServiceuserProperties;
+import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import org.apache.activemq.jms.pool.PooledConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -52,12 +52,12 @@ public class JmsConfig {
 
 	@Bean
 	public ConnectionFactory connectionFactory(final MqGatewayProperties mqGatewayProperties,
-											   final MqServiceuserProperties serviceuserProperties) throws JMSException {
+											   final ServiceuserProperties serviceuserProperties) throws JMSException {
 		return createConnectionFactory(mqGatewayProperties, serviceuserProperties);
 	}
 
 	private PooledConnectionFactory createConnectionFactory(final MqGatewayProperties mqGatewayProperties,
-															final MqServiceuserProperties serviceuserProperties) throws JMSException {
+															final ServiceuserProperties serviceuserProperties) throws JMSException {
 		MQConnectionFactory mqConnectionFactory = new MQConnectionFactory();
 		mqConnectionFactory.setHostName(mqGatewayProperties.getHostname());
 		mqConnectionFactory.setPort(mqGatewayProperties.getPort());

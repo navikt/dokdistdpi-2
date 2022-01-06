@@ -7,7 +7,6 @@ import no.nav.dokdistdpi.consumer.rdist001.DokdistAdministrerForsendelseUpdater;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
-import org.apache.camel.CamelContext;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.ValidationException;
@@ -42,10 +41,9 @@ public class Qdist011Route extends RouteBuilder {
 	private final DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater;
 
 	@Autowired
-	public Qdist011Route(CamelContext context, Queue qdist011, Queue qdist011FunksjonellFeil,
+	public Qdist011Route(Queue qdist011, Queue qdist011FunksjonellFeil,
 						 Qdist011Service qdist011Service, DpiMeldingsformidler dpiMeldingsformidler,
 						 Qdist011MetricsRoutePolicy routePolicy, DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater) {
-		super(context);
 		this.qdist011 = qdist011;
 		this.qdist011FunksjonellFeil = qdist011FunksjonellFeil;
 		this.qdist011Service = qdist011Service;

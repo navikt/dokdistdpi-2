@@ -34,7 +34,7 @@ public class StsRestConsumer {
 	private final String stsUrl;
 
 	@Autowired
-	public StsRestConsumer(@Value("${security-token-service-token.url}") String stsUrl,
+	public StsRestConsumer(@Value("${security-token-service.url}") String stsUrl,
 						   final ServiceuserProperties serviceuserProperties,
 						   RestTemplateBuilder restTemplateBuilder) {
 		this.restTemplate = restTemplateBuilder

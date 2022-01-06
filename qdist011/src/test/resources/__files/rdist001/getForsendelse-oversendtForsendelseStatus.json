@@ -3,6 +3,7 @@
   "konversasjonId": "601a9fcd-8bae-4076-a2d7-37f9dd17e050",
   "forsendelseStatus": "OVERSENDT",
   "forsendelseTittel": "forsendelseTittel",
+  "tema": "DAG",
   "mottaker": {
     "mottakerId": "22027838743",
     "mottakerNavn": "mottakerNavn",

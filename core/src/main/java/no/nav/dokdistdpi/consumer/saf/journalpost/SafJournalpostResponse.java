@@ -1,75 +1,82 @@
 package no.nav.dokdistdpi.consumer.saf.journalpost;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.Value;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Value
+@Getter
+@ToString
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SafJournalpostResponse {
-	private final String journalpostId;
-	private final Sak sak;
-	private final String opprettetAvNavn;
-	private final Bruker bruker;
-	private final LocalDateTime datoOpprettet;
-	private final String tittel;
-	private final String journalfortAvNavn;
-	private final String temanavn;
-	private final String journalposttype;
-	private final String journalfoerendeEnhet;
-	private final AvsenderMottaker avsenderMottaker;
+	private String journalpostId;
+	private Sak sak;
+	private String opprettetAvNavn;
+	private Bruker bruker;
+	private LocalDateTime datoOpprettet;
+	private String tittel;
+	private String journalfortAvNavn;
+	private String temanavn;
+	private String journalposttype;
+	private String journalfoerendeEnhet;
+	private AvsenderMottaker avsenderMottaker;
 
 	@Builder.Default
-	private final List<RelevantDato> relevanteDatoer = new ArrayList<>();
+	private List<RelevantDato> relevanteDatoer = new ArrayList<>();
 
 	@Builder.Default
-	private final List<DokumentInfo> dokumenter = new ArrayList<>();
+	private List<DokumentInfo> dokumenter = new ArrayList<>();
 
 	@Value
 	@Builder
 	public static class AvsenderMottaker {
-		private final String navn;
+		private String navn;
 	}
 
 	@Value
 	@Builder
 	public static class Sak {
-		private final String arkivsaksnummer;
-		private final LocalDateTime datoOpprettet;
+		private String arkivsaksnummer;
+		private LocalDateTime datoOpprettet;
 	}
 
 	@Value
 	@Builder
 	public static class RelevantDato {
-		private final LocalDateTime dato;
-		private final String datotype;
+		private LocalDateTime dato;
+		private String datotype;
 	}
 
 	@Value
 	@Builder
 	public static class Bruker {
-		private final String id;
-		private final String type;
+		private String id;
+		private String type;
 	}
 
 	@Value
 	@Builder
 	public static class DokumentInfo {
-		private final String dokumentInfoId;
-		private final String dokumentstatus;
-		private final String tittel;
-		private final String originalJournalpostId;
+		private String dokumentInfoId;
+		private String dokumentstatus;
+		private String tittel;
+		private String originalJournalpostId;
 		@Builder.Default
-		private final List<Dokumentvariant> dokumentvarianter = new ArrayList<>();
+		private List<Dokumentvariant> dokumentvarianter = new ArrayList<>();
 
 		@Value
 		@Builder
 		public static class Dokumentvariant {
-			private final String variantformat;
-			private final String filtype;
+			private String variantformat;
+			private String filtype;
 		}
 	}
 }

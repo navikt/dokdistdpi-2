@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -70,7 +71,11 @@ public class DpiMeldingsformidler {
 		this.sbdMapper = sbdMapper;
 		this.digitalPostContentPackager = digitalPostContentPackager;
 		this.appCertificate = appCertificate;
-		this.restTemplate = restTemplateBuilder.setConnectTimeout(ofSeconds(15)).setReadTimeout(ofSeconds(30)).build();
+		this.restTemplate = restTemplateBuilder
+				.setConnectTimeout(ofSeconds(15))
+				.messageConverters(new FormHttpMessageConverter())
+				.setReadTimeout(ofSeconds(30))
+				.build();
 	}
 
 	@Handler
@@ -89,7 +94,7 @@ public class DpiMeldingsformidler {
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
 		multipartBodyBuilder.part("forretningsmelding", generateStandardBusinessDocumentJWT(standardBusinessDocument));
 		multipartBodyBuilder.part("dokumentpakke", dokumentpakke);
-		HttpEntity<?> httpEntity = new HttpEntity<>(multipartBodyBuilder, headers(forsendelse.getDigital().getMaskinportentoken()));
+		HttpEntity<?> httpEntity = new HttpEntity<>(multipartBodyBuilder.build(), headers(forsendelse.getDigital().getMaskinportentoken()));
 
 		ResponseEntity<String> response = restTemplate.exchange(uri, POST, httpEntity, String.class);
 
