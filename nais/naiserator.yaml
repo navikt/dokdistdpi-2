@@ -97,6 +97,6 @@ spec:
         mountPath: "/var/run/secrets/nais.io/vault"
       - kvPath: {{ VIRKSOMHETSSERTIFIKAT_VAULT }}
         mountPath: "/secrets/virksomhetssertifikat/sdp"
-      - kvPath: { { APPDYNAMICS } }
+      - kvPath: {{ APPDYNAMICS }}
         mountPath: /var/run/secrets/nais.io/appdynamics
 
