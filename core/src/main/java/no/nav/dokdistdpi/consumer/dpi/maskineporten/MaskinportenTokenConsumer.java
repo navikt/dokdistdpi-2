@@ -77,7 +77,7 @@ public class MaskinportenTokenConsumer {
 
 		LinkedMultiValueMap<String, String> attrMap = new LinkedMultiValueMap<>();
 		attrMap.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
-		attrMap.add("assertion", generateJWT(maskinportenUrl));
+		attrMap.add("assertion", generateJWT());
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(APPLICATION_FORM_URLENCODED);
@@ -100,11 +100,11 @@ public class MaskinportenTokenConsumer {
 		}
 	}
 
-	private String generateJWT(String issuer) {
+	private String generateJWT() {
 
 		JWTClaimsSet claims = new JWTClaimsSet.Builder()
 				.audience(maskinportenProperties.getAudience())
-				.issuer(issuer)
+				.issuer(maskinportenProperties.getClientid())
 				.claim("scope", getCurrentScopes())
 				.claim("consumer", Consumer.builder()
 						.authority(ISO_6523_ACTORID_UPIS.getValue())

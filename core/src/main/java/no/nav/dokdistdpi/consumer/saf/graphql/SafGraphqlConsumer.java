@@ -32,7 +32,6 @@ import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BEARER_PREFIX;
 
 @Slf4j
 @Component
@@ -77,7 +76,7 @@ public class SafGraphqlConsumer {
 	private HttpHeaders createAuthorizationHeader() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + stsConsumer.getStsOidcToken());
+		headers.setBearerAuth(stsConsumer.getStsOidcToken());
 		return headers;
 	}
 

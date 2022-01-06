@@ -98,7 +98,8 @@ public class Qdist011Route extends RouteBuilder {
 					.log(LoggingLevel.INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
 					.bean(administrerForsendelseUpdater, "updateStatusAndConversationId")
 					.log(LoggingLevel.INFO, log, "qdist011 har oppdatert dokdistDb med forsendelseStatus=OVERSENDT og konversasjonId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} og avslutter behandling av forsendelse med " + getIdsForLogging())
-				.endChoice();
+				.endChoice()
+				.end();
 	}
 
 	public static String getIdsForLogging() {

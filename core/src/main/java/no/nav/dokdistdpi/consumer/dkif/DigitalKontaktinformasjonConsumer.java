@@ -26,7 +26,6 @@ import static java.lang.String.format;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BEARER_PREFIX;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
@@ -97,7 +96,7 @@ public class DigitalKontaktinformasjonConsumer {
 	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + stsRestConsumer.getStsOidcToken());
+		headers.setBearerAuth(stsRestConsumer.getStsOidcToken());
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
 		headers.add(NAV_CALL_ID, MDC.get(CALL_ID));
 		return headers;
