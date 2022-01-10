@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import javax.jms.Queue;
 import javax.xml.bind.JAXBContext;
 
+import static java.lang.Boolean.valueOf;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
@@ -34,7 +35,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Component
 public class Qdist011Route extends RouteBuilder {
 
-	private final boolean autoStartup;
+	private final String autoStartup;
 	private final Queue qdist011;
 	private final Queue qdist011FunksjonellFeil;
 	private final Qdist011Service qdist011Service;
@@ -43,7 +44,7 @@ public class Qdist011Route extends RouteBuilder {
 	private final DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater;
 
 	@Autowired
-	public Qdist011Route(@Value("${autostartup.route}") boolean autoStartup, Queue qdist011, Queue qdist011FunksjonellFeil,
+	public Qdist011Route(@Value("${autostartup.route}") String autoStartup, Queue qdist011, Queue qdist011FunksjonellFeil,
 						 Qdist011Service qdist011Service, DpiMeldingsformidler dpiMeldingsformidler,
 						 Qdist011MetricsRoutePolicy routePolicy, DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater) {
 		this.autoStartup = autoStartup;
@@ -87,7 +88,7 @@ public class Qdist011Route extends RouteBuilder {
 				.to("jms:" + qdist011FunksjonellFeil.getQueueName());
 
 		from("jms:" + qdist011.getQueueName() + "?transacted=true&concurrentConsumers=1")
-				.autoStartup(autoStartup)
+				.autoStartup(valueOf(autoStartup))
 				.routeId(QDIST011_SERVICE_ID)
 				.routePolicy(routePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)
