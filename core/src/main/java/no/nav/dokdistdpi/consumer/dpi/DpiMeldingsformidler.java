@@ -22,10 +22,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -38,6 +36,7 @@ import java.util.Base64;
 
 import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
+import static java.util.Objects.nonNull;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.KANAL;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
@@ -73,7 +72,6 @@ public class DpiMeldingsformidler {
 		this.appCertificate = appCertificate;
 		this.restTemplate = restTemplateBuilder
 				.setConnectTimeout(ofSeconds(15))
-				.messageConverters(new FormHttpMessageConverter())
 				.setReadTimeout(ofSeconds(30))
 				.build();
 	}
@@ -81,8 +79,8 @@ public class DpiMeldingsformidler {
 	@Handler
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "sendMelding"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public HttpStatus sendMelding(Forsendelse forsendelse, Exchange exchange) {
-		byte[] dokumentpakke = digitalPostContentPackager.createKryptertDokumentpakke(forsendelse, appCertificate);
+	public ForsendelseResponse sendMelding(Forsendelse forsendelse, Exchange exchange) {
+		byte[] dokumentpakke = getKryptertDokumentpakke(forsendelse);
 
 		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse,
 				getDokumentpakkefingeravtrykk(dokumentpakke));
@@ -96,16 +94,19 @@ public class DpiMeldingsformidler {
 		multipartBodyBuilder.part("dokumentpakke", dokumentpakke);
 		HttpEntity<?> httpEntity = new HttpEntity<>(multipartBodyBuilder.build(), headers(forsendelse.getDigital().getMaskinportentoken()));
 
-		ResponseEntity<String> response = restTemplate.exchange(uri, POST, httpEntity, String.class);
+		ResponseEntity<ForsendelseResponse> response = restTemplate.exchange(uri, POST, httpEntity, ForsendelseResponse.class);
 
-		exchange.setProperty("DigitalPostStatus", response.getStatusCode());
-
-		if (!CREATED.equals(response.getStatusCode())) {
-			throw new KanIkkeDistribuereForsendelseException(format("kunne ikke sende til DigDir-hjorne2 med status=%s, bestillingsId=%s og konversasjonId=%s",
-					response.getStatusCode(), forsendelse.getBestillingsId(), forsendelse.getKonversasjonId()));
+		if (nonNull(response) && !CREATED.equals(response.getStatusCode())) {
+			throw new KanIkkeDistribuereForsendelseException(format("kunne ikke sende til DigDir-hjorne2 med status=%s, bestillingsId=%s og feilmelding=%s",
+					response.getBody().getStatus(), forsendelse.getBestillingsId(), response.getBody().getDetail()));
 		}
 
-		return response.getStatusCode();
+		log.info("Brev sendt til digidir hjørn-2 med konversajonsId={}, status={}", forsendelse.getKonversasjonId(), response.getBody().getStatus());
+		return response.getBody();
+	}
+
+	private byte[] getKryptertDokumentpakke(Forsendelse forsendelse) {
+		return digitalPostContentPackager.createKryptertDokumentpakke(forsendelse, appCertificate);
 	}
 
 	public Dokumentpakkefingeravtrykk getDokumentpakkefingeravtrykk(byte[] asicStream) {

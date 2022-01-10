@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -35,6 +34,7 @@ import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
+import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
 @Slf4j
@@ -86,7 +86,7 @@ public class MaskinportenTokenConsumer {
 
 		try {
 			log.info("Henter accessToken fra maskinporten på url={}", maskinportenUrl);
-			ResponseEntity<OidcTokenResponse> response = restTemplate.exchange(accessTokenUri, HttpMethod.POST, httpEntity, OidcTokenResponse.class);
+			ResponseEntity<OidcTokenResponse> response = restTemplate.exchange(accessTokenUri, POST, httpEntity, OidcTokenResponse.class);
 			log.info("AccessToken hentet OK fra maskinporten på url={}", maskinportenUrl);
 			return response.getBody();
 		} catch (HttpClientErrorException e) {

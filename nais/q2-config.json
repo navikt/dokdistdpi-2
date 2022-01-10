@@ -26,6 +26,7 @@
   "APPDYNAMICS": "/apikey/appdynamics/dev",
   "APPD_NAME": "dokdistdpi-2",
   "APP_NAME": "dokdistdpi-2",
+  "AUTOSTARTUP_ROUTE": true,
   "MIN_REPLICAS": "1",
   "MAX_REPLICAS": "2",
   "INGRESSES": [

@@ -27,6 +27,7 @@
   "APP_NAME": "dokdistdpi-2",
   "APPD_NAME": "dokdistdpi-2",
   "NAMESPACE": "teamdokumenthandtering",
+  "AUTOSTARTUP_ROUTE": false,
   "MIN_REPLICAS": "2",
   "MAX_REPLICAS": "10",
   "INGRESSES": [

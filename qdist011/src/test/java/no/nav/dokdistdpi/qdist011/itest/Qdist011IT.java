@@ -1,8 +1,6 @@
 package no.nav.dokdistdpi.qdist011.itest;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
@@ -14,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +27,6 @@ import org.springframework.util.MimeTypeUtils;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
-import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -53,16 +49,17 @@ import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
 import static no.nav.dokdistdpi.qdist011.TestUtil.classpathToString;
 import static no.nav.dokdistdpi.s3storage.S3Configuration.BUCKET_NAME;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
-import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
 @EnableAutoConfiguration
@@ -150,27 +147,109 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERE_FORSENDELSE_URL)));
 		});
-
 	}
 
-	private void stubPostDPISend() throws JsonProcessingException {
+	@SneakyThrows
+	@Test
+	@Disabled
+	public void shouldThrowValideringsfeilException() {
+		stubGetDigitalKontaktInformasjon(OK.value());
+		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
+		stubGetVarselInfo();
+		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
+		stubPostSecurityToken();
+		stubPutForsendelseStatusAndkonversasjonsId();
+		stubPutOgOppdaterKonversasjonsId(OK.value());
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", FORSENDELSE_ID, OK.value());
+		stubPostMaskinporten();
+		stubPostDPISend(BAD_REQUEST.value());
+		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+		ListStubMappingsResult stubs = listAllStubMappings();
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
+			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
+			verify(1, getRequestedFor(urlEqualTo("/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
+			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERE_FORSENDELSE_URL)));
+		});
+	}
+
+	@SneakyThrows
+	@Test
+	public void shouldThrowExceptionIfMaskineportenIsNull() {
+		stubGetDigitalKontaktInformasjon(OK.value());
+		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
+		stubGetVarselInfo();
+		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
+		stubPostSecurityToken();
+		stubPutForsendelseStatusAndkonversasjonsId();
+		stubPutOgOppdaterKonversasjonsId(OK.value());
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", FORSENDELSE_ID, OK.value());
+		stubPostMaskinportenFeil(BAD_REQUEST.value());
+		stubPostDPISend();
+		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+		ListStubMappingsResult stubs = listAllStubMappings();
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+		});
+	}
+
+	@SneakyThrows
+	@Test
+	public void shouldThrowAdministrerforsendelseNotFoundException() {
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", FORSENDELSE_ID, NOT_FOUND.value());
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+		ListStubMappingsResult stubs = listAllStubMappings();
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		});
+	}
+
+	private void stubPostDPISend() {
 		stubFor(post(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
 				.willReturn(aResponse()
 						.withStatus(CREATED.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())));
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody(classpathToString("__files/dpi/dpi_out_status.json"))));
+	}
+
+	private void stubPostDPISend(int status) {
+		stubFor(post(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
+				.willReturn(aResponse()
+						.withStatus(status)
+						.withHeader(CONTENT_TYPE, APPLICATION_PROBLEM_JSON_VALUE)
+						.withBody(classpathToString("__files/dpi/dpi_out_status400.json"))));
 	}
 
 	private void stubPostMaskinporten() {
 		stubFor(post(urlMatching("/maskinporten"))
 				.willReturn(aResponse().withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString("__files/maskinporten/maskinporten_happy_response.json"))));
+
+	}
+
+	private void stubPostMaskinportenFeil(int status) {
+		stubFor(post(urlMatching("/maskinporten"))
+				.willReturn(aResponse().withStatus(status)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody(classpathToString("__files/maskinporten/maskinporten_feil.json"))));
 
 	}
 
 	private void stubPutOgOppdaterKonversasjonsId(int statusValue) {
 		stubFor(put(urlPathMatching("/administrerforsendelse?(.*?)"))
-				.willReturn(aResponse().withStatus(statusValue).withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())));
+				.willReturn(aResponse().withStatus(statusValue).withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
 	}
 
 	private void stubPutForsendelseStatusAndkonversasjonsId() {
@@ -182,13 +261,13 @@ public class Qdist011IT {
 		stubFor(post("/securitytoken?grant_type=client_credentials&scope=openid")
 				.willReturn(aResponse()
 						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString("__files/sts/stsResponse-happy.json"))));
 	}
 
 	private void stubPostSafJournalpost(String bodyFileName) {
 		stubFor(post(urlMatching("/safgraphql")).willReturn(aResponse().withStatus(OK.value())
-				.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+				.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.withBodyFile(bodyFileName)));
 	}
 
@@ -196,29 +275,28 @@ public class Qdist011IT {
 		stubFor(post(urlMatching("/safgraphql"))
 				.withRequestBody(containing(stringInRequestBody))
 				.willReturn(aResponse().withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile(returnBodyFileName)));
 	}
 
 	private void stubGetVarselInfo() {
 		stubFor(get(urlMatching("/varselinfo/" + VARSEL_TYPE_ID)).willReturn(aResponse().withStatus(OK.value())
-				.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+				.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.withBodyFile("varselinfov1/tkat021-happy.json")));
 	}
 
 	private void stubGetDokumentTypeInfo(String bodyFileName) {
 		stubFor(get(urlMatching("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)).willReturn(aResponse().withStatus(OK
 						.value())
-				.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+				.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.withBodyFile(bodyFileName)));
 	}
-
 
 	private void stubGetDigitalKontaktInformasjon(int status) {
 		stubFor(get("/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true")
 				.willReturn(aResponse()
 						.withStatus(status)
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON.getMimeType())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString("__files/digitalkontaktinformasjonv1/dki-happy.json"))));
 	}
 
@@ -226,15 +304,16 @@ public class Qdist011IT {
 		stubFor(put(urlMatching("/administrerforsendelse\\?forsendelseId=" + FORSENDELSE_ID + "\\&forsendelseStatus=OVERSENDT\\&konversasjonsId=.*"))
 				.willReturn(aResponse().withStatus(OK.value())));
 	}
+
 	private void stubPutForsendelse() {
 		stubFor(put(urlEqualTo("/administrerforsendelse?forsendelseId=33333&forsendelseStatus=KLAR_FOR_DIST&konversasjonsId=601a9fcd-8bae-4076-a2d7-37f9dd17e050"))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody("OK")));
 	}
 
-	private void stubGetForsendelse(String bodyClasspath) throws IOException {
+	private void stubGetForsendelse(String bodyClasspath) {
 		stubFor(get(urlMatching("/administrerforsendelse/" + FORSENDELSE_ID))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
@@ -247,7 +326,6 @@ public class Qdist011IT {
 				.withHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.withBody(classpathToString(responsebody))));
 	}
-
 
 	private void sendStringMessage(Queue queue, final String message) {
 		sendStringMessage(queue, message, CALL_ID);
@@ -272,5 +350,4 @@ public class Qdist011IT {
 		}
 		return (T) response;
 	}
-
 }
