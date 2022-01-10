@@ -7,8 +7,6 @@ metadata:
     team: teamdokumenthandtering
 spec:
   env:
-    - name : AUTOSTARTUP_ROUTE
-      value: {{ AUTOSTARTUP_ROUTE }}
     - name: DPI_URL
       value: {{ DPI_URL }}
     - name: DPI_MPCKANAL
@@ -51,6 +49,8 @@ spec:
       value: {{ DOKDISTDPI_QDIST014_FUNK_FEIL_QUEUENAME }}
     - name: DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME
       value: {{ DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME }}
+    - name: AUTOSTARTUP_ROUTE
+      value: {{ AUTOSTARTUP_ROUTE }}
     - name: APPD_NAME
       value: {{ APPD_NAME }}
   image: {{ image }}
