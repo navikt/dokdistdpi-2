@@ -2,8 +2,6 @@ package no.nav.dokdistdpi.config.jms;
 
 import com.ibm.mq.jms.MQConnectionFactory;
 import com.ibm.mq.jms.MQQueue;
-import com.ibm.msg.client.jms.JmsConstants;
-import com.ibm.msg.client.wmq.WMQConstants;
 import no.nav.dokdistdpi.config.prop.MqGatewayProperties;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import org.apache.activemq.jms.pool.PooledConnectionFactory;

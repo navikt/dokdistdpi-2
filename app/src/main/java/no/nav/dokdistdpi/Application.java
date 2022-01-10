@@ -8,6 +8,7 @@ import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Import;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -18,6 +19,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 		DpiClientProperties.class,
 		KeyStoreProperties.class
 })
+@Import({CoreConfig.class})
 @EnableRetry
 @EnableScheduling
 @SpringBootApplication
