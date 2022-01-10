@@ -2,6 +2,8 @@ package no.nav.dokdistdpi.config.jms;
 
 import com.ibm.mq.jms.MQConnectionFactory;
 import com.ibm.mq.jms.MQQueue;
+import com.ibm.msg.client.jms.JmsConstants;
+import com.ibm.msg.client.wmq.WMQConstants;
 import no.nav.dokdistdpi.config.prop.MqGatewayProperties;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import org.apache.activemq.jms.pool.PooledConnectionFactory;
@@ -18,6 +20,7 @@ import javax.jms.Queue;
 import static com.ibm.mq.constants.CMQC.MQENC_NATIVE;
 import static com.ibm.msg.client.jms.JmsConstants.JMS_IBM_CHARACTER_SET;
 import static com.ibm.msg.client.jms.JmsConstants.JMS_IBM_ENCODING;
+import static com.ibm.msg.client.jms.JmsConstants.USERID;
 import static com.ibm.msg.client.wmq.common.CommonConstants.WMQ_CM_CLIENT;
 
 @Configuration
@@ -67,6 +70,7 @@ public class JmsConfig {
 		mqConnectionFactory.setCCSID(UTF_8_WITH_PUA);
 		mqConnectionFactory.setIntProperty(JMS_IBM_ENCODING, MQENC_NATIVE);
 		mqConnectionFactory.setIntProperty(JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA);
+		mqConnectionFactory.setStringProperty(USERID, serviceuserProperties.getUsername());
 		UserCredentialsConnectionFactoryAdapter adapter = new UserCredentialsConnectionFactoryAdapter();
 		adapter.setTargetConnectionFactory(mqConnectionFactory);
 
