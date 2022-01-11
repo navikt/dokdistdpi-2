@@ -1,5 +1,7 @@
 package no.nav.dokdistdpi.utils;
 
+import no.nav.dokdistdpi.exception.functional.SafJournalpostValidationException;
+
 import static java.lang.String.format;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
@@ -27,5 +29,11 @@ public class DokdistdpiUtils {
 
 	public static boolean notBlank(String str) {
 		return hasText(str);
+	}
+
+	public static void assertFieldOnSafDokumenterNotNullOrEmpty(String field, String value, String journalpostId, String dokumentInfoId) {
+		if (isEmpty(value)) {
+			throw new SafJournalpostValidationException(format("Feltet %s kan ikke være null eller tomt i journalpost-respons fra SAF. journalpostId=%s, dokumentInfoId=%s", field, journalpostId, dokumentInfoId));
+		}
 	}
 }

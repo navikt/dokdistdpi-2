@@ -1,15 +1,10 @@
 package no.nav.dokdistdpi.consumer.dpi.maskineporten;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
+import no.nav.dokdistdpi.consumer.dpi.GenerateJwt;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.exception.technical.MaskinportenTechnicalException;
 import no.nav.dokdistdpi.metrics.Monitor;
@@ -17,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -31,10 +24,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.cert.CertificateEncodingException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static java.time.Duration.ofSeconds;
@@ -43,6 +34,7 @@ import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
+import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
 @Slf4j
@@ -85,7 +77,7 @@ public class MaskinportenTokenConsumer {
 
 		LinkedMultiValueMap<String, String> attrMap = new LinkedMultiValueMap<>();
 		attrMap.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
-		attrMap.add("assertion", generateJWT(maskinportenUrl));
+		attrMap.add("assertion", generateJWT());
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(APPLICATION_FORM_URLENCODED);
@@ -94,8 +86,7 @@ public class MaskinportenTokenConsumer {
 
 		try {
 			log.info("Henter accessToken fra maskinporten på url={}", maskinportenUrl);
-			ResponseEntity<OidcTokenResponse> response = restTemplate.exchange(accessTokenUri, HttpMethod.POST,
-					httpEntity, OidcTokenResponse.class);
+			ResponseEntity<OidcTokenResponse> response = restTemplate.exchange(accessTokenUri, POST, httpEntity, OidcTokenResponse.class);
 			log.info("AccessToken hentet OK fra maskinporten på url={}", maskinportenUrl);
 			return response.getBody();
 		} catch (HttpClientErrorException e) {
@@ -109,20 +100,11 @@ public class MaskinportenTokenConsumer {
 		}
 	}
 
-	private String generateJWT(String issuer) {
-		List<Base64> certChain = new ArrayList<>();
-		try {
-			certChain.add(Base64.encode(appCertificate.getX509Certificate().getEncoded()));
-		} catch (CertificateEncodingException e) {
-			log.error("Could not get encoded certificate", e);
-			throw new RuntimeException(e);
-		}
-
-		JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(certChain).build();
+	private String generateJWT() {
 
 		JWTClaimsSet claims = new JWTClaimsSet.Builder()
 				.audience(maskinportenProperties.getAudience())
-				.issuer(issuer)
+				.issuer(maskinportenProperties.getClientid())
 				.claim("scope", getCurrentScopes())
 				.claim("consumer", Consumer.builder()
 						.authority(ISO_6523_ACTORID_UPIS.getValue())
@@ -133,20 +115,7 @@ public class MaskinportenTokenConsumer {
 				.expirationTime(from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant().plusSeconds(30)))
 				.build();
 
-		RSASSASigner signer = new RSASSASigner(appCertificate.loadPrivateKey());
-
-		if (appCertificate.shouldLockProvider()) {
-			signer.getJCAContext().setProvider(appCertificate.getKeyStore().getProvider());
-		}
-
-		SignedJWT signedJWT = new SignedJWT(jwsHeader, claims);
-		try {
-			signedJWT.sign(signer);
-		} catch (JOSEException e) {
-			log.error("Error occured during signing of JWT", e);
-		}
-
-		return signedJWT.serialize();
+		return GenerateJwt.generateJWT(claims, appCertificate);
 	}
 
 	private String getCurrentScopes() {

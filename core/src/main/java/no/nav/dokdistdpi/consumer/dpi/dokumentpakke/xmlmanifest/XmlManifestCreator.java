@@ -1,0 +1,68 @@
+package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.xmlmanifest;
+
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
+import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
+
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
+import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.ISO6523_AUTHORITY;
+import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
+
+public class XmlManifestCreator {
+
+	private static final String DOKUMENT_LANG = "no";
+
+	public String createManifest(Forsendelse forsendelse) {
+		Dokumentpakke dokumentpakke = forsendelse.getDokumentpakke();
+		DigitalPost digitalPostInfo = forsendelse.getDigital();
+
+		Avsender avsender = Avsender.builder()
+				.organisasjon(Organisasjon.builder()
+						.authority(ISO6523_AUTHORITY)
+						.orgNummer(asIso6523(NAV_ORGNUMMER))
+						.build())
+				.avsenderidentifikator(NAV_ORGNUMMER)
+				.build();
+		Mottaker mottaker = Mottaker.builder()
+				.person(Person.builder()
+						.personidentifikator(forsendelse.getPersonidentifikator())
+						.postkasseadresse(digitalPostInfo.getMottaker().getPostkasseadresse())
+						.build())
+				.build();
+		Dokument hoveddokument = Dokument.builder()
+				.href(dokumentpakke.getHoveddokument().getFilnavn())
+				.data(DokumentData.builder()
+						.mime(dokumentpakke.getHoveddokument().getMimeType())
+						.build())
+				.tittel(Dokument.Tittel.builder()
+						.tittel(dokumentpakke.getHoveddokument().getTittel())
+						.lang(DOKUMENT_LANG)
+						.build())
+				.mime(dokumentpakke.getHoveddokument().getMimeType())
+				.build();
+		List<Dokument> vedlegg = dokumentpakke.getVedlegg().stream().map(dokument ->
+				Dokument.builder()
+						.tittel(Dokument.Tittel.builder()
+								.lang(DOKUMENT_LANG)
+								.tittel(dokument.getTittel())
+								.build())
+						.mime(dokument.getMimeType())
+						.href(dokument.getFilnavn())
+						.build()
+		).toList();
+		Manifest xmlManifest = Manifest.builder()
+				.avsender(avsender)
+				.mottaker(mottaker)
+				.hoveddokument(hoveddokument)
+				.vedlegg(vedlegg)
+				.build();
+
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		MarshalManifest.marshal(xmlManifest, os);
+		return os.toString(StandardCharsets.UTF_8);
+	}
+}

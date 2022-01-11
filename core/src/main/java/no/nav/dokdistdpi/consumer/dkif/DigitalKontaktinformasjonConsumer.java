@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -27,11 +26,11 @@ import static java.lang.String.format;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BEARER_PREFIX;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_PERSONIDENTER;
+import static org.springframework.http.HttpMethod.GET;
 
 @Slf4j
 @Component
@@ -64,7 +63,7 @@ public class DigitalKontaktinformasjonConsumer {
 
 		try {
 			DigitalKontaktInfoResponse response = restTemplate.exchange(dkiUrl + "/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true",
-					HttpMethod.GET, new HttpEntity<>(headers), DigitalKontaktInfoResponse.class).getBody();
+					GET, new HttpEntity<>(headers), DigitalKontaktInfoResponse.class).getBody();
 
 			if (isValidRespons(response, fnrStriped)) {
 				return digitalPostKontaktinfoMapper.mapDigitalKontaktinfo(response.getKontaktinfo().get(fnrStriped), personidentifikator);
@@ -97,7 +96,7 @@ public class DigitalKontaktinformasjonConsumer {
 	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + stsRestConsumer.getStsOidcToken());
+		headers.setBearerAuth(stsRestConsumer.getStsOidcToken());
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
 		headers.add(NAV_CALL_ID, MDC.get(CALL_ID));
 		return headers;

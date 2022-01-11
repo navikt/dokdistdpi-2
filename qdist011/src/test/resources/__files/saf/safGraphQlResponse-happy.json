@@ -1,0 +1,20 @@
+{
+  "data": {
+    "journalpost": {
+      "dokumenter": [
+        {
+          "dokumentInfoId": "arkivDokumentInfoIdHoveddok",
+          "tittel": "Hoveddok"
+        },
+        {
+          "dokumentInfoId": "arkivDokumentInfoIdVedlegg1",
+          "tittel": "Vedlegg1"
+        },
+        {
+          "dokumentInfoId": "arkivDokumentInfoIdVedlegg2",
+          "tittel": "Vedlegg2"
+        }
+      ]
+    }
+  }
+}

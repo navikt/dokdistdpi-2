@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
@@ -34,7 +35,7 @@ public class StsRestConsumer {
 	private final String stsUrl;
 
 	@Autowired
-	public StsRestConsumer(@Value("${security-token-service-token.url}") String stsUrl,
+	public StsRestConsumer(@Value("${security-token-service.url}") String stsUrl,
 						   final ServiceuserProperties serviceuserProperties,
 						   RestTemplateBuilder restTemplateBuilder) {
 		this.restTemplate = restTemplateBuilder
@@ -47,9 +48,10 @@ public class StsRestConsumer {
 
 	@Cacheable(STS_CACHE)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public StsResponseTo getStsOidcToken() {
+	public String getStsOidcToken() {
 		try {
-			return restTemplate.exchange(stsUrl + "?grant_type=client_credentials&scope=openid", POST, httpEntity(), StsResponseTo.class).getBody();
+			StsResponseTo stsResponse = restTemplate.exchange(stsUrl + "?grant_type=client_credentials&scope=openid", POST, httpEntity(), StsResponseTo.class).getBody();
+			return requireNonNull(stsResponse.getAccessToken());
 		} catch (HttpStatusCodeException e) {
 			throw new StsTechnicalException(format("Kall mot STS feilet med status=%s feilmelding=%s.", e.getStatusCode(), e
 					.getMessage()), e);

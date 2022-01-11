@@ -1,13 +1,11 @@
 package no.nav.dokdistdpi.certificate;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.dokdistdpi.utils.CertificateUtils.itestVirksomhetssertifikatBase64Properties;
 import static no.nav.dokdistdpi.utils.CertificateUtils.itestVirksomhetssertifikatProperties;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 class AppCertificateTest {
 
 	@Test

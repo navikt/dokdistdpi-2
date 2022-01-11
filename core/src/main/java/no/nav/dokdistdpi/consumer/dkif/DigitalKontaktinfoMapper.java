@@ -13,7 +13,7 @@ public class DigitalKontaktinfoMapper {
 			DigitalKontaktInfoResponse.SikkerDigitalPostkasse sikkerDigitalPostkasse = digitalKontaktinfo.getSikkerDigitalPostkasse();
 			validateSikkerDigitalPostKasse(sikkerDigitalPostkasse);
 			return SikkerDigitalKontaktInfo.builder()
-					.personident(personident)
+					.personidentifikator(personident)
 					.brukerAdresse(digitalKontaktinfo.getSikkerDigitalPostkasse() != null ? digitalKontaktinfo.getSikkerDigitalPostkasse()
 							.getAdresse() : null)
 					.epostadresse(digitalKontaktinfo.isKanVarsles() ? digitalKontaktinfo.getEpostadresse() : null)

@@ -6,6 +6,7 @@
 	<modules>
 		<module>core</module>
 		<module>app</module>
+		<module>qdist011</module>
 	</modules>
 
 	<parent>
@@ -28,6 +29,7 @@
 		<camel.version>3.13.0</camel.version>
 		<commons-asic.version>0.9.5</commons-asic.version>
 		<commons-io.version>2.11.0</commons-io.version>
+		<commons-lang3.version>3.12.0</commons-lang3.version>
 		<dokkat.version>11.0.5</dokkat.version>
 		<ibm-mq.version>9.2.4.0</ibm-mq.version>
 		<java.version>17</java.version>
@@ -49,14 +51,15 @@
 			</dependency>
 			<dependency>
 				<groupId>no.nav.dokdistdpi</groupId>
-				<artifactId>app</artifactId>
+				<artifactId>qdist011</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>no.nav.dokdistdpi</groupId>
-				<artifactId>schema</artifactId>
+				<artifactId>app</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
 			<!--Apache -->
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
@@ -76,6 +79,11 @@
 				<version>${commons-io.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>${commons-lang3.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.camel</groupId>
 				<artifactId>camel-jms</artifactId>
 				<version>${camel.version}</version>
@@ -88,6 +96,11 @@
 			<dependency>
 				<groupId>org.apache.camel</groupId>
 				<artifactId>camel-core</artifactId>
+				<version>${camel.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.camel</groupId>
+				<artifactId>camel-json-validator</artifactId>
 				<version>${camel.version}</version>
 			</dependency>
 			<!--IBM MQ -->
@@ -151,7 +164,6 @@
 				<version>${lombok.version}</version>
 				<scope>provided</scope>
 			</dependency>
-
 			<!-- test -->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
@@ -198,12 +210,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>${maven-plugin.version}</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>${maven-plugin.version}</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

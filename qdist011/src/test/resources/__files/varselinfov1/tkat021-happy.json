@@ -1,0 +1,28 @@
+{
+  "varseltypeId": "SDP_000004",
+  "varselNavn": "Vedtaksbrev",
+  "varselKategori": "DISTRIBUSJON",
+  "varselForDistribusjonKanal": "SDP",
+  "inaktiv": false,
+  "revarslingIntervall": 7,
+  "antallRevarslinger": 1,
+  "varselURL": null,
+  "preferertKanal": [
+    "EPOST",
+    "SMS"
+  ],
+  "varselmals": [
+    {
+      "kanal": "SMS",
+      "varselTittel": null,
+      "foerstegangsvarselTekst": "Varslingstekst SMS",
+      "revarslingTekst": null
+    },
+    {
+      "kanal": "EPOST",
+      "varselTittel": null,
+      "foerstegangsvarselTekst": "Varslingstekst epost",
+      "revarslingTekst": null
+    }
+  ]
+}

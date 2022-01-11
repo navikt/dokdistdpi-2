@@ -1,0 +1,43 @@
+{
+  "bestillingsId": "b8b297e1-46c1-4657-9f2d-7cf6dd089b9d",
+  "konversasjonId": null,
+  "forsendelseStatus": "KLAR_FOR_DIST",
+  "forsendelseTittel": "forsendelseTittel",
+  "mottaker": {
+    "mottakerId": "22027838743",
+    "mottakerNavn": "mottakerNavn",
+    "mottakerType": "PERSON"
+  },
+  "arkivInformasjon": {
+    "arkivSystem": "JOARK",
+    "arkivId": "123"
+  },
+  "postadresse": {
+    "adresselinje1": "adresselinjeEn",
+    "adresselinje2": "adresselinjeTo",
+    "adresselinje3": "adresselinjeTre",
+    "postnummer": "123",
+    "poststed": "poststed",
+    "landkode": "NO"
+  },
+  "dokumenter": [
+    {
+      "tilknyttetSom": "HOVEDDOKUMENT",
+      "dokumentObjektReferanse": "dokumentObjektReferanseHoveddok",
+      "arkivDokumentInfoId": "arkivDokumentInfoIdHoveddok",
+      "dokumenttypeId": "dokumenttypeIdHoveddok"
+    },
+    {
+      "tilknyttetSom": "VEDLEGG",
+      "dokumentObjektReferanse": "dokumentObjektReferanseVedlegg1",
+      "arkivDokumentInfoId": "arkivDokumentInfoIdVedlegg1",
+      "dokumenttypeId": "dokumenttypeId2Vedlegg1"
+    },
+    {
+      "tilknyttetSom": "VEDLEGG",
+      "dokumentObjektReferanse": "dokumentObjektReferanseVedlegg2",
+      "arkivDokumentInfoId": "arkivDokumentInfoIdVedlegg2",
+      "dokumenttypeId": "dokumenttypeIdVedlegg2"
+    }
+  ]
+}

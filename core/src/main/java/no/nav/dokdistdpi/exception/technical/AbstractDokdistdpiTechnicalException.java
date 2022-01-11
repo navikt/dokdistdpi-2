@@ -9,4 +9,5 @@ public abstract class AbstractDokdistdpiTechnicalException extends RuntimeExcept
 	protected AbstractDokdistdpiTechnicalException(String message, Throwable cause) {
 		super(message, cause);
 	}
+
 }

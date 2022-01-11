@@ -1,9 +1,7 @@
 package no.nav.dokdistdpi.consumer.dpi.digitalpost.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,7 +15,7 @@ public class DigitalPost {
 	private Personmottaker mottaker;
 	private Dokumentpakkefingeravtrykk dokumentpakkefingeravtrykk;
 	private String maskinportentoken;
-	private Sikkerhetsnivaa sikkerhetsnivaa;
+	private Integer sikkerhetsnivaa;
 	/*Dato for når en melding skal tilgjengeliggjøres for Innbygger i Innbygger sin postkasse.*/
 	private LocalDate virkningsdato;
 
@@ -30,8 +28,6 @@ public class DigitalPost {
 	private Varsler varsler;
 
 	private Kvittering kvittering;
-
-
 
 	@Data
 	@Builder
@@ -53,20 +49,5 @@ public class DigitalPost {
 	@Builder
 	public static class Personmottaker {
 		private String postkasseadresse;
-	}
-
-	@Data
-	@Builder
-	public static class Dokumentpakkefingeravtrykk {
-		private String digestMethod;
-		private String digestValue;
-	}
-
-	@Getter
-	@AllArgsConstructor
-	public enum Sikkerhetsnivaa {
-		NIVAA_3("3"),
-		NIVAA_4("4");
-		private String value;
 	}
 }
