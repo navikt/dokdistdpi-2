@@ -24,6 +24,7 @@
   "DOKDISTDPI_VAULT": "/kv/preprod/fss/dokdistdpi-2/teamdokumenthandtering",
   "VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/preprod/shared",
   "APPDYNAMICS": "/apikey/appdynamics/dev",
+  "NAMESPACE": "teamdokumenthandtering",
   "APPD_NAME": "dokdistdpi-2",
   "APP_NAME": "dokdistdpi-2",
   "AUTOSTARTUP_ROUTE": "true",
