@@ -59,11 +59,7 @@
 				<artifactId>app</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>no.nav.dokdistdpi</groupId>
-				<artifactId>schema</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+
 			<!--Apache -->
 			<dependency>
 				<groupId>org.apache.activemq</groupId>

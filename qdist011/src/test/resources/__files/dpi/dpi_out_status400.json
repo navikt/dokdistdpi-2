@@ -1,7 +1,7 @@
 {
-  "type": "",
-  "title": "",
-  "status": "400",
-  "detail": "",
-  "instance": ""
+  "type": "about:blank",
+  "title": "string",
+  "status": 400,
+  "detail": "string",
+  "instance": "http://example.com"
 }

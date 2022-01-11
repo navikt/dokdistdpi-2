@@ -4,4 +4,8 @@ public class KanIkkeDistribuereForsendelseException extends AbstractDokdistdpiTe
 	public KanIkkeDistribuereForsendelseException(String message) {
 		super(message);
 	}
+
+	public KanIkkeDistribuereForsendelseException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

@@ -8,6 +8,7 @@ import no.nav.dokdistdpi.qdist011.itest.config.ApplicationTestConfig;
 import no.nav.dokdistdpi.s3storage.DokDistDokumentFraS3;
 import no.nav.dokdistdpi.s3storage.JsonSerializer;
 import org.apache.activemq.command.ActiveMQTextMessage;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -168,16 +169,17 @@ public class Qdist011IT {
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
-			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
-			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
-			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
-			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
-			verify(1, getRequestedFor(urlEqualTo("/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true")));
-			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
-			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
-			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
-			verify(1, putRequestedFor(urlEqualTo(OPPDATERE_FORSENDELSE_URL)));
+			String response = receive(backoutQueue);
+			Assertions.assertNotNull(response);
 		});
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+		verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
+		verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
+		verify(1, getRequestedFor(urlEqualTo("/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true")));
+		verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
+		verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+		verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 	}
 
 	@SneakyThrows
@@ -197,10 +199,12 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+			String response = receive(qdist011FunksjonellFeil);
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
-			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+
 		});
+		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 	}
 
 	@SneakyThrows
@@ -210,7 +214,7 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 		});
 	}
@@ -228,7 +232,7 @@ public class Qdist011IT {
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_PROBLEM_JSON_VALUE)
-						.withBody(classpathToString("__files/dpi/dpi_out_status400.json"))));
+						.withBodyFile("dpi/dpi_out_status400.json")));
 	}
 
 	private void stubPostMaskinporten() {

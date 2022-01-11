@@ -1,17 +1,11 @@
 package no.nav.dokdistdpi.consumer.dpi;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Value;
 
 
-@Getter
-@ToString
+@Value
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ForsendelseResponse {
 	private String type;
 	private String title;
