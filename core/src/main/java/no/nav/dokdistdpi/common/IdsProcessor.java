@@ -18,6 +18,7 @@ public class IdsProcessor implements Processor {
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		setOrGenerateCallIdToMdc(exchange);
+		setForsendelseIdAsProperty(exchange);
 	}
 
 	private void setOrGenerateCallIdToMdc(Exchange exchange) {

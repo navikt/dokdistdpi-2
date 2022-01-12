@@ -78,7 +78,6 @@ public class AdministrerForsendelseConsumer {
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	@Monitor(value = DOK_REQUEST, extraTags = {"process", "persisterForsendelse"}, histogram = true)
 	public PersisterForsendelseResponseTo persisterForsendelse(final PersisterForsendelseRequestTo forsendelseRequestTo) {
-
 		try {
 			HttpEntity<?> entity = new HttpEntity<>(forsendelseRequestTo, createHeaders());
 			ResponseEntity<PersisterForsendelseResponseTo> response = restTemplate.exchange(url, POST, entity, PersisterForsendelseResponseTo.class);
