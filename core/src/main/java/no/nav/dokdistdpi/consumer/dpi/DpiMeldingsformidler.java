@@ -56,8 +56,8 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 @Component
 public class DpiMeldingsformidler {
 
-	private static final String LOG_FEIL_MELDING = "kunne ikke sende til DigDir-hjorne2 med status={}, bestillingsId={} og feilmelding={}";
-	private static final String EXCEPTION_FEIL_MELDING = "kunne ikke sende til DigDir-hjorne2 med status=%s, bestillingsId=%s og feilmelding=%s";
+	private static final String LOG_FEIL_MELDING = "Kunne ikke sende til DPI hjørn-2 med status={}, konversasjonId={} og feilmelding={}";
+	private static final String EXCEPTION_FEIL_MELDING = "Kunne ikke sende til DPI hjørne-2 med status=%s, konversasjonId=%s og feilmelding=%s";
 	private static final String SEND_PATH = "/out";
 	private final StandardBusinessDocumentMapper sbdMapper;
 	private final DigitalPostContentPackager digitalPostContentPackager;
@@ -109,12 +109,12 @@ public class DpiMeldingsformidler {
 		try {
 			ResponseEntity<ForsendelseResponse> response = restTemplate.exchange(uri, POST, httpEntity, ForsendelseResponse.class);
 
-			if (nonNull(response) && CREATED.value() != response.getBody().getStatus()) {
+			if (nonNull(response.getBody()) && CREATED.value() != response.getBody().getStatus()) {
 				log.error(LOG_FEIL_MELDING, response.getBody().getStatus(), konversasjonId, response.getBody().getDetail());
 				throw new KanIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING,
 						response.getBody().getStatus(), konversasjonId, response.getBody().getDetail()));
 			}
-			log.info("Brev sendt til digidir hjørn-2 med konversajonsId={}, status={}", konversasjonId, response.getBody().getStatus());
+			log.info("Brev sendt til DPI hjørne-2 med konversajonsId={}, status={}", konversasjonId, response.getBody().getStatus());
 			return response;
 		} catch (HttpClientErrorException e) {
 			log.error(LOG_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage());
@@ -146,8 +146,8 @@ public class DpiMeldingsformidler {
 			JWTClaimsSet claims = new JWTClaimsSet.Builder().claim("StandardBusinessDocument", sbdJson).build();
 			return GenerateJwt.generateJWT(claims, appCertificate);
 		} catch (JsonProcessingException e) {
-			log.warn("StandardBusinessDocument mapping feilet. Feilmelding: {}", e.getMessage());
-			return null;
+			log.warn("SBD til JWT behandling feilet med feilmelding={}", e.getMessage());
+			throw new KanIkkeDistribuereForsendelseException("SBD til JWT behandling feilet med feilmelding={}" + e.getMessage(), e);
 		}
 	}
 
