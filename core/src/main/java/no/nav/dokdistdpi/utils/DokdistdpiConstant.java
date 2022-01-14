@@ -40,6 +40,8 @@ public class DokdistdpiConstant {
 	public static final String VEDLEGG = "VEDLEGG";
 	public static final String VEDLEGG_TITTEL_PREFIX = "Vedlegg ";
 
+	public static final String HENT_KVITTERING_STATUS_CODE = "HENT_KVITTERING_STATUS_CODE";
+
 	private DokdistdpiConstant() {
 		//no-op
 	}

@@ -2,10 +2,10 @@ package no.nav.dokdistdpi.consumer.dpi.digitalpost.domain;
 
 import lombok.Builder;
 import lombok.Data;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.Kvittering;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 
 @Data
 @Builder
@@ -28,22 +28,6 @@ public class DigitalPost {
 	private Varsler varsler;
 
 	private Kvittering kvittering;
-
-	@Data
-	@Builder
-	public static class Avsender {
-		private Identifikator virksomhetsidentifikator;
-		private String avsenderindentifikator;
-		private String fakturaReferanse;
-	}
-
-	@Data
-	@Builder
-	public static class Kvittering {
-		private Avsender avsender;
-		private Virksomhetmottaker virksomhetmottaker;
-		private LocalDateTime tidspunkt;
-	}
 
 	@Data
 	@Builder

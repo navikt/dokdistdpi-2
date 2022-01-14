@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Avsender;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator;
@@ -102,7 +103,7 @@ public class Qdist011Service {
 				.bestillingsId(hentForsendelseResponse.getBestillingsId())
 				.konversasjonId(konversasjonId)
 				.digital(DigitalPost.builder()
-						.avsender(DigitalPost.Avsender.builder()
+						.avsender(Avsender.builder()
 								.virksomhetsidentifikator(Identifikator.builder()
 										.authority(ISO_6523_ACTORID_UPIS)
 										.value(asIso6523(NAV_ORGNUMMER))

@@ -199,7 +199,7 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String response = receive(qdist011FunksjonellFeil);
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 
@@ -214,7 +214,7 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 		});
 	}

@@ -5,49 +5,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
-import no.nav.dokdistdpi.config.prop.DpiClientProperties;
+import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Dokumentpakkefingeravtrykk;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.StandardBusinessDocumentMapper;
+import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.StandardBusinessDocument;
-import no.nav.dokdistdpi.exception.functional.KanIkkeDistribuereFunctinalException;
-import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.KanIkkeDistribuereForsendelseException;
 import no.nav.dokdistdpi.metrics.Monitor;
-import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.xml.crypto.dsig.DigestMethod;
 import java.security.MessageDigest;
+import java.text.ParseException;
 import java.util.Base64;
 
-import static java.lang.String.format;
-import static java.time.Duration.ofSeconds;
-import static java.util.Objects.nonNull;
-import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.KANAL;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 
 /**
  * @author Tsigab A. Gebremedhin, NAV
@@ -56,75 +37,36 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 @Component
 public class DpiMeldingsformidler {
 
-	private static final String LOG_FEIL_MELDING = "Kunne ikke sende til DPI hjørn-2 med status={}, konversasjonId={} og feilmelding={}";
-	private static final String EXCEPTION_FEIL_MELDING = "Kunne ikke sende til DPI hjørne-2 med status=%s, konversasjonId=%s og feilmelding=%s";
-	private static final String SEND_PATH = "/out";
 	private final StandardBusinessDocumentMapper sbdMapper;
 	private final DigitalPostContentPackager digitalPostContentPackager;
 	private final AppCertificate appCertificate;
-	private final RestTemplate restTemplate;
-	private final DpiClientProperties dpiClientProperties;
 	private final ObjectMapper objectMapper;
+	private final DpiClient dpiClient;
 
 	@Autowired
-	public DpiMeldingsformidler(@Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper, DpiClientProperties dpiClientProperties,
-								StandardBusinessDocumentMapper sbdMapper, RestTemplateBuilder restTemplateBuilder,
-								DigitalPostContentPackager digitalPostContentPackager, AppCertificate appCertificate) {
+	public DpiMeldingsformidler(@Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper,
+								StandardBusinessDocumentMapper sbdMapper, DigitalPostContentPackager digitalPostContentPackager,
+								AppCertificate appCertificate, DpiClient dpiClient) {
 		this.objectMapper = dpiObjectMapper;
-		this.dpiClientProperties = dpiClientProperties;
 		this.sbdMapper = sbdMapper;
 		this.digitalPostContentPackager = digitalPostContentPackager;
 		this.appCertificate = appCertificate;
-		this.restTemplate = restTemplateBuilder
-				.setConnectTimeout(ofSeconds(15))
-				.setReadTimeout(ofSeconds(30))
-				.build();
+		this.dpiClient = dpiClient;
 	}
 
 	@Handler
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "sendMelding"}, percentiles = {0.5, 0.95}, histogram = true)
-	public ForsendelseResponse sendMelding(Forsendelse forsendelse, Exchange exchange) {
+	public HttpStatus sendMelding(Forsendelse forsendelse) {
 		byte[] dokumentpakke = getKryptertDokumentpakke(forsendelse);
 
 		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse,
 				getDokumentpakkefingeravtrykk(dokumentpakke));
-		String uri = UriComponentsBuilder.fromHttpUrl(dpiClientProperties.getUrl())
-				.path(SEND_PATH)
-				.queryParam(KANAL, dpiClientProperties.getMpckanal())
-				.toUriString();
 
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
 		multipartBodyBuilder.part("forretningsmelding", generateStandardBusinessDocumentJWT(standardBusinessDocument));
 		multipartBodyBuilder.part("dokumentpakke", dokumentpakke);
-		HttpEntity<?> httpEntity = new HttpEntity<>(multipartBodyBuilder.build(), headers(forsendelse.getDigital().getMaskinportentoken()));
 
-		ResponseEntity<ForsendelseResponse> forsendelseResponse = dpiSendClient(uri, httpEntity, forsendelse.getKonversasjonId());
-		return forsendelseResponse.getBody();
-	}
-
-	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "dpiSendClient"}, percentiles = {0.5, 0.95}, histogram = true)
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	private ResponseEntity<ForsendelseResponse> dpiSendClient(String uri, HttpEntity<?> httpEntity, String konversasjonId) {
-
-		try {
-			ResponseEntity<ForsendelseResponse> response = restTemplate.exchange(uri, POST, httpEntity, ForsendelseResponse.class);
-
-			if (nonNull(response.getBody()) && CREATED.value() != response.getBody().getStatus()) {
-				log.error(LOG_FEIL_MELDING, response.getBody().getStatus(), konversasjonId, response.getBody().getDetail());
-				throw new KanIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING,
-						response.getBody().getStatus(), konversasjonId, response.getBody().getDetail()));
-			}
-			log.info("Brev sendt til DPI hjørne-2 med konversajonsId={}, status={}", konversasjonId, response.getBody().getStatus());
-			return response;
-		} catch (HttpClientErrorException e) {
-			log.error(LOG_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage());
-			throw new KanIkkeDistribuereFunctinalException(format(EXCEPTION_FEIL_MELDING,
-					e.getStatusCode(), konversasjonId, e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			log.error(LOG_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage());
-			throw new KanIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING,
-					e.getStatusCode(), konversasjonId, e.getMessage()), e);
-		}
+		return dpiClient.sendDpiForsendelse(multipartBodyBuilder, forsendelse);
 	}
 
 	private byte[] getKryptertDokumentpakke(Forsendelse forsendelse) {
@@ -142,19 +84,12 @@ public class DpiMeldingsformidler {
 
 	private String generateStandardBusinessDocumentJWT(StandardBusinessDocument sbd) {
 		try {
-			String sbdJson = objectMapper.writeValueAsString(sbd);
-			JWTClaimsSet claims = new JWTClaimsSet.Builder().claim("StandardBusinessDocument", sbdJson).build();
+			String sbdJson = objectMapper.writeValueAsString(new SimpleStandardBusinessDocument(sbd));
+			JWTClaimsSet claims = JWTClaimsSet.parse(sbdJson);
 			return GenerateJwt.generateJWT(claims, appCertificate);
-		} catch (JsonProcessingException e) {
+		} catch (JsonProcessingException | ParseException e) {
 			log.warn("SBD til JWT behandling feilet med feilmelding={}", e.getMessage());
 			throw new KanIkkeDistribuereForsendelseException("SBD til JWT behandling feilet med feilmelding={}" + e.getMessage(), e);
 		}
-	}
-
-	private HttpHeaders headers(final String maskinportentoken) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MULTIPART_FORM_DATA);
-		headers.setBearerAuth(maskinportentoken);
-		return headers;
 	}
 }
