@@ -27,8 +27,8 @@ spec:
       value: {{ S3_STORAGE_URL }}
     - name: SAF_GRAPHQL_URL
       value: {{ SAF_GRAPHQL_URL }}
-    - name: LAGREJURIDISKLOGG_REST_URL
-      value: {{ LAGREJURIDISKLOGG_REST_URL }}
+    - name: JURIDISKLOGG_URL
+      value: {{ JURIDISKLOGG_URL }}
     - name: SECURITY_TOKEN_SERVICE_URL
       value: {{ SECURITY_TOKEN_SERVICE_URL }}
     - name: MQGATEWAY01_CHANNELNAME

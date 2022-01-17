@@ -8,9 +8,7 @@ import no.nav.dokdistdpi.qdist011.itest.config.ApplicationTestConfig;
 import no.nav.dokdistdpi.s3storage.DokDistDokumentFraS3;
 import no.nav.dokdistdpi.s3storage.JsonSerializer;
 import org.apache.activemq.command.ActiveMQTextMessage;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,12 +43,15 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
 import static no.nav.dokdistdpi.qdist011.TestUtil.classpathToString;
 import static no.nav.dokdistdpi.s3storage.S3Configuration.BUCKET_NAME;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -111,6 +112,9 @@ public class Qdist011IT {
 
 		cacheManager.getCache(TKAT020_CACHE).clear();
 		cacheManager.getCache(TKAT021_CACHE).clear();
+		cacheManager.getCache(MASKINPORTEN_CACHE).clear();
+		cacheManager.getCache(STS_CACHE).clear();
+
 		reset(amazonS3);
 		when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK)))
 				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraS3.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
@@ -152,7 +156,6 @@ public class Qdist011IT {
 
 	@SneakyThrows
 	@Test
-	@Disabled
 	public void shouldThrowValideringsfeilException() {
 		stubGetDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
@@ -168,9 +171,9 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
-			String response = receive(backoutQueue);
-			Assertions.assertNotNull(response);
+		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+			String response = receive(qdist011FunksjonellFeil);
+			assertNotNull(response);
 		});
 		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
@@ -199,7 +202,7 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String response = receive(qdist011FunksjonellFeil);
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 
@@ -214,7 +217,7 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(15, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 		});
 	}

@@ -57,11 +57,9 @@ public class JacksonConfig {
 
 		private static OffsetDateTime getOffsetDateTime(TemporalAccessor temporal) {
 			ZoneId obj = temporal.query(TemporalQueries.zone());
-
 			if (obj != null) {
 				return OffsetDateTime.from(temporal);
 			}
-
 			return LocalDateTime.from(temporal)
 					.atOffset(DEFAULT_ZONE_ID.getRules().getOffset(LocalDateTime.now()));
 		}

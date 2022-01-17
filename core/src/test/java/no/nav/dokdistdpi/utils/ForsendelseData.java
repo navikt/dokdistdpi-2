@@ -1,5 +1,6 @@
 package no.nav.dokdistdpi.utils;
 
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Avsender;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.CommonVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
@@ -12,7 +13,6 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -80,7 +80,7 @@ public class ForsendelseData {
 
 
 		return DigitalPost.builder()
-				.avsender(DigitalPost.Avsender.builder()
+				.avsender(Avsender.builder()
 						.virksomhetsidentifikator(Identifikator.builder()
 								.authority(ISO_6523_ACTORID_UPIS)
 								.value(asIso6523(NAV_ORGNUMMER))

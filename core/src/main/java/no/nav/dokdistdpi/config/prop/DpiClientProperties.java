@@ -17,4 +17,14 @@ public class DpiClientProperties {
 	private String url;
 	@NonNull
 	private String mpckanal;
+	@NonNull
+	private long pullinterval;
+	@NonNull
+	private boolean autoStartup;
+	@NonNull
+	private int dpischeduler;
+	@NonNull
+	private int pagesize;
+	@NonNull
+	private int page;
 }

@@ -1,24 +1,26 @@
 package no.nav.dokdistdpi.common;
 
-import no.nav.dokdistdpi.exception.functional.ForsendelseManglerForsendelseIdFunctionalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.language.xpath.XPathBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
 
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.isBlank;
 
-public class IdsProcessor implements Processor {
+public class MDCHeaderProcessor implements Processor {
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		setOrGenerateCallIdToMdc(exchange);
 		setForsendelseIdAsProperty(exchange);
+		setConsumerIdToMdc(exchange);
 	}
 
 	private void setOrGenerateCallIdToMdc(Exchange exchange) {
@@ -35,8 +37,15 @@ public class IdsProcessor implements Processor {
 	private void setForsendelseIdAsProperty(Exchange exchange) {
 		String forsendelseId = XPathBuilder.xpath("//forsendelseId/text()").evaluate(exchange, String.class);
 		if (forsendelseId == null || forsendelseId.trim().isEmpty()) {
-			throw new ForsendelseManglerForsendelseIdFunctionalException(exchange.getFromRouteId() + " har mottatt forsendelse uten påkrevd felt forsendelseId");
+			return;
 		}
 		exchange.setProperty(PROPERTY_FORSENDELSE_ID, forsendelseId);
+	}
+
+	private void setConsumerIdToMdc(Exchange exchange) {
+		String consumerId = exchange.getIn().getHeader(NAV_CONSUMER_ID, String.class);
+		if (!StringUtils.isBlank(consumerId)) {
+			MDC.put(NAV_CONSUMER_ID, consumerId);
+		}
 	}
 }

@@ -1,7 +1,8 @@
 package no.nav.dokdistdpi.qdist011;
 
 import com.ibm.msg.client.jms.DetailedJMSException;
-import no.nav.dokdistdpi.common.IdsProcessor;
+import no.nav.dokdistdpi.common.MDCHeaderProcessor;
+import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.consumer.dpi.DpiMeldingsformidler;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistAdministrerForsendelseUpdater;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
@@ -13,13 +14,11 @@ import org.apache.camel.ValidationException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.jms.Queue;
 import javax.xml.bind.JAXBContext;
 
-import static java.lang.Boolean.valueOf;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
@@ -35,7 +34,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Component
 public class Qdist011Route extends RouteBuilder {
 
-	private final String autoStartup;
+	private final DpiClientProperties clientProperties;
 	private final Queue qdist011;
 	private final Queue qdist011FunksjonellFeil;
 	private final Qdist011Service qdist011Service;
@@ -44,10 +43,10 @@ public class Qdist011Route extends RouteBuilder {
 	private final DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater;
 
 	@Autowired
-	public Qdist011Route(@Value("${autostartup.route}") String autoStartup, Queue qdist011, Queue qdist011FunksjonellFeil,
+	public Qdist011Route(DpiClientProperties clientProperties, Queue qdist011, Queue qdist011FunksjonellFeil,
 						 Qdist011Service qdist011Service, DpiMeldingsformidler dpiMeldingsformidler,
 						 Qdist011MetricsRoutePolicy routePolicy, DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater) {
-		this.autoStartup = autoStartup;
+		this.clientProperties = clientProperties;
 		this.qdist011 = qdist011;
 		this.qdist011FunksjonellFeil = qdist011FunksjonellFeil;
 		this.qdist011Service = qdist011Service;
@@ -88,22 +87,22 @@ public class Qdist011Route extends RouteBuilder {
 				.to("jms:" + qdist011FunksjonellFeil.getQueueName());
 
 		from("jms:" + qdist011.getQueueName() + "?transacted=true&concurrentConsumers=1")
-				.autoStartup(valueOf(autoStartup))
+				.autoStartup(clientProperties.isAutoStartup())
 				.routeId(QDIST011_SERVICE_ID)
 				.routePolicy(routePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)
-				.process(new IdsProcessor())
+				.process(new MDCHeaderProcessor())
 				.log(INFO, log, "qdist011 har mottatt forsendelse med " + logForsendelseId())
 				.to("validator:no/nav/meldinger/virksomhet/dokdistfordeling/xsd/qdist008/out/distribuertilkanal.xsd")
 				.unmarshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
 				.bean(qdist011Service)
 				.bean(dpiMeldingsformidler)
 				.choice()
-				.when(simple("${body.status}").isEqualTo(CREATED.value()))
-					.log(LoggingLevel.INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
-					.bean(administrerForsendelseUpdater, "updateStatusAndConversationId")
-					.log(LoggingLevel.INFO, log, "qdist011 har oppdatert dokdistDb med forsendelseStatus=OVERSENDT og konversasjonId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} og avslutter behandling av forsendelse med " + getIdsForLogging())
-				.endChoice()
+					.when(simple("${body}").isEqualTo(CREATED))
+						.log(LoggingLevel.INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
+						.bean(administrerForsendelseUpdater, "updateStatusAndConversationId")
+						.log(LoggingLevel.INFO, log, "qdist011 har oppdatert dokdistDb med forsendelseStatus=OVERSENDT og konversasjonId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} og avslutter behandling av forsendelse med " + getIdsForLogging())
+					.endChoice()
 				.end();
 	}
 
