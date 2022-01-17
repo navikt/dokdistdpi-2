@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
+import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.exception.functional.KanIkkeDistribuereFunctinalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.KanIkkeDistribuereForsendelseException;
@@ -58,14 +59,20 @@ public class DpiClient {
 	public DpiClient(RestTemplateBuilder restTemplateBuilder, MaskinportenTokenConsumer maskinportenTokenConsumer, DpiClientProperties clientProperties) {
 		this.maskinportenTokenConsumer = maskinportenTokenConsumer;
 		this.clientProperties = clientProperties;
-		this.restTemplate = restTemplateBuilder.setConnectTimeout(ofSeconds(15)).setReadTimeout(ofSeconds(30)).build();
+		this.restTemplate = restTemplateBuilder
+				.setConnectTimeout(ofSeconds(15))
+				.setReadTimeout(ofSeconds(30))
+				.build();
 	}
 
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "dpiSendClient"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public HttpStatus sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
 
-		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl()).path(SEND_PATH).queryParam(KANAL, clientProperties.getMpckanal()).toUriString();
+		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl())
+				.path(SEND_PATH)
+				.queryParam(KANAL, clientProperties.getMpckanal())
+				.toUriString();
 
 		HttpEntity<?> httpEntity = new HttpEntity<>(multipartBodyBuilder.build(), headers(forsendelse.getDigital().getMaskinportentoken(), MULTIPART_FORM_DATA));
 
@@ -91,13 +98,21 @@ public class DpiClient {
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public ResponseEntity<HentKvitteringResponse[]> hentKvittering() {
 
-		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl()).path(HENT_PATH).queryParam(KANAL, clientProperties.getMpckanal()).queryParam(PAGE_SIZE, clientProperties.getPagesize()).queryParam(PAGE, clientProperties.getPage()).toUriString();
+		String uri = UriComponentsBuilder
+				.fromHttpUrl(clientProperties.getUrl())
+				.path(HENT_PATH)
+				.queryParam(KANAL, clientProperties.getMpckanal())
+				.queryParam(PAGE_SIZE, clientProperties.getPagesize())
+				.queryParam(PAGE, clientProperties.getPage())
+				.toUriString();
 
 		HttpHeaders headers = headers(maskinportenTokenConsumer.fetchToken().getAccessToken(), APPLICATION_JSON);
 
 		try {
+
 			ResponseEntity<HentKvitteringResponse[]> response = restTemplate.exchange(uri, GET, new HttpEntity<>(headers), HentKvitteringResponse[].class);
 			return response;
+
 		} catch (HttpClientErrorException e) {
 			throw new KunneIkkeHentKvitteringException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
@@ -107,24 +122,26 @@ public class DpiClient {
 
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "bekreft"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public ResponseEntity<String> bekreft(String bestllingId) {
+	public HttpStatus bekreft(String bestllingId) {
 
-		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl()).path(HENT_PATH + "/").path(bestllingId).path(READ).toUriString();
-
-		HttpEntity<?> httpEntity = new HttpEntity<>(headers(maskinportenTokenConsumer.fetchToken().getAccessToken(), APPLICATION_JSON));
+		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl())
+				.path(HENT_PATH + "/")
+				.path(bestllingId).path(READ).toUriString();
+		OidcTokenResponse oidcTokenResponse = maskinportenTokenConsumer.fetchToken();
+		HttpHeaders headers = headers(oidcTokenResponse.getAccessToken(), APPLICATION_JSON);
 
 		try {
-			ResponseEntity<String> response = restTemplate.exchange(uri, POST, httpEntity, String.class);
+			ResponseEntity<String> response = restTemplate.exchange(uri, POST, new HttpEntity<>(headers), String.class);
 			if (!OK.equals(response.getStatusCode())) {
-				throw new KunneIkkeHentKvitteringException(format("Feilet til å markere kvitteringen med bestillingId=%s som mottatt", bestllingId));
+				throw new KunneIkkeHentKvitteringException(format("Feilet til å markere kvitteringen med bestillingId=%s og status={} som mottatt", bestllingId, response.getStatusCode()));
 			}
-			log.info("Kvitteringen med bestillingId={} bekreftet mottatt", bestllingId);
-			return response;
+			log.info("Kvitteringen med bestillingId={} og status={} bekreftet mottatt", bestllingId, response.getStatusCode());
+			return response.getStatusCode();
 		} catch (HttpClientErrorException e) {
-			log.warn("Feilet til å markere kvitteringen med bestillingId={} som mottatt", bestllingId);
+			log.warn(format("Feilet til å markere kvitteringen med bestillingId=%s og feilmelding=%s som mottatt", bestllingId, e.getMessage()), e);
 			throw new KunneIkkeHentKvitteringException(format(KVITTERING_FEIL_MELDING, bestllingId, e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
-			log.warn("Feilet til å markere kvitteringen med bestillingId={} som mottatt", bestllingId);
+			log.warn(format("Feilet til å markere kvitteringen med bestillingId={} som mottatt", bestllingId), e);
 			throw new KunneIkkeHentKvitteringException(format(KVITTERING_FEIL_MELDING, bestllingId, e.getMessage()), e);
 		}
 	}

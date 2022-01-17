@@ -10,6 +10,7 @@ import no.nav.dokdistdpi.exception.technical.MaskinportenTechnicalException;
 import no.nav.dokdistdpi.metrics.Monitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import java.util.UUID;
 
 import static java.time.Duration.ofSeconds;
 import static java.util.Date.from;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
@@ -63,6 +65,7 @@ public class MaskinportenTokenConsumer {
 				.build();
 	}
 
+	@Cacheable(MASKINPORTEN_CACHE)
 	@Monitor(value = "dok_consumer", extraTags = {"process", "maskinporten_fetchtoken"}, percentiles = {0.5, 0.95}, histogram = true)
 	public OidcTokenResponse fetchToken() {
 		URI accessTokenUri;

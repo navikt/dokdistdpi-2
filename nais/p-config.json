@@ -5,7 +5,7 @@
   "DOKUMENTTYPEINFO_V4_URL": "https://app.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "VARSELINFO_V1_URL": "https://app.adeo.no/dokkat/rest/varselinfo/v1",
   "DKI_API_URL": "https://dkif.intern.nav.no",
-  "LAGREJURIDISKLOGG_REST_URL": "https://app.adeo.no/juridisklogg/api/rest/logg",
+  "JURIDISKLOGG_URL": "https://app.adeo.no/juridisklogg/api/rest/logg",
   "MASKINPORTEN_URL": "https://maskinporten.no/token",
   "MASKINPORTEN_AUDIENCE": "https://api.aksesspunktleverandør.no/",
   "SAF_GRAPHQL_URL": "https://saf.intern.nav.no/graphql",

@@ -6,8 +6,11 @@ import no.nav.dokdistdpi.exception.functional.LagreJuridiskLoggFunctionalExcepti
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.LagreJuridiskLoggTechnicalException;
 import no.nav.dokdistdpi.metrics.Monitor;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -19,8 +22,11 @@ import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @Component
@@ -28,7 +34,7 @@ public class JuridiskLoggConsumer {
 	private final String juridiskLoggUrl;
 	private final RestTemplate restTemplate;
 
-	public JuridiskLoggConsumer(@Value("${LagreJuridiskLogg_Rest_Url}")  String juridiskLoggUrl,
+	public JuridiskLoggConsumer(@Value("${juridisklogg.url}") String juridiskLoggUrl,
 								RestTemplateBuilder restTemplateBuilder,
 								final ServiceuserProperties serviceuserProperties) {
 		this.juridiskLoggUrl = juridiskLoggUrl;
@@ -43,7 +49,8 @@ public class JuridiskLoggConsumer {
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "lagreJuridiskLogg"}, histogram = true)
 	public LoggMeldingResponse lagreJuridiskLogg(final LoggMeldingRequest loggMeldingRequest) {
 		try {
-			return restTemplate.postForObject(this.juridiskLoggUrl, loggMeldingRequest, LoggMeldingResponse.class);
+			HttpEntity<LoggMeldingRequest> meldingRequestHttpEntity = new HttpEntity<>(loggMeldingRequest, createHeaders());
+			return restTemplate.exchange(this.juridiskLoggUrl, POST, meldingRequestHttpEntity, LoggMeldingResponse.class).getBody();
 		} catch (HttpClientErrorException e) {
 			throw new LagreJuridiskLoggFunctionalException(format("lagreJuridiskLogg feilet funksjonelt med statusKode=%s. Feilmelding=%s",
 					e.getStatusCode(), e.getResponseBodyAsString()), e);
@@ -51,5 +58,12 @@ public class JuridiskLoggConsumer {
 			throw new LagreJuridiskLoggTechnicalException(format("lagreJuridiskLogg feilet teknisk med statusKode=%s. Feilmelding=%s", e
 					.getStatusCode(), e.getResponseBodyAsString()), e);
 		}
+	}
+
+	private HttpHeaders createHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(APPLICATION_JSON);
+		headers.add(CALL_ID, MDC.get(CALL_ID));
+		return headers;
 	}
 }

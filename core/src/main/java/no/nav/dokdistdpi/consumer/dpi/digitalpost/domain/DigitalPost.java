@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.consumer.dpi.digitalpost.domain;
 
 import lombok.Builder;
 import lombok.Data;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.Kvittering;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiKvittering;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,7 +27,7 @@ public class DigitalPost {
 	private String spraak;
 	private Varsler varsler;
 
-	private Kvittering kvittering;
+	private DpiKvittering kvittering;
 
 	@Data
 	@Builder

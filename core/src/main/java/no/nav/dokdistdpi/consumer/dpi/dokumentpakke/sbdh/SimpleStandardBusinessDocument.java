@@ -1,11 +1,13 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer;
+import org.springframework.lang.NonNull;
 
 import java.util.Objects;
 import java.util.Set;
@@ -17,7 +19,10 @@ import static java.util.Objects.nonNull;
 @NoArgsConstructor
 @JsonSerialize(using = SimpleSBDSerializer.class)
 public class SimpleStandardBusinessDocument {
-	private StandardBusinessDocument sbd;
+
+	@NonNull
+	@JsonProperty
+	private StandardBusinessDocument standardBusinessDocument;
 
 	@JsonIgnore
 	public final String getBestillingsId() {
@@ -30,6 +35,11 @@ public class SimpleStandardBusinessDocument {
 		return getScopes().stream()
 				.map(scope -> scope.getInstanceIdentifier())
 				.findFirst().orElse(null);
+	}
+
+	@JsonIgnore
+	public String getType() {
+		return getStandardBusinessDocumentHeader().getDocumentIdentification().getType();
 	}
 
 	@JsonIgnore
@@ -46,7 +56,7 @@ public class SimpleStandardBusinessDocument {
 
 	@JsonIgnore
 	public StandardBusinessDocumentHeader getStandardBusinessDocumentHeader() {
-		return nonNull(sbd.getStandardBusinessDocumentHeader()) ? sbd.getStandardBusinessDocumentHeader() : null;
+		return nonNull(standardBusinessDocument.getStandardBusinessDocumentHeader()) ? standardBusinessDocument.getStandardBusinessDocumentHeader() : null;
 	}
 
 	@JsonIgnore

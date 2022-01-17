@@ -17,15 +17,15 @@ public class SimpleSBDSerializer extends StdSerializer<SimpleStandardBusinessDoc
 	public void serialize(SimpleStandardBusinessDocument value, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
 		gen.writeStartObject();
 		gen.writeFieldName("standardBusinessDocument");
-		gen.writeObject(value.getSbd());
+		gen.writeObject(value.getStandardBusinessDocument());
 		gen.writeFieldName("standardBusinessDocumentHeader");
 		gen.writeObject(value.getStandardBusinessDocumentHeader());
-		if (value.getSbd().getAny() instanceof DigitalPost) {
+		if (value.getStandardBusinessDocument().getAny() instanceof DigitalPost) {
 			gen.writeFieldName("digital");
 		} else {
-			throw new UnsupportedOperationException("Kun avtaltmelding er støttet.");
+			throw new UnsupportedOperationException("Kun digitalmelding er støttet.");
 		}
-		gen.writeObject(value.getSbd().getAny());
+		gen.writeObject(value.getStandardBusinessDocument().getAny());
 		gen.writeEndObject();
 	}
 }
