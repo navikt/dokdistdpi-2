@@ -8,6 +8,7 @@
 		<module>app</module>
 		<module>qdist011</module>
 		<module>sdist003</module>
+		<module>qdist014</module>
 	</modules>
 
 	<parent>
@@ -53,6 +54,11 @@
 			<dependency>
 				<groupId>no.nav.dokdistdpi</groupId>
 				<artifactId>qdist011</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.dokdistdpi</groupId>
+				<artifactId>qdist014</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
