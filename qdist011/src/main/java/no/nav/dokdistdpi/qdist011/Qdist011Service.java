@@ -48,7 +48,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG_TITTEL_PREFIX;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotNull;
-import static no.nav.dokdistdpi.utils.DokdistdpiUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * @author Tsigab A. Gebremedhin, NAV
@@ -76,6 +76,7 @@ public class Qdist011Service {
 	public Forsendelse createForsendelse(DistribuerTilKanal distribuerTilKanal, Exchange exchange) {
 		validateDistribuerForsendelseTilDpi(distribuerTilKanal);
 		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(distribuerTilKanal.getForsendelseId());
+		assertForsendelseNotNull(hentForsendelseResponse);
 		exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
 		if (FORSENDELSE_STATUS_EKSPEDERT.equals(hentForsendelseResponse.getForsendelseStatus())) {
 			log.info("Forsendelse med forsendelseId={}, status={} er ekspdert og behandlingen avsluttes",
@@ -92,7 +93,6 @@ public class Qdist011Service {
 
 		VarselInfoTo varselInfoTo = digitalPostService.getVarselInfo(dokumenttypeInfo);
 
-		assertForsendelseNotNull(hentForsendelseResponse);
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfoTo);
 
 		Varsler varsler = digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo);
@@ -105,7 +105,7 @@ public class Qdist011Service {
 				.digital(DigitalPost.builder()
 						.avsender(Avsender.builder()
 								.virksomhetsidentifikator(Identifikator.builder()
-										.authority(ISO_6523_ACTORID_UPIS)
+										.authority(ISO_6523_ACTORID_UPIS.getValue())
 										.value(asIso6523(NAV_ORGNUMMER))
 										.build())
 								.avsenderindentifikator(NAV_ORGNUMMER)
