@@ -10,12 +10,14 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Virksomhetmottaker;
 import java.time.LocalDateTime;
 
 @Data
-@SuperBuilder(toBuilder=true)
-@AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
+@AllArgsConstructor
 public abstract class DpiMelding {
 	private Avsender avsender;
 	private Virksomhetmottaker virksomhetmottaker;
 	private LocalDateTime tidspunkt;
-
+	private String konversasjonsId;
+	private KvitteringType kvitteringType;
+	private String bestillingsId;
 }

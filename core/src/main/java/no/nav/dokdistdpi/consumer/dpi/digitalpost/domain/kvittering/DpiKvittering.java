@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DpiKvittering {
 	private DpiFeilKvittering feil;
-	private DpiVarslingfeilet varslingfeiletkvittering;
-	private DpiLevering leveringskvittering;
+	private VarslingFeiletKvittering varslingfeiletkvittering;
+	private LeveringsKvittering leveringskvittering;
 }
