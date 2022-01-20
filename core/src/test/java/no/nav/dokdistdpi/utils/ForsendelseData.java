@@ -82,7 +82,7 @@ public class ForsendelseData {
 		return DigitalPost.builder()
 				.avsender(Avsender.builder()
 						.virksomhetsidentifikator(Identifikator.builder()
-								.authority(ISO_6523_ACTORID_UPIS)
+								.authority(ISO_6523_ACTORID_UPIS.getValue())
 								.value(asIso6523(NAV_ORGNUMMER))
 								.build())
 						.build())

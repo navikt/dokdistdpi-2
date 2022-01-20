@@ -6,19 +6,19 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
+import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Dokumentpakkefingeravtrykk;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.StandardBusinessDocumentMapper;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.StandardBusinessDocument;
-import no.nav.dokdistdpi.exception.technical.KanIkkeDistribuereForsendelseException;
+import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import no.nav.dokdistdpi.metrics.Monitor;
 import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,10 @@ import javax.xml.crypto.dsig.DigestMethod;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.List;
 
+import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.StatusType.OPPRETTET;
+import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.StatusType.SENDT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 
@@ -56,7 +59,7 @@ public class DpiMeldingsformidler {
 
 	@Handler
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "sendMelding"}, percentiles = {0.5, 0.95}, histogram = true)
-	public HttpStatus sendMelding(Forsendelse forsendelse) {
+	public ForsendelseStatusResponse sendMelding(Forsendelse forsendelse) {
 		byte[] dokumentpakke = getKryptertDokumentpakke(forsendelse);
 
 		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse,
@@ -66,7 +69,10 @@ public class DpiMeldingsformidler {
 		multipartBodyBuilder.part("forretningsmelding", generateStandardBusinessDocumentJWT(standardBusinessDocument));
 		multipartBodyBuilder.part("dokumentpakke", dokumentpakke);
 
-		return dpiClient.sendDpiForsendelse(multipartBodyBuilder, forsendelse);
+		List<ForsendelseStatusResponse> forsendelseStatusResponses = dpiClient.sendDpiForsendelse(multipartBodyBuilder, forsendelse);
+		return forsendelseStatusResponses.stream()
+				.filter(statusResponse -> SENDT.equals(statusResponse.getStatus()) || OPPRETTET.equals(statusResponse.getStatus()))
+				.findAny().orElse(null);
 	}
 
 	private byte[] getKryptertDokumentpakke(Forsendelse forsendelse) {
@@ -89,7 +95,7 @@ public class DpiMeldingsformidler {
 			return GenerateJwt.generateJWT(claims, appCertificate);
 		} catch (JsonProcessingException | ParseException e) {
 			log.warn("SBD til JWT behandling feilet med feilmelding={}", e.getMessage());
-			throw new KanIkkeDistribuereForsendelseException("SBD til JWT behandling feilet med feilmelding={}" + e.getMessage(), e);
+			throw new JsonParserTechnicalException("SBD til JWT behandling feilet med feilmelding={}" + e.getMessage(), e);
 		}
 	}
 }

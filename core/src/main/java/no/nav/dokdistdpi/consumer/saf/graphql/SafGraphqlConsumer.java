@@ -7,7 +7,7 @@ import no.nav.dokdistdpi.consumer.saf.journalpost.SafJournalpostResponse;
 import no.nav.dokdistdpi.consumer.saf.journalpost.SafJsonJournalpost;
 import no.nav.dokdistdpi.consumer.sts.StsRestConsumer;
 import no.nav.dokdistdpi.exception.functional.SafJournalpostIkkeFunnetException;
-import no.nav.dokdistdpi.exception.technical.MarshalGraphqlRequestToJsonTechnicalException;
+import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SafJournalpostQueryTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SafJournalpostQueryUnauthorizedException;
 import no.nav.dokdistdpi.metrics.Monitor;
@@ -84,7 +84,7 @@ public class SafGraphqlConsumer {
 		try {
 			return new ObjectMapper().writeValueAsString(graphQLRequest);
 		} catch (JsonProcessingException e) {
-			throw new MarshalGraphqlRequestToJsonTechnicalException(format("Kunne ikke konvertere graphQlRequest til json, feilmelding=%s", e.getMessage()), e);
+			throw new JsonParserTechnicalException(format("Kunne ikke konvertere graphQlRequest til json, feilmelding=%s", e.getMessage()), e);
 		}
 	}
 }

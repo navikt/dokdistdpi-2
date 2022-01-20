@@ -1,18 +1,13 @@
 package no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-
 @Data
 @SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class DpiFeilKvittering extends DpiMelding {
-	private Feiltype feiltype;
-	private String detaljer;
+public class LeveringsKvittering extends DpiMelding {
 }

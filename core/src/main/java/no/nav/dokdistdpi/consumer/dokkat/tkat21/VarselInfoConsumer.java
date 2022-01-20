@@ -25,6 +25,7 @@ import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
+import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
@@ -66,7 +67,7 @@ public class VarselInfoConsumer implements VarselInfo {
 	}
 
 	private VarselInfoTo mapResponse(final VarselInfoRestTo response) {
-		return response == null ? null : VarselInfoTo.builder()
+		return isNull(response) ? null : VarselInfoTo.builder()
 				.varselTypeId(response.getVarseltypeId())
 				.stoppRepeterendeVarsel(response.getRevarslingIntervall() != null)
 				.antallDagerListe(toDagerListe(response))

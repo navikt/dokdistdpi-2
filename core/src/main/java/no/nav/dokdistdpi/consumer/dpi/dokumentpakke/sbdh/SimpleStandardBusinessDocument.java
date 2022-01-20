@@ -72,4 +72,5 @@ public class SimpleStandardBusinessDocument {
 				Organisasjonsnummer.asIso6523(sender.getIdentifier().getValue())
 		).findFirst().orElse(null);
 	}
+
 }

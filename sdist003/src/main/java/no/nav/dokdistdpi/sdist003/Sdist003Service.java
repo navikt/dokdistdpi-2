@@ -1,7 +1,5 @@
 package no.nav.dokdistdpi.sdist003;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEObject;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -9,14 +7,13 @@ import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.HentKvitteringResponse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
-import no.nav.dokdistdpi.exception.technical.ForretningsmeldingParseException;
+import no.nav.dokdistdpi.exception.technical.DigitalPostTechnicalException;
+import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import no.nav.dokdistdpi.exception.technical.KunneIkkeHentKvitteringException;
-import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +27,7 @@ import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.Kvitt
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HENT_KVITTERING_STATUS_CODE;
+import static no.nav.dokdistdpi.utils.JsonObjectMapper.mapSimpleSbd;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -43,17 +41,15 @@ public class Sdist003Service {
 	private final ProducerTemplate producerTemplate;
 	private final Queue qdist014;
 	private final MeterRegistry meterRegistry;
-	private final ObjectMapper objectMapper;
 	private final LagreJuridiskLoggService juridiskLoggService;
 
 	@Autowired
-	public Sdist003Service(@Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper, DpiClient dpiClient, ProducerTemplate producerTemplate,
+	public Sdist003Service(DpiClient dpiClient, ProducerTemplate producerTemplate,
 						   MeterRegistry meterRegistry, Queue qdist014, LagreJuridiskLoggService juridiskLoggService) {
 		this.dpiClient = dpiClient;
 		this.producerTemplate = producerTemplate;
 		this.qdist014 = qdist014;
 		this.meterRegistry = meterRegistry;
-		this.objectMapper = dpiObjectMapper;
 		this.juridiskLoggService = juridiskLoggService;
 	}
 
@@ -68,12 +64,15 @@ public class Sdist003Service {
 
 		exchange.setProperty(HENT_KVITTERING_STATUS_CODE, kvitteringList.getStatusCode());
 
-		if (OK.equals(kvitteringList.getStatusCode())) {
+		if (OK.equals(kvitteringList.getStatusCode()) && isNull(kvitteringList.getBody())) {
+			log.info("Hentet tomt kvittering={} med status={}", kvitteringList.getBody(), kvitteringList.getStatusCode());
+			return;
+		} else if (OK.equals(kvitteringList.getStatusCode())) {
 			Arrays.stream(kvitteringList.getBody())
 					.filter(Objects::nonNull)
-					.map(kvittering -> jwtPayload(kvittering))
+					.map(this::jwtPayload)
 					.forEach(payload -> {
-						SimpleStandardBusinessDocument simpleSbd = mapSbd(payload);
+						SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(payload);
 						log.info("Mottatt kvittering fra dpi aksesspunkt med bestillingsId={} og conversationId={}", simpleSbd.getBestillingsId(), simpleSbd.getConversationId());
 						producerTemplate.sendBody("jms:" + qdist014, payload);
 						log.info("Sdist003 har skrevet melding på qdist014");
@@ -88,32 +87,24 @@ public class Sdist003Service {
 		}
 	}
 
-	private SimpleStandardBusinessDocument mapSbd(String jwtPayload) {
-		try {
-			return objectMapper.readValue(jwtPayload, SimpleStandardBusinessDocument.class);
-		} catch (JsonProcessingException e) {
-			throw new ForretningsmeldingParseException("Feilet å mappe JWT Forretningsmelding", e);
-		}
-	}
-
 	private String jwtPayload(HentKvitteringResponse hentKvitteringResponse) {
 		try {
 			return JOSEObject.parse(hentKvitteringResponse.getForretningsmelding()).getPayload().toString();
 		} catch (ParseException e) {
-			throw new ForretningsmeldingParseException("Feilet å mappe JWT Forretningsmelding", e);
+			throw new JsonParserTechnicalException("Feilet å mappe JWT Forretningsmelding", e);
 		}
 	}
 
 	private KvitteringType getKvitteringType(SimpleStandardBusinessDocument simpleSbd) {
 
-		if (LEVERING.getType().equals(simpleSbd.getType())) {
+		if (LEVERING.getValue().equals(simpleSbd.getType())) {
 			return LEVERING;
-		} else if (VARSLINGFEILET.getType().equals(simpleSbd.getType())) {
+		} else if (VARSLINGFEILET.getValue().equals(simpleSbd.getType())) {
 			return VARSLINGFEILET;
-		} else if (FEILET.getType().equals(simpleSbd.getType())) {
+		} else if (FEILET.getValue().equals(simpleSbd.getType())) {
 			return FEILET;
 		}
-		throw new SikkerDigitalPostException("Kvittering tilbake fra dpi meldingsformidler var verken kvittering eller feil.");
+		throw new DigitalPostTechnicalException("Kvittering tilbake fra dpi meldingsformidler var verken kvittering eller feil.");
 	}
 
 	private void dpiKivtteringCounter(KvitteringType kvitteringType) {
