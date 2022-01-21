@@ -135,7 +135,7 @@ public class Qdist014IT {
 		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID, OK.value());
 		stubPutFeilregistrerforsendelse(OK.value());
 
-		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.JSON"));
+		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
 		ListStubMappingsResult stubs = listAllStubMappings();
 		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
