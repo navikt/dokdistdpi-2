@@ -10,6 +10,7 @@ import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalExceptio
 import no.nav.dokdistdpi.exception.technical.DigitalPostTechnicalException;
 import no.nav.dokdistdpi.exception.technical.KunneIkkeHentKvitteringException;
 import no.nav.dokdistdpi.metrics.Monitor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -62,7 +63,9 @@ public class DpiClient {
 	private final MaskinportenTokenConsumer maskinportenTokenConsumer;
 	private final DpiClientProperties clientProperties;
 
-	public DpiClient(RestTemplateBuilder restTemplateBuilder, MaskinportenTokenConsumer maskinportenTokenConsumer, DpiClientProperties clientProperties) {
+	@Autowired
+	public DpiClient(RestTemplateBuilder restTemplateBuilder,
+					 MaskinportenTokenConsumer maskinportenTokenConsumer, DpiClientProperties clientProperties) {
 		this.maskinportenTokenConsumer = maskinportenTokenConsumer;
 		this.clientProperties = clientProperties;
 		this.restTemplate = restTemplateBuilder

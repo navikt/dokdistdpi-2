@@ -13,7 +13,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
@@ -65,10 +64,5 @@ public class ForretningsKvitteringMapper {
 			}
 		}
 		throw new DigitalPostTechnicalException("Kvittering tilbake fra meldingsformidler var verken kvittering eller feil");
-	}
-
-	public boolean erKvitteringBehandlet(DpiKvittering dpiKvittering) {
-		return isNull(dpiKvittering) && (isNull(dpiKvittering.getFeil()) || isNull(dpiKvittering.getLeveringskvittering()) ||
-				isNull(dpiKvittering.getVarslingfeiletkvittering()));
 	}
 }

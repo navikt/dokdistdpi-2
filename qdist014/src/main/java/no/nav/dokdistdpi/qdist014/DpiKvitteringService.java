@@ -3,10 +3,7 @@ package no.nav.dokdistdpi.qdist014;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarselType;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeiletKvittering;
-import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
-import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.StandardBusinessDocument;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
@@ -26,6 +23,8 @@ import java.util.List;
 
 import static java.lang.String.valueOf;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarselType.MELDINGSFEIL;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarselType.VARSLINGSFEIL;
 import static no.nav.dokdistdpi.qdist014.domain.ForsendelseStatus.BEKREFTET;
 import static no.nav.dokdistdpi.qdist014.domain.ForsendelseStatus.EKSPEDERT;
 import static no.nav.dokdistdpi.qdist014.domain.ForsendelseStatus.FEILET;
@@ -40,7 +39,6 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ST
 public class DpiKvitteringService {
 
 	private static final String KONVERSASJONS_ID = "konversasjonsId";
-	private static final String FEIL_TYPE = "MELDINGSFEIL";
 
 	private final AdministrerForsendelseConsumer administrerForsendelse;
 
@@ -49,11 +47,8 @@ public class DpiKvitteringService {
 		this.administrerForsendelse = administrerForsendelse;
 	}
 
-	boolean erStatusEkspedertOrReturOrFeilet(SimpleStandardBusinessDocument simpleSbd, Exchange exchange) {
-		StandardBusinessDocument sbd = simpleSbd.getStandardBusinessDocument();
-		String konversasjonsId = simpleSbd.getConversationId();
-
-		FinnForsendelseResponseTo finnForsendelseResponse = finnForsendelse(konversasjonsId);
+	boolean erStatusEkspedertOrReturOrFeilet(DpiMelding dpiMelding, Exchange exchange) {
+		FinnForsendelseResponseTo finnForsendelseResponse = finnForsendelse(dpiMelding.getKonversasjonsId());
 		HentForsendelseResponse hentForsendelseResponse = hentForsendelse(finnForsendelseResponse);
 		assertNotNull("HentForsendelseResponseTo", hentForsendelseResponse);
 		exchange.setProperty(PROPERTY_FORSENDELSE_ID, finnForsendelseResponse.getForsendelseId());
@@ -89,7 +84,7 @@ public class DpiKvitteringService {
 		if (dpiMelding instanceof VarslingFeiletKvittering varslingFeiletKvittering) {
 			administrerForsendelse.feilRegistrerForsendelse(FeilRegistrerForsendelseRequest.builder()
 					.forsendelseId(forsendelseId)
-					.type(VarselType.VARSLINGSFEIL.name())
+					.type(VARSLINGSFEIL.name())
 					.tidspunkt(varslingFeiletKvittering.getTidspunkt())
 					.detaljer(varslingFeiletKvittering.getVarslingskanal().name() + ":" + varslingFeiletKvittering.getBeskrivelse())
 					.resendingDistribusjonId(request.getBestillingsId())
@@ -97,7 +92,7 @@ public class DpiKvitteringService {
 		} else if (dpiMelding instanceof DpiFeilKvittering dpiFeil) {
 			administrerForsendelse.feilRegistrerForsendelse(FeilRegistrerForsendelseRequest.builder()
 					.forsendelseId(forsendelseId)
-					.type(FEIL_TYPE)
+					.type(MELDINGSFEIL.name())
 					.part(dpiFeil.getFeiltype().name())
 					.tidspunkt(dpiFeil.getTidspunkt())
 					.detaljer(dpiFeil.getDetaljer())

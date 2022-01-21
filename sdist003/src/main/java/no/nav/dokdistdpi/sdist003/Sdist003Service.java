@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import javax.jms.Queue;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Objects;
 
 import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
@@ -69,25 +68,24 @@ public class Sdist003Service {
 			return;
 		} else if (OK.equals(kvitteringList.getStatusCode())) {
 			Arrays.stream(kvitteringList.getBody())
-					.filter(Objects::nonNull)
-					.map(this::jwtPayload)
+					.map(this::getForretningsmeldingFromJwt)
 					.forEach(payload -> {
 						SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(payload);
 						log.info("Mottatt kvittering fra dpi aksesspunkt med bestillingsId={} og conversationId={}", simpleSbd.getBestillingsId(), simpleSbd.getConversationId());
 						producerTemplate.sendBody("jms:" + qdist014, payload);
-						log.info("Sdist003 har skrevet melding på qdist014");
+						log.info("Sdist003 har skrevet melding på qdist014 med bestillingsId={} og conversationId={}", simpleSbd.getBestillingsId(), simpleSbd.getConversationId());
 
 						juridiskLoggService.lagreJuridiskLogg(payload);
 
 						KvitteringType kvitteringType = getKvitteringType(simpleSbd);
-						dpiKivtteringCounter(kvitteringType);
+						countDpiKvittering(kvitteringType);
 
 						dpiClient.bekreft(simpleSbd.getBestillingsId());
 					});
 		}
 	}
 
-	private String jwtPayload(HentKvitteringResponse hentKvitteringResponse) {
+	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {
 		try {
 			return JOSEObject.parse(hentKvitteringResponse.getForretningsmelding()).getPayload().toString();
 		} catch (ParseException e) {
@@ -104,10 +102,10 @@ public class Sdist003Service {
 		} else if (FEILET.getValue().equals(simpleSbd.getType())) {
 			return FEILET;
 		}
-		throw new DigitalPostTechnicalException("Kvittering tilbake fra dpi meldingsformidler var verken kvittering eller feil.");
+		throw new DigitalPostTechnicalException("Kvittering tilbake fra dpi hjørne-3 var hverken kvittering eller feil.");
 	}
 
-	private void dpiKivtteringCounter(KvitteringType kvitteringType) {
+	private void countDpiKvittering(KvitteringType kvitteringType) {
 		meterRegistry.counter(DPI_KVITTERING_COUNTER,
 				"kvitteringStatus", isNull(kvitteringType.name()) ? "UKJENT" : kvitteringType.name()).increment();
 	}
