@@ -7,6 +7,7 @@
 		<module>core</module>
 		<module>app</module>
 		<module>qdist011</module>
+		<module>sdist003</module>
 	</modules>
 
 	<parent>
@@ -56,6 +57,11 @@
 			</dependency>
 			<dependency>
 				<groupId>no.nav.dokdistdpi</groupId>
+				<artifactId>sdist003</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.dokdistdpi</groupId>
 				<artifactId>app</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -82,26 +88,6 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>${commons-lang3.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.camel</groupId>
-				<artifactId>camel-jms</artifactId>
-				<version>${camel.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.camel</groupId>
-				<artifactId>camel-jaxb</artifactId>
-				<version>${camel.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.camel</groupId>
-				<artifactId>camel-core</artifactId>
-				<version>${camel.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.camel</groupId>
-				<artifactId>camel-json-validator</artifactId>
-				<version>${camel.version}</version>
 			</dependency>
 			<!--IBM MQ -->
 			<dependency>
