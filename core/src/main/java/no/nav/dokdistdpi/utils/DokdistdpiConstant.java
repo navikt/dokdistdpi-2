@@ -27,6 +27,7 @@ public class DokdistdpiConstant {
 
 	public static final String FORSENDELSE_STATUS_KLAR_FOR_DIST = "KLAR_FOR_DIST";
 	public static final String FORSENDELSE_STATUS_OVERSENDT = "OVERSENDT";
+	public static final String FORSENDELSE_STATUS_OPPRETTET = "OPPRETTET";
 	public static final String FORSENDELSE_STATUS_EKSPEDERT = "EKSPEDERT";
 
 	public static final String PROPERTY_BESTILLINGS_ID = "bestillingsId";

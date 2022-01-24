@@ -108,7 +108,6 @@ public class Qdist011Service {
 										.authority(ISO_6523_ACTORID_UPIS.getValue())
 										.value(asIso6523(NAV_ORGNUMMER))
 										.build())
-								.avsenderindentifikator(NAV_ORGNUMMER)
 								.build())
 						.mottaker(DigitalPost.Personmottaker.builder()
 								.postkasseadresse(sikkerDigitalKontaktInfo.getBrukerAdresse())
