@@ -27,8 +27,6 @@ public class DigitalPost {
 	private String spraak;
 	private Varsler varsler;
 
-	private DpiKvittering kvittering;
-
 	@Data
 	@Builder
 	public static class Personmottaker {
