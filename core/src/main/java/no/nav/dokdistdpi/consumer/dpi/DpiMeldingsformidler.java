@@ -1,14 +1,8 @@
 package no.nav.dokdistdpi.consumer.dpi;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchema;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.nimbusds.jwt.JWTClaimsSet;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;

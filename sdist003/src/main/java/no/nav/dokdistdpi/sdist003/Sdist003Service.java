@@ -7,25 +7,28 @@ import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.HentKvitteringResponse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
-import no.nav.dokdistdpi.exception.technical.DigitalPostTechnicalException;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import no.nav.dokdistdpi.exception.technical.KunneIkkeHentKvitteringException;
+import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.jms.Queue;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HENT_KVITTERING_STATUS_CODE;
 import static no.nav.dokdistdpi.utils.JsonObjectMapper.mapSimpleSbd;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
@@ -53,7 +56,7 @@ public class Sdist003Service {
 	}
 
 	@Handler
-	public void hentKvitteringOgBekreft(Exchange exchange) {
+	public HttpStatus hentKvitteringOgBekreft(Exchange exchange) {
 
 		ResponseEntity<HentKvitteringResponse[]> kvitteringList = dpiClient.hentKvittering();
 
@@ -61,12 +64,9 @@ public class Sdist003Service {
 			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir");
 		}
 
-		exchange.setProperty(HENT_KVITTERING_STATUS_CODE, kvitteringList.getStatusCode());
+		Map<String, String> bestillingsIds = new HashMap<>();
 
-		if (OK.equals(kvitteringList.getStatusCode()) && isNull(kvitteringList.getBody())) {
-			log.info("Hentet tomt kvittering={} med status={}", kvitteringList.getBody(), kvitteringList.getStatusCode());
-			return;
-		} else if (OK.equals(kvitteringList.getStatusCode())) {
+		if (OK.equals(kvitteringList.getStatusCode()) && nonNull(kvitteringList.getBody())) {
 			Arrays.stream(kvitteringList.getBody())
 					.map(this::getForretningsmeldingFromJwt)
 					.forEach(payload -> {
@@ -81,8 +81,12 @@ public class Sdist003Service {
 						countDpiKvittering(kvitteringType);
 
 						dpiClient.bekreft(simpleSbd.getBestillingsId());
+						bestillingsIds.put(simpleSbd.getBestillingsId(), simpleSbd.getType());
 					});
+			log.info("Hentet kvitteringer={}", bestillingsIds);
 		}
+
+		return kvitteringList.getStatusCode();
 	}
 
 	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {
@@ -102,7 +106,7 @@ public class Sdist003Service {
 		} else if (FEILET.getValue().equals(simpleSbd.getType())) {
 			return FEILET;
 		}
-		throw new DigitalPostTechnicalException("Kvittering tilbake fra dpi hjørne-3 var hverken kvittering eller feil.");
+		throw new SikkerDigitalPostException("Kvittering tilbake fra dpi hjørne-3 var hverken kvittering eller feil.");
 	}
 
 	private void countDpiKvittering(KvitteringType kvitteringType) {

@@ -7,7 +7,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.LeveringsKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeiletKvittering;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
-import no.nav.dokdistdpi.exception.technical.DigitalPostTechnicalException;
+import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import no.nav.dokdistdpi.utils.JsonObjectMapper;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
@@ -63,6 +63,6 @@ public class ForretningsKvitteringMapper {
 						.build();
 			}
 		}
-		throw new DigitalPostTechnicalException("Kvittering tilbake fra meldingsformidler var verken kvittering eller feil");
+		throw new SikkerDigitalPostException("Kvittering tilbake fra meldingsformidler var verken kvittering eller feil");
 	}
 }
