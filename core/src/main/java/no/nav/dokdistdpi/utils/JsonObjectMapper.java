@@ -3,7 +3,7 @@ package no.nav.dokdistdpi.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import no.nav.dokdistdpi.consumer.dpi.JacksonConfig;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
-import no.nav.dokdistdpi.exception.technical.ForretningsmeldingParseException;
+import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 
 public class JsonObjectMapper {
 
@@ -14,7 +14,7 @@ public class JsonObjectMapper {
 		try {
 			return new JacksonConfig().dpiObjectMapper().readValue(jwtPayload, SimpleStandardBusinessDocument.class);
 		} catch (JsonProcessingException e) {
-			throw new ForretningsmeldingParseException("Feilet å mappe StandardBusinessDocument", e);
+			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 		}
 	}
 }

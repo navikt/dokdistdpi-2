@@ -16,8 +16,7 @@ public class SimpleSBDSerializer extends StdSerializer<SimpleStandardBusinessDoc
 	@Override
 	public void serialize(SimpleStandardBusinessDocument value, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
 		gen.writeStartObject();
-		gen.writeFieldName("standardBusinessDocument");
-		gen.writeObject(value.getStandardBusinessDocument());
+		gen.writeObjectFieldStart("standardBusinessDocument");
 		gen.writeFieldName("standardBusinessDocumentHeader");
 		gen.writeObject(value.getStandardBusinessDocumentHeader());
 		if (value.getStandardBusinessDocument().getAny() instanceof DigitalPost) {

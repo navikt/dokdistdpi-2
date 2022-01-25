@@ -1,7 +1,6 @@
 package no.nav.dokdistdpi.utils;
 
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Avsender;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.CommonVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
@@ -61,17 +60,13 @@ public class ForsendelseData {
 		EpostVarsel epostVarsel = EpostVarsel.builder()
 				.epostadresse(EPOSTADRESSE)
 				.varslingstekst(VARSLINGSTEKST)
-				.repetisjoner(CommonVarsel.Repetisjoner.builder()
-						.dagerEtters(asList(0, 7))
-						.build())
+				.repetisjoner(asList(0, 7))
 				.build();
 
 		SmsVarsel smsVarsel = SmsVarsel.builder()
 				.mobiltelefonnummer(MOBILTELEFONNUMMER)
 				.varslingstekst(VARSLINGSTEKST)
-				.repetisjoner(CommonVarsel.Repetisjoner.builder()
-						.dagerEtters(asList(0, 7))
-						.build())
+				.repetisjoner(asList(0, 7))
 				.build();
 
 		DigitalPost.Personmottaker personmottaker = DigitalPost.Personmottaker.builder()

@@ -7,7 +7,6 @@ import no.nav.dokdistdpi.consumer.dokkat.tkat20.Dokumentkatalog;
 import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.CommonVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
@@ -89,18 +88,17 @@ public class DigitalPostService {
 		return SmsVarsel.builder()
 				.mobiltelefonnummer(digitalKontaktInfo.getMobiltelefonnummer())
 				.varslingstekst(varselInfoTo.getVarslingsTekst()
-						.get(SMS)).repetisjoner(CommonVarsel.Repetisjoner.builder()
-						.dagerEtters(varselInfoTo.getAntallDagerListe())
-						.build())
+						.get(SMS))
+				.repetisjoner(varselInfoTo.getAntallDagerListe())
 				.build();
 	}
 
 	private EpostVarsel mapEpostVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo) {
 		return EpostVarsel.builder()
 				.epostadresse(digitalKontaktInfo.getEpostadresse())
-				.varslingstekst(varselInfoTo.getVarslingsTekst().get(EPOST))
-				.repetisjoner(CommonVarsel.Repetisjoner.builder().dagerEtters(varselInfoTo.getAntallDagerListe())
-						.build())
+				.varslingstekst(varselInfoTo.getVarslingsTekst()
+						.get(EPOST))
+				.repetisjoner(varselInfoTo.getAntallDagerListe())
 				.build();
 	}
 

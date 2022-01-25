@@ -7,7 +7,7 @@ import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.HentKvitteringResponse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
-import no.nav.dokdistdpi.exception.technical.ForretningsmeldingParseException;
+import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import no.nav.dokdistdpi.exception.technical.KunneIkkeHentKvitteringException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import org.apache.camel.Exchange;
@@ -93,7 +93,7 @@ public class Sdist003Service {
 		try {
 			return JOSEObject.parse(hentKvitteringResponse.getForretningsmelding()).getPayload().toString();
 		} catch (ParseException e) {
-			throw new ForretningsmeldingParseException("Feilet å mappe StandardBusinessDocument", e);
+			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 		}
 	}
 

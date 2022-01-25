@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
 import no.nav.dokdistdpi.consumer.juridisklogg.JuridiskLoggConsumer;
 import no.nav.dokdistdpi.consumer.juridisklogg.LoggMeldingRequest;
-import no.nav.dokdistdpi.exception.technical.ForretningsmeldingParseException;
+import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -33,7 +33,7 @@ public class LagreJuridiskLoggService {
 			juridiskLoggConsumer.lagreJuridiskLogg(map(payload, simpleSbd));
 			log.info("Hendelse med bestillingsId={} og konversasjonsId={} logget til juridisk arkiv.", simpleSbd.getBestillingsId(), simpleSbd.getConversationId());
 		} catch (JsonProcessingException e) {
-			throw new ForretningsmeldingParseException("Feilet å mappe JWT Forretningsmelding", e);
+			throw new JsonParserTechnicalException("Feilet å mappe JWT Forretningsmelding", e);
 
 		}
 	}
