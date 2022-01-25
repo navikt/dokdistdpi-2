@@ -32,6 +32,7 @@ import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.St
 import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.StatusType.SENDT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 
 /**
  * @author Tsigab A. Gebremedhin, NAV
@@ -67,7 +68,7 @@ public class DpiMeldingsformidler {
 
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
 		multipartBodyBuilder.part("forretningsmelding", generateStandardBusinessDocumentJWT(standardBusinessDocument));
-		multipartBodyBuilder.part("dokumentpakke", dokumentpakke);
+		multipartBodyBuilder.part("dokumentpakke", dokumentpakke, APPLICATION_OCTET_STREAM);
 
 		List<ForsendelseStatusResponse> forsendelseStatusResponses = dpiClient.sendDpiForsendelse(multipartBodyBuilder, forsendelse);
 		return forsendelseStatusResponses.stream()

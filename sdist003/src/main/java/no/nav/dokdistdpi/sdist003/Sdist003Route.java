@@ -10,12 +10,11 @@ import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.builder.RouteBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.jms.Queue;
 import java.io.IOException;
 
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HENT_KVITTERING_STATUS_CODE;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @Component
@@ -23,28 +22,25 @@ public class Sdist003Route extends RouteBuilder {
 
 	private static final String JURIDISKLOGG_ROUTE_ID = "juridiskLogg";
 	public static final String ROUTE_JURIDISKLOGG = "direct:" + JURIDISKLOGG_ROUTE_ID;
-	public static final String ROUTE_QDIST014_ID = "qdist014route";
-	public static final String ROUTE_QDIST014 = "direct:" + ROUTE_QDIST014_ID;
-	private final String ROUTEID = "SDIST003";
+	private static final String ROUTE_SDIST003_AVVIK_ID = "sdist003Avvik";
+	public static final String ROUTE_SDIST003_AVVIK = "direct:" + ROUTE_SDIST003_AVVIK_ID;
+	private final String ROUTEID = "sdist003";
 	private final String FUNCTIONAL_ERROR_HANDLER = "FUNCTIONAL_ERROR_HANDLER";
 	private final String TECHNICAL_ERROR_HANDLER = "TECHNICAL_ERROR_HANDLER";
 	private final String UNKNOWN_ERROR_HANDLER = "UNKNOWN_ERROR_HANDLER";
 
 	private final LederElectionConsumer lederElection;
-	private final Queue qdist014;
 	private final Sdist003Service sdist003Service;
 	private final DpiClientProperties dpiClientProperties;
-	private final LagreJuridiskLoggService lagreJuridiskLoggService;
 
+	@Autowired
 	public Sdist003Route(CamelContext context,
-						 LederElectionConsumer lederElection, Queue qdist014, Sdist003Service sdist003Service,
-						 DpiClientProperties dpiClientProperties, LagreJuridiskLoggService lagreJuridiskLoggService) {
+						 LederElectionConsumer lederElection, Sdist003Service sdist003Service,
+						 DpiClientProperties dpiClientProperties) {
 		super(context);
 		this.lederElection = lederElection;
-		this.qdist014 = qdist014;
 		this.sdist003Service = sdist003Service;
 		this.dpiClientProperties = dpiClientProperties;
-		this.lagreJuridiskLoggService = lagreJuridiskLoggService;
 	}
 
 	@Override
@@ -54,21 +50,21 @@ public class Sdist003Route extends RouteBuilder {
 				.id(FUNCTIONAL_ERROR_HANDLER)
 				.handled(true)
 				.log(LoggingLevel.ERROR, log, "Sdist003 feilet funksjonelt" + ". ${exception}.")
-				.to("direct:sdist003Avvik");
+				.to(ROUTE_SDIST003_AVVIK);
 
 		onException(AbstractDokdistdpiTechnicalException.class, IOException.class)
 				.id(TECHNICAL_ERROR_HANDLER)
 				.handled(true)
 				.logStackTrace(true)
 				.log(LoggingLevel.ERROR, log, "Sdist003 feilet teknisk" + ". ${exception}.")
-				.to("direct:sdist003Avvik");
+				.to(ROUTE_SDIST003_AVVIK);
 
 		onException(Exception.class)
 				.id(UNKNOWN_ERROR_HANDLER)
 				.handled(true)
 				.logStackTrace(true)
 				.log(LoggingLevel.ERROR, log, "Sdist003 feilet med ukjent feil" + ". ${exception}.")
-				.to("direct:sdist003Avvik");
+				.to(ROUTE_SDIST003_AVVIK);
 
 		from("scheduler://dpiScheduler?delay=" + dpiClientProperties.getDpischeduler())
 				.autoStartup(dpiClientProperties.isAutoStartup())
@@ -79,15 +75,15 @@ public class Sdist003Route extends RouteBuilder {
 						.setExchangePattern(ExchangePattern.InOnly)
 						.bean(sdist003Service)
 						.choice()
-							.when(exchangeProperty(HENT_KVITTERING_STATUS_CODE).isEqualTo(NO_CONTENT))
+							.when(simple("${body}").isEqualTo(NO_CONTENT))
 							.log(LoggingLevel.INFO, log, "Sdist003 fant ingen kvitteringer fra DPI.")
 							.delay(dpiClientProperties.getPullinterval())
 						.endChoice()
 				.endChoice()
 				.end();
 
-		from("direct:sdist003Avvik")
-				.routeId(ROUTEID + "-avvik")
+		from(ROUTE_SDIST003_AVVIK)
+				.routeId(ROUTE_SDIST003_AVVIK_ID)
 				.log(LoggingLevel.OFF, "avvikshåndtering");
 	}
 }

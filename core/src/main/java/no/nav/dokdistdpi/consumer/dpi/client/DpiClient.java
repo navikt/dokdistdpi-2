@@ -7,8 +7,8 @@ import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
-import no.nav.dokdistdpi.exception.technical.DigitalPostTechnicalException;
 import no.nav.dokdistdpi.exception.technical.KunneIkkeHentKvitteringException;
+import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import no.nav.dokdistdpi.metrics.Monitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -100,7 +100,7 @@ public class DpiClient {
 			throw new KunneIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), forsendelse.getBestillingsId(), e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
 			log.error(LOG_FEIL_MELDING, e.getStatusCode(), forsendelse.getBestillingsId(), e.getMessage());
-			throw new DigitalPostTechnicalException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), forsendelse.getBestillingsId(), e.getMessage()), e);
+			throw new SikkerDigitalPostException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), forsendelse.getBestillingsId(), e.getMessage()), e);
 		}
 	}
 
@@ -124,7 +124,7 @@ public class DpiClient {
 		} catch (HttpClientErrorException e) {
 			throw new KunneIkkeDistribuereForsendelseException(format("Kan ikke sendt forsendelse til hjørne-2, bestillingId=%s og feilmelding=%s", bestllingId, e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
-			throw new DigitalPostTechnicalException("Henter ikke forsendelse statusen", e);
+			throw new SikkerDigitalPostException("Henter ikke forsendelse statusen", e);
 		}
 	}
 
@@ -147,7 +147,7 @@ public class DpiClient {
 		} catch (HttpClientErrorException e) {
 			throw new KunneIkkeHentKvitteringException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
-			throw new DigitalPostTechnicalException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
+			throw new SikkerDigitalPostException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
 		}
 	}
 
@@ -170,7 +170,7 @@ public class DpiClient {
 			throw new KunneIkkeHentKvitteringException(format(KVITTERING_FEIL_MELDING, bestllingId, e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
 			log.warn(format("Feilet til å markere kvitteringen med bestillingId=%s som mottatt", bestllingId), e);
-			throw new DigitalPostTechnicalException(format(KVITTERING_FEIL_MELDING, bestllingId, e.getMessage()), e);
+			throw new SikkerDigitalPostException(format(KVITTERING_FEIL_MELDING, bestllingId, e.getMessage()), e);
 		}
 	}
 
