@@ -26,7 +26,7 @@ public class JsonObjectMapper {
 		try {
 			return new JacksonConfig().dpiObjectMapper().readValue(jwtPayload, SimpleStandardBusinessDocument.class);
 		} catch (JsonProcessingException e) {
-			throw new JsonParserTechnicalException("Feilet å mappe JWT Forretningsmelding", e);
+			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 		}
 	}
 
@@ -56,7 +56,7 @@ public class JsonObjectMapper {
 			}
 			return dpiKvittering;
 		} catch (JsonProcessingException e) {
-			throw new JsonParserTechnicalException("Feilet å mappe JWT Forretningsmelding", e);
+			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 		}
 	}
 }

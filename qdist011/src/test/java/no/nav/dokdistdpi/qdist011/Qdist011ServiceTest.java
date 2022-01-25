@@ -135,7 +135,6 @@ class Qdist011ServiceTest {
 		assertEquals(MASKINPORTEN_TOKEN, digitalPost.getMaskinportentoken());
 		assertEquals(ISO_6523_ACTORID_UPIS.getValue(), digitalPost.getAvsender().getVirksomhetsidentifikator().getAuthority());
 		assertEquals(asIso6523(NAV_ORGNUMMER), digitalPost.getAvsender().getVirksomhetsidentifikator().getValue());
-		assertEquals(NAV_ORGNUMMER, digitalPost.getAvsender().getAvsenderindentifikator());
 		assertEquals(POSTKASSEADRESSE, digitalPost.getMottaker().getPostkasseadresse());
 		assertNull(digitalPost.getDokumentpakkefingeravtrykk());
 		assertEquals(NIVAA_4.getValue(), digitalPost.getSikkerhetsnivaa());
