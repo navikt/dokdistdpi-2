@@ -2,7 +2,6 @@ package no.nav.dokdistdpi.consumer.dpi.digitalpost.domain;
 
 import lombok.Builder;
 import lombok.Data;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiKvittering;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

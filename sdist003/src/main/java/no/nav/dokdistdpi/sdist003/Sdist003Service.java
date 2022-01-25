@@ -93,7 +93,7 @@ public class Sdist003Service {
 		try {
 			return JOSEObject.parse(hentKvitteringResponse.getForretningsmelding()).getPayload().toString();
 		} catch (ParseException e) {
-			throw new JsonParserTechnicalException("Feilet å mappe JWT Forretningsmelding", e);
+			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 		}
 	}
 
@@ -106,7 +106,7 @@ public class Sdist003Service {
 		} else if (FEILET.getValue().equals(simpleSbd.getType())) {
 			return FEILET;
 		}
-		throw new SikkerDigitalPostException("Kvittering tilbake fra dpi hjørne-3 var hverken kvittering eller feil.");
+		throw new SikkerDigitalPostException("Kvittering tilbake fra dpi meldingsformidler var hverken kvittering eller feil.");
 	}
 
 	private void countDpiKvittering(KvitteringType kvitteringType) {
