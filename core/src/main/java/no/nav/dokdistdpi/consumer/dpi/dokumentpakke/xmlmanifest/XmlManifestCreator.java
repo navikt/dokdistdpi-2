@@ -25,7 +25,6 @@ public class XmlManifestCreator {
 						.authority(ISO6523_AUTHORITY)
 						.orgNummer(asIso6523(NAV_ORGNUMMER))
 						.build())
-				.avsenderidentifikator(NAV_ORGNUMMER)
 				.build();
 		Mottaker mottaker = Mottaker.builder()
 				.person(Person.builder()
@@ -35,9 +34,6 @@ public class XmlManifestCreator {
 				.build();
 		Dokument hoveddokument = Dokument.builder()
 				.href(dokumentpakke.getHoveddokument().getFilnavn())
-				.data(DokumentData.builder()
-						.mime(dokumentpakke.getHoveddokument().getMimeType())
-						.build())
 				.tittel(Dokument.Tittel.builder()
 						.tittel(dokumentpakke.getHoveddokument().getTittel())
 						.lang(DOKUMENT_LANG)
