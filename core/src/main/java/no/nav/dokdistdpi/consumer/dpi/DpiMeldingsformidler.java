@@ -12,7 +12,7 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.StandardBusinessDocumentMapper;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.StandardBusinessDocument;
-import no.nav.dokdistdpi.exception.technical.KanIkkeDistribuereForsendelseException;
+import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import no.nav.dokdistdpi.metrics.Monitor;
 import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
@@ -89,7 +89,7 @@ public class DpiMeldingsformidler {
 			return GenerateJwt.generateJWT(claims, appCertificate);
 		} catch (JsonProcessingException | ParseException e) {
 			log.warn("SBD til JWT behandling feilet med feilmelding={}", e.getMessage());
-			throw new KanIkkeDistribuereForsendelseException("SBD til JWT behandling feilet med feilmelding={}" + e.getMessage(), e);
+			throw new JsonParserTechnicalException("SBD til JWT behandling feilet med feilmelding={}" + e.getMessage(), e);
 		}
 	}
 }
