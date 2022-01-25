@@ -21,7 +21,6 @@ import java.util.List;
 )
 @XmlRootElement(
 		name = "manifest"
-
 )
 @NoArgsConstructor
 @AllArgsConstructor
