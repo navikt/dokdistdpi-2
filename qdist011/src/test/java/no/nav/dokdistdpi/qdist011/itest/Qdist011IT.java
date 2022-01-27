@@ -74,7 +74,8 @@ public class Qdist011IT {
 	private static final String DOKUMENTTYPE_ID_HOVEDDOK = "dokumenttypeIdHoveddok";
 	private static final String VARSEL_TYPE_ID = "SDP_000004";
 	private static final String KONVERSASJON_ID = "601a9fcd-8bae-4076-a2d7-37f9dd17e050";
-	private static final String OPPDATERE_FORSENDELSE_URL = "/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT&konversasjonsId=601a9fcd-8bae-4076-a2d7-37f9dd17e050";
+	private static final String BESTILLINGS_ID = "b8b297e1-46c1-4657-9f2d-7cf6dd089b9d";
+	private static final String OPPDATERE_FORSENDELSE_URL = "/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT";
 
 	public static final String DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK = "dokumentObjektReferanseHoveddok";
 	public static final String DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 = "dokumentObjektReferanseVedlegg1";
@@ -137,11 +138,12 @@ public class Qdist011IT {
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", FORSENDELSE_ID, OK.value());
 		stubPostMaskinporten();
 		stubPostDPISend();
+		stubGetDPIStatus();
 		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
@@ -171,7 +173,7 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String response = receive(qdist011FunksjonellFeil);
 			assertNotNull(response);
 		});
@@ -228,6 +230,14 @@ public class Qdist011IT {
 						.withStatus(CREATED.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString("__files/dpi/dpi_out_status.json"))));
+	}
+
+	private void stubGetDPIStatus() {
+		stubFor(get(urlEqualTo("/message/out/" + BESTILLINGS_ID + "/statuses"))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_PROBLEM_JSON_VALUE)
+						.withBodyFile("dpi/dpi_forsendelse_status.json")));
 	}
 
 	private void stubPostDPISend(int status) {

@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 import javax.jms.Queue;
 import javax.xml.bind.JAXBContext;
 
+import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.StatusType.OPPRETTET;
+import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.StatusType.SENDT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
@@ -26,7 +28,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.QDIST011_SERVICE_ID;
 import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
-import static org.springframework.http.HttpStatus.CREATED;
+import static org.apache.camel.support.builder.PredicateBuilder.or;
 
 /**
  * @author Tsigab A. Gebremedhin, NAV
@@ -98,9 +100,9 @@ public class Qdist011Route extends RouteBuilder {
 				.bean(qdist011Service)
 				.bean(dpiMeldingsformidler)
 				.choice()
-					.when(simple("${body}").isEqualTo(CREATED))
+					.when(or(simple("${body.status}").isEqualTo(SENDT), simple("${body.status}").isEqualTo(OPPRETTET)))
 						.log(LoggingLevel.INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
-						.bean(administrerForsendelseUpdater, "updateStatusAndConversationId")
+						.bean(administrerForsendelseUpdater, "updateStatus")
 						.log(LoggingLevel.INFO, log, "qdist011 har oppdatert dokdistDb med forsendelseStatus=OVERSENDT og konversasjonId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} og avslutter behandling av forsendelse med " + getIdsForLogging())
 					.endChoice()
 				.end();

@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_OVERSENDT;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
-import static no.nav.dokdistdpi.utils.DokdistdpiUtils.isBlank;
 
 @Component
 public class DokdistAdministrerForsendelseUpdater {
@@ -26,17 +24,11 @@ public class DokdistAdministrerForsendelseUpdater {
 	public void updateStatus(Exchange exchange) {
 		final String forsendelseId = exchange.getProperty(PROPERTY_FORSENDELSE_ID, String.class);
 		administrerForsendelse.oppdaterForsendelseStatus(forsendelseId, FORSENDELSE_STATUS_OVERSENDT);
+		meldingTilDpiCounter();
 	}
 
-	public void updateStatusAndConversationId(Exchange exchange) {
-		final String forsendelseId = exchange.getProperty(PROPERTY_FORSENDELSE_ID, String.class);
-		final String conversationId = exchange.getProperty(PROPERTY_CONVERSATION_ID, String.class);
-		administrerForsendelse.oppdaterForsendelseStatusOgKonversasjonsId(forsendelseId, FORSENDELSE_STATUS_OVERSENDT, conversationId);
-		meldingTilDpiCounter(FORSENDELSE_STATUS_OVERSENDT);
-	}
-
-	private void meldingTilDpiCounter(String dokumentStatus) {
+	private void meldingTilDpiCounter() {
 		meterRegistry.counter(FORSENDELSE_TIL_DPI_COUNTER,
-				"dokumentStatus", isBlank(dokumentStatus) ? "UKJENT" : dokumentStatus).increment();
+				"forsendelseStatus", FORSENDELSE_STATUS_OVERSENDT).increment();
 	}
 }

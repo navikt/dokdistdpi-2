@@ -96,8 +96,7 @@ public class DigitalPostService {
 	private EpostVarsel mapEpostVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo) {
 		return EpostVarsel.builder()
 				.epostadresse(digitalKontaktInfo.getEpostadresse())
-				.varslingstekst(varselInfoTo.getVarslingsTekst()
-						.get(EPOST))
+				.varslingstekst(varselInfoTo.getVarslingsTekst().get(EPOST))
 				.repetisjoner(varselInfoTo.getAntallDagerListe())
 				.build();
 	}

@@ -2,6 +2,7 @@ package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.xmlmanifest;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import no.difi.begrep.sdp.schema_v10.Manifest;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

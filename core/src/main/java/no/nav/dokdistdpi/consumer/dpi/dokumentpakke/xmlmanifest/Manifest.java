@@ -20,8 +20,7 @@ import java.util.List;
 		propOrder = {"mottaker", "avsender", "hoveddokument", "vedlegg"}
 )
 @XmlRootElement(
-		name = "manifest",
-		namespace = "http://begrep.difi.no/sdp/schema_v10"
+		name = "manifest"
 )
 @NoArgsConstructor
 @AllArgsConstructor

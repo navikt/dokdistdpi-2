@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
+import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import no.nav.dokdistdpi.sdist003.Sdist003Service;
@@ -49,7 +50,6 @@ import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
-import static no.nav.dokdistdpi.sdist003.Sdist003Route.ROUTE_JURIDISKLOGG;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -100,8 +100,6 @@ public class Sdist003ITest {
 	void setUp() {
 		System.setProperty("ELECTOR_PATH", lederHost);
 		lederElection = mock(LederElectionConsumer.class);
-		cacheManager.getCache(TKAT020_CACHE).clear();
-		cacheManager.getCache(TKAT021_CACHE).clear();
 		cacheManager.getCache(MASKINPORTEN_CACHE).clear();
 		cacheManager.getCache(STS_CACHE).clear();
 		WireMock.reset();
@@ -111,6 +109,7 @@ public class Sdist003ITest {
 
 	@Test
 	public void shouldGetKvitteringFromDpiAccessPoint() {
+		String x = KvitteringType.FEILET.getValue();
 		when(lederElection.isLeader()).thenReturn(true);
 		stubGetKvittering();
 		stubPostMottattKvittering();
@@ -123,7 +122,7 @@ public class Sdist003ITest {
 		});
 
 		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
-		verify(1, getRequestedFor(urlEqualTo("/message/in?kanal=dokdistdpi-t&page_size=5&page=1")));
+		verify(1, getRequestedFor(urlEqualTo("/message/in?kanal=dokdistdpi-t")));
 	}
 
 	private void stubPostJuridiskLogg(HttpStatus status, String filePath) {
@@ -135,7 +134,7 @@ public class Sdist003ITest {
 	}
 
 	private void stubGetKvittering() {
-		stubFor(get(urlEqualTo("/message/in?kanal=dokdistdpi-t&page_size=5&page=1"))
+		stubFor(get(urlEqualTo("/message/in?kanal=dokdistdpi-t"))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -143,7 +142,7 @@ public class Sdist003ITest {
 	}
 
 	private void stubPostMottattKvittering() {
-		stubFor(post(urlMatching("/message/in/"+BESTILLING_ID+"/read"))
+		stubFor(post(urlMatching("/message/in/" + BESTILLING_ID + "/read"))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));

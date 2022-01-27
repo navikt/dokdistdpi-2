@@ -6,6 +6,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
+import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Dokumentpakkefingeravtrykk;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
@@ -18,7 +19,6 @@ import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +26,13 @@ import javax.xml.crypto.dsig.DigestMethod;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.List;
 
+import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.StatusType.OPPRETTET;
+import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.StatusType.SENDT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 
 /**
  * @author Tsigab A. Gebremedhin, NAV
@@ -56,7 +60,7 @@ public class DpiMeldingsformidler {
 
 	@Handler
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "sendMelding"}, percentiles = {0.5, 0.95}, histogram = true)
-	public HttpStatus sendMelding(Forsendelse forsendelse) {
+	public ForsendelseStatusResponse sendMelding(Forsendelse forsendelse) {
 		byte[] dokumentpakke = getKryptertDokumentpakke(forsendelse);
 
 		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse,
@@ -64,9 +68,12 @@ public class DpiMeldingsformidler {
 
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
 		multipartBodyBuilder.part("forretningsmelding", generateStandardBusinessDocumentJWT(standardBusinessDocument));
-		multipartBodyBuilder.part("dokumentpakke", dokumentpakke);
+		multipartBodyBuilder.part("dokumentpakke", dokumentpakke, APPLICATION_OCTET_STREAM);
 
-		return dpiClient.sendDpiForsendelse(multipartBodyBuilder, forsendelse);
+		List<ForsendelseStatusResponse> forsendelseStatusResponses = dpiClient.sendDpiForsendelse(multipartBodyBuilder, forsendelse);
+		return forsendelseStatusResponses.stream()
+				.filter(statusResponse -> SENDT.equals(statusResponse.getStatus()) || OPPRETTET.equals(statusResponse.getStatus()))
+				.findAny().orElse(null);
 	}
 
 	private byte[] getKryptertDokumentpakke(Forsendelse forsendelse) {

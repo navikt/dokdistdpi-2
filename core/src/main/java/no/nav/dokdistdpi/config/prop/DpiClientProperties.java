@@ -23,8 +23,4 @@ public class DpiClientProperties {
 	private boolean autoStartup;
 	@NonNull
 	private int dpischeduler;
-	@NonNull
-	private int pagesize;
-	@NonNull
-	private int page;
 }

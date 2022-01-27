@@ -60,22 +60,20 @@ class Qdist011ServiceTest {
 
 	private MaskinportenTokenConsumer maskinportenTokenConsumer;
 	private DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer;
-	private SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService;
 	private VarselInfo varselInfo;
 	private Dokumentkatalog dokumentkatalog;
 	private Exchange exchange;
-	private Storage s3Storage;
 
 	@BeforeEach
 	void setup() {
 		administrerForsendelse = mock(AdministrerForsendelseConsumer.class);
-		safJournalpostQueryService = mock(SafJournalpostQueryServiceImplQdist011.class);
+		SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService = mock(SafJournalpostQueryServiceImplQdist011.class);
 		maskinportenTokenConsumer = mock(MaskinportenTokenConsumer.class);
 		digitalKontaktinformasjonConsumer = mock(DigitalKontaktinformasjonConsumer.class);
 		varselInfo = mock(VarselInfo.class);
 		dokumentkatalog = mock(DokumentkatalogConsumer.class);
 		exchange = mock(Exchange.class);
-		s3Storage = mock(AmazonS3Storage.class);
+		Storage s3Storage = mock(AmazonS3Storage.class);
 
 		DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator = new DigitalKontaktInformasjonValidator();
 		DigitalPostService digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
@@ -135,9 +133,8 @@ class Qdist011ServiceTest {
 
 	private void assertDigitalMapping(DigitalPost digitalPost) {
 		assertEquals(MASKINPORTEN_TOKEN, digitalPost.getMaskinportentoken());
-		assertEquals(ISO_6523_ACTORID_UPIS, digitalPost.getAvsender().getVirksomhetsidentifikator().getAuthority());
+		assertEquals(ISO_6523_ACTORID_UPIS.getValue(), digitalPost.getAvsender().getVirksomhetsidentifikator().getAuthority());
 		assertEquals(asIso6523(NAV_ORGNUMMER), digitalPost.getAvsender().getVirksomhetsidentifikator().getValue());
-		assertEquals(NAV_ORGNUMMER, digitalPost.getAvsender().getAvsenderindentifikator());
 		assertEquals(POSTKASSEADRESSE, digitalPost.getMottaker().getPostkasseadresse());
 		assertNull(digitalPost.getDokumentpakkefingeravtrykk());
 		assertEquals(NIVAA_4.getValue(), digitalPost.getSikkerhetsnivaa());

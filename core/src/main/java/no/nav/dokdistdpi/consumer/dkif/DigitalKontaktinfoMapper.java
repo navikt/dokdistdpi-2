@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.consumer.dkif;
 
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotNull;
-import static no.nav.dokdistdpi.utils.DokdistdpiUtils.notBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DigitalKontaktinfoMapper {
 
@@ -20,9 +20,9 @@ public class DigitalKontaktinfoMapper {
 					.leverandoerAdresse(digitalKontaktinfo.getSikkerDigitalPostkasse() != null ? digitalKontaktinfo.getSikkerDigitalPostkasse()
 							.getLeverandoerAdresse() : null)
 					.mobiltelefonnummer(digitalKontaktinfo.isKanVarsles() ? digitalKontaktinfo.getMobiltelefonnummer() : null)
-					.leverandoerSertifikat(notBlank(sikkerDigitalPostkasse.getLeverandoerSertifikat()) ? sikkerDigitalPostkasse.getLeverandoerSertifikat() : null)
+					.leverandoerSertifikat(isNotBlank(sikkerDigitalPostkasse.getLeverandoerSertifikat()) ? sikkerDigitalPostkasse.getLeverandoerSertifikat() : null)
 					.reservasjon(digitalKontaktinfo.isReservert())
-					.sertifikat(digitalKontaktinfo.getSikkerDigitalPostkasse() != null && notBlank(digitalKontaktinfo.getSikkerDigitalPostkasse()
+					.sertifikat(digitalKontaktinfo.getSikkerDigitalPostkasse() != null && isNotBlank(digitalKontaktinfo.getSikkerDigitalPostkasse()
 							.getLeverandoerSertifikat()))
 					.kanVarsles(digitalKontaktinfo.isKanVarsles())
 					.build();

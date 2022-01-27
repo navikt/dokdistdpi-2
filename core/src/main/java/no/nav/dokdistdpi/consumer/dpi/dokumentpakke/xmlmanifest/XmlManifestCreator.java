@@ -1,15 +1,23 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.xmlmanifest;
 
+import no.difi.begrep.sdp.schema_v10.Avsender;
+import no.difi.begrep.sdp.schema_v10.Dokument;
+import no.difi.begrep.sdp.schema_v10.Iso6523Authority;
+import no.difi.begrep.sdp.schema_v10.Manifest;
+import no.difi.begrep.sdp.schema_v10.Mottaker;
+import no.difi.begrep.sdp.schema_v10.Organisasjon;
+import no.difi.begrep.sdp.schema_v10.Person;
+import no.difi.begrep.sdp.schema_v10.Tittel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
+import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
-import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.ISO6523_AUTHORITY;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 
 public class XmlManifestCreator {
@@ -20,49 +28,44 @@ public class XmlManifestCreator {
 		Dokumentpakke dokumentpakke = forsendelse.getDokumentpakke();
 		DigitalPost digitalPostInfo = forsendelse.getDigital();
 
-		Avsender avsender = Avsender.builder()
-				.organisasjon(Organisasjon.builder()
-						.authority(ISO6523_AUTHORITY)
-						.orgNummer(asIso6523(NAV_ORGNUMMER))
-						.build())
-				.avsenderidentifikator(NAV_ORGNUMMER)
-				.build();
-		Mottaker mottaker = Mottaker.builder()
-				.person(Person.builder()
-						.personidentifikator(forsendelse.getPersonidentifikator())
-						.postkasseadresse(digitalPostInfo.getMottaker().getPostkasseadresse())
-						.build())
-				.build();
-		Dokument hoveddokument = Dokument.builder()
-				.href(dokumentpakke.getHoveddokument().getFilnavn())
-				.data(DokumentData.builder()
-						.mime(dokumentpakke.getHoveddokument().getMimeType())
-						.build())
-				.tittel(Dokument.Tittel.builder()
-						.tittel(dokumentpakke.getHoveddokument().getTittel())
-						.lang(DOKUMENT_LANG)
-						.build())
-				.mime(dokumentpakke.getHoveddokument().getMimeType())
-				.build();
-		List<Dokument> vedlegg = dokumentpakke.getVedlegg().stream().map(dokument ->
-				Dokument.builder()
-						.tittel(Dokument.Tittel.builder()
-								.lang(DOKUMENT_LANG)
-								.tittel(dokument.getTittel())
-								.build())
-						.mime(dokument.getMimeType())
-						.href(dokument.getFilnavn())
-						.build()
-		).toList();
-		Manifest xmlManifest = Manifest.builder()
-				.avsender(avsender)
-				.mottaker(mottaker)
-				.hoveddokument(hoveddokument)
-				.vedlegg(vedlegg)
-				.build();
+		Organisasjon organisasjon = new Organisasjon()
+				.withAuthority(Iso6523Authority.ISO_6523_ACTORID_UPIS)
+				.withValue(asIso6523(NAV_ORGNUMMER));
+
+		Avsender avsender = new Avsender()
+				.withOrganisasjon(organisasjon);
+
+		Person person = new Person()
+				.withPersonidentifikator(forsendelse.getPersonidentifikator())
+				.withPostkasseadresse(digitalPostInfo.getMottaker().getPostkasseadresse());
+		Mottaker mottaker = new Mottaker()
+				.withPerson(person);
+
+		Dokument hoveddokument = mapDokument(dokumentpakke.getHoveddokument());
+
+		List<Dokument> vedlegg = dokumentpakke.getVedlegg().stream()
+				.map(this::mapDokument)
+				.toList();
+
+		Manifest manifest = new Manifest()
+				.withAvsender(avsender)
+				.withMottaker(mottaker)
+				.withHoveddokument(hoveddokument)
+				.withVedlegg(vedlegg);
 
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		MarshalManifest.marshal(xmlManifest, os);
+		MarshalManifest.marshal(manifest, os);
 		return os.toString(StandardCharsets.UTF_8);
+	}
+
+	private Dokument mapDokument(DpiDokument dpiDokument) {
+
+		Tittel tittel = new Tittel();
+		tittel.setLang(DOKUMENT_LANG);
+		tittel.setValue(dpiDokument.getTittel());
+		return new Dokument()
+				.withTittel(tittel)
+				.withMime(dpiDokument.getMimeType())
+				.withHref(dpiDokument.getFilnavn());
 	}
 }

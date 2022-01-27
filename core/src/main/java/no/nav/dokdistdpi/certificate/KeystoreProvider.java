@@ -8,7 +8,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Base64;
-import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 public class KeystoreProvider {
 
@@ -34,7 +35,7 @@ public class KeystoreProvider {
 			if (path == null || "none".equalsIgnoreCase(path.getFilename())) {
 				keyStore.load(null, password.toCharArray());
 			} else {
-				if(Objects.requireNonNull(path.getFilename()).endsWith(".b64")) {
+				if(requireNonNull(path.getFilename()).endsWith(".b64")) {
 					keyStore.load(Base64.getDecoder().wrap(path.getInputStream()), password.toCharArray());
 				} else {
 					keyStore.load(path.getInputStream(), password.toCharArray());

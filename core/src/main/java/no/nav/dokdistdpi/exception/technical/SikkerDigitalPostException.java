@@ -4,4 +4,8 @@ public class SikkerDigitalPostException extends AbstractDokdistdpiTechnicalExcep
 	public SikkerDigitalPostException(String message) {
 		super(message);
 	}
+
+	public SikkerDigitalPostException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }
