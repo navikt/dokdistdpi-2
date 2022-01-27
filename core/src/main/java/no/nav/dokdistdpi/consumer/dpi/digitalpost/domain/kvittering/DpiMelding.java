@@ -7,7 +7,7 @@ import lombok.experimental.SuperBuilder;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Avsender;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Virksomhetmottaker;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Data
 @SuperBuilder
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public abstract class DpiMelding {
 	private Avsender avsender;
 	private Virksomhetmottaker virksomhetmottaker;
-	private LocalDateTime tidspunkt;
+	private ZonedDateTime tidspunkt;
 	private String konversasjonsId;
 	private KvitteringType kvitteringType;
 	private String bestillingsId;

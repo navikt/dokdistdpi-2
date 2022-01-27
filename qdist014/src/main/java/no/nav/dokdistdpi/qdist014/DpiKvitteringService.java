@@ -85,7 +85,7 @@ public class DpiKvitteringService {
 			administrerForsendelse.feilRegistrerForsendelse(FeilRegistrerForsendelseRequest.builder()
 					.forsendelseId(forsendelseId)
 					.type(VARSLINGSFEIL.name())
-					.tidspunkt(varslingFeiletKvittering.getTidspunkt())
+					.tidspunkt(varslingFeiletKvittering.getTidspunkt().toLocalDateTime())
 					.detaljer(varslingFeiletKvittering.getVarslingskanal().name() + ":" + varslingFeiletKvittering.getBeskrivelse())
 					.resendingDistribusjonId(request.getBestillingsId())
 					.build());
@@ -94,7 +94,7 @@ public class DpiKvitteringService {
 					.forsendelseId(forsendelseId)
 					.type(MELDINGSFEIL.name())
 					.part(dpiFeil.getFeiltype().name())
-					.tidspunkt(dpiFeil.getTidspunkt())
+					.tidspunkt(dpiFeil.getTidspunkt().toLocalDateTime())
 					.detaljer(dpiFeil.getDetaljer())
 					.resendingDistribusjonId(request.getBestillingsId())
 					.build());

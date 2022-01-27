@@ -12,12 +12,13 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessD
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
+import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.getByValue;
 
 public class JsonObjectMapper {
 
 	private static final String SBD = "standardBusinessDocument";
-	private static final String KVITTERING = "kvittering";
 
 	private JsonObjectMapper() {
 	}
@@ -35,19 +36,19 @@ public class JsonObjectMapper {
 			ObjectMapper mapper = new JacksonConfig().dpiObjectMapper();
 			JsonNode jsonNode = mapper.readTree(jsonPayload);
 			JsonNode feilJsnode = jsonNode.path(SBD).path(FEILET.getValue());
-			JsonNode kvitteringJsnode = jsonNode.path(SBD).path(KVITTERING);
+			JsonNode varslingJsnode = jsonNode.path(SBD).path(VARSLINGFEILET.getValue());
+			JsonNode leveringsKvittering = jsonNode.path(SBD).path(LEVERING.getValue());
 			SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(jsonPayload);
 			DpiKvittering dpiKvittering = new DpiKvittering();
 
 			switch (getByValue(simpleSbd.getType())) {
 				case VARSLINGFEILET -> {
-					VarslingFeiletKvittering varslingfeiletKvittering = mapper.convertValue(kvitteringJsnode, VarslingFeiletKvittering.class);
+					VarslingFeiletKvittering varslingfeiletKvittering = mapper.convertValue(varslingJsnode, VarslingFeiletKvittering.class);
 					dpiKvittering.setVarslingfeiletkvittering(varslingfeiletKvittering);
 				}
 				case LEVERING -> {
-					LeveringsKvittering leveringKvittering = mapper.convertValue(kvitteringJsnode, LeveringsKvittering.class);
+					LeveringsKvittering leveringKvittering = mapper.convertValue(leveringsKvittering, LeveringsKvittering.class);
 					dpiKvittering.setLeveringskvittering(leveringKvittering);
-
 				}
 				case FEILET -> {
 					DpiFeilKvittering feilKvittering = mapper.convertValue(feilJsnode, DpiFeilKvittering.class);
