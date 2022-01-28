@@ -20,8 +20,8 @@ import org.springframework.stereotype.Component;
 import javax.jms.Queue;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
@@ -54,7 +54,7 @@ public class Sdist003Service {
 	}
 
 	@Handler
-	public HentKvitteringResponse[] hentKvitteringOgBekreft(Exchange exchange) {
+	public List<HentKvitteringResponse> hentKvitteringOgBekreft(Exchange exchange) {
 
 		ResponseEntity<HentKvitteringResponse[]> kvitteringList = dpiClient.hentKvittering();
 
@@ -62,7 +62,7 @@ public class Sdist003Service {
 			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir");
 		}
 
-		Map<String, String> bestillingsIds = new HashMap<>();
+		List<HentKvitteringResponse> hentKvitteringResponses = isEmpty(kvitteringList.getBody()) ? null : Arrays.stream(kvitteringList.getBody()).collect(Collectors.toList());
 
 		if (OK.equals(kvitteringList.getStatusCode()) && !isEmpty(kvitteringList.getBody())) {
 			Arrays.stream(kvitteringList.getBody())
@@ -79,12 +79,10 @@ public class Sdist003Service {
 						countDpiKvittering(kvitteringType);
 
 						dpiClient.bekreft(simpleSbd.getBestillingsId());
-						bestillingsIds.put(simpleSbd.getBestillingsId(), simpleSbd.getType());
 					});
-			log.info("Hentet kvitteringer={}", bestillingsIds);
 		}
 
-		return isEmpty(kvitteringList.getBody()) ? null : kvitteringList.getBody();
+		return hentKvitteringResponses;
 	}
 
 	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {
