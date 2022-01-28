@@ -42,12 +42,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.Certificate;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
 import static org.apache.commons.codec.digest.DigestUtils.sha256;
 import static org.springframework.xml.validation.XmlValidatorFactory.SCHEMA_W3C_XML;
@@ -170,19 +170,16 @@ public class CreateSignature {
 	}
 
 	private List<Reference> references(final XMLSignatureFactory xmlSignatureFactory, final List<AsicEVedlegg> files) {
-		List<Reference> result = new ArrayList<>();
-		for (int i = 0; i < files.size(); i++) {
+		AtomicInteger count = new AtomicInteger(0);
+		return files.stream().map(file -> {
 			try {
-				String signatureElementId = "ID_" + i;
-				String uri = URLEncoder.encode(files.get(i).getFileName(), UTF_8.name());
-				Reference reference = xmlSignatureFactory.newReference(uri, sha256DigestMethod, null, null, signatureElementId, sha256(files.get(i).getBytes()));
-				result.add(reference);
+				String signatureElementId = "ID_" + count.getAndIncrement();
+				String uri = URLEncoder.encode(file.getFileName(), "UTF-8");
+				return xmlSignatureFactory.newReference(uri, sha256DigestMethod, null, null, signatureElementId, sha256(file.getBytes()));
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);
 			}
-
-		}
-		return result;
+		}).collect(toList());
 	}
 
 	private static KeyInfo keyInfo(final XMLSignatureFactory xmlSignatureFactory, final Certificate[] sertifikater) {

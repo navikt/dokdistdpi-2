@@ -27,16 +27,15 @@
 		<java.version>17</java.version>
 		<activemq.version>5.16.3</activemq.version>
 		<awaitility.version>4.1.1</awaitility.version>
-		<aws-s3.version>1.12.125</aws-s3.version>
+		<aws-s3.version>1.12.148</aws-s3.version>
 		<bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
-		<camel.version>3.13.0</camel.version>
+		<camel.version>3.14.0</camel.version>
 		<commons-compress.version>1.21</commons-compress.version>
 		<commons-io.version>2.11.0</commons-io.version>
 		<commons-lang3.version>3.12.0</commons-lang3.version>
 		<dokkat.version>11.0.5</dokkat.version>
 		<ibm-mq.version>9.2.4.0</ibm-mq.version>
 		<jakarta.xml.version>2.3.3</jakarta.xml.version>
-		<java.version>17</java.version>
 		<lombok.version>1.18.22</lombok.version>
 		<logstash-logback-encoder.version>7.0.1</logstash-logback-encoder.version>
 		<melding-virksomhet-dokdistfordeling.version>2.1.2</melding-virksomhet-dokdistfordeling.version>
@@ -122,11 +121,6 @@
 			</dependency>
 
 			<!--Encryption-->
-			<dependency>
-				<groupId>no.difi.commons</groupId>
-				<artifactId>commons-asic</artifactId>
-				<version>${commons-asic.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>no.digipost</groupId>
 				<artifactId>sdp-xsd</artifactId>
