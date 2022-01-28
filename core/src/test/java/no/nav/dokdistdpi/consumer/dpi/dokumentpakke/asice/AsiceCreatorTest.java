@@ -4,6 +4,7 @@ package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.asice;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
+import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures.CreateSignature;
 import no.nav.dokdistdpi.utils.CertificateUtils;
 import no.nav.dokdistdpi.utils.TestUtils.ZipFile;
 import org.apache.commons.io.IOUtils;
@@ -33,7 +34,8 @@ class AsiceCreatorTest {
 	private static final String DOKUMENT_2_NAME = "test2.pdf";
 	private static final String DOKUMENT_2_CONTENTS = "test2pdf";
 
-	AsiceCreator asiceCreator = new AsiceCreator();
+	CreateSignature createSignature = new CreateSignature();
+	AsiceCreator asiceCreator = new AsiceCreator(createSignature);
 	CreateCMSDocument createCMSDocument = new CreateCMSDocument();
 	DigitalPostContentPackager digitalPostContentPackage = new DigitalPostContentPackager(asiceCreator, createCMSDocument);
 
@@ -46,15 +48,15 @@ class AsiceCreatorTest {
 		final ByteArrayInputStream asice = new ByteArrayInputStream(((ByteArrayOutputStream) asiceStreamed).toByteArray());
 
 		final List<ZipFile> zipEntries = zipEntries(IOUtils.toBufferedInputStream(asice));
-		assertEquals(7, zipEntries.size());
+		assertEquals(5, zipEntries.size());
 
 		assertThat(zipEntries).extracting(ZipFile::getName).containsAll(
-				Arrays.asList("mimetype",
+				Arrays.asList(
 						"manifest.xml",
 						"hoveddokument.pdf",
 						"test1.pdf",
-						"META-INF/signatures.xml",
-						"META-INF/manifest.xml"));
+						"test2.pdf",
+						"META-INF/signatures.xml"));
 		assertFileContents(zipEntries, HOVEDDOKUMENT_NAME, HOVEDDOKUMENT_CONTENTS);
 		assertFileContents(zipEntries, DOKUMENT_1_NAME, DOKUMENT_1_CONTENTS);
 		assertFileContents(zipEntries, DOKUMENT_2_NAME, DOKUMENT_2_CONTENTS);
@@ -72,9 +74,9 @@ class AsiceCreatorTest {
 
 	private Dokumentpakke getDokumentpakke() {
 		return Dokumentpakke.builder()
-				.hoveddokument(fromHoveddokument(TITTEL, HOVEDDOKUMENT_NAME, new ByteArrayInputStream(HOVEDDOKUMENT_CONTENTS.getBytes())))
-				.vedlegg(Arrays.asList(fromVedlegg(TITTEL, DOKUMENT_1_NAME, new ByteArrayInputStream(DOKUMENT_1_CONTENTS.getBytes())),
-						fromVedlegg(TITTEL, DOKUMENT_2_NAME, new ByteArrayInputStream(DOKUMENT_2_CONTENTS.getBytes()))))
+				.hoveddokument(fromHoveddokument(TITTEL, HOVEDDOKUMENT_NAME, HOVEDDOKUMENT_CONTENTS.getBytes()))
+				.vedlegg(Arrays.asList(fromVedlegg(TITTEL, DOKUMENT_1_NAME, DOKUMENT_1_CONTENTS.getBytes()),
+						fromVedlegg(TITTEL, DOKUMENT_2_NAME, DOKUMENT_2_CONTENTS.getBytes())))
 				.build();
 	}
 

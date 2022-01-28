@@ -10,6 +10,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 @Getter
@@ -71,6 +72,14 @@ public class AppCertificate {
 			return certificate;
 		} catch (KeyStoreException e) {
 			throw new IllegalStateException(ERR_GENERAL, e);
+		}
+	}
+
+	public Certificate[] getCertificateList() {
+		try {
+			return keyStore.getCertificateChain(properties.getAlias());
+		} catch (KeyStoreException e) {
+			throw new IllegalStateException("Kunne ikke hente privatnøkkel fra KeyStore. Er KeyStore initialisiert?", e);
 		}
 	}
 

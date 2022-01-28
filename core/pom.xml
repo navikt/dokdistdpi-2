@@ -27,6 +27,14 @@
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-oxm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.ws</groupId>
+			<artifactId>spring-xml</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
@@ -60,6 +68,10 @@
 		</dependency>
 
 		<!-- apache -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-jms-pool</artifactId>
@@ -103,8 +115,8 @@
 
 		<!--Encryption-->
 		<dependency>
-			<groupId>no.difi.commons</groupId>
-			<artifactId>commons-asic</artifactId>
+			<groupId>no.digipost</groupId>
+			<artifactId>sdp-xsd</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.nimbusds</groupId>

@@ -14,7 +14,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -56,7 +55,7 @@ public class Sdist003Service {
 	}
 
 	@Handler
-	public HttpStatus hentKvitteringOgBekreft(Exchange exchange) {
+	public HentKvitteringResponse[] hentKvitteringOgBekreft(Exchange exchange) {
 
 		ResponseEntity<HentKvitteringResponse[]> kvitteringList = dpiClient.hentKvittering();
 
@@ -71,9 +70,9 @@ public class Sdist003Service {
 					.map(this::getForretningsmeldingFromJwt)
 					.forEach(payload -> {
 						SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(payload);
-						log.info("Mottatt kvittering fra dpi aksesspunkt med bestillingsId={} og conversationId={}", simpleSbd.getBestillingsId(), simpleSbd.getConversationId());
+						log.info("Mottatt kvittering fra dpi aksesspunkt med konversasjonId={}", simpleSbd.getConversationId());
 						producerTemplate.sendBody("jms:" + qdist014, payload);
-						log.info("Sdist003 har skrevet melding på qdist014 med bestillingsId={} og conversationId={}", simpleSbd.getBestillingsId(), simpleSbd.getConversationId());
+						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
 
 						juridiskLoggService.lagreJuridiskLogg(payload);
 
@@ -86,7 +85,7 @@ public class Sdist003Service {
 			log.info("Hentet kvitteringer={}", bestillingsIds);
 		}
 
-		return kvitteringList.getStatusCode();
+		return isNull(kvitteringList.getBody()) ? null : kvitteringList.getBody();
 	}
 
 	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {

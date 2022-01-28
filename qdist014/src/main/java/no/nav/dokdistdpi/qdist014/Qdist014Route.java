@@ -95,7 +95,7 @@ public class Qdist014Route extends RouteBuilder {
 						.choice()
 							.when(simple("${body.kvitteringType}").isEqualTo(LEVERING))
 								.bean(oppdaterForsendelseStatus)
-								.log(INFO, log,"qdist014 har oppdatert forsendelse med " + getIdsForLogging() + "til EKSPEDERT")
+								.log(INFO, log,"qdist014 har oppdatert forsendelse med " + getIdsForLogging() + " til EKSPEDERT")
 							.when(or(simple("${body.kvitteringType}").isEqualTo(VARSLINGFEILET), simple("${body.kvitteringType}").isEqualTo(FEILET)))
 								.bean(qdist014Service)
 								.marshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))

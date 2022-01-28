@@ -6,5 +6,6 @@ public enum ForsendelseStatus {
 	FEILET,
 	RETURPOSTBEHANDLET,
 	BEKREFTET,
-	KLAR_FOR_DIST
+	KLAR_FOR_DIST,
+	OPPRETTET
 }

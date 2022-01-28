@@ -14,7 +14,6 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
@@ -24,7 +23,7 @@ public class XmlManifestCreator {
 
 	private static final String DOKUMENT_LANG = "no";
 
-	public String createManifest(Forsendelse forsendelse) {
+	public DpiManifest createManifest(Forsendelse forsendelse) {
 		Dokumentpakke dokumentpakke = forsendelse.getDokumentpakke();
 		DigitalPost digitalPostInfo = forsendelse.getDigital();
 
@@ -55,7 +54,7 @@ public class XmlManifestCreator {
 
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		MarshalManifest.marshal(manifest, os);
-		return os.toString(StandardCharsets.UTF_8);
+		return new DpiManifest(os.toByteArray());
 	}
 
 	private Dokument mapDokument(DpiDokument dpiDokument) {

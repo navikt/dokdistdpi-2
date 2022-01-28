@@ -9,6 +9,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
+import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class GenerateJwt {
 			certChain.add(Base64.encode(appCertificate.getX509Certificate().getEncoded()));
 		} catch (CertificateEncodingException e) {
 			log.error("Could not get encoded certificate", e);
-			throw new RuntimeException(e);
+			throw new SikkerDigitalPostException("Could not get encoded certificate", e);
 		}
 		JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256).x509CertChain(certChain).build();
 
