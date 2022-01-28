@@ -24,13 +24,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
 import static no.nav.dokdistdpi.utils.JsonObjectMapper.mapSimpleSbd;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Slf4j
 @Component
@@ -65,7 +65,7 @@ public class Sdist003Service {
 
 		Map<String, String> bestillingsIds = new HashMap<>();
 
-		if (OK.equals(kvitteringList.getStatusCode()) && nonNull(kvitteringList.getBody())) {
+		if (OK.equals(kvitteringList.getStatusCode()) && !isEmpty(kvitteringList.getBody())) {
 			Arrays.stream(kvitteringList.getBody())
 					.map(this::getForretningsmeldingFromJwt)
 					.forEach(payload -> {
@@ -85,7 +85,7 @@ public class Sdist003Service {
 			log.info("Hentet kvitteringer={}", bestillingsIds);
 		}
 
-		return isNull(kvitteringList.getBody()) ? null : kvitteringList.getBody();
+		return isEmpty(kvitteringList.getBody()) ? null : kvitteringList.getBody();
 	}
 
 	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {
@@ -110,6 +110,6 @@ public class Sdist003Service {
 
 	private void countDpiKvittering(KvitteringType kvitteringType) {
 		meterRegistry.counter(DPI_KVITTERING_COUNTER,
-				"kvitteringStatus", isNull(kvitteringType.name()) ? "UKJENT" : kvitteringType.name()).increment();
+				"kvitteringStatus", kvitteringType.name()).increment();
 	}
 }
