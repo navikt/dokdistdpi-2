@@ -10,12 +10,9 @@ public class DokdistdpiConstant {
 	public static final String QDIST011_SERVICE_ID = "qdist011";
 
 	public static final String CALL_ID = "callId";
-	public static final String MDC_REQUEST_ID = "requestId";
 	public static final String NAV_CALL_ID = "Nav-Call-Id";
 	public static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";
 	public static final String APP_NAME = "dokdistdpi";
-	public static final String BEARER_PREFIX = "Bearer ";
-	public static final String NAV_PERSONIDENT = "Nav-Personident";
 	public static final String NAV_PERSONIDENTER = "Nav-Personidenter";
 
 	public static final String STS_CACHE = "stsCache";

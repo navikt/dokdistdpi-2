@@ -87,7 +87,7 @@ public class Qdist014Route extends RouteBuilder {
 				.log(INFO, log, "qdist014 har mottatt kvittering fra sdist003")
 				.bean(forretningsKvitteringMapper)
 				.choice()
-					.when(simple("${body}").isEqualTo(null))
+					.when(simple("${body}").isNull())
 						.log(INFO, log, BEHANDLINGEN_AVSLUTTES)
 					.when(method(dpiKvitteringService, "erStatusEkspedertOrReturOrFeilet").isEqualTo(true))
 						.log(INFO, log, BEHANDLINGEN_AVSLUTTES + "forsendelseStatus=${exchangeProperty." + PROPERTY_FORSENDELSE_STATUS + "}")
