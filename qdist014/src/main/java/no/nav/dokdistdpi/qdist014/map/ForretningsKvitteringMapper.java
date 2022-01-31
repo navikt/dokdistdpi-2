@@ -34,6 +34,7 @@ public class ForretningsKvitteringMapper {
 		switch (getByValue(simpleSbd.getType())) {
 			case VARSLINGFEILET -> {
 				VarslingFeiletKvittering varslingFeilet = dpiKvittering.getVarslingfeiletkvittering();
+				log.warn("Kvittering varslingfeilet {}", varslingFeilet.getBeskrivelse());
 				return VarslingFeiletKvittering.builder()
 						.konversasjonsId(simpleSbd.getConversationId())
 						.bestillingsId(simpleSbd.getBestillingsId())
@@ -53,6 +54,7 @@ public class ForretningsKvitteringMapper {
 			}
 			case FEILET -> {
 				DpiFeilKvittering dpiFeilKvittering = dpiKvittering.getFeil();
+				log.warn("Kvittering feilet: {}", dpiFeilKvittering.getDetaljer());
 				return DpiFeilKvittering.builder()
 						.konversasjonsId(simpleSbd.getConversationId())
 						.bestillingsId(simpleSbd.getBestillingsId())

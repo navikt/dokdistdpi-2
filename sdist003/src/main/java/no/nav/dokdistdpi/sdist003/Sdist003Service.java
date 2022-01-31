@@ -14,24 +14,22 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.jms.Queue;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
 import static no.nav.dokdistdpi.utils.JsonObjectMapper.mapSimpleSbd;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Slf4j
 @Component
@@ -56,7 +54,7 @@ public class Sdist003Service {
 	}
 
 	@Handler
-	public HttpStatus hentKvitteringOgBekreft(Exchange exchange) {
+	public List<HentKvitteringResponse> hentKvitteringOgBekreft(Exchange exchange) {
 
 		ResponseEntity<HentKvitteringResponse[]> kvitteringList = dpiClient.hentKvittering();
 
@@ -64,16 +62,16 @@ public class Sdist003Service {
 			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir");
 		}
 
-		Map<String, String> bestillingsIds = new HashMap<>();
+		List<HentKvitteringResponse> hentKvitteringResponses = isEmpty(kvitteringList.getBody()) ? null : Arrays.stream(kvitteringList.getBody()).collect(Collectors.toList());
 
-		if (OK.equals(kvitteringList.getStatusCode()) && nonNull(kvitteringList.getBody())) {
+		if (OK.equals(kvitteringList.getStatusCode()) && !isEmpty(kvitteringList.getBody())) {
 			Arrays.stream(kvitteringList.getBody())
 					.map(this::getForretningsmeldingFromJwt)
 					.forEach(payload -> {
 						SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(payload);
-						log.info("Mottatt kvittering fra dpi aksesspunkt med bestillingsId={} og conversationId={}", simpleSbd.getBestillingsId(), simpleSbd.getConversationId());
+						log.info("Mottatt kvittering fra dpi aksesspunkt med konversasjonId={}", simpleSbd.getConversationId());
 						producerTemplate.sendBody("jms:" + qdist014, payload);
-						log.info("Sdist003 har skrevet melding på qdist014 med bestillingsId={} og conversationId={}", simpleSbd.getBestillingsId(), simpleSbd.getConversationId());
+						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
 
 						juridiskLoggService.lagreJuridiskLogg(payload);
 
@@ -81,12 +79,10 @@ public class Sdist003Service {
 						countDpiKvittering(kvitteringType);
 
 						dpiClient.bekreft(simpleSbd.getBestillingsId());
-						bestillingsIds.put(simpleSbd.getBestillingsId(), simpleSbd.getType());
 					});
-			log.info("Hentet kvitteringer={}", bestillingsIds);
 		}
 
-		return kvitteringList.getStatusCode();
+		return hentKvitteringResponses;
 	}
 
 	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {
@@ -111,6 +107,6 @@ public class Sdist003Service {
 
 	private void countDpiKvittering(KvitteringType kvitteringType) {
 		meterRegistry.counter(DPI_KVITTERING_COUNTER,
-				"kvitteringStatus", isNull(kvitteringType.name()) ? "UKJENT" : kvitteringType.name()).increment();
+				"kvitteringStatus", kvitteringType.name()).increment();
 	}
 }

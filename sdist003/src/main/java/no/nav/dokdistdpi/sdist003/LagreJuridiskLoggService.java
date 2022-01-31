@@ -31,9 +31,9 @@ public class LagreJuridiskLoggService {
 		try {
 			SimpleStandardBusinessDocument simpleSbd = objectMapper.readValue(payload, SimpleStandardBusinessDocument.class);
 			juridiskLoggConsumer.lagreJuridiskLogg(map(payload, simpleSbd));
-			log.info("Hendelse med bestillingsId={} og konversasjonsId={} logget til juridisk arkiv.", simpleSbd.getBestillingsId(), simpleSbd.getConversationId());
+			log.info("Hendelse med konversasjonsId={} logget til juridisk arkiv.", simpleSbd.getConversationId());
 		} catch (JsonProcessingException e) {
-			throw new JsonParserTechnicalException("Feilet å mappe JWT Forretningsmelding", e);
+			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 
 		}
 	}

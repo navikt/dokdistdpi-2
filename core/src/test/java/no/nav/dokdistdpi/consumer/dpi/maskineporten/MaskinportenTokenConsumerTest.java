@@ -3,6 +3,8 @@ package no.nav.dokdistdpi.consumer.dpi.maskineporten;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.certificate.KeyStoreProperties;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
+import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
+import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -11,11 +13,13 @@ import org.springframework.core.io.FileSystemResource;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 @Disabled
 class MaskinportenTokenConsumerTest {
-	private KeyStoreProperties keyStoreProperties = new KeyStoreProperties();
-	private MaskinportenProperties maskinportenProperties = new MaskinportenProperties();
+	private final KeyStoreProperties keyStoreProperties = new KeyStoreProperties();
+	private final MaskinportenProperties maskinportenProperties = new MaskinportenProperties();
+	private DpiClient dpiClient;
 
 	@BeforeEach
 	public void setup() throws MalformedURLException {
@@ -51,6 +55,9 @@ class MaskinportenTokenConsumerTest {
 		MaskinportenTokenConsumer oidcTokenClient = new MaskinportenTokenConsumer(new AppCertificate(keyStoreProperties), maskinportenProperties, new RestTemplateBuilder());
 
 		final OidcTokenResponse oidcTokenResponse = oidcTokenClient.fetchToken();
+
+		List<ForsendelseStatusResponse> hentKvitteringResponseList = dpiClient.hentForsendelseStatus("");
+
 		System.out.println(oidcTokenResponse.getAccessToken());
 	}
 }

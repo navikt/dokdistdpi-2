@@ -15,19 +15,17 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-
 @Component
 public class Sdist003Route extends RouteBuilder {
 
-	private static final String JURIDISKLOGG_ROUTE_ID = "juridiskLogg";
-	public static final String ROUTE_JURIDISKLOGG = "direct:" + JURIDISKLOGG_ROUTE_ID;
 	private static final String ROUTE_SDIST003_AVVIK_ID = "sdist003Avvik";
 	public static final String ROUTE_SDIST003_AVVIK = "direct:" + ROUTE_SDIST003_AVVIK_ID;
-	private final String ROUTEID = "sdist003";
-	private final String FUNCTIONAL_ERROR_HANDLER = "FUNCTIONAL_ERROR_HANDLER";
-	private final String TECHNICAL_ERROR_HANDLER = "TECHNICAL_ERROR_HANDLER";
-	private final String UNKNOWN_ERROR_HANDLER = "UNKNOWN_ERROR_HANDLER";
+	private static final String ROUTEID = "sdist003";
+	public static final String SDIST003_NORMAL_ROUTE = "direct:sdist003-normal";
+
+	private static final String FUNCTIONAL_ERROR_HANDLER = "FUNCTIONAL_ERROR_HANDLER";
+	private static final String TECHNICAL_ERROR_HANDLER = "TECHNICAL_ERROR_HANDLER";
+	private static final String UNKNOWN_ERROR_HANDLER = "UNKNOWN_ERROR_HANDLER";
 
 	private final LederElectionConsumer lederElection;
 	private final Sdist003Service sdist003Service;
@@ -69,15 +67,23 @@ public class Sdist003Route extends RouteBuilder {
 		from("scheduler://dpiScheduler?delay=" + dpiClientProperties.getDpischeduler())
 				.autoStartup(dpiClientProperties.isAutoStartup())
 				.routeId(ROUTEID + "-dpiScheduler")
+				.onCompletion()
+					.to(SDIST003_NORMAL_ROUTE)
+				.end()
+				.to("log:avsluttes");
+
+		from(SDIST003_NORMAL_ROUTE)
+				.routeId("sdist003-normal")
+				.process(new Sdist003HeaderProcessor())
+				.setExchangePattern(ExchangePattern.InOnly)
 				.choice()
 					.when(method(lederElection, "isLeader").isEqualTo(true))
-						.process(new MDCHeaderProcessor())
 						.setExchangePattern(ExchangePattern.InOnly)
 						.bean(sdist003Service)
 						.choice()
-							.when(simple("${body}").isEqualTo(NO_CONTENT))
-							.log(LoggingLevel.INFO, log, "Sdist003 fant ingen kvitteringer fra DPI.")
-							.delay(dpiClientProperties.getPullinterval())
+							.when(simple("${body}").isEqualTo(null))
+								.log(LoggingLevel.INFO, log, "Sdist003 fant ingen kvitteringer fra DPI.")
+								.delay(dpiClientProperties.getPullinterval())
 						.endChoice()
 				.endChoice()
 				.end();

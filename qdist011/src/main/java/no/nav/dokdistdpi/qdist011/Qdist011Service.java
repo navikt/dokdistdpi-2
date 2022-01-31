@@ -17,6 +17,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDeserialisereS3PayloadException;
+import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeFinneDokumentException;
 import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.dokdistdpi.s3storage.DokDistDokumentFraS3;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +40,7 @@ import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_EKSPEDERT;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_OPPRETTET;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
@@ -78,12 +79,9 @@ public class Qdist011Service {
 		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(distribuerTilKanal.getForsendelseId());
 		assertForsendelseNotNull(hentForsendelseResponse);
 		exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
-		if (FORSENDELSE_STATUS_EKSPEDERT.equals(hentForsendelseResponse.getForsendelseStatus())) {
-			log.info("Forsendelse med forsendelseId={}, status={} er ekspdert og behandlingen avsluttes",
-					distribuerTilKanal.getForsendelseId(), hentForsendelseResponse.getForsendelseStatus());
-			throw new ForsendelseStatusExpedertKanIkkeDistribuereException(format("Forsendelse med forsendelseId=%s, status=%s er ekspdert og behandlingen avsluttes",
-					distribuerTilKanal.getForsendelseId(), hentForsendelseResponse.getForsendelseStatus()));
-		}
+
+		validateStatus(hentForsendelseResponse.getForsendelseStatus(), distribuerTilKanal.getForsendelseId());
+
 		String konversasjonId = getConversationId(hentForsendelseResponse, distribuerTilKanal.getForsendelseId());
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
 		exchange.setProperty(PROPERTY_CONVERSATION_ID, konversasjonId);
@@ -144,8 +142,7 @@ public class Qdist011Service {
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
 				.map(dokument ->
 						DpiDokument.fromHoveddokument(hentForsendelseResponse.getForsendelseTittel(),
-								getHoveddokumentFilnavn(hentForsendelseResponse),
-								new ByteArrayInputStream(this.getDocumentForS3(dokument).getPdf())
+								getHoveddokumentFilnavn(hentForsendelseResponse), this.getDocumentForS3(dokument).getPdf()
 						))
 				.findFirst().orElseThrow(() -> new KunneIkkeFinneDokumentException("Kunne ikke finne hovedDokument"));
 
@@ -161,8 +158,7 @@ public class Qdist011Service {
 									dokument,
 									vedleggIdx.getAndIncrement()
 							),
-							dokDistDokumentFraS3.getDokumentObjektReferanse(),
-							new ByteArrayInputStream(dokDistDokumentFraS3.getPdf())
+							dokDistDokumentFraS3.getDokumentObjektReferanse(), dokDistDokumentFraS3.getPdf()
 					);
 				})
 				.toList();
@@ -205,6 +201,17 @@ public class Qdist011Service {
 				.orElseThrow(() -> new KunneIkkeFinneDokumentException(
 						format("DokumentInfoId=%s ikke funnet i journalpost", arkivDokumentInfoId)))
 				.getTittel();
+	}
+
+	private void validateStatus(String forsendelseStatus, String forsendelseId) {
+		if (FORSENDELSE_STATUS_EKSPEDERT.equals(forsendelseStatus)) {
+			log.info("Forsendelse med forsendelseId={}, status={} er ekspdert og behandlingen avsluttes",
+					forsendelseId, forsendelseStatus);
+			throw new ForsendelseStatusExpedertKanIkkeDistribuereException(format("Forsendelse med forsendelseId=%s, status=%s er ekspdert og behandlingen avsluttes",
+					forsendelseId, forsendelseStatus));
+		} else if(FORSENDELSE_STATUS_OPPRETTET.equals(forsendelseStatus)) {
+			throw new KunneIkkeDistribuereForsendelseException(format("Kunne ikke distribuere forsendelse med forsendelseId=%s, status=%s", forsendelseId, forsendelseStatus));
+		}
 	}
 
 	private void validateDistribuerForsendelseTilDpi(DistribuerTilKanal distribuerTilKanal) {
