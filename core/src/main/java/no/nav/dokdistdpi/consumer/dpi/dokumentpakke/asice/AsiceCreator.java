@@ -10,6 +10,7 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures.XAdESSignatu
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures.XmlValideringException;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.xmlmanifest.DpiManifest;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.xmlmanifest.XmlManifestCreator;
+import no.nav.dokdistdpi.exception.technical.XMLXAdESSignaturesException;
 import no.nav.dokdistdpi.utils.CreateZip;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.String.format;
 import static no.nav.dokdistdpi.utils.CreateZip.zipEntries;
 
 
@@ -53,11 +55,12 @@ public class AsiceCreator {
 
 		try {
 			// Lag signatur over alle filene i pakka
-			log.info("Signing ASiC-E documents using private key with alias.");
+			log.info("Signing ASiC-E documents with bestillingsId={} using private key.", forsendelse.getBestillingsId());
 			XAdESSignatures signatures = createSignature.createSignature(appCertificate, asicEAttachables);
 			asicEAttachables.add(signatures);
 		} catch (XmlValideringException e) {
-			e.printStackTrace();
+			log.error(format("Klarte ikke å signere ASiC-E element, bestillingsId=%s.", forsendelse.getBestillingsId()));
+			throw new XMLXAdESSignaturesException("Klarte ikke å signere ASiC-E element.", e);
 		}
 
 		// Zip filene

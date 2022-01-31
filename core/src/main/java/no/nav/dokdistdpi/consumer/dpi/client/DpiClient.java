@@ -140,7 +140,6 @@ public class DpiClient {
 
 		try {
 			ResponseEntity<HentKvitteringResponse[]> response = restTemplate.exchange(uri, GET, new HttpEntity<>(jsonTypeHeaders()), HentKvitteringResponse[].class);
-			log.info("Hentet kvittering fra C3 med status={}", response.getStatusCode());
 			return response;
 		} catch (HttpClientErrorException e) {
 			throw new KunneIkkeHentKvitteringException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
