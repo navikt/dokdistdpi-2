@@ -57,32 +57,31 @@ public class Sdist003Service {
 	public List<HentKvitteringResponse> hentKvitteringOgBekreft(Exchange exchange) {
 
 		ResponseEntity<HentKvitteringResponse[]> kvitteringList = dpiClient.hentKvittering();
+		log.info("Hentet total={} kvitteringer fra DPI", kvitteringList.getBody().length);
 
 		if (!OK.equals(kvitteringList.getStatusCode()) && !NO_CONTENT.equals(kvitteringList.getStatusCode())) {
 			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir");
 		}
-
-		List<HentKvitteringResponse> hentKvitteringResponses = isEmpty(kvitteringList.getBody()) ? null : Arrays.stream(kvitteringList.getBody()).collect(Collectors.toList());
 
 		if (OK.equals(kvitteringList.getStatusCode()) && !isEmpty(kvitteringList.getBody())) {
 			Arrays.stream(kvitteringList.getBody())
 					.map(this::getForretningsmeldingFromJwt)
 					.forEach(payload -> {
 						SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(payload);
-						log.info("Mottatt kvittering fra dpi aksesspunkt med konversasjonId={}", simpleSbd.getConversationId());
+						KvitteringType kvitteringType = getKvitteringType(simpleSbd);
+						log.info("Mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getConversationId(), kvitteringType);
 						producerTemplate.sendBody("jms:" + qdist014, payload);
 						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
 
 						juridiskLoggService.lagreJuridiskLogg(payload);
 
-						KvitteringType kvitteringType = getKvitteringType(simpleSbd);
 						countDpiKvittering(kvitteringType);
 
 						dpiClient.bekreft(simpleSbd.getBestillingsId());
 					});
 		}
 
-		return hentKvitteringResponses;
+		return isEmpty(kvitteringList.getBody()) ? null : Arrays.stream(kvitteringList.getBody()).collect(Collectors.toList());
 	}
 
 	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {

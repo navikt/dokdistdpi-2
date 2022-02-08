@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import no.nav.dokdistdpi.sdist003.Sdist003Service;
@@ -109,7 +108,6 @@ public class Sdist003ITest {
 
 	@Test
 	public void shouldGetKvitteringFromDpiAccessPoint() {
-		String x = KvitteringType.FEILET.getValue();
 		when(lederElection.isLeader()).thenReturn(true);
 		stubGetKvittering();
 		stubPostMottattKvittering();
