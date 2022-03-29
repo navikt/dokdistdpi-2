@@ -5,7 +5,6 @@
   "DOKUMENTTYPEINFO_V4_URL": "https://app-q2.adeo.no/dokkat/rest/dokumenttypeinfo/v4",
   "VARSELINFO_V1_URL": "https://app-q2.adeo.no/dokkat/rest/varselinfo/v1",
   "DKI_API_URL": "https://dkif-u.dev.intern.nav.no/",
-  "S3_STORAGE_URL": "https://objectstore.nais.preprod.local",
   "SAF_GRAPHQL_URL": "https://saf.dev.intern.nav.no/graphql",
   "JURIDISKLOGG_URL": "https://app-q1.adeo.no/juridisklogg/api/rest/logg",
   "SECURITY_TOKEN_SERVICE_URL": "https://security-token-service.nais.preprod.local/rest/v1/sts/token",
@@ -28,6 +27,10 @@
   "APPD_NAME": "dokdistdpi-2",
   "APP_NAME": "dokdistdpi-2",
   "AUTOSTARTUP_ROUTE": "true",
+  "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-dev-2c5a",
+  "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-dev",
+  "DOKDISTMELLOMLAGER_KEYRING": "dokdistmellomlager-keyring-dev",
+  "DOKDISTMELLOMLAGER_KEYID": "dokdistmellomlager-symmetric-dev",
   "MIN_REPLICAS": "1",
   "MAX_REPLICAS": "2",
   "INGRESSES": [

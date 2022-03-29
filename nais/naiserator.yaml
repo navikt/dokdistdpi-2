@@ -23,8 +23,6 @@ spec:
       value: {{ MASKINPORTEN_URL }}
     - name: MASKINPORTEN_AUDIENCE
       value: {{ MASKINPORTEN_AUDIENCE }}
-    - name: S3_STORAGE_URL
-      value: {{ S3_STORAGE_URL }}
     - name: SAF_GRAPHQL_URL
       value: {{ SAF_GRAPHQL_URL }}
     - name: JURIDISKLOGG_URL
@@ -53,6 +51,14 @@ spec:
       value: "{{ AUTOSTARTUP_ROUTE }}"
     - name: APPD_NAME
       value: {{ APPD_NAME }}
+    - name: DOKDISTMELLOMLAGER_PROJECTID
+      value: {{ DOKDISTMELLOMLAGER_PROJECTID }}
+    - name: DOKDISTMELLOMLAGER_BUCKET
+      value: {{ DOKDISTMELLOMLAGER_BUCKET }}
+    - name: DOKDISTMELLOMLAGER_KEYRING
+      value: {{ DOKDISTMELLOMLAGER_KEYRING }}
+    - name: DOKDISTMELLOMLAGER_KEYID
+      value: {{ DOKDISTMELLOMLAGER_KEYID }}
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}

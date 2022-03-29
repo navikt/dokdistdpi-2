@@ -1,5 +1,6 @@
 package no.nav.dokdistdpi.qdist011;
 
+import no.nav.dokdistdpi.cloudstorage.BucketStorage;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
@@ -15,8 +16,6 @@ import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctiona
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.dokdistdpi.qdist011.saf.SafJournalpostQueryServiceImplQdist011;
-import no.nav.dokdistdpi.s3storage.AmazonS3Storage;
-import no.nav.dokdistdpi.s3storage.Storage;
 import org.apache.camel.Exchange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,15 +72,15 @@ class Qdist011ServiceTest {
 		varselInfo = mock(VarselInfo.class);
 		dokumentkatalog = mock(DokumentkatalogConsumer.class);
 		exchange = mock(Exchange.class);
-		Storage s3Storage = mock(AmazonS3Storage.class);
+		BucketStorage bucketStorage = mock(BucketStorage.class);
 
 		DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator = new DigitalKontaktInformasjonValidator();
 		DigitalPostService digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
 				digitalKontaktinformasjonConsumer, varselInfo, dokumentkatalog);
 
-		qdist011Service = new Qdist011Service(s3Storage, administrerForsendelse, digitalPostService, safJournalpostQueryService);
+		qdist011Service = new Qdist011Service(bucketStorage, administrerForsendelse, digitalPostService, safJournalpostQueryService);
 
-		when(s3Storage.get(anyString())).thenReturn("{\"pdf\":\"SE9WRURET0tfVEVTVF9DT05URU5U\",\"dokumentObjektReferanse\":null,\"dokumentInfoId\":null}");
+		when(bucketStorage.downloadObject(anyString(), anyString())).thenReturn("{\"pdf\":\"SE9WRURET0tfVEVTVF9DT05URU5U\",\"dokumentObjektReferanse\":null,\"dokumentInfoId\":null}");
 	}
 
 	@Test

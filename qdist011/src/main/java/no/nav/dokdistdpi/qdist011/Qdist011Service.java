@@ -1,7 +1,9 @@
 package no.nav.dokdistdpi.qdist011;
 
-import com.amazonaws.SdkClientException;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokdistdpi.cloudstorage.BucketStorage;
+import no.nav.dokdistdpi.cloudstorage.DokDistDokumentFraBucket;
+import no.nav.dokdistdpi.cloudstorage.JsonSerializer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
@@ -16,13 +18,10 @@ import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
-import no.nav.dokdistdpi.exception.functional.KunneIkkeDeserialisereS3PayloadException;
+import no.nav.dokdistdpi.exception.functional.KunneIkkeDeserialisereBucketPayloadException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeFinneDokumentException;
 import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
-import no.nav.dokdistdpi.s3storage.DokDistDokumentFraS3;
-import no.nav.dokdistdpi.s3storage.JsonSerializer;
-import no.nav.dokdistdpi.s3storage.Storage;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
@@ -59,15 +58,15 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class Qdist011Service {
 	private static final String SPRAAK = "NO";
 
-	private final Storage s3Storage;
+	private final BucketStorage bucketStorage;
 	private final AdministrerForsendelseConsumer administrerForsendelse;
 	private final SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService;
 	private final DigitalPostService digitalPostService;
 
 	@Autowired
-	public Qdist011Service(Storage s3Storage, AdministrerForsendelseConsumer administrerForsendelse, DigitalPostService digitalPostService,
+	public Qdist011Service(BucketStorage bucketStorage, AdministrerForsendelseConsumer administrerForsendelse, DigitalPostService digitalPostService,
 						   @Qualifier("SafJournalpostQueryServiceQdist011") SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService) {
-		this.s3Storage = s3Storage;
+		this.bucketStorage = bucketStorage;
 		this.administrerForsendelse = administrerForsendelse;
 		this.safJournalpostQueryService = safJournalpostQueryService;
 		this.digitalPostService = digitalPostService;
@@ -118,7 +117,7 @@ public class Qdist011Service {
 						.spraak(SPRAAK)
 						.varsler(varsler)
 						.build())
-				.dokumentpakke(getDocumentpakkeFromS3(hentForsendelseResponse))
+				.dokumentpakke(getDocumentpakkeFromBucket(hentForsendelseResponse))
 				.build();
 	}
 
@@ -129,10 +128,11 @@ public class Qdist011Service {
 		return safJournalpostQueryService.hentJournalpost(HentForsendelseResponse.getArkivInformasjon().getArkivId());
 	}
 
-	Dokumentpakke getDocumentpakkeFromS3(HentForsendelseResponse hentForsendelseResponse) {
+	Dokumentpakke getDocumentpakkeFromBucket(HentForsendelseResponse hentForsendelseResponse) {
+		final var bestillingsId = hentForsendelseResponse.getBestillingsId();
 		if (hentForsendelseResponse.getDokumenter().isEmpty()) {
 			throw new KunneIkkeFinneDokumentException(
-					format("Finnes ikke dokumenter med bestillingsId=%s", hentForsendelseResponse.getBestillingsId())
+					format("Finnes ikke dokumenter med bestillingsId=%s", bestillingsId)
 			);
 		}
 
@@ -142,7 +142,7 @@ public class Qdist011Service {
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
 				.map(dokument ->
 						DpiDokument.fromHoveddokument(hentForsendelseResponse.getForsendelseTittel(),
-								getHoveddokumentFilnavn(hentForsendelseResponse), this.getDocumentForS3(dokument).getPdf()
+								getHoveddokumentFilnavn(hentForsendelseResponse), this.getDocumentFromBucket(dokument, bestillingsId).getPdf()
 						))
 				.findFirst().orElseThrow(() -> new KunneIkkeFinneDokumentException("Kunne ikke finne hovedDokument"));
 
@@ -151,14 +151,14 @@ public class Qdist011Service {
 				.stream()
 				.filter(dokument -> VEDLEGG.equals(dokument.getTilknyttetSom()))
 				.map(dokument -> {
-					DokDistDokumentFraS3 dokDistDokumentFraS3 = this.getDocumentForS3(dokument);
+					DokDistDokumentFraBucket dokDistDokumentFraBucket = this.getDocumentFromBucket(dokument, bestillingsId);
 
 					return DpiDokument.fromVedlegg(getVedleggTittel(
 									journalpostQdist011,
 									dokument,
 									vedleggIdx.getAndIncrement()
 							),
-							dokDistDokumentFraS3.getDokumentObjektReferanse(), dokDistDokumentFraS3.getPdf()
+							dokDistDokumentFraBucket.getDokumentObjektReferanse(), dokDistDokumentFraBucket.getPdf()
 					);
 				})
 				.toList();
@@ -169,12 +169,12 @@ public class Qdist011Service {
 				.build();
 	}
 
-	private DokDistDokumentFraS3 getDocumentForS3(HentForsendelseResponse.DokumentTo dokument) {
-		String jsonPayload = s3Storage.get(dokument.getDokumentObjektReferanse());
-		DokDistDokumentFraS3 dokDistDokumentFraS3 = deserializeS3JsonPayloadToDokdistDokument(jsonPayload, dokument.getDokumentObjektReferanse());
-		dokDistDokumentFraS3.setDokumentInfoId(dokument.getArkivDokumentInfoId());
+	private DokDistDokumentFraBucket getDocumentFromBucket(HentForsendelseResponse.DokumentTo dokument, String bestillingsId) {
+		String jsonPayload = bucketStorage.downloadObject(dokument.getDokumentObjektReferanse(), bestillingsId);
+		DokDistDokumentFraBucket dokDistDokumentFraBucket = deserializeBucketJsonPayloadToDokdistDokument(jsonPayload, dokument.getDokumentObjektReferanse());
+		dokDistDokumentFraBucket.setDokumentInfoId(dokument.getArkivDokumentInfoId());
 
-		return dokDistDokumentFraS3;
+		return dokDistDokumentFraBucket;
 	}
 
 	private String getHoveddokumentFilnavn(HentForsendelseResponse hentForsendelseResponseTo) {
@@ -224,15 +224,15 @@ public class Qdist011Service {
 		assertNotNull("HentForsendelseResponseTo.MottakerTo", hentForsendelseResponse.getMottaker());
 	}
 
-	public static DokDistDokumentFraS3 deserializeS3JsonPayloadToDokdistDokument(String jsonPayload, String objektReferanse) {
-		DokDistDokumentFraS3 dokDistDokumentFraS3;
+	public static DokDistDokumentFraBucket deserializeBucketJsonPayloadToDokdistDokument(String jsonPayload, String objektReferanse) {
+		DokDistDokumentFraBucket dokDistDokumentFraBucket;
 		try {
-			dokDistDokumentFraS3 = JsonSerializer.deserialize(jsonPayload, DokDistDokumentFraS3.class);
-			dokDistDokumentFraS3.setDokumentObjektReferanse(objektReferanse);
-		} catch (SdkClientException e) {
-			throw new KunneIkkeDeserialisereS3PayloadException(format("Kunne ikke deserialisere jsonPayload fra s3 bucket for dokument med dokumentobjektreferanse=%s. Dokumentet er ikke persistert til s3 med korrekt format!", objektReferanse));
+			dokDistDokumentFraBucket = JsonSerializer.deserialize(jsonPayload, DokDistDokumentFraBucket.class);
+			dokDistDokumentFraBucket.setDokumentObjektReferanse(objektReferanse);
+		} catch (IllegalStateException e) {
+			throw new KunneIkkeDeserialisereBucketPayloadException(format("Kunne ikke deserialisere jsonPayload fra bucket for dokument med dokumentobjektreferanse=%s. Dokumentet er ikke persistert til bucket med korrekt format!", objektReferanse));
 		}
-		return dokDistDokumentFraS3;
+		return dokDistDokumentFraBucket;
 	}
 
 	private String getConversationId(HentForsendelseResponse hentForsendelse, String forsendelseId) {

@@ -46,3 +46,9 @@ then
 else
     echo "No such file or directory found at /var/run/secrets/nais.io/appdynamics/appdynamics.env"
 fi
+
+if test -f /var/run/secrets/nais.io/vault/gcloud_serviceaccount
+then
+    echo "Setting GOOGLE_APPLICATION_CREDENTIALS"
+    export GOOGLE_APPLICATION_CREDENTIALS=/var/run/secrets/nais.io/vault/gcloud_serviceaccount
+fi
