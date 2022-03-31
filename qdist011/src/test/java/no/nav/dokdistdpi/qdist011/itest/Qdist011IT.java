@@ -1,12 +1,12 @@
 package no.nav.dokdistdpi.qdist011.itest;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
+import no.nav.dokdistdpi.cloudstorage.BucketStorage;
+import no.nav.dokdistdpi.cloudstorage.DokDistDokumentFraBucket;
+import no.nav.dokdistdpi.cloudstorage.JsonSerializer;
 import no.nav.dokdistdpi.qdist011.itest.config.ApplicationTestConfig;
-import no.nav.dokdistdpi.s3storage.DokDistDokumentFraS3;
-import no.nav.dokdistdpi.s3storage.JsonSerializer;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,10 +48,10 @@ import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
 import static no.nav.dokdistdpi.qdist011.TestUtil.classpathToString;
-import static no.nav.dokdistdpi.s3storage.S3Configuration.BUCKET_NAME;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -87,7 +87,7 @@ public class Qdist011IT {
 
 	@Autowired
 	@Lazy
-	private AmazonS3 amazonS3;
+	private BucketStorage bucketStorage;
 
 	@Autowired
 	private CacheManager cacheManager;
@@ -116,13 +116,13 @@ public class Qdist011IT {
 		cacheManager.getCache(MASKINPORTEN_CACHE).clear();
 		cacheManager.getCache(STS_CACHE).clear();
 
-		reset(amazonS3);
-		when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK)))
-				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraS3.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
-		when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1)))
-				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraS3.builder().pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build()));
-		when(amazonS3.getObjectAsString(eq(BUCKET_NAME), eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2)))
-				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraS3.builder().pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build()));
+		reset(bucketStorage);
+		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString()))
+				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
+		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString()))
+				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build()));
+		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString()))
+				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build()));
 	}
 
 	@SneakyThrows

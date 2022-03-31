@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.s3storage;
+package no.nav.dokdistdpi.cloudstorage;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DokDistDokumentFraS3 {
+public class DokDistDokumentFraBucket {
 	private byte[] pdf;
 	private String dokumentObjektReferanse;
 	private String dokumentInfoId;

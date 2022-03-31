@@ -60,13 +60,18 @@
 			<groupId>no.nav.dokkat</groupId>
 			<artifactId>dokkat-schemas</artifactId>
 		</dependency>
-
-		<!--Storage S3-->
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-storage</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.google.crypto.tink</groupId>
+			<artifactId>tink</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.crypto.tink</groupId>
+			<artifactId>tink-gcpkms</artifactId>
+		</dependency>
 		<!-- apache -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

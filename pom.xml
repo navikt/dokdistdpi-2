@@ -27,7 +27,8 @@
 		<java.version>17</java.version>
 		<activemq.version>5.16.3</activemq.version>
 		<awaitility.version>4.1.1</awaitility.version>
-		<aws-s3.version>1.12.148</aws-s3.version>
+		<google-cloud.version>25.0.0</google-cloud.version>
+		<google-tink.version>1.6.1</google-tink.version>
 		<bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
 		<camel.version>3.14.0</camel.version>
 		<commons-compress.version>1.21</commons-compress.version>
@@ -136,19 +137,28 @@
 				<artifactId>nimbus-jose-jwt</artifactId>
 				<version>${bnimbus-jose-jwt.version}</version>
 			</dependency>
-			<!--Storage S3-->
 			<dependency>
-				<groupId>com.amazonaws</groupId>
-				<artifactId>aws-java-sdk-s3</artifactId>
-				<version>${aws-s3.version}</version>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<version>${google-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
-
+			<dependency>
+				<groupId>com.google.crypto.tink</groupId>
+				<artifactId>tink</artifactId>
+				<version>${google-tink.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.crypto.tink</groupId>
+				<artifactId>tink-gcpkms</artifactId>
+				<version>${google-tink.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>${jakarta.xml.version}</version>
 			</dependency>
-
 			<!--Tjenester-->
 			<dependency>
 				<groupId>no.nav.meldinger.virksomhet</groupId>
