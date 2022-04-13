@@ -30,7 +30,7 @@ public class GoogleCloudStorageConfiguration {
 
 	@Bean
 	@Lazy
-	public BucketStorage storage(
+	public EncryptedBucketStorage storage(
 			DokdistmellomlagerProperties dokdistmellomlagerProperties
 	) throws Exception {
 		final String kekUri = dokdistmellomlagerProperties.gcpKekUri();
@@ -49,6 +49,6 @@ public class GoogleCloudStorageConfiguration {
 						.setHttpTransportFactory(ApacheHttpTransport::new)
 						.build())
 				.build().getService();
-		return new GoogleCloudBucketStorage(storage, dokdistmellomlagerProperties.getBucket(), aead);
+		return new GoogleCloudEncryptedBucketStorage(storage, dokdistmellomlagerProperties.getBucket(), aead);
 	}
 }

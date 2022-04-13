@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.qdist011;
 
-import no.nav.dokdistdpi.cloudstorage.BucketStorage;
+import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
@@ -72,15 +72,15 @@ class Qdist011ServiceTest {
 		varselInfo = mock(VarselInfo.class);
 		dokumentkatalog = mock(DokumentkatalogConsumer.class);
 		exchange = mock(Exchange.class);
-		BucketStorage bucketStorage = mock(BucketStorage.class);
+		EncryptedBucketStorage encryptedBucketStorage = mock(EncryptedBucketStorage.class);
 
 		DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator = new DigitalKontaktInformasjonValidator();
 		DigitalPostService digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
 				digitalKontaktinformasjonConsumer, varselInfo, dokumentkatalog);
 
-		qdist011Service = new Qdist011Service(bucketStorage, administrerForsendelse, digitalPostService, safJournalpostQueryService);
+		qdist011Service = new Qdist011Service(encryptedBucketStorage, administrerForsendelse, digitalPostService, safJournalpostQueryService);
 
-		when(bucketStorage.downloadObject(anyString(), anyString())).thenReturn("{\"pdf\":\"SE9WRURET0tfVEVTVF9DT05URU5U\",\"dokumentObjektReferanse\":null,\"dokumentInfoId\":null}");
+		when(encryptedBucketStorage.downloadObject(anyString(), anyString())).thenReturn("{\"pdf\":\"SE9WRURET0tfVEVTVF9DT05URU5U\",\"dokumentObjektReferanse\":null,\"dokumentInfoId\":null}");
 	}
 
 	@Test

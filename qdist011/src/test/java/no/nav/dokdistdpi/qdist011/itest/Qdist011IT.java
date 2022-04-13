@@ -3,7 +3,7 @@ package no.nav.dokdistdpi.qdist011.itest;
 import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
-import no.nav.dokdistdpi.cloudstorage.BucketStorage;
+import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.cloudstorage.DokDistDokumentFraBucket;
 import no.nav.dokdistdpi.cloudstorage.JsonSerializer;
 import no.nav.dokdistdpi.qdist011.itest.config.ApplicationTestConfig;
@@ -87,7 +87,7 @@ public class Qdist011IT {
 
 	@Autowired
 	@Lazy
-	private BucketStorage bucketStorage;
+	private EncryptedBucketStorage encryptedBucketStorage;
 
 	@Autowired
 	private CacheManager cacheManager;
@@ -116,12 +116,12 @@ public class Qdist011IT {
 		cacheManager.getCache(MASKINPORTEN_CACHE).clear();
 		cacheManager.getCache(STS_CACHE).clear();
 
-		reset(bucketStorage);
-		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString()))
+		reset(encryptedBucketStorage);
+		when(encryptedBucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString()))
 				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
-		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString()))
+		when(encryptedBucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString()))
 				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(VEDLEGG1_TEST_CONTENT.getBytes()).build()));
-		when(bucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString()))
+		when(encryptedBucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG2), anyString()))
 				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(VEDLEGG2_TEST_CONTENT.getBytes()).build()));
 	}
 
