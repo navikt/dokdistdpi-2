@@ -1,7 +1,7 @@
 package no.nav.dokdistdpi.qdist011.itest.config;
 
 import no.nav.dokdistdpi.certificate.KeyStoreProperties;
-import no.nav.dokdistdpi.cloudstorage.BucketStorage;
+import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.config.cache.CacheConfig;
 import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
 public abstract class ApplicationTestConfig {
 
 	@Bean
-	public BucketStorage bucketStorage() {
-		return mock(BucketStorage.class);
+	public EncryptedBucketStorage bucketStorage() {
+		return mock(EncryptedBucketStorage.class);
 	}
 }

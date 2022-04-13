@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.cloudstorage;
 
-public interface BucketStorage {
+public interface EncryptedBucketStorage {
 	/**
 	 * Laster ned kryptert payload fra ekstern bucket i Google Cloud Storage
 	 *

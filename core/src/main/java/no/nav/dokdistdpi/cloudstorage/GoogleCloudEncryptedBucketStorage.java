@@ -9,13 +9,13 @@ import no.nav.dokdistdpi.exception.technical.BucketFailedToDownloadTechnicalExce
 import java.security.GeneralSecurityException;
 
 @Slf4j
-public class GoogleCloudBucketStorage implements BucketStorage {
+public class GoogleCloudEncryptedBucketStorage implements EncryptedBucketStorage {
 
 	private final String bucket;
 	private final Storage storage;
 	private final Aead aead;
 
-	public GoogleCloudBucketStorage(Storage storage, String bucket, Aead aead) {
+	public GoogleCloudEncryptedBucketStorage(Storage storage, String bucket, Aead aead) {
 		this.storage = storage;
 		this.bucket = bucket;
 		this.aead = aead;

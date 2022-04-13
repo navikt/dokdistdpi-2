@@ -1,7 +1,7 @@
 package no.nav.dokdistdpi.qdist011;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.cloudstorage.BucketStorage;
+import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.cloudstorage.DokDistDokumentFraBucket;
 import no.nav.dokdistdpi.cloudstorage.JsonSerializer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
@@ -58,15 +58,15 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class Qdist011Service {
 	private static final String SPRAAK = "NO";
 
-	private final BucketStorage bucketStorage;
+	private final EncryptedBucketStorage encryptedBucketStorage;
 	private final AdministrerForsendelseConsumer administrerForsendelse;
 	private final SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService;
 	private final DigitalPostService digitalPostService;
 
 	@Autowired
-	public Qdist011Service(BucketStorage bucketStorage, AdministrerForsendelseConsumer administrerForsendelse, DigitalPostService digitalPostService,
+	public Qdist011Service(EncryptedBucketStorage encryptedBucketStorage, AdministrerForsendelseConsumer administrerForsendelse, DigitalPostService digitalPostService,
 						   @Qualifier("SafJournalpostQueryServiceQdist011") SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService) {
-		this.bucketStorage = bucketStorage;
+		this.encryptedBucketStorage = encryptedBucketStorage;
 		this.administrerForsendelse = administrerForsendelse;
 		this.safJournalpostQueryService = safJournalpostQueryService;
 		this.digitalPostService = digitalPostService;
@@ -170,7 +170,7 @@ public class Qdist011Service {
 	}
 
 	private DokDistDokumentFraBucket getDocumentFromBucket(HentForsendelseResponse.DokumentTo dokument, String bestillingsId) {
-		String jsonPayload = bucketStorage.downloadObject(dokument.getDokumentObjektReferanse(), bestillingsId);
+		String jsonPayload = encryptedBucketStorage.downloadObject(dokument.getDokumentObjektReferanse(), bestillingsId);
 		DokDistDokumentFraBucket dokDistDokumentFraBucket = deserializeBucketJsonPayloadToDokdistDokument(jsonPayload, dokument.getDokumentObjektReferanse());
 		dokDistDokumentFraBucket.setDokumentInfoId(dokument.getArkivDokumentInfoId());
 
