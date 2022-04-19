@@ -11,17 +11,6 @@ then
     export  serviceuser_password=$(cat /secrets/serviceuser/srvdokdistdpi-2/password)
 fi
 
-if test -f /secrets/serviceuser/srvdokdistdpi/username;
-then
-    echo "Setting mqserviceuser_username"
-    export  mqserviceuser_username=$(cat /secrets/serviceuser/srvdokdistdpi/username)
-fi
-if test -f /secrets/serviceuser/srvdokdistdpi/password;
-then
-    echo "Setting mqserviceuser_password"
-    export  mqserviceuser_password=$(cat /secrets/serviceuser/srvdokdistdpi/password)
-fi
-
 if test -f /secrets/virksomhetssertifikat/sdp/credentials.json
 then
     echo "Setting virksomhetssertifikat_alias"

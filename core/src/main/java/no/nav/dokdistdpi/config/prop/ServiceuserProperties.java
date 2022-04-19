@@ -4,8 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.lang.NonNull;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotEmpty;
 
 @Getter
 @Setter
@@ -13,8 +14,8 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("serviceuser")
 @Validated
 public class ServiceuserProperties {
-	@NonNull
+	@NotEmpty
 	private String username;
-	@NonNull
+	@NotEmpty
 	private String password;
 }

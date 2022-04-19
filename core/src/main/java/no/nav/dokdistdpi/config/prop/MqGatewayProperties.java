@@ -4,8 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.lang.NonNull;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Positive;
 
 @Getter
 @Setter
@@ -13,12 +15,12 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("mqgateway01")
 @Validated
 public class MqGatewayProperties {
-	@NonNull
+	@NotEmpty
 	private String hostname;
-	@NonNull
+	@NotEmpty
 	private String name;
-	@NonNull
+	@Positive
 	private int port;
-	@NonNull
+	@NotEmpty
 	private String channelname;
 }

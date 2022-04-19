@@ -4,8 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.lang.NonNull;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Positive;
 
 @Getter
 @Setter
@@ -13,14 +15,13 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("dpi")
 @Validated
 public class DpiClientProperties {
-	@NonNull
+	@NotEmpty
 	private String url;
-	@NonNull
+	@NotEmpty
 	private String mpckanal;
-	@NonNull
+	@Positive
 	private long pullinterval;
-	@NonNull
-	private boolean autoStartup;
-	@NonNull
+	private boolean autostartup;
+	@Positive
 	private int dpischeduler;
 }

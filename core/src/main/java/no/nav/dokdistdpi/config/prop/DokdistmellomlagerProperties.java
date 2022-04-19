@@ -3,8 +3,9 @@ package no.nav.dokdistdpi.config.prop;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.lang.NonNull;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author Joakim Bjørnstad, Jbit AS
@@ -14,13 +15,13 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("dokdistmellomlager")
 @Validated
 public class DokdistmellomlagerProperties {
-	@NonNull
+	@NotEmpty
 	private String projectid;
-	@NonNull
+	@NotEmpty
 	private String bucket;
-	@NonNull
+	@NotEmpty
 	private String keyring;
-	@NonNull
+	@NotEmpty
 	private String keyid;
 
 	public String gcpKekUri() {

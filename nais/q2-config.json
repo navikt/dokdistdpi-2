@@ -26,7 +26,6 @@
   "NAMESPACE": "teamdokumenthandtering",
   "APPD_NAME": "dokdistdpi-2",
   "APP_NAME": "dokdistdpi-2",
-  "AUTOSTARTUP_ROUTE": "true",
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-dev-2c5a",
   "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-dev",
   "DOKDISTMELLOMLAGER_KEYRING": "dokdistmellomlager-keyring-dev",

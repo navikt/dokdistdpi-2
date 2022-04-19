@@ -89,7 +89,7 @@ public class Qdist011Route extends RouteBuilder {
 				.to("jms:" + qdist011FunksjonellFeil.getQueueName());
 
 		from("jms:" + qdist011.getQueueName() + "?transacted=true&concurrentConsumers=1")
-				.autoStartup(clientProperties.isAutoStartup())
+				.autoStartup(clientProperties.isAutostartup())
 				.routeId(QDIST011_SERVICE_ID)
 				.routePolicy(routePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)
