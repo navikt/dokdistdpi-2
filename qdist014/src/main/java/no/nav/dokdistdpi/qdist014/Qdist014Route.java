@@ -79,7 +79,7 @@ public class Qdist014Route extends RouteBuilder {
 				.to("jms:" + qdist014FunksjonellFeil.getQueueName());
 
 		from("jms:" + qdist014.getQueueName() + "?transacted=true")
-				.autoStartup(dpiClientProperties.isAutoStartup())
+				.autoStartup(dpiClientProperties.isAutostartup())
 				.routeId(SERVICE_ID)
 				.routePolicy(qdist014MetricsRoutePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)

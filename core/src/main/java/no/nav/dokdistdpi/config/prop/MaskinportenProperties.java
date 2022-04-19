@@ -4,9 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.lang.NonNull;
 import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.net.URL;
 
 @Getter
@@ -15,10 +16,10 @@ import java.net.URL;
 @ConfigurationProperties("maskinporten")
 @Validated
 public class MaskinportenProperties {
-	@NonNull
+	@NotNull
 	private URL url;
-	@NonNull
+	@NotEmpty
 	private String audience;
-	@NonNull
+	@NotEmpty
 	private String clientid;
 }
