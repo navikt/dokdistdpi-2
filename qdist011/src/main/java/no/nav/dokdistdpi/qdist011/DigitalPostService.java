@@ -27,6 +27,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.EPOST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.SMS;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * @author Tsigab A. Gebremedhin, NAV
@@ -85,6 +86,9 @@ public class DigitalPostService {
 	}
 
 	private SmsVarsel mapSMSVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo) {
+		if (isBlank(digitalKontaktInfo.getMobiltelefonnummer())) {
+			return null;
+		}
 		return SmsVarsel.builder()
 				.mobiltelefonnummer(digitalKontaktInfo.getMobiltelefonnummer())
 				.varslingstekst(varselInfoTo.getVarslingsTekst()
@@ -94,6 +98,9 @@ public class DigitalPostService {
 	}
 
 	private EpostVarsel mapEpostVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo) {
+		if (isBlank(digitalKontaktInfo.getEpostadresse())) {
+			return null;
+		}
 		return EpostVarsel.builder()
 				.epostadresse(digitalKontaktInfo.getEpostadresse())
 				.varslingstekst(varselInfoTo.getVarslingsTekst().get(EPOST))
