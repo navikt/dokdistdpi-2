@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.qdist011;
 
 import com.ibm.msg.client.jms.DetailedJMSException;
 import no.nav.dokdistdpi.common.MDCHeaderProcessor;
-import no.nav.dokdistdpi.config.prop.DpiClientProperties;
+import no.nav.dokdistdpi.config.prop.DokdistDpiProperties;
 import no.nav.dokdistdpi.consumer.dpi.DpiMeldingsformidler;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistAdministrerForsendelseUpdater;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
@@ -36,7 +36,7 @@ import static org.apache.camel.support.builder.PredicateBuilder.or;
 @Component
 public class Qdist011Route extends RouteBuilder {
 
-	private final DpiClientProperties clientProperties;
+	private final DokdistDpiProperties.Qdist011 qdist011Properties;
 	private final Queue qdist011;
 	private final Queue qdist011FunksjonellFeil;
 	private final Qdist011Service qdist011Service;
@@ -45,10 +45,11 @@ public class Qdist011Route extends RouteBuilder {
 	private final DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater;
 
 	@Autowired
-	public Qdist011Route(DpiClientProperties clientProperties, Queue qdist011, Queue qdist011FunksjonellFeil,
+	public Qdist011Route(DokdistDpiProperties dokdistDpiProperties,
+						 Queue qdist011, Queue qdist011FunksjonellFeil,
 						 Qdist011Service qdist011Service, DpiMeldingsformidler dpiMeldingsformidler,
 						 Qdist011MetricsRoutePolicy routePolicy, DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater) {
-		this.clientProperties = clientProperties;
+		this.qdist011Properties = dokdistDpiProperties.getQdist011();
 		this.qdist011 = qdist011;
 		this.qdist011FunksjonellFeil = qdist011FunksjonellFeil;
 		this.qdist011Service = qdist011Service;
@@ -89,7 +90,7 @@ public class Qdist011Route extends RouteBuilder {
 				.to("jms:" + qdist011FunksjonellFeil.getQueueName());
 
 		from("jms:" + qdist011.getQueueName() + "?transacted=true&concurrentConsumers=1")
-				.autoStartup(clientProperties.isAutostartup())
+				.autoStartup(qdist011Properties.isAutostartup())
 				.routeId(QDIST011_SERVICE_ID)
 				.routePolicy(routePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)
@@ -100,11 +101,11 @@ public class Qdist011Route extends RouteBuilder {
 				.bean(qdist011Service)
 				.bean(dpiMeldingsformidler)
 				.choice()
-					.when(or(simple("${body.status}").isEqualTo(SENDT), simple("${body.status}").isEqualTo(OPPRETTET)))
-						.log(LoggingLevel.INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
-						.bean(administrerForsendelseUpdater, "updateStatus")
-						.log(LoggingLevel.INFO, log, "qdist011 har oppdatert dokdistDb med forsendelseStatus=OVERSENDT og konversasjonId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} og avslutter behandling av forsendelse med " + getIdsForLogging())
-					.endChoice()
+				.when(or(simple("${body.status}").isEqualTo(SENDT), simple("${body.status}").isEqualTo(OPPRETTET)))
+				.log(LoggingLevel.INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
+				.bean(administrerForsendelseUpdater, "updateStatus")
+				.log(LoggingLevel.INFO, log, "qdist011 har oppdatert dokdistDb med forsendelseStatus=OVERSENDT og konversasjonId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} og avslutter behandling av forsendelse med " + getIdsForLogging())
+				.endChoice()
 				.end();
 	}
 
