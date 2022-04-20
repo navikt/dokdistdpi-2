@@ -61,6 +61,7 @@ public class Sdist003Route extends RouteBuilder {
 
 		from(sdist003Properties.camelUri())
 				.routeId(ROUTEID + "-dpiScheduler")
+				.autoStartup(sdist003Properties.isAutostartup())
 				.process(new Sdist003HeaderProcessor())
 				.setExchangePattern(ExchangePattern.InOnly)
 				.choice()
