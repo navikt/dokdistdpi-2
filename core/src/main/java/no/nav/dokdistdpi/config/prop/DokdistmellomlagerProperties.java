@@ -1,17 +1,17 @@
 package no.nav.dokdistdpi.config.prop;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotEmpty;
 
 /**
+ * Konfigurasjon for Google Cloud Storage bucket
+ *
  * @author Joakim Bjørnstad, Jbit AS
  */
-@Getter
-@Setter
+@Data
 @ConfigurationProperties("dokdistmellomlager")
 @Validated
 public class DokdistmellomlagerProperties {

@@ -56,20 +56,26 @@ public class Sdist003Service {
 	@Handler
 	public List<HentKvitteringResponse> hentKvitteringOgBekreft(Exchange exchange) {
 
-		ResponseEntity<HentKvitteringResponse[]> kvitteringList = dpiClient.hentKvittering();
-		log.info("Hentet total={} kvitteringer fra DPI", kvitteringList.getBody().length);
+		ResponseEntity<HentKvitteringResponse[]> kvitteringResponse = dpiClient.hentKvittering();
 
-		if (!OK.equals(kvitteringList.getStatusCode()) && !NO_CONTENT.equals(kvitteringList.getStatusCode())) {
-			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir");
+		final HentKvitteringResponse[] kvitteringer = kvitteringResponse.getBody();
+		if(kvitteringer == null) {
+			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir. Listen av kvitteringer er null");
 		}
 
-		if (OK.equals(kvitteringList.getStatusCode()) && !isEmpty(kvitteringList.getBody())) {
-			Arrays.stream(kvitteringList.getBody())
+		if (!OK.equals(kvitteringResponse.getStatusCode()) && !NO_CONTENT.equals(kvitteringResponse.getStatusCode())) {
+			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir. Status er ikke OK");
+		}
+
+		log.info("Sdist003 Hentet totalt={} kvitteringer fra DPI", kvitteringer.length);
+
+		if (OK.equals(kvitteringResponse.getStatusCode()) && !isEmpty(kvitteringer)) {
+			Arrays.stream(kvitteringer)
 					.map(this::getForretningsmeldingFromJwt)
 					.forEach(payload -> {
 						SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(payload);
 						KvitteringType kvitteringType = getKvitteringType(simpleSbd);
-						log.info("Mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getConversationId(), kvitteringType);
+						log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getConversationId(), kvitteringType);
 						producerTemplate.sendBody("jms:" + qdist014, payload);
 						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
 
@@ -81,7 +87,7 @@ public class Sdist003Service {
 					});
 		}
 
-		return isEmpty(kvitteringList.getBody()) ? null : Arrays.stream(kvitteringList.getBody()).collect(Collectors.toList());
+		return isEmpty(kvitteringer) ? null : Arrays.stream(kvitteringer).collect(Collectors.toList());
 	}
 
 	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {

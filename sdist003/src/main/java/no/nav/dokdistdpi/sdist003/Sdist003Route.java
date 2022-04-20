@@ -1,11 +1,11 @@
 package no.nav.dokdistdpi.sdist003;
 
-import no.nav.dokdistdpi.common.MDCHeaderProcessor;
-import no.nav.dokdistdpi.config.prop.DpiClientProperties;
+import no.nav.dokdistdpi.config.prop.DokdistDpiProperties;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.RuntimeCamelException;
@@ -18,8 +18,6 @@ import java.io.IOException;
 @Component
 public class Sdist003Route extends RouteBuilder {
 
-	private static final String ROUTE_SDIST003_AVVIK_ID = "sdist003Avvik";
-	public static final String ROUTE_SDIST003_AVVIK = "direct:" + ROUTE_SDIST003_AVVIK_ID;
 	private static final String ROUTEID = "sdist003";
 
 	private static final String FUNCTIONAL_ERROR_HANDLER = "FUNCTIONAL_ERROR_HANDLER";
@@ -28,42 +26,40 @@ public class Sdist003Route extends RouteBuilder {
 
 	private final LederElectionConsumer lederElection;
 	private final Sdist003Service sdist003Service;
-	private final DpiClientProperties dpiClientProperties;
+	private final DokdistDpiProperties.Sdist003 sdist003Properties;
 
 	@Autowired
 	public Sdist003Route(CamelContext context,
 						 LederElectionConsumer lederElection, Sdist003Service sdist003Service,
-						 DpiClientProperties dpiClientProperties) {
+						 DokdistDpiProperties dokdistDpiProperties) {
 		super(context);
 		this.lederElection = lederElection;
 		this.sdist003Service = sdist003Service;
-		this.dpiClientProperties = dpiClientProperties;
+		this.sdist003Properties = dokdistDpiProperties.getSdist003();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void configure() {
 
 		onException(AbstractDokdistdpiFunctionalException.class, RuntimeCamelException.class)
 				.id(FUNCTIONAL_ERROR_HANDLER)
 				.handled(true)
-				.log(LoggingLevel.ERROR, log, "Sdist003 feilet funksjonelt" + ". ${exception}.")
-				.to(ROUTE_SDIST003_AVVIK);
+				.log(LoggingLevel.ERROR, log, "Sdist003 feilet funksjonelt" + ". ${exception}.");
 
 		onException(AbstractDokdistdpiTechnicalException.class, IOException.class)
 				.id(TECHNICAL_ERROR_HANDLER)
 				.handled(true)
 				.logStackTrace(true)
-				.log(LoggingLevel.ERROR, log, "Sdist003 feilet teknisk" + ". ${exception}.")
-				.to(ROUTE_SDIST003_AVVIK);
+				.log(LoggingLevel.ERROR, log, "Sdist003 feilet teknisk" + ". ${exception}.");
 
 		onException(Exception.class)
 				.id(UNKNOWN_ERROR_HANDLER)
 				.handled(true)
 				.logStackTrace(true)
-				.log(LoggingLevel.ERROR, log, "Sdist003 feilet med ukjent feil" + ". ${exception}.")
-				.to(ROUTE_SDIST003_AVVIK);
+				.log(LoggingLevel.ERROR, log, "Sdist003 feilet med ukjent feil" + ". ${exception}.");
 
-		from("scheduler://dpiScheduler?delay=" + dpiClientProperties.getDpischeduler())
+		from(sdist003Properties.camelUri())
 				.routeId(ROUTEID + "-dpiScheduler")
 				.process(new Sdist003HeaderProcessor())
 				.setExchangePattern(ExchangePattern.InOnly)
@@ -74,12 +70,8 @@ public class Sdist003Route extends RouteBuilder {
 						.choice()
 							.when(simple("${body}").isEqualTo(null))
 								.log(LoggingLevel.INFO, log, "Sdist003 fant ingen kvitteringer fra DPI.")
-								.delay(dpiClientProperties.getPullinterval())
+								.setProperty(Exchange.SCHEDULER_POLLED_MESSAGES, constant(false))
 						.endChoice()
 				.end();
-
-		from(ROUTE_SDIST003_AVVIK)
-				.routeId(ROUTE_SDIST003_AVVIK_ID)
-				.log(LoggingLevel.OFF, "avvikshåndtering");
 	}
 }

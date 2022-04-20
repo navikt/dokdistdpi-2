@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.qdist014;
 
-import no.nav.dokdistdpi.config.prop.DpiClientProperties;
+import no.nav.dokdistdpi.config.prop.DokdistDpiProperties;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.qdist014.map.ForretningsKvitteringMapper;
 import no.nav.dokdistdpi.qdist014.metrics.Qdist014HeaderProcessor;
@@ -36,6 +36,7 @@ public class Qdist014Route extends RouteBuilder {
 	private static final String SERVICE_ID = "qdist014";
 	private static final String BEHANDLINGEN_AVSLUTTES = "Behandling av kvitteringen avsluttes, ";
 
+	private final DokdistDpiProperties.Qdist014 qdist014Properties;
 	private final Qdist014Service qdist014Service;
 	private final Queue qdist014;
 	private final Queue qdist009;
@@ -44,7 +45,6 @@ public class Qdist014Route extends RouteBuilder {
 	private final ForretningsKvitteringMapper forretningsKvitteringMapper;
 	private final OppdaterForsendelseStatus oppdaterForsendelseStatus;
 	private final DpiKvitteringService dpiKvitteringService;
-	private final DpiClientProperties dpiClientProperties;
 
 	@Autowired
 	public Qdist014Route(CamelContext context, Qdist014Service qdist014Service,
@@ -52,7 +52,7 @@ public class Qdist014Route extends RouteBuilder {
 						 Qdist014MetricsRoutePolicy qdist014MetricsRoutePolicy,
 						 ForretningsKvitteringMapper forretningsKvitteringMapper,
 						 OppdaterForsendelseStatus oppdaterForsendelseStatus,
-						 DpiKvitteringService dpiKvitteringService, DpiClientProperties dpiClientProperties) {
+						 DpiKvitteringService dpiKvitteringService, DokdistDpiProperties dokdistDpiProperties) {
 		super(context);
 		this.qdist014Service = qdist014Service;
 		this.qdist014 = qdist014;
@@ -62,9 +62,10 @@ public class Qdist014Route extends RouteBuilder {
 		this.forretningsKvitteringMapper = forretningsKvitteringMapper;
 		this.oppdaterForsendelseStatus = oppdaterForsendelseStatus;
 		this.dpiKvitteringService = dpiKvitteringService;
-		this.dpiClientProperties = dpiClientProperties;
+		this.qdist014Properties = dokdistDpiProperties.getQdist014();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void configure() throws Exception {
 
@@ -79,7 +80,7 @@ public class Qdist014Route extends RouteBuilder {
 				.to("jms:" + qdist014FunksjonellFeil.getQueueName());
 
 		from("jms:" + qdist014.getQueueName() + "?transacted=true")
-				.autoStartup(dpiClientProperties.isAutostartup())
+				.autoStartup(qdist014Properties.isAutostartup())
 				.routeId(SERVICE_ID)
 				.routePolicy(qdist014MetricsRoutePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)
