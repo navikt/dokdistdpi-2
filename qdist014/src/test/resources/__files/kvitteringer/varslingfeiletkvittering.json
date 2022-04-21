@@ -19,7 +19,7 @@
         }
       ],
       "documentIdentification": {
-        "standard": "urn:fdc:digdir.no:2020:innbyggerpost:xsd:digital::digital##urn:fdc:digdir.no:2020:innbyggerpost:schema:digital::1.0",
+        "standard": "urn:fdc:digdir.no:2020:innbyggerpost:xsd::Innbyggerpost##urn:fdc:digdir.no:2020:innbyggerpost:schema:varslingfeiletkvittering::1.0",
         "typeVersion": "1.0",
         "instanceIdentifier": "ff88849c-e281-4809-8555-7cd54952b916",
         "type": "varslingfeiletkvittering",
@@ -40,18 +40,17 @@
         "virksomhetsidentifikator": {
           "authority": "iso6523-actorid-upis",
           "value": "0192:999888999"
-        },
-        "avsenderidentifikator": "999888999"
+        }
       },
-      "virksomhetmottaker": {
+      "mottaker": {
         "virksomhetsidentifikator": {
-          "authority": "iso3166-1-alfa2",
+          "authority": "iso6523-actorid-upis",
           "value": "0192:889640782"
-        },
-        "motakeridentifikator": "889640782"
+        }
       },
-      "tidspunkt": "2021-04-11T15:29:58.753+02:00",
-      "varslingskanal": "SMS"
+      "tidspunkt": "2022-04-21T11:24:24.500+00:00",
+      "beskrivelse": "Smstil 88888888 feilet. Feilkode: The SMS failed to be delivered because no operator accepted the message or due to internal Gateway error",
+      "varslingskanal": "sms"
     }
   }
 }

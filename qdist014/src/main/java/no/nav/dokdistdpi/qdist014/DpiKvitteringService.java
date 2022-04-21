@@ -86,7 +86,7 @@ public class DpiKvitteringService {
 					.forsendelseId(forsendelseId)
 					.type(VARSLINGSFEIL.name())
 					.tidspunkt(varslingFeiletKvittering.getTidspunkt().toLocalDateTime())
-					.detaljer(varslingFeiletKvittering.getVarslingskanal().name() + ":" + varslingFeiletKvittering.getBeskrivelse())
+					.detaljer(varslingFeiletKvittering.getVarslingskanal() + ":" + varslingFeiletKvittering.getBeskrivelse())
 					.resendingDistribusjonId(request.getBestillingsId())
 					.build());
 		} else if (dpiMelding instanceof DpiFeilKvittering dpiFeil) {

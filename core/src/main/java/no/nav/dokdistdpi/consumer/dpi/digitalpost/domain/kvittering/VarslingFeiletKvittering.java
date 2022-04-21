@@ -13,5 +13,5 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = false)
 public class VarslingFeiletKvittering extends DpiMelding {
 	private String beskrivelse;
-	private Varslingskanal varslingskanal;
+	private String varslingskanal;
 }

@@ -127,7 +127,6 @@ public class Qdist014IT {
 
 	@Test
 	void shouldOppretteNyForsendelseOgSendTilQdist009WhenSDPKvitteringErVarslingfeilet() throws IOException {
-
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
@@ -144,8 +143,7 @@ public class Qdist014IT {
 	}
 
 	@Test
-	void sshouldOppretteNyForsendelseOgSendTilQdist009WhenSDPFeilKvittering() throws IOException {
-
+	void shouldOppretteNyForsendelseOgSendTilQdist009WhenSDPFeilKvittering() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
@@ -164,7 +162,6 @@ public class Qdist014IT {
 
 	@Test
 	void shouldProcessForsendelseWithForsendelseStatusErOversendt() throws IOException {
-
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
@@ -185,7 +182,6 @@ public class Qdist014IT {
 
 	@Test
 	void shouldProcessForsendelseWithForsendelseStatusErBekreftet() throws IOException {
-
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
@@ -204,7 +200,6 @@ public class Qdist014IT {
 
 	@Test
 	void shouldThrowInvalidExceptionWhenForsendelseStatusErKlarForDist() throws IOException {
-
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-feil.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
@@ -228,7 +223,6 @@ public class Qdist014IT {
 
 	@Test
 	void shouldEndAndLogWhenForsendelseStatusErEkspedert() throws IOException {
-
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-ekspedert.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
@@ -247,7 +241,6 @@ public class Qdist014IT {
 
 	@Test
 	void shouldThrowsFunctionlaExceptionWhenFinnForsendelseReturnsNull() throws IOException {
-
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-feil.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", null, OK.value());
 		//Oversendt og bekreftet er gyldig status.
@@ -284,7 +277,6 @@ public class Qdist014IT {
 
 		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
 		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
-
 	}
 
 
