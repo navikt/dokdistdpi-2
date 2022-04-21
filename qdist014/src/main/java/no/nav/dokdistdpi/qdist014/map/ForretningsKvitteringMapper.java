@@ -13,6 +13,9 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
@@ -24,6 +27,9 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_I
 @Component
 public class ForretningsKvitteringMapper {
 
+	private static final Pattern MOBILNUMMER_REGEX = Pattern.compile("(0047|\\+47|47)?\\d{8}");
+	private static final Pattern EPOST_REGEX = Pattern.compile("[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*");
+
 	@Handler
 	public DpiMelding mapForretningsKvittering(String sbdJsonString, Exchange exchange) {
 		SimpleStandardBusinessDocument simpleSbd = JsonObjectMapper.mapSimpleSbd(sbdJsonString);
@@ -34,7 +40,7 @@ public class ForretningsKvitteringMapper {
 		switch (getByValue(simpleSbd.getType())) {
 			case VARSLINGFEILET -> {
 				VarslingFeiletKvittering varslingFeilet = dpiKvittering.getVarslingfeiletkvittering();
-				log.warn("Kvittering varslingfeilet {}", varslingFeilet.getBeskrivelse());
+				log.warn("Kvittering varslingfeilet: {}", maskerBeskrivelse(varslingFeilet));
 				return VarslingFeiletKvittering.builder()
 						.konversasjonsId(simpleSbd.getConversationId())
 						.bestillingsId(simpleSbd.getBestillingsId())
@@ -66,5 +72,25 @@ public class ForretningsKvitteringMapper {
 			}
 		}
 		throw new SikkerDigitalPostException("Kvittering tilbake fra meldingsformidler var verken kvittering eller feil");
+	}
+
+	String maskerBeskrivelse(VarslingFeiletKvittering varslingFeiletKvittering) {
+		final String beskrivelse = varslingFeiletKvittering.getBeskrivelse();
+		switch (varslingFeiletKvittering.getVarslingskanal()) {
+			case "sms":
+				Matcher mobilmatcher = MOBILNUMMER_REGEX.matcher(beskrivelse);
+				if (mobilmatcher.find()) {
+					return mobilmatcher.replaceAll("********");
+				}
+				return beskrivelse;
+			case "epost":
+				Matcher epostmatcher = EPOST_REGEX.matcher(beskrivelse);
+				if (epostmatcher.find()) {
+					return epostmatcher.replaceAll("********@****.***");
+				}
+				return beskrivelse;
+			default:
+				return beskrivelse;
+		}
 	}
 }
