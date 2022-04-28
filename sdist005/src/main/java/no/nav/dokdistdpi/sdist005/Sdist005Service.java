@@ -58,6 +58,10 @@ public class Sdist005Service {
 		List<FeiletForsendelseTo> feiledeForsendelser = finnFeiledeForsendelser(ikkeKvitterteForsendelser);
 		log.info("Sdist005 fant antall={} ikke-kvitterte forsendelser med endelig status FAILED fra hjørne2", feiledeForsendelser.size());
 
+		if(feiledeForsendelser.isEmpty()) {
+			return List.of();
+		}
+
 		return feiledeForsendelser.stream()
 				.map(feiletForsendelse -> {
 					final String nyForsendelseId = behandleFeiletForsendelse(feiletForsendelse);

@@ -45,19 +45,19 @@ public class Sdist003Route extends RouteBuilder {
 		onException(AbstractDokdistdpiFunctionalException.class, RuntimeCamelException.class)
 				.id(FUNCTIONAL_ERROR_HANDLER)
 				.handled(true)
-				.log(LoggingLevel.ERROR, log, "Sdist003 feilet funksjonelt" + ". ${exception}.");
+				.log(LoggingLevel.ERROR, log, "Sdist003 feilet funksjonelt. ${exception}.");
 
 		onException(AbstractDokdistdpiTechnicalException.class, IOException.class)
 				.id(TECHNICAL_ERROR_HANDLER)
 				.handled(true)
 				.logStackTrace(true)
-				.log(LoggingLevel.ERROR, log, "Sdist003 feilet teknisk" + ". ${exception}.");
+				.log(LoggingLevel.ERROR, log, "Sdist003 feilet teknisk. ${exception}.");
 
 		onException(Exception.class)
 				.id(UNKNOWN_ERROR_HANDLER)
 				.handled(true)
 				.logStackTrace(true)
-				.log(LoggingLevel.ERROR, log, "Sdist003 feilet med ukjent feil" + ". ${exception}.");
+				.log(LoggingLevel.ERROR, log, "Sdist003 feilet med ukjent feil. ${exception}.");
 
 		from(sdist003Properties.camelUri())
 				.routeId(ROUTEID + "-dpiScheduler")
