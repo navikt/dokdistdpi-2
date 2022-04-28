@@ -155,7 +155,7 @@ public class DpiClient {
 			if (!OK.equals(response.getStatusCode())) {
 				throw new KunneIkkeHentKvitteringException(format("Feilet til å markere kvitteringen med bestillingId=%s og status=%s som mottatt", bestillingId, response.getStatusCode()));
 			}
-			log.info("Kvitteringen med bestillingId={} og status={} bekreftet mottatt", bestillingId, response);
+			log.info("Kvitteringen med bestillingId={} og status={} bekreftet mottatt", bestillingId, response.getStatusCode());
 			return response.getStatusCode();
 		} catch (HttpClientErrorException e) {
 			log.warn(format("Feilet til å markere kvitteringen med bestillingId=%s og feilmelding=%s som mottatt", bestillingId, e.getMessage()), e);

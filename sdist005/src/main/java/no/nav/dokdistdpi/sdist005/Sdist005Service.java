@@ -48,14 +48,15 @@ public class Sdist005Service {
 
 	@Handler
 	public List<DistribuerTilKanal> hentStatusFraAksesspunkt(Exchange exchange) {
+		log.info("Sdist005 leter etter ukvitterte forsendelser");
 		List<AvstemForsendelseResponseTo> ikkeKvitterteForsendelser = hentIkkeKvitterteForsendelser();
 		if (ikkeKvitterteForsendelser.isEmpty()) {
 			return List.of();
 		}
-		log.info("sdist005 fant antall={} ikke-kvitterte forsendelser", ikkeKvitterteForsendelser.size());
+		log.info("Sdist005 fant antall={} ikke-kvitterte forsendelser", ikkeKvitterteForsendelser.size());
 
 		List<FeiletForsendelseTo> feiledeForsendelser = finnFeiledeForsendelser(ikkeKvitterteForsendelser);
-		log.info("sdist005 fant antall={} ikke-kvitterte forsendelser med endelig status FAILED fra hjørne2", feiledeForsendelser.size());
+		log.info("Sdist005 fant antall={} ikke-kvitterte forsendelser med endelig status FAILED fra hjørne2", feiledeForsendelser.size());
 
 		return feiledeForsendelser.stream()
 				.map(feiletForsendelse -> {
@@ -73,7 +74,7 @@ public class Sdist005Service {
 		PersisterForsendelseRequestTo persisterForsendelseRequestTo = persisterForsendelseMapper.map(hentForsendelseResponse, bestillingsId);
 		PersisterForsendelseResponseTo persisterForsendelseResponseTo = administrerForsendelseConsumer.persisterForsendelse(persisterForsendelseRequestTo);
 		final String nyForsendelseId = valueOf(persisterForsendelseResponseTo.getForsendelseId());
-		log.info("sdist005 har opprettet ny forsendelse med forsendelseId={}, bestillingsId={}", nyForsendelseId, bestillingsId);
+		log.info("Sdist005 har opprettet ny forsendelse med forsendelseId={}, bestillingsId={}", nyForsendelseId, bestillingsId);
 
 		administrerForsendelseConsumer.feilRegistrerForsendelse(FeilRegistrerForsendelseRequest.builder()
 				.forsendelseId(feiletForsendelse.getForsendelseId())
@@ -83,11 +84,11 @@ public class Sdist005Service {
 				.detaljer(feiletForsendelse.getFeilbeskrivelse())
 				.resendingDistribusjonId(bestillingsId)
 				.build());
-		log.info("sdist005 har feilregistrert forsendelse med forsendelseId={}, bestillingsId={}", feiletForsendelse.getForsendelseId(),
+		log.info("Sdist005 har feilregistrert forsendelse med forsendelseId={}, bestillingsId={}", feiletForsendelse.getForsendelseId(),
 				feiletForsendelse.getBestillingsId());
 
 		administrerForsendelseConsumer.oppdaterForsendelseStatus(nyForsendelseId, KLAR_FOR_DIST.name());
-		log.info("sdist005 har oppdatert ny forsendelse med forsendelseId={}, bestillingsId={} til KLAR_FOR_DIST", feiletForsendelse.getForsendelseId(),
+		log.info("Sdist005 har oppdatert ny forsendelse med forsendelseId={}, bestillingsId={} til KLAR_FOR_DIST", feiletForsendelse.getForsendelseId(),
 				feiletForsendelse.getBestillingsId());
 		return nyForsendelseId;
 	}
