@@ -2,6 +2,7 @@ package no.nav.dokdistdpi.consumer.dpi.maskineporten;
 
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.certificate.KeyStoreProperties;
+import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
@@ -19,7 +20,7 @@ import java.util.List;
 class MaskinportenTokenConsumerTest {
 	private final KeyStoreProperties keyStoreProperties = new KeyStoreProperties();
 	private final MaskinportenProperties maskinportenProperties = new MaskinportenProperties();
-	private DpiClient dpiClient;
+	private final DpiClientProperties dpiClientProperties = new DpiClientProperties();
 
 	@BeforeEach
 	public void setup() throws MalformedURLException {
@@ -48,6 +49,8 @@ class MaskinportenTokenConsumerTest {
 		keyStoreProperties.setAlias(System.getProperty("virksomhetssertifikat.alias"));
 		keyStoreProperties.setPassword(System.getProperty("virksomhetssertifikat.password"));
 		keyStoreProperties.setPath(new FileSystemResource(System.getProperty("virksomhetssertifikat.path")));
+		dpiClientProperties.setUrl("https://srest.qa.dataplatfor.ms/dpi/messages");
+		dpiClientProperties.setMpckanal("dokdistdpi-q");
 	}
 
 	@Test
@@ -56,7 +59,8 @@ class MaskinportenTokenConsumerTest {
 
 		final OidcTokenResponse oidcTokenResponse = oidcTokenClient.fetchToken();
 
-		List<ForsendelseStatusResponse> hentKvitteringResponseList = dpiClient.hentForsendelseStatus("");
+		DpiClient dpiClient = new DpiClient(new RestTemplateBuilder(), oidcTokenClient, dpiClientProperties);
+		List<ForsendelseStatusResponse> hentKvitteringResponseList = dpiClient.hentForsendelseStatus("bb0ce2c0-0b29-4005-bf35-3deb27365acb");
 
 		System.out.println(oidcTokenResponse.getAccessToken());
 	}

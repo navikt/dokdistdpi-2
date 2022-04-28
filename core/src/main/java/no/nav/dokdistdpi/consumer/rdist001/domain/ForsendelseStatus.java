@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.qdist014.domain;
+package no.nav.dokdistdpi.consumer.rdist001.domain;
 
 public enum ForsendelseStatus {
 	OVERSENDT,

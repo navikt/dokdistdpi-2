@@ -10,6 +10,7 @@
 		<module>sdist003</module>
 		<module>qdist014</module>
 		<module>dpischema</module>
+		<module>sdist005</module>
 	</modules>
 
 	<parent>

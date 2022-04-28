@@ -2,11 +2,11 @@ package no.nav.dokdistdpi.qdist014;
 
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.map.PersisterForsendelseMapper;
 import no.nav.dokdistdpi.exception.functional.InvalidForsendelseStatusException;
-import no.nav.dokdistdpi.qdist014.domain.ForsendelseStatus;
-import no.nav.dokdistdpi.qdist014.map.PersisterForsendelseMapper;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-import static no.nav.dokdistdpi.qdist014.domain.ForsendelseStatus.BEKREFTET;
-import static no.nav.dokdistdpi.qdist014.domain.ForsendelseStatus.KLAR_FOR_DIST;
-import static no.nav.dokdistdpi.qdist014.domain.ForsendelseStatus.OVERSENDT;
+import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.BEKREFTET;
+import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_FOR_DIST;
+import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.OVERSENDT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
 

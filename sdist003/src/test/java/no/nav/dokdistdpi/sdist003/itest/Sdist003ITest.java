@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.sdist003.itest.config;
+package no.nav.dokdistdpi.sdist003.itest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
@@ -9,6 +9,7 @@ import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import no.nav.dokdistdpi.sdist003.Sdist003Service;
 import no.nav.dokdistdpi.sdist003.TestUtil;
+import no.nav.dokdistdpi.sdist003.itest.config.ApplicationTestConfig;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,8 +48,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

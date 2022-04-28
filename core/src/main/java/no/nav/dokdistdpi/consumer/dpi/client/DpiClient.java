@@ -5,6 +5,7 @@ import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
+import no.nav.dokdistdpi.exception.functional.ForsendelseStatusIkkeFunnetException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.KunneIkkeHentKvitteringException;
@@ -32,9 +33,7 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
-import static java.util.Objects.nonNull;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.KANAL;
-import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.StatusType.FEILET;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
@@ -106,25 +105,22 @@ public class DpiClient {
 
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "hentForsendelseStatus"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public List<ForsendelseStatusResponse> hentForsendelseStatus(String bestllingId) {
+	public List<ForsendelseStatusResponse> hentForsendelseStatus(String bestillingsId) {
 
 		String uri = UriComponentsBuilder
 				.fromHttpUrl(clientProperties.getUrl())
 				.path(SEND_PATH + "/")
-				.path(bestllingId).path(STATUSES).toUriString();
+				.path(bestillingsId).path(STATUSES).toUriString();
 		try {
 			ResponseEntity<ForsendelseStatusResponse[]> forsendelseStatues = restTemplate.exchange(uri, GET, new HttpEntity<>(jsonTypeHeaders()), ForsendelseStatusResponse[].class);
 
-			List<ForsendelseStatusResponse> forsendelseStatusResponses = map(forsendelseStatues.getBody());
-			if (nonNull(forsendelseStatusResponses) && OK.equals(forsendelseStatues.getStatusCode()) && erFeilet(forsendelseStatusResponses)) {
-				throw new KunneIkkeDistribuereForsendelseException(format("Feilet til å distribuere forsendelse med bestillingId=%s og status=%s", bestllingId, forsendelseStatusResponses));
-			}
-			log.info("Forsendelse med bestillingId={} og status={}", bestllingId, forsendelseStatusResponses);
+			List<ForsendelseStatusResponse> forsendelseStatusResponses = mapForsendelseStatus(forsendelseStatues.getBody());
+			log.info("Hentet status på forsendelse med bestillingId={} og status={} hos hjørne2", bestillingsId, forsendelseStatusResponses);
 			return forsendelseStatusResponses;
 		} catch (HttpClientErrorException e) {
-			throw new KunneIkkeDistribuereForsendelseException(format("Kan ikke sendt forsendelse til hjørne-2, bestillingId=%s og feilmelding=%s", bestllingId, e.getMessage()), e);
+			throw new ForsendelseStatusIkkeFunnetException(format("Finner ikke forsendelse status med bestillingId=%s hos hjørne2. Feilmelding=%s", bestillingsId, e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
-			throw new SikkerDigitalPostException("Henter ikke forsendelse statusen", e);
+			throw new SikkerDigitalPostException("Hente forsendelse status feilet mot hjørne2.", e);
 		}
 	}
 
@@ -149,35 +145,31 @@ public class DpiClient {
 
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "bekreft"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public HttpStatus bekreft(String bestllingId) {
+	public HttpStatus bekreft(String bestillingId) {
 
 		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl())
 				.path(HENT_PATH + "/")
-				.path(bestllingId).path(READ).toUriString();
+				.path(bestillingId).path(READ).toUriString();
 		try {
 			ResponseEntity<String> response = restTemplate.exchange(uri, POST, new HttpEntity<>(jsonTypeHeaders()), String.class);
 			if (!OK.equals(response.getStatusCode())) {
-				throw new KunneIkkeHentKvitteringException(format("Feilet til å markere kvitteringen med bestillingId=%s og status=%s som mottatt", bestllingId, response.getStatusCode()));
+				throw new KunneIkkeHentKvitteringException(format("Feilet til å markere kvitteringen med bestillingId=%s og status=%s som mottatt", bestillingId, response.getStatusCode()));
 			}
-			log.info("Kvitteringen med bestillingId={} og status={} bekreftet mottatt", bestllingId, response);
+			log.info("Kvitteringen med bestillingId={} og status={} bekreftet mottatt", bestillingId, response);
 			return response.getStatusCode();
 		} catch (HttpClientErrorException e) {
-			log.warn(format("Feilet til å markere kvitteringen med bestillingId=%s og feilmelding=%s som mottatt", bestllingId, e.getMessage()), e);
-			throw new KunneIkkeHentKvitteringException(format(KVITTERING_FEIL_MELDING, bestllingId, e.getMessage()), e);
+			log.warn(format("Feilet til å markere kvitteringen med bestillingId=%s og feilmelding=%s som mottatt", bestillingId, e.getMessage()), e);
+			throw new KunneIkkeHentKvitteringException(format(KVITTERING_FEIL_MELDING, bestillingId, e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
-			log.warn(format("Feilet til å markere kvitteringen med bestillingId=%s som mottatt", bestllingId), e);
-			throw new SikkerDigitalPostException(format(KVITTERING_FEIL_MELDING, bestllingId, e.getMessage()), e);
+			log.warn(format("Feilet til å markere kvitteringen med bestillingId=%s som mottatt", bestillingId), e);
+			throw new SikkerDigitalPostException(format(KVITTERING_FEIL_MELDING, bestillingId, e.getMessage()), e);
 		}
 	}
 
-	private List<ForsendelseStatusResponse> map(ForsendelseStatusResponse[] statusResponses) {
+	private List<ForsendelseStatusResponse> mapForsendelseStatus(ForsendelseStatusResponse[] statusResponses) {
 		return Arrays.stream(statusResponses)
 				.filter(Objects::nonNull)
 				.toList();
-	}
-
-	private boolean erFeilet(List<ForsendelseStatusResponse> statuses) {
-		return statuses.stream().anyMatch(status -> FEILET.equals(status.getStatus()));
 	}
 
 	private HttpHeaders jsonTypeHeaders() {

@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.qdist014.map;
+package no.nav.dokdistdpi.consumer.rdist001.map;
 
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseRequestTo;
