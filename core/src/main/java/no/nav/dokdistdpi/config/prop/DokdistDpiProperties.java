@@ -74,11 +74,9 @@ public class DokdistDpiProperties {
 		 * @return camel URI som konfigurerer sdist005
 		 */
 		public String camelUri() {
-			return "scheduler://sdist003?timeUnit=SECONDS" +
+			return "scheduler://sdist005?timeUnit=SECONDS" +
 					"&initialDelay=5" +
-					"&delay=" + polldelay.toSeconds() +
-					"&backoffMultiplier=2" +
-					"&backoffIdleThreshold=2";
+					"&delay=" + polldelay.toSeconds();
 		}
 	}
 }

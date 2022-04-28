@@ -6,7 +6,6 @@ import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalExcept
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.RuntimeCamelException;
@@ -83,7 +82,6 @@ public class Sdist005Route extends RouteBuilder {
 						.choice()
 							.when(simple("${body.size}").isEqualTo(0))
 								.log(LoggingLevel.INFO, log, "Sdist005 fant ingen feilede forsendelser")
-								.setProperty(Exchange.SCHEDULER_POLLED_MESSAGES, constant(false))
 						.otherwise()
 							.split(simple("${body}"))
 								.setProperty(PROPERTY_FORSENDELSE_ID, simple("${body.forsendelseId}"))
