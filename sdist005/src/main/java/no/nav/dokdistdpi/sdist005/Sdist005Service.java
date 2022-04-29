@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
+import no.nav.dokdistdpi.consumer.rdist001.UekspedertForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.AvstemForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
@@ -35,13 +36,16 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DISTRIBUSJONS_SDP_KANAL
 public class Sdist005Service {
 
 	private final AdministrerForsendelseConsumer administrerForsendelseConsumer;
+	private final UekspedertForsendelseConsumer uekspedertForsendelseConsumer;
 	private final DpiClient dpiClient;
 	private final PersisterForsendelseMapper persisterForsendelseMapper;
 
 	@Autowired
 	public Sdist005Service(AdministrerForsendelseConsumer administrerForsendelseConsumer,
+						   UekspedertForsendelseConsumer uekspedertForsendelseConsumer,
 						   DpiClient dpiClient) {
 		this.administrerForsendelseConsumer = administrerForsendelseConsumer;
+		this.uekspedertForsendelseConsumer = uekspedertForsendelseConsumer;
 		this.dpiClient = dpiClient;
 		this.persisterForsendelseMapper = new PersisterForsendelseMapper();
 	}
@@ -58,7 +62,7 @@ public class Sdist005Service {
 		List<FeiletForsendelseTo> feiledeForsendelser = finnFeiledeForsendelser(ikkeKvitterteForsendelser);
 		log.info("Sdist005 fant antall={} ikke-kvitterte forsendelser med endelig status FAILED fra hjørne2", feiledeForsendelser.size());
 
-		if(feiledeForsendelser.isEmpty()) {
+		if (feiledeForsendelser.isEmpty()) {
 			return List.of();
 		}
 
@@ -98,7 +102,7 @@ public class Sdist005Service {
 	}
 
 	private List<AvstemForsendelseResponseTo> hentIkkeKvitterteForsendelser() {
-		return administrerForsendelseConsumer.hentForsendelserKvitteringIkkeMottatt(DISTRIBUSJONS_SDP_KANAL, 6)
+		return uekspedertForsendelseConsumer.hentForsendelserKvitteringIkkeMottatt(DISTRIBUSJONS_SDP_KANAL, 6)
 				.stream()
 				.filter(f -> OVERSENDT.name().equals(f.getDistribusjonStatus()))
 				.toList();
