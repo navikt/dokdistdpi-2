@@ -1,0 +1,12 @@
+[
+  {
+    "status": "OPPRETTET",
+    "beskrivelse": "Received by C2",
+    "timestamp": "2022-03-30T09:20:59"
+  },
+  {
+    "status": "FEILET",
+    "beskrivelse": "Bad Gateway mot postkasse",
+    "timestamp": "2022-03-30T09:21:59"
+  }
+]

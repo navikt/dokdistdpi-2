@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.qdist014.itest;
 
 import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import no.nav.dokdistdpi.qdist014.domain.ForsendelseStatus;
+import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.qdist014.itest.config.ApplicationTestConfig;
 import no.nav.dokdistdpi.qdist014.map.Testutil;
 import org.apache.activemq.command.ActiveMQTextMessage;
@@ -50,8 +50,8 @@ import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
-import static no.nav.dokdistdpi.qdist014.domain.ForsendelseStatus.EKSPEDERT;
-import static no.nav.dokdistdpi.qdist014.domain.ForsendelseStatus.KLAR_FOR_DIST;
+import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.EKSPEDERT;
+import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_FOR_DIST;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -378,7 +378,6 @@ public class Qdist014IT {
 	private void stubPutOppdaterForsendelse(String forsendelseStatus, String forsendelseId, int httpStatusvalue) {
 		stubFor(put("/administrerforsendelse?forsendelseId=" + forsendelseId + "&forsendelseStatus=" + forsendelseStatus)
 				.willReturn(aResponse().withStatus(httpStatusvalue)));
-
 	}
 
 	private void stubGetHentForsendelse(String responsebody, String forsendelseId, int httpStatusvalue) throws IOException {

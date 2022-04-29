@@ -10,6 +10,7 @@
 		<module>sdist003</module>
 		<module>qdist014</module>
 		<module>dpischema</module>
+		<module>sdist005</module>
 	</modules>
 
 	<parent>
@@ -73,6 +74,11 @@
 			<dependency>
 				<groupId>no.nav.dokdistdpi</groupId>
 				<artifactId>sdist003</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>no.nav.dokdistdpi</groupId>
+				<artifactId>sdist005</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
