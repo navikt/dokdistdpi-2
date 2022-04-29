@@ -77,6 +77,8 @@ public class Sdist005Service {
 	}
 
 	private String behandleFeiletForsendelse(FeiletForsendelseTo feiletForsendelse) {
+		log.info("Sdist005 behandler feilet forsendelse med forsendelseId={}, bestillingsId={} som har endelig status FAILED fra hjørne2",
+				feiletForsendelse.getForsendelseId(), feiletForsendelse.getBestillingsId());
 		HentForsendelseResponse hentForsendelseResponse = administrerForsendelseConsumer.hentForsendelse(feiletForsendelse.getForsendelseId());
 		final String bestillingsId = randomUUID().toString();
 		PersisterForsendelseRequestTo persisterForsendelseRequestTo = persisterForsendelseMapper.map(hentForsendelseResponse, bestillingsId);
@@ -92,12 +94,12 @@ public class Sdist005Service {
 				.detaljer(feiletForsendelse.getFeilbeskrivelse())
 				.resendingDistribusjonId(bestillingsId)
 				.build());
-		log.info("Sdist005 har feilregistrert forsendelse med forsendelseId={}, bestillingsId={}", feiletForsendelse.getForsendelseId(),
-				feiletForsendelse.getBestillingsId());
+		log.info("Sdist005 har feilregistrert forsendelse med forsendelseId={}, bestillingsId={}",
+				feiletForsendelse.getForsendelseId(), feiletForsendelse.getBestillingsId());
 
 		administrerForsendelseConsumer.oppdaterForsendelseStatus(nyForsendelseId, KLAR_FOR_DIST.name());
-		log.info("Sdist005 har oppdatert ny forsendelse med forsendelseId={}, bestillingsId={} til KLAR_FOR_DIST", feiletForsendelse.getForsendelseId(),
-				feiletForsendelse.getBestillingsId());
+		log.info("Sdist005 har oppdatert ny forsendelse med forsendelseId={}, bestillingsId={} til KLAR_FOR_DIST",
+				nyForsendelseId, feiletForsendelse.getBestillingsId());
 		return nyForsendelseId;
 	}
 
