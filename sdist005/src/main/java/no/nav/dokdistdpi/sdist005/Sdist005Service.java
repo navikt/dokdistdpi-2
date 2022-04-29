@@ -99,7 +99,7 @@ public class Sdist005Service {
 
 		administrerForsendelseConsumer.oppdaterForsendelseStatus(nyForsendelseId, KLAR_FOR_DIST.name());
 		log.info("Sdist005 har oppdatert ny forsendelse med forsendelseId={}, bestillingsId={} til KLAR_FOR_DIST",
-				nyForsendelseId, feiletForsendelse.getBestillingsId());
+				nyForsendelseId, bestillingsId);
 		return nyForsendelseId;
 	}
 
