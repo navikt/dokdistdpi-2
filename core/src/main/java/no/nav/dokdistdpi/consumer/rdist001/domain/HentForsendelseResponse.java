@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import no.nav.dokdistdpi.consumer.rdist001.kodeverk.DistribusjonstidspunktKode;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class HentForsendelseResponse {
 	private ArkivInformasjonTo arkivInformasjon;
 	private PostadresseTo postadresse;
 	private List<DokumentTo> dokumenter;
+	private DistribusjonstidspunktKode distribusjonstidspunkt;
 
 	public boolean isIkkeArkivertIJoark() {
 		return getArkivInformasjon() == null || !ARKIV_SYSTEM_JOARK.equals(getArkivInformasjon().getArkivSystem());

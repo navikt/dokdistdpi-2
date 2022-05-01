@@ -16,20 +16,25 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.kodeverk.DistribusjonstidspunktKode;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDeserialisereBucketPayloadException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeFinneDokumentException;
+import no.nav.dokdistdpi.exception.functional.UtenforKjernetidFunctionalException;
 import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,14 +67,24 @@ public class Qdist011Service {
 	private final AdministrerForsendelseConsumer administrerForsendelse;
 	private final SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService;
 	private final DigitalPostService digitalPostService;
+	private final LocalTime kjernetidStart;
+	private final LocalTime kjernetidSlutt;
+	private Clock clock;
 
 	@Autowired
-	public Qdist011Service(EncryptedBucketStorage encryptedBucketStorage, AdministrerForsendelseConsumer administrerForsendelse, DigitalPostService digitalPostService,
-						   @Qualifier("SafJournalpostQueryServiceQdist011") SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService) {
+	public Qdist011Service(EncryptedBucketStorage encryptedBucketStorage,
+						   AdministrerForsendelseConsumer administrerForsendelse,
+						   DigitalPostService digitalPostService,
+						   @Qualifier("SafJournalpostQueryServiceQdist011") SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService,
+						   @Value("${kjernetidStart}") String kjernetidStart,
+						   @Value("${kjernetidSlutt}") String kjernetidSlutt) {
 		this.encryptedBucketStorage = encryptedBucketStorage;
 		this.administrerForsendelse = administrerForsendelse;
 		this.safJournalpostQueryService = safJournalpostQueryService;
 		this.digitalPostService = digitalPostService;
+		this.kjernetidStart = LocalTime.parse(kjernetidStart);
+		this.kjernetidSlutt = LocalTime.parse(kjernetidSlutt);
+		this.clock = Clock.systemDefaultZone();
 	}
 
 	@Handler
@@ -80,6 +95,7 @@ public class Qdist011Service {
 		exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
 
 		validateStatus(hentForsendelseResponse.getForsendelseStatus(), distribuerTilKanal.getForsendelseId());
+		validateKjernetid(hentForsendelseResponse.getDistribusjonstidspunkt(), hentForsendelseResponse.getBestillingsId());
 
 		String konversasjonId = getConversationId(hentForsendelseResponse, distribuerTilKanal.getForsendelseId());
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
@@ -120,6 +136,8 @@ public class Qdist011Service {
 				.dokumentpakke(getDocumentpakkeFromBucket(hentForsendelseResponse))
 				.build();
 	}
+
+
 
 	private JournalpostQdist011 getJournalpostQdist011(HentForsendelseResponse HentForsendelseResponse) {
 		if (HentForsendelseResponse.isIkkeArkivertIJoark()) {
@@ -222,6 +240,21 @@ public class Qdist011Service {
 	private void assertForsendelseNotNull(HentForsendelseResponse hentForsendelseResponse) {
 		assertNotNull("HentForsendelseResponseTo", hentForsendelseResponse);
 		assertNotNull("HentForsendelseResponseTo.MottakerTo", hentForsendelseResponse.getMottaker());
+	}
+
+	private void validateKjernetid(DistribusjonstidspunktKode distribusjonstidspunkt, String bestillingsId) {
+		if (!innenKjernetid(distribusjonstidspunkt)) {
+			log.info("Legger melding med distribusjonstidspunkt {} på vente-kø for eventId/bestillingsId={}", distribusjonstidspunkt, bestillingsId);
+			throw new UtenforKjernetidFunctionalException("Utenfor kjernetid, legges på ventekø");
+		}
+	}
+
+	private boolean innenKjernetid(DistribusjonstidspunktKode distribusjonstidspunkt) {
+		if (distribusjonstidspunkt == null || distribusjonstidspunkt.equals(DistribusjonstidspunktKode.UMIDDELBART)) {
+			return true;
+		}
+		LocalTime tid = LocalTime.now(clock);
+		return (tid.isAfter(kjernetidStart) && tid.isBefore(kjernetidSlutt));
 	}
 
 	public static DokDistDokumentFraBucket deserializeBucketJsonPayloadToDokdistDokument(String jsonPayload, String objektReferanse) {
