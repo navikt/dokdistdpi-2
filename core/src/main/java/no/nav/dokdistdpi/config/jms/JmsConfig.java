@@ -52,7 +52,7 @@ public class JmsConfig {
 	}
 
 	@Bean
-	public Queue qdist010UtenforKjernetid(@Value("${dokdistdittnav_qdist010_dist_til_dpi_kbq.queuename}") String qdist010UtenforKjernetid) throws JMSException {
+	public Queue qdist010UtenforKjernetid(@Value("${dokdistdpi_qdist010_dist_til_dpi_kbq.queuename}") String qdist010UtenforKjernetid) throws JMSException {
 		return new MQQueue(qdist010UtenforKjernetid);
 	}
 

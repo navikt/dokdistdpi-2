@@ -82,7 +82,7 @@ public class Qdist011Route extends RouteBuilder {
 		onException(UtenforKjernetidFunctionalException.class)
 				.handled(true)
 				.useOriginalMessage()
-				.log(LoggingLevel.WARN, log, "${exception}; " + getIdsForLogging())
+				.log(LoggingLevel.INFO, log, "${exception}; " + getIdsForLogging())
 				.to("jms:" + qdist010UtenforKjernetid.getQueueName());
 
 		onException(AbstractDokdistdpiFunctionalException.class, ValidationException.class)
