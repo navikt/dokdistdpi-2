@@ -244,7 +244,7 @@ public class Qdist011Service {
 
 	private void validateKjernetid(DistribusjonstidspunktKode distribusjonstidspunkt, String bestillingsId) {
 		if (!innenKjernetid(distribusjonstidspunkt)) {
-			log.info("Legger melding med distribusjonstidspunkt {} på vente-kø for eventId/bestillingsId={}", distribusjonstidspunkt, bestillingsId);
+			log.info("Legger melding med distribusjonstidspunkt {} på vente-kø for bestillingsId={}", distribusjonstidspunkt, bestillingsId);
 			throw new UtenforKjernetidFunctionalException("Utenfor kjernetid, legges på ventekø");
 		}
 	}
