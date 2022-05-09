@@ -52,6 +52,11 @@ public class JmsConfig {
 	}
 
 	@Bean
+	public Queue qdist011UtenforKjernetid(@Value("${dokdistdpi_qdist011_dist_til_dpi_kbq.queuename}") String qdist011UtenforKjernetid) throws JMSException {
+		return new MQQueue(qdist011UtenforKjernetid);
+	}
+
+	@Bean
 	public ConnectionFactory connectionFactory(final MqGatewayProperties mqGatewayProperties,
 											   final ServiceuserProperties serviceuserProperties) throws JMSException {
 		return createConnectionFactory(mqGatewayProperties, serviceuserProperties);

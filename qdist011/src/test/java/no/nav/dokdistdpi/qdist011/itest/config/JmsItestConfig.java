@@ -42,6 +42,11 @@ public class JmsItestConfig {
 	}
 
 	@Bean
+	public Queue qdist011UtenforKjernetid(@Value("${dokdistdpi_qdist011_dist_til_dpi_kbq.queuename}") String qdist011UtenforKjernetid) {
+		return new ActiveMQQueue(qdist011UtenforKjernetid);
+	}
+
+	@Bean
 	public Queue backoutQueue() {
 		return new ActiveMQQueue("ActiveMQ.DLQ");
 	}

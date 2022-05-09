@@ -7,6 +7,7 @@ import no.nav.dokdistdpi.consumer.dpi.DpiMeldingsformidler;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistAdministrerForsendelseUpdater;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
+import no.nav.dokdistdpi.exception.functional.UtenforKjernetidFunctionalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
@@ -39,19 +40,26 @@ public class Qdist011Route extends RouteBuilder {
 	private final DokdistDpiProperties.Qdist011 qdist011Properties;
 	private final Queue qdist011;
 	private final Queue qdist011FunksjonellFeil;
+	private final Queue qdist011UtenforKjernetid;
 	private final Qdist011Service qdist011Service;
 	private final DpiMeldingsformidler dpiMeldingsformidler;
 	private final Qdist011MetricsRoutePolicy routePolicy;
 	private final DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater;
 
+
 	@Autowired
 	public Qdist011Route(DokdistDpiProperties dokdistDpiProperties,
-						 Queue qdist011, Queue qdist011FunksjonellFeil,
-						 Qdist011Service qdist011Service, DpiMeldingsformidler dpiMeldingsformidler,
-						 Qdist011MetricsRoutePolicy routePolicy, DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater) {
+						 Queue qdist011,
+						 Queue qdist011FunksjonellFeil,
+						 Queue qdist011UtenforKjernetid,
+						 Qdist011Service qdist011Service,
+						 DpiMeldingsformidler dpiMeldingsformidler,
+						 Qdist011MetricsRoutePolicy routePolicy,
+						 DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater) {
 		this.qdist011Properties = dokdistDpiProperties.getQdist011();
 		this.qdist011 = qdist011;
 		this.qdist011FunksjonellFeil = qdist011FunksjonellFeil;
+		this.qdist011UtenforKjernetid = qdist011UtenforKjernetid;
 		this.qdist011Service = qdist011Service;
 		this.dpiMeldingsformidler = dpiMeldingsformidler;
 		this.routePolicy = routePolicy;
@@ -71,6 +79,12 @@ public class Qdist011Route extends RouteBuilder {
 		onException(ForsendelseStatusExpedertKanIkkeDistribuereException.class)
 				.handled(true).logExhaustedMessageBody(false)
 				.log(INFO, log, "${exception}" + logForsendelseId());
+
+		onException(UtenforKjernetidFunctionalException.class)
+				.handled(true)
+				.useOriginalMessage()
+				.log(LoggingLevel.INFO, log, "${exception}; " + getIdsForLogging())
+				.to("jms:" + qdist011UtenforKjernetid.getQueueName());
 
 		onException(AbstractDokdistdpiFunctionalException.class, ValidationException.class)
 				.handled(true)

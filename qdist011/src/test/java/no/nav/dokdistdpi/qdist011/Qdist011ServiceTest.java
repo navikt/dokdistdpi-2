@@ -78,7 +78,7 @@ class Qdist011ServiceTest {
 		DigitalPostService digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
 				digitalKontaktinformasjonConsumer, varselInfo, dokumentkatalog);
 
-		qdist011Service = new Qdist011Service(encryptedBucketStorage, administrerForsendelse, digitalPostService, safJournalpostQueryService);
+		qdist011Service = new Qdist011Service(encryptedBucketStorage, administrerForsendelse, digitalPostService, safJournalpostQueryService, "07:00:00", "23:00:00");
 
 		when(encryptedBucketStorage.downloadObject(anyString(), anyString())).thenReturn("{\"pdf\":\"SE9WRURET0tfVEVTVF9DT05URU5U\",\"dokumentObjektReferanse\":null,\"dokumentInfoId\":null}");
 	}
