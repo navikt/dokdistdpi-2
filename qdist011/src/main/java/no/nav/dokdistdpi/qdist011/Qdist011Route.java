@@ -40,7 +40,7 @@ public class Qdist011Route extends RouteBuilder {
 	private final DokdistDpiProperties.Qdist011 qdist011Properties;
 	private final Queue qdist011;
 	private final Queue qdist011FunksjonellFeil;
-	private final Queue qdist010UtenforKjernetid;
+	private final Queue qdist011UtenforKjernetid;
 	private final Qdist011Service qdist011Service;
 	private final DpiMeldingsformidler dpiMeldingsformidler;
 	private final Qdist011MetricsRoutePolicy routePolicy;
@@ -49,8 +49,9 @@ public class Qdist011Route extends RouteBuilder {
 
 	@Autowired
 	public Qdist011Route(DokdistDpiProperties dokdistDpiProperties,
-						 Queue qdist011, Queue qdist011FunksjonellFeil,
-						 Queue qdist010UtenforKjernetid,
+						 Queue qdist011,
+						 Queue qdist011FunksjonellFeil,
+						 Queue qdist011UtenforKjernetid,
 						 Qdist011Service qdist011Service,
 						 DpiMeldingsformidler dpiMeldingsformidler,
 						 Qdist011MetricsRoutePolicy routePolicy,
@@ -58,7 +59,7 @@ public class Qdist011Route extends RouteBuilder {
 		this.qdist011Properties = dokdistDpiProperties.getQdist011();
 		this.qdist011 = qdist011;
 		this.qdist011FunksjonellFeil = qdist011FunksjonellFeil;
-		this.qdist010UtenforKjernetid = qdist010UtenforKjernetid;
+		this.qdist011UtenforKjernetid = qdist011UtenforKjernetid;
 		this.qdist011Service = qdist011Service;
 		this.dpiMeldingsformidler = dpiMeldingsformidler;
 		this.routePolicy = routePolicy;
@@ -83,7 +84,7 @@ public class Qdist011Route extends RouteBuilder {
 				.handled(true)
 				.useOriginalMessage()
 				.log(LoggingLevel.INFO, log, "${exception}; " + getIdsForLogging())
-				.to("jms:" + qdist010UtenforKjernetid.getQueueName());
+				.to("jms:" + qdist011UtenforKjernetid.getQueueName());
 
 		onException(AbstractDokdistdpiFunctionalException.class, ValidationException.class)
 				.handled(true)
