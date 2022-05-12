@@ -124,6 +124,8 @@ public class Sdist005Service {
 								.feiltidspunkt(forsendelseStatusResponse.getTimestamp())
 								.build();
 					} else {
+						log.warn("Sdist005 fant ikke-kvittert forsendelse med forsendelseId={}, bestillingsId={} UTEN endelig FEILET status i hjørne2",
+								dokumentInfoTo.getForsendelseId(), dokumentInfoTo.getDokumentId());
 						return null;
 					}
 				}).filter(Objects::nonNull)
