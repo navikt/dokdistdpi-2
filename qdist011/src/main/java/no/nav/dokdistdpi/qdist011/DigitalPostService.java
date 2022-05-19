@@ -1,5 +1,6 @@
 package no.nav.dokdistdpi.qdist011;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
@@ -34,6 +35,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 
 @Component
+@Slf4j
 public class DigitalPostService {
 
 	private final MaskinportenTokenConsumer maskinportenTokenConsumer;
@@ -80,6 +82,9 @@ public class DigitalPostService {
 
 	public Varsler mapVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, DistribusjonsTypeKode distribusjonsType) {
 		String varslingstekst = determineVarslingstekst(distribusjonsType);
+		//Log for å sjekke hvilken varslingtekst som blir sendt i dev.
+		//TODO: Remove før merge
+		log.info("Distribusjonstype: " + distribusjonsType.name() + " varslingtekst: " + varslingstekst);
 		return Varsler.builder()
 				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
 				.smsvarsel(mapSMSVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))

@@ -13,7 +13,7 @@ public class DigitalPostUtils {
 	public static String determineVarslingstekst(DistribusjonsTypeKode distribusjonstype) {
 
 		//Pattern matching er ikke lov i switcher enda virker det som.
-		//Ønsker å ha denne inn i switchen; "case VIKTIG, null -> VIKTIG_TEKST" når det er mulig
+		//Ønsker å ha denne inn i switchen: "case VIKTIG, null -> VIKTIG_TEKST" når det er mulig
 		if (distribusjonstype == null) {
 			return VIKTIG_TEKST;
 		}
