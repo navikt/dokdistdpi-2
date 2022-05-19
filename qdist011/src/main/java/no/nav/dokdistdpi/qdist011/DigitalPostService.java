@@ -79,31 +79,31 @@ public class DigitalPostService {
 	}
 
 	public Varsler mapVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, DistribusjonsTypeKode distribusjonsType) {
-		String varselTekst = determineVarslingstekst(distribusjonsType);
+		String varslingstekst = determineVarslingstekst(distribusjonsType);
 		return Varsler.builder()
-				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo, varselTekst))
-				.smsvarsel(mapSMSVarsler(varselInfoTo, digitalKontaktInfo, varselTekst))
+				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
+				.smsvarsel(mapSMSVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
 				.build();
 	}
 
-	private SmsVarsel mapSMSVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, String varseltekst) {
+	private SmsVarsel mapSMSVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, String varslingstekst) {
 		if (isBlank(digitalKontaktInfo.getMobiltelefonnummer())) {
 			return null;
 		}
 		return SmsVarsel.builder()
 				.mobiltelefonnummer(digitalKontaktInfo.getMobiltelefonnummer())
-				.varslingstekst(varseltekst)
+				.varslingstekst(varslingstekst)
 				.repetisjoner(varselInfoTo.getAntallDagerListe())
 				.build();
 	}
 
-	private EpostVarsel mapEpostVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, String varseltekst) {
+	private EpostVarsel mapEpostVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, String varslingstekst) {
 		if (isBlank(digitalKontaktInfo.getEpostadresse())) {
 			return null;
 		}
 		return EpostVarsel.builder()
 				.epostadresse(digitalKontaktInfo.getEpostadresse())
-				.varslingstekst(varseltekst)
+				.varslingstekst(varslingstekst)
 				.repetisjoner(varselInfoTo.getAntallDagerListe())
 				.build();
 	}
