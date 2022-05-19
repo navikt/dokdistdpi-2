@@ -84,7 +84,7 @@ public class DigitalPostService {
 		String varslingstekst = determineVarslingstekst(distribusjonsType);
 		//Log for å sjekke hvilken varslingtekst som blir sendt i dev.
 		//TODO: Remove før merge
-		log.info("Distribusjonstype: " + distribusjonsType.name() + " varslingtekst: " + varslingstekst);
+		log.info("Distribusjonstype: " + distribusjonsType + " varslingtekst: " + varslingstekst);
 		return Varsler.builder()
 				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
 				.smsvarsel(mapSMSVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
