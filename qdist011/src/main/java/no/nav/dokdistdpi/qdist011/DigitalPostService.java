@@ -12,6 +12,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
@@ -23,9 +24,8 @@ import java.util.Optional;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.EPOST;
+import static no.nav.dokdistdpi.qdist011.Utils.DigitalPostUtils.determineVarslingstekst;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.SMS;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -78,32 +78,32 @@ public class DigitalPostService {
 				.orElseThrow(() -> new Tkat020FunctionalException("DokumenttypeInfo kan ikke være null"));
 	}
 
-	public Varsler mapVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo) {
+	public Varsler mapVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, DistribusjonsTypeKode distribusjonsType) {
+		String varselTekst = determineVarslingstekst(distribusjonsType);
 		return Varsler.builder()
-				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo))
-				.smsvarsel(mapSMSVarsler(varselInfoTo, digitalKontaktInfo))
+				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo, varselTekst))
+				.smsvarsel(mapSMSVarsler(varselInfoTo, digitalKontaktInfo, varselTekst))
 				.build();
 	}
 
-	private SmsVarsel mapSMSVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo) {
+	private SmsVarsel mapSMSVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, String varseltekst) {
 		if (isBlank(digitalKontaktInfo.getMobiltelefonnummer())) {
 			return null;
 		}
 		return SmsVarsel.builder()
 				.mobiltelefonnummer(digitalKontaktInfo.getMobiltelefonnummer())
-				.varslingstekst(varselInfoTo.getVarslingsTekst()
-						.get(SMS))
+				.varslingstekst(varseltekst)
 				.repetisjoner(varselInfoTo.getAntallDagerListe())
 				.build();
 	}
 
-	private EpostVarsel mapEpostVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo) {
+	private EpostVarsel mapEpostVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, String varseltekst) {
 		if (isBlank(digitalKontaktInfo.getEpostadresse())) {
 			return null;
 		}
 		return EpostVarsel.builder()
 				.epostadresse(digitalKontaktInfo.getEpostadresse())
-				.varslingstekst(varselInfoTo.getVarslingsTekst().get(EPOST))
+				.varslingstekst(varseltekst)
 				.repetisjoner(varselInfoTo.getAntallDagerListe())
 				.build();
 	}
