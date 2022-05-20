@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.qdist011.Utils;
 
 import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 
-public class DigitalPostUtils {
+public class VarslingstekstUtil {
 
 	//Pass på encoding her; Disse må inneholde "å".
 	public static String VEDTAK_TEKST = "Du har fått et vedtak fra NAV. Les det i din digitale postkasse.";

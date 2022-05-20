@@ -25,7 +25,7 @@ import java.util.Optional;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
-import static no.nav.dokdistdpi.qdist011.Utils.DigitalPostUtils.determineVarslingstekst;
+import static no.nav.dokdistdpi.qdist011.Utils.VarslingstekstUtil.determineVarslingstekst;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -82,9 +82,6 @@ public class DigitalPostService {
 
 	public Varsler mapVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, DistribusjonsTypeKode distribusjonsType) {
 		String varslingstekst = determineVarslingstekst(distribusjonsType);
-		//Log for å sjekke hvilken varslingtekst som blir sendt i dev.
-		//TODO: Remove før merge
-		log.info("Distribusjonstype: " + distribusjonsType + " varslingtekst: " + varslingstekst);
 		return Varsler.builder()
 				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
 				.smsvarsel(mapSMSVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
