@@ -31,6 +31,7 @@ public class HentForsendelseResponse {
 	private PostadresseTo postadresse;
 	private List<DokumentTo> dokumenter;
 	private DistribusjonstidspunktKode distribusjonstidspunkt;
+	private DistribusjonsTypeKode distribusjonstype;
 
 	public boolean isIkkeArkivertIJoark() {
 		return getArkivInformasjon() == null || !ARKIV_SYSTEM_JOARK.equals(getArkivInformasjon().getArkivSystem());

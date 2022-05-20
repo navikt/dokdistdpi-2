@@ -108,7 +108,7 @@ public class Qdist011Service {
 
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfoTo);
 
-		Varsler varsler = digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo);
+		Varsler varsler = digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
 		return Forsendelse.builder()
 				.personidentifikator(sikkerDigitalKontaktInfo.getPersonidentifikator())
 				.mottakerSertifikat(sikkerDigitalKontaktInfo.getLeverandoerSertifikat())
@@ -136,7 +136,6 @@ public class Qdist011Service {
 				.dokumentpakke(getDocumentpakkeFromBucket(hentForsendelseResponse))
 				.build();
 	}
-
 
 
 	private JournalpostQdist011 getJournalpostQdist011(HentForsendelseResponse HentForsendelseResponse) {
@@ -227,7 +226,7 @@ public class Qdist011Service {
 					forsendelseId, forsendelseStatus);
 			throw new ForsendelseStatusExpedertKanIkkeDistribuereException(format("Forsendelse med forsendelseId=%s, status=%s er ekspdert og behandlingen avsluttes",
 					forsendelseId, forsendelseStatus));
-		} else if(FORSENDELSE_STATUS_OPPRETTET.equals(forsendelseStatus)) {
+		} else if (FORSENDELSE_STATUS_OPPRETTET.equals(forsendelseStatus)) {
 			throw new KunneIkkeDistribuereForsendelseException(format("Kunne ikke distribuere forsendelse med forsendelseId=%s, status=%s", forsendelseId, forsendelseStatus));
 		}
 	}
