@@ -21,7 +21,7 @@ public class VarslingstekstUtilTest {
 	}
 
 	@Test
-	public void shouldViktigInput(){
+	public void shouldTestViktigInput(){
 		String varslingTekst = determineVarslingstekst(VIKTIG);
 		assertEquals(VIKTIG_TEKST, varslingTekst);
 	}

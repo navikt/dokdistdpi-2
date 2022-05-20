@@ -9,7 +9,6 @@ public class VarslingstekstUtil {
 	public static String VIKTIG_TEKST = "Du har fått et viktig brev fra NAV. Les det i din digitale postkasse";
 	public static String DEFAULT_TEKST = "Du har fått et brev fra NAV. Les det i din digitale postkasse";
 
-
 	public static String determineVarslingstekst(DistribusjonsTypeKode distribusjonstype) {
 
 		//Pattern matching er ikke lov i switcher enda virker det som.
