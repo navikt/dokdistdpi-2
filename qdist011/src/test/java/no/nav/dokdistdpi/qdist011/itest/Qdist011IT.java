@@ -3,8 +3,8 @@ package no.nav.dokdistdpi.qdist011.itest;
 import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
-import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.cloudstorage.DokDistDokumentFraBucket;
+import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.cloudstorage.JsonSerializer;
 import no.nav.dokdistdpi.qdist011.itest.config.ApplicationTestConfig;
 import org.apache.activemq.command.ActiveMQTextMessage;
@@ -143,7 +143,37 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
+			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
+			verify(1, getRequestedFor(urlEqualTo("/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
+			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERE_FORSENDELSE_URL)));
+		});
+	}
+
+	@Test
+	void shouldHandleForsendelseOversendtWhenDuplikatForsendelse() {
+		stubGetDigitalKontaktInformasjon(OK.value());
+		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
+		stubGetVarselInfo();
+		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
+		stubPostSecurityToken();
+		stubPutForsendelseStatusAndkonversasjonsId();
+		stubPutOgOppdaterKonversasjonsId(OK.value());
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", FORSENDELSE_ID, OK.value());
+		stubPostMaskinporten();
+		stubPostDPIDuplicate();
+		stubGetDPIStatus();
+		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+		ListStubMappingsResult stubs = listAllStubMappings();
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
@@ -230,6 +260,14 @@ public class Qdist011IT {
 						.withStatus(CREATED.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString("__files/dpi/dpi_out_status.json"))));
+	}
+
+	private void stubPostDPIDuplicate() {
+		stubFor(post(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
+				.willReturn(aResponse()
+						.withStatus(BAD_REQUEST.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody(classpathToString("__files/dpi/dpi_out_duplicate.json"))));
 	}
 
 	private void stubGetDPIStatus() {

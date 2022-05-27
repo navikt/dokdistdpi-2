@@ -40,6 +40,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -56,7 +57,9 @@ public class DpiClient {
 	private static final String HENT_PATH = "/in";
 	private static final String READ = "/read";
 	private static final String STATUSES = "/statuses";
-	private static final String AVSENDERIDENTIFIKATOR = "avsenderidentifikator";
+	// Siden hjørne2 ikke har et veldefinert felt som indikerer duplikate forsendelser så matches det på meldingen under.
+	// Ved feil her så sjekk med Digdir og om dette er endret hos hjørne2 leverandør.
+	private static final String HJORNE2_DUPLICATE_ERROR_MESSAGE = "ERROR: duplicate key value violates unique constraint";
 
 	private final RestTemplate restTemplate;
 	private final MaskinportenTokenConsumer maskinportenTokenConsumer;
@@ -95,6 +98,11 @@ public class DpiClient {
 
 			return hentForsendelseStatus(forsendelse.getBestillingsId());
 		} catch (HttpClientErrorException e) {
+			if(e.getStatusCode() == BAD_REQUEST && e.getMessage() != null && e.getMessage().contains(HJORNE2_DUPLICATE_ERROR_MESSAGE)) {
+				log.info("Brev sendt til DPI hjørne2 tidligere, fortsetter behandling. Dette kallet avvist på duplikatkontroll hos hjørne2. bestillingsId={}, status={}, melding={}",
+						forsendelse.getBestillingsId(), e.getStatusCode(), e.getMessage());
+				return hentForsendelseStatus(forsendelse.getBestillingsId());
+			}
 			log.error(LOG_FEIL_MELDING, e.getStatusCode(), forsendelse.getBestillingsId(), e.getMessage());
 			throw new KunneIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), forsendelse.getBestillingsId(), e.getMessage()), e);
 		} catch (HttpServerErrorException e) {

@@ -1,0 +1,7 @@
+{
+  "type": "about:blank",
+  "title": "Operation Failed",
+  "status": 400,
+  "detail": "Unable to send message : ERROR: duplicate key value violates unique constraint \"unique_message_uuid\"\n  Detail: Key (direction, message_uuid)=(OUT, b8b297e1-46c1-4657-9f2d-7cf6dd089b9d) already exists.",
+  "instance": "https://tools.ietf.org/html/rfc7807"
+}
