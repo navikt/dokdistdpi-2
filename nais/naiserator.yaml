@@ -107,4 +107,6 @@ spec:
         mountPath: "/secrets/virksomhetssertifikat/sdp"
       - kvPath: {{ APPDYNAMICS }}
         mountPath: /var/run/secrets/nais.io/appdynamics
-
+  azure:
+    application:
+      enabled: true
