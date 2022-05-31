@@ -8,27 +8,27 @@ metadata:
 spec:
   env:
     - name: DPI_URL
-      value: {{ DPI_URL }}
+      value: { { DPI_URL } }
     - name: DPI_MPCKANAL
-      value: {{ DPI_MPCKANAL }}
+      value: { { DPI_MPCKANAL } }
     - name: ADMINISTRERFORSENDELSE_URL
-      value: {{ ADMINISTRERFORSENDELSE_URL }}
+      value: { { ADMINISTRERFORSENDELSE_URL } }
     - name: DOKUMENTTYPEINFO_V4_URL
-      value: {{ DOKUMENTTYPEINFO_V4_URL }}
+      value: { { DOKUMENTTYPEINFO_V4_URL } }
     - name: VARSELINFO_V1_URL
-      value: {{ VARSELINFO_V1_URL }}
-    - name: DKI_API_URL
-      value: {{ DKI_API_URL }}
+      value: { { VARSELINFO_V1_URL } }
+    - name: DIGDIR_KRR_PROXY_URL
+      value: { { DIGDIR_KRR_PROXY_URL } }
     - name: MASKINPORTEN_URL
-      value: {{ MASKINPORTEN_URL }}
+      value: { { MASKINPORTEN_URL } }
     - name: MASKINPORTEN_AUDIENCE
-      value: {{ MASKINPORTEN_AUDIENCE }}
+      value: { { MASKINPORTEN_AUDIENCE } }
     - name: SAF_GRAPHQL_URL
-      value: {{ SAF_GRAPHQL_URL }}
+      value: { { SAF_GRAPHQL_URL } }
     - name: JURIDISKLOGG_URL
-      value: {{ JURIDISKLOGG_URL }}
+      value: { { JURIDISKLOGG_URL } }
     - name: SECURITY_TOKEN_SERVICE_URL
-      value: {{ SECURITY_TOKEN_SERVICE_URL }}
+      value: { { SECURITY_TOKEN_SERVICE_URL } }
     - name: MQGATEWAY01_CHANNELNAME
       value: {{ MQGATEWAY01_CHANNELNAME }}
     - name: MQGATEWAY01_HOSTNAME

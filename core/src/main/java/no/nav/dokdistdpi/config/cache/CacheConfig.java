@@ -23,6 +23,7 @@ public class CacheConfig {
 	public static final String MASKINPORTEN_CACHE = "maskinportenCache";
 	public static final String LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE = "LightweightSafJournalpostQdist011Cache";
 	public static final String SAF_JOURNALPOST_QDIST011_CACHE = "SafJournalpostQueryServiceImplQdist011Cache";
+	public static final String AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE = "AZUREAD";
 
 	@Bean
 	@Primary
@@ -42,7 +43,9 @@ public class CacheConfig {
 				new CaffeineCache(SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(30, TimeUnit.SECONDS).build()),
 				new CaffeineCache(MASKINPORTEN_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(120, TimeUnit.SECONDS).build())
+						.expireAfterWrite(120, TimeUnit.SECONDS).build()),
+				new CaffeineCache(AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE, Caffeine.newBuilder()
+						.expireAfterWrite(50, TimeUnit.MINUTES).maximumSize(1).build())
 		));
 		return manager;
 	}
