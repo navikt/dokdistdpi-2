@@ -27,6 +27,8 @@
   "NAMESPACE": "teamdokumenthandtering",
   "APPD_NAME": "dokdistdpi-2",
   "APP_NAME": "dokdistdpi-2",
+  "DOKDISTDPI_PROXY_HOST": "webproxy.nais",
+  "DOKDISTDPI_PROXY_PORT": "8088",
   "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token",
   "AZURE_APP_SCOPE": "api://dev-gcp.team-rocket.digdir-krr-proxy/.default",
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-dev-2c5a",

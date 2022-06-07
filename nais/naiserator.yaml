@@ -11,6 +11,10 @@ spec:
       value: {{AZURE_APP_TOKEN_URL}}
     - name: AZURE_APP_SCOPE
       value: {{AZURE_APP_SCOPE}}
+    - name: DOKDISTDPI_PROXY_HOST
+      value: {{DOKDISTDPI_PROXY_HOST}}
+    - name: DOKDISTDPI_PROXY_PORT
+      value: "{{DOKDISTDPI_PROXY_PORT}}"
     - name: DPI_URL
       value: {{ DPI_URL }}
     - name: DPI_MPCKANAL

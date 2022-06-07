@@ -2,9 +2,12 @@ package no.nav.dokdistdpi.azure;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
+import no.nav.dokdistdpi.config.prop.DokdistDpiProperties;
+import org.apache.http.HttpHost;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Profile;
@@ -34,8 +37,9 @@ public class AzureTokenConsumer implements TokenConsumer {
 
 	public AzureTokenConsumer(AzureProperties azureProperties,
 							  RestTemplateBuilder restTemplateBuilder,
-							  HttpClientConnectionManager httpClientConnectionManager) {
-		final CloseableHttpClient httpClient = createHttpClient(httpClientConnectionManager);
+							  HttpClientConnectionManager httpClientConnectionManager,
+							  DokdistDpiProperties dokdistDpiProperties) {
+		final CloseableHttpClient httpClient = createHttpClient(dokdistDpiProperties.getProxy(), httpClientConnectionManager);
 		this.restTemplate = restTemplateBuilder
 				.setConnectTimeout(Duration.ofSeconds(3))
 				.setReadTimeout(Duration.ofSeconds(20))
@@ -44,11 +48,21 @@ public class AzureTokenConsumer implements TokenConsumer {
 		this.azureProperties = azureProperties;
 	}
 
-	private CloseableHttpClient createHttpClient(HttpClientConnectionManager httpClientConnectionManager) {
-		return HttpClients.custom()
-				.setConnectionManager(httpClientConnectionManager)
-				.build();
+	private CloseableHttpClient createHttpClient(DokdistDpiProperties.Proxy proxy,
+												 HttpClientConnectionManager httpClientConnectionManager) {
+		if (proxy.isSet()) {
+			final HttpHost proxyHost = new HttpHost(proxy.getHost(), proxy.getPort());
+			return HttpClients.custom()
+					.setRoutePlanner(new DefaultProxyRoutePlanner(proxyHost))
+					.setConnectionManager(httpClientConnectionManager)
+					.build();
+		} else {
+			return HttpClients.custom()
+					.setConnectionManager(httpClientConnectionManager)
+					.build();
+		}
 	}
+
 
 	@Retry(name = AZURE_TOKEN_INSTANCE)
 	@CircuitBreaker(name = AZURE_TOKEN_INSTANCE)
