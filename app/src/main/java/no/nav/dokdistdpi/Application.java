@@ -1,5 +1,6 @@
 package no.nav.dokdistdpi;
 
+import no.nav.dokdistdpi.azure.AzureProperties;
 import no.nav.dokdistdpi.certificate.KeyStoreProperties;
 import no.nav.dokdistdpi.config.prop.DokdistDpiProperties;
 import no.nav.dokdistdpi.config.prop.DokdistmellomlagerProperties;
@@ -21,7 +22,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 		DpiClientProperties.class,
 		KeyStoreProperties.class,
 		DokdistmellomlagerProperties.class,
-		DokdistDpiProperties.class
+		DokdistDpiProperties.class,
+		AzureProperties.class,
 })
 @Import({CoreConfig.class})
 @EnableRetry

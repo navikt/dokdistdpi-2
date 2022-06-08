@@ -13,13 +13,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class DigitalKontaktInfoResponse {
 
-	private Map<String, Melding> feil;
-	private Map<String, DigitalKontaktinfo> kontaktinfo;
-
-	@Data
-	public static class Melding {
-		private String melding;
-	}
+	private Map<String, String> feil;
+	private Map<String, DigitalKontaktinfo> personer;
 
 	@Data
 	@Builder

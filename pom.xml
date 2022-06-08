@@ -42,6 +42,7 @@
 		<sdp-xsd.version>3.1</sdp-xsd.version>
 		<spring-cloud-contract-wiremock.version>3.1.0</spring-cloud-contract-wiremock.version>
 		<awaitility.version>4.1.1</awaitility.version>
+		<resilience4j-circuitbreaker.version>1.7.1</resilience4j-circuitbreaker.version>
 
 		<lombok.version>1.18.22</lombok.version>
 
@@ -185,6 +186,11 @@
 				<artifactId>lombok</artifactId>
 				<version>${lombok.version}</version>
 				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.github.resilience4j</groupId>
+				<artifactId>resilience4j-spring-boot2</artifactId>
+				<version>${resilience4j-circuitbreaker.version}</version>
 			</dependency>
 			<!-- test -->
 			<dependency>

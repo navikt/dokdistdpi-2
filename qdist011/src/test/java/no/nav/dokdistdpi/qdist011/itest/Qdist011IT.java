@@ -148,7 +148,7 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
-			verify(1, getRequestedFor(urlEqualTo("/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
@@ -178,7 +178,7 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
-			verify(1, getRequestedFor(urlEqualTo("/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
@@ -211,8 +211,7 @@ public class Qdist011IT {
 		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 		verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
 		verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
-		verify(1, getRequestedFor(urlEqualTo("/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true")));
-		verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
+		verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 		verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 		verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 	}
@@ -348,7 +347,7 @@ public class Qdist011IT {
 	}
 
 	private void stubGetDigitalKontaktInformasjon(int status) {
-		stubFor(get("/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true")
+		stubFor(post("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)

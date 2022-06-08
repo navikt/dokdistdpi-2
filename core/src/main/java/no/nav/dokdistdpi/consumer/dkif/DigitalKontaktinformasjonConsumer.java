@@ -1,7 +1,8 @@
 package no.nav.dokdistdpi.consumer.dkif;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.consumer.sts.StsRestConsumer;
+import no.nav.dokdistdpi.azure.TokenConsumer;
+import no.nav.dokdistdpi.azure.TokenResponse;
 import no.nav.dokdistdpi.exception.functional.DigitalKontaktinformasjonFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.DigitalKontaktinformasjonTechnicalException;
@@ -21,6 +22,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import static java.lang.String.format;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
@@ -29,24 +31,23 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_PERSONIDENTER;
-import static org.springframework.http.HttpMethod.GET;
 
 @Slf4j
 @Component
 public class DigitalKontaktinformasjonConsumer {
 
 	private final DigitalKontaktinfoMapper digitalPostKontaktinfoMapper;
-	private final StsRestConsumer stsRestConsumer;
+	private final TokenConsumer tokenConsumer;
 	private final RestTemplate restTemplate;
 	private final String dkiUrl;
+	private static final String BEARER_PREFIX = "Bearer ";
 
 	@Autowired
-	public DigitalKontaktinformasjonConsumer(@Value("${dki_api_url}") String dkiUrl,
-											 StsRestConsumer stsRestConsumer,
+	public DigitalKontaktinformasjonConsumer(@Value("${digdir_krr_proxy_url}") String dkiUrl,
+											 TokenConsumer tokenConsumer,
 											 RestTemplateBuilder restTemplateBuilder) {
 		this.digitalPostKontaktinfoMapper = new DigitalKontaktinfoMapper();
-		this.stsRestConsumer = stsRestConsumer;
+		this.tokenConsumer = tokenConsumer;
 		this.dkiUrl = dkiUrl;
 		this.restTemplate = restTemplateBuilder
 				.setConnectTimeout(Duration.ofSeconds(5))
@@ -58,18 +59,18 @@ public class DigitalKontaktinformasjonConsumer {
 	@Monitor(value = "dok_consumer", extraTags = {"process", "hentSikkerDigitalPostadresse"}, percentiles = {0.5, 0.95}, histogram = true)
 	public SikkerDigitalKontaktInfo hentSikkerDigitalPostadresse(final String personidentifikator) {
 		HttpHeaders headers = createHeaders();
-		final String fnrStriped = personidentifikator.strip();
-		headers.add(NAV_PERSONIDENTER, fnrStriped);
+		final String fnrTrimmed = personidentifikator.strip();
 
 		try {
-			DigitalKontaktInfoResponse response = restTemplate.exchange(dkiUrl + "/api/v1/personer/kontaktinformasjon?inkluderSikkerDigitalPost=true",
-					GET, new HttpEntity<>(headers), DigitalKontaktInfoResponse.class).getBody();
+			PostPersonerRequest postPersonRequest = PostPersonerRequest.builder().personidenter(Arrays.asList(fnrTrimmed)).build();
+			HttpEntity<String> request = new HttpEntity(postPersonRequest, headers);
+			DigitalKontaktInfoResponse response = restTemplate.postForEntity(dkiUrl + "/rest/v1/personer?inkluderSikkerDigitalPost=true", request, DigitalKontaktInfoResponse.class).getBody();
 
-			if (isValidRespons(response, fnrStriped)) {
-				return digitalPostKontaktinfoMapper.mapDigitalKontaktinfo(response.getKontaktinfo().get(fnrStriped), personidentifikator);
+			if (isValidRespons(response, fnrTrimmed)) {
+				return digitalPostKontaktinfoMapper.mapDigitalKontaktinfo(response.getPersoner().get(fnrTrimmed), personidentifikator);
 			} else {
 				throw new DigitalKontaktinformasjonFunctionalException(format("Funksjonell feil ved kall mot DigitalKontaktinformasjonV1.kontaktinformasjon. Feilmelding=%s",
-						getErrorMsg(response, fnrStriped)));
+						getErrorMsg(response, fnrTrimmed)));
 			}
 
 		} catch (HttpClientErrorException e) {
@@ -82,21 +83,22 @@ public class DigitalKontaktinformasjonConsumer {
 	}
 
 	private boolean isValidRespons(DigitalKontaktInfoResponse response, String fnr) {
-		return response != null && response.getKontaktinfo() != null && response.getKontaktinfo().get(fnr) != null;
+		return response != null && response.getPersoner() != null && response.getPersoner().get(fnr) != null;
 	}
 
 	private String getErrorMsg(DigitalKontaktInfoResponse response, String fnr) {
 		if (response == null || response.getFeil() == null) {
 			return null;
 		} else {
-			return response.getFeil().get(fnr).getMelding();
+			return response.getFeil().get(fnr);
 		}
 	}
 
 	private HttpHeaders createHeaders() {
+		TokenResponse clientCredentialToken = tokenConsumer.getClientCredentialToken();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.setBearerAuth(stsRestConsumer.getStsOidcToken());
+		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + clientCredentialToken.getAccess_token());
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
 		headers.add(NAV_CALL_ID, MDC.get(CALL_ID));
 		return headers;

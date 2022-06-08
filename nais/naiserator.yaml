@@ -7,6 +7,14 @@ metadata:
     team: teamdokumenthandtering
 spec:
   env:
+    - name: AZURE_APP_TOKEN_URL
+      value: {{AZURE_APP_TOKEN_URL}}
+    - name: AZURE_APP_SCOPE
+      value: {{AZURE_APP_SCOPE}}
+    - name: DOKDISTDPI_PROXY_HOST
+      value: {{DOKDISTDPI_PROXY_HOST}}
+    - name: DOKDISTDPI_PROXY_PORT
+      value: "{{DOKDISTDPI_PROXY_PORT}}"
     - name: DPI_URL
       value: {{ DPI_URL }}
     - name: DPI_MPCKANAL
@@ -17,8 +25,8 @@ spec:
       value: {{ DOKUMENTTYPEINFO_V4_URL }}
     - name: VARSELINFO_V1_URL
       value: {{ VARSELINFO_V1_URL }}
-    - name: DKI_API_URL
-      value: {{ DKI_API_URL }}
+    - name: DIGDIR_KRR_PROXY_URL
+      value: {{ DIGDIR_KRR_PROXY_URL }}
     - name: MASKINPORTEN_URL
       value: {{ MASKINPORTEN_URL }}
     - name: MASKINPORTEN_AUDIENCE

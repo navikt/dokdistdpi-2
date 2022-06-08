@@ -1,5 +1,8 @@
 package no.nav.dokdistdpi.qdist011.itest.config;
 
+import no.nav.dokdistdpi.azure.AzureProperties;
+import no.nav.dokdistdpi.azure.TokenConsumer;
+import no.nav.dokdistdpi.azure.TokenResponse;
 import no.nav.dokdistdpi.certificate.KeyStoreProperties;
 import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.config.cache.CacheConfig;
@@ -13,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.retry.annotation.EnableRetry;
 
@@ -27,7 +31,8 @@ import static org.mockito.Mockito.mock;
 		MqGatewayProperties.class,
 		DpiClientProperties.class,
 		KeyStoreProperties.class,
-		DokdistDpiProperties.class
+		DokdistDpiProperties.class,
+		AzureProperties.class
 })
 @Import({CacheConfig.class,
 		JmsItestConfig.class,
@@ -38,5 +43,15 @@ public abstract class ApplicationTestConfig {
 	@Bean
 	public EncryptedBucketStorage bucketStorage() {
 		return mock(EncryptedBucketStorage.class);
+	}
+
+	static class Config {
+		@Bean
+		@Primary
+		TokenConsumer azureTokenConsumer() {
+			return () -> TokenResponse.builder()
+					.access_token("dummy")
+					.build();
+		}
 	}
 }
