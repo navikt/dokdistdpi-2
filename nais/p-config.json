@@ -35,7 +35,7 @@
   "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-prod",
   "DOKDISTMELLOMLAGER_KEYRING": "dokdistmellomlager-keyring",
   "DOKDISTMELLOMLAGER_KEYID": "dokdistmellomlager-symmetric",
-  "MIN_REPLICAS": "2",
+  "MIN_REPLICAS": "4",
   "MAX_REPLICAS": "10",
   "INGRESSES": [
     "https://dokdistdpi-2.intern.nav.no"
