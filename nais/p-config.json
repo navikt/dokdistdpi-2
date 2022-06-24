@@ -11,7 +11,7 @@
   "SAF_GRAPHQL_URL": "https://saf.intern.nav.no/graphql",
   "SECURITY_TOKEN_SERVICE_URL": "https://security-token-service.nais.adeo.no/rest/v1/sts/token",
   "MQGATEWAY01_CHANNELNAME": "P_DOKDISTDPI",
-  "MQGATEWAY01_HOSTNAME": "a01apvl247.adeo.no",
+  "MQGATEWAY01_HOSTNAME": "mpls01.adeo.no",
   "MQGATEWAY01_PORT": "1414",
   "MQGATEWAY01_NAME": "MPLS01",
   "DOKDISTDPI_QDIST011_DIST_TIL_DPI_QUEUENAME": "QA.P_DOKDISTDPI.QDIST011_DIST_TIL_DPI",
