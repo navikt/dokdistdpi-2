@@ -5,7 +5,6 @@ import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.asice.AsiceCreator;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.asice.CreateCMSDocument;
-import no.nav.dokdistdpi.exception.functional.FileSizeLimitExceededException;
 import no.nav.dokdistdpi.exception.technical.DokumentpakkingException;
 import no.nav.dokdistdpi.exception.technical.SertifikatException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import static java.lang.Math.pow;
-import static java.lang.String.format;
 import static java.security.cert.CertificateFactory.getInstance;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
@@ -42,9 +40,7 @@ public class DigitalPostContentPackager {
 		try (final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse, appCertificate)) {
 			log.info("Oppretter CMS dokument med bestillingsId={} og KonversasjonId={}", forsendelse.getBestillingsId(), forsendelse.getKonversasjonId());
 			byte[] cmsByte = createCMSDocument.createCMSByte(((ByteArrayOutputStream) asiceStreamed).toByteArray(), mottakerCertificate);
-
 			validateDokumentpakkeSize(cmsByte);
-
 			return cmsByte;
 		} catch (IOException e) {
 			throw new DokumentpakkingException("Klarte ikke lage asic eller kryptere dokumentpakke.", e);
@@ -54,7 +50,7 @@ public class DigitalPostContentPackager {
 	private void validateDokumentpakkeSize(byte[] cmsByte) {
 		int dokumentpakkeSize = cmsByte.length / (int) pow(1024, 2);
 		if (dokumentpakkeSize > DOKUMENTPAKKE_SIZE_LIMIT_MB) {
-			throw new FileSizeLimitExceededException(format("Dokumentpakken kan ikke overstige 30Mb. Faktisk størrelse er %sMb", dokumentpakkeSize));
+			log.warn("Dokumentpakken er større enn 30Mb. Faktisk størrelse er {}Mb", dokumentpakkeSize);
 		}
 	}
 
