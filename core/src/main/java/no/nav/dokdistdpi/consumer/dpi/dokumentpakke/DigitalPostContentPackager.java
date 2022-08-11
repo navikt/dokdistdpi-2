@@ -38,7 +38,7 @@ public class DigitalPostContentPackager {
 	public byte[] createKryptertDokumentpakke(Forsendelse forsendelse, AppCertificate appCertificate) {
 		X509Certificate mottakerCertificate = fraBase64X509String(forsendelse.getMottakerSertifikat());
 		try (final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse, appCertificate)) {
-			log.info("Oppretter CMS dokument med bestillingsId={} og KonversasjonId={}", forsendelse.getBestillingsId(), forsendelse.getKonversasjonId());
+			log.info("Oppretter CMS dokument med bestillingsId={} og konversasjonId={}", forsendelse.getBestillingsId(), forsendelse.getKonversasjonId());
 			byte[] cmsByte = createCMSDocument.createCMSByte(((ByteArrayOutputStream) asiceStreamed).toByteArray(), mottakerCertificate);
 			validateDokumentpakkeSize(cmsByte);
 			return cmsByte;

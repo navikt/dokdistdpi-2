@@ -46,7 +46,8 @@ public class AsiceCreator {
 		ByteArrayOutputStream asiceArchive = new ByteArrayOutputStream();
 		List<AsicEVedlegg> asicEAttachables = new ArrayList<>();
 
-		log.info("Creating ASiC-E manifest");
+		log.info("Oppretter ASiC-E manifest. bestillingsId={}. antall={} dokumenter (hoveddokument + vedlegg)",
+				forsendelse.getBestillingsId(), 1 + vedlegg.size());
 		DpiManifest xmlManifest = xmlManifestCreator.createManifest(forsendelse);
 
 		asicEAttachables.add(xmlManifest);
@@ -55,7 +56,7 @@ public class AsiceCreator {
 
 		try {
 			// Lag signatur over alle filene i pakka
-			log.info("Signing ASiC-E documents with bestillingsId={} using private key.", forsendelse.getBestillingsId());
+			log.info("Signerer ASiC-E dokumenter med bestillingsId={} ved bruk av private key.", forsendelse.getBestillingsId());
 			XAdESSignatures signatures = createSignature.createSignature(appCertificate, asicEAttachables);
 			asicEAttachables.add(signatures);
 		} catch (XmlValideringException e) {
