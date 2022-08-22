@@ -60,11 +60,11 @@ public class Sdist003Service {
 
 		final HentKvitteringResponse[] kvitteringer = kvitteringResponse.getBody();
 		if(kvitteringer == null) {
-			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir. Listen av kvitteringer er null");
+			return null;
 		}
 
 		if (!OK.equals(kvitteringResponse.getStatusCode()) && !NO_CONTENT.equals(kvitteringResponse.getStatusCode())) {
-			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir. Status er ikke OK");
+			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir. Status er ikke 200 OK eller 204 NO_CONTENT. httpstatus=" + kvitteringResponse.getStatusCode());
 		}
 
 		log.info("Sdist003 Hentet totalt={} kvitteringer fra DPI", kvitteringer.length);
