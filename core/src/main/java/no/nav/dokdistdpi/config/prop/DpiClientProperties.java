@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Positive;
 
 @Data
 @ConfigurationProperties("dpi")
@@ -14,4 +15,6 @@ public class DpiClientProperties {
 	private String url;
 	@NotEmpty
 	private String mpckanal;
+	@Positive
+	private int pagesize;
 }

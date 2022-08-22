@@ -119,7 +119,7 @@ public class Sdist003ITest {
 		});
 
 		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
-		verify(1, getRequestedFor(urlEqualTo("/message/in?kanal=dokdistdpi-t")));
+		verify(1, getRequestedFor(urlEqualTo("/message/in?kanal=dokdistdpi-t&page_size=10")));
 	}
 
 	private void stubPostJuridiskLogg(HttpStatus status, String filePath) {
@@ -131,7 +131,7 @@ public class Sdist003ITest {
 	}
 
 	private void stubGetKvittering() {
-		stubFor(get(urlEqualTo("/message/in?kanal=dokdistdpi-t"))
+		stubFor(get(urlEqualTo("/message/in?kanal=dokdistdpi-t&page_size=10"))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
