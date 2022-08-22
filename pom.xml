@@ -26,11 +26,10 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<activemq.version>5.17.0</activemq.version>
 		<google-cloud.version>25.4.0</google-cloud.version>
-		<google-tink.version>1.6.1</google-tink.version>
+		<google-tink.version>1.7.0</google-tink.version>
 		<bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
-		<camel.version>3.18.0</camel.version>
+		<camel.version>3.18.1</camel.version>
 		<commons-compress.version>1.21</commons-compress.version>
 		<commons-io.version>2.11.0</commons-io.version>
 		<dokkat.version>11.0.5</dokkat.version>
@@ -38,11 +37,12 @@
 		<jakarta.xml.version>2.3.3</jakarta.xml.version>
 		<logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
 		<melding-virksomhet-dokdistfordeling.version>2.1.2</melding-virksomhet-dokdistfordeling.version>
-		<nimbus-jose-jwt.version>9.15.2</nimbus-jose-jwt.version>
+		<nimbus-jose-jwt.version>9.24.2</nimbus-jose-jwt.version>
 		<sdp-xsd.version>3.1</sdp-xsd.version>
 		<resilience4j-circuitbreaker.version>1.7.1</resilience4j-circuitbreaker.version>
 		<spring-cloud-contract-wiremock.version>3.1.0</spring-cloud-contract-wiremock.version>
 		<awaitility.version>4.1.1</awaitility.version>
+		<activemq.version>5.17.0</activemq.version>
 
 		<maven-toolchains-plugin.version>3.0.0</maven-toolchains-plugin.version>
 	</properties>
