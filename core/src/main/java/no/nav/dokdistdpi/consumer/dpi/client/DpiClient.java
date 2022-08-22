@@ -34,6 +34,7 @@ import java.util.Objects;
 import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.KANAL;
+import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.PAGE_SIZE;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
@@ -140,6 +141,7 @@ public class DpiClient {
 				.fromHttpUrl(clientProperties.getUrl())
 				.path(HENT_PATH)
 				.queryParam(KANAL, clientProperties.getMpckanal())
+				.queryParam(PAGE_SIZE, clientProperties.getPagesize())
 				.toUriString();
 
 		try {
