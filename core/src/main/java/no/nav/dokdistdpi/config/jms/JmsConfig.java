@@ -14,6 +14,7 @@ import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapte
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import java.util.concurrent.TimeUnit;
 
 import static com.ibm.mq.constants.CMQC.MQENC_NATIVE;
 import static com.ibm.msg.client.jms.JmsConstants.JMS_IBM_CHARACTER_SET;
@@ -74,17 +75,18 @@ public class JmsConfig {
 		mqConnectionFactory.setIntProperty(JMS_IBM_ENCODING, MQENC_NATIVE);
 		mqConnectionFactory.setIntProperty(JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA);
 		mqConnectionFactory.setStringProperty(USERID, serviceuserProperties.getUsername());
+
 		UserCredentialsConnectionFactoryAdapter adapter = new UserCredentialsConnectionFactoryAdapter();
 		adapter.setTargetConnectionFactory(mqConnectionFactory);
+		adapter.setUsername(serviceuserProperties.getUsername());
+		adapter.setPassword(serviceuserProperties.getPassword());
 
 		PooledConnectionFactory pooledFactory = new PooledConnectionFactory();
 		pooledFactory.setConnectionFactory(adapter);
 		pooledFactory.setMaxConnections(10);
 		pooledFactory.setMaximumActiveSessionPerConnection(10);
-
-		adapter.setUsername(serviceuserProperties.getUsername());
-		adapter.setPassword(serviceuserProperties.getPassword());
-
+		pooledFactory.setReconnectOnException(true);
+		pooledFactory.setExpiryTimeout(TimeUnit.HOURS.toMillis(24));
 		return pooledFactory;
 	}
 }
