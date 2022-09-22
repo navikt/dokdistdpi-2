@@ -110,6 +110,7 @@ public class Qdist011Service {
 
 		Varsler varsler = digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
 		return Forsendelse.builder()
+				.forsendelseId(distribuerTilKanal.getForsendelseId())
 				.personidentifikator(sikkerDigitalKontaktInfo.getPersonidentifikator())
 				.mottakerSertifikat(sikkerDigitalKontaktInfo.getLeverandoerSertifikat())
 				.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())

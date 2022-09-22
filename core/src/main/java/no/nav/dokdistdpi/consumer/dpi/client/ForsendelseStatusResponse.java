@@ -11,9 +11,5 @@ public class ForsendelseStatusResponse {
 	StatusType status;
 	String beskrivelse;
 	LocalDateTime timestamp;
-
-	public enum StatusType {
-		OPPRETTET, SENDT, FEILET
-	}
 }
 

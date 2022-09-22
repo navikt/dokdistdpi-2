@@ -1,12 +1,12 @@
 package no.nav.dokdistdpi.consumer.rdist001;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import org.apache.camel.Exchange;
+import no.nav.dokdistdpi.consumer.dpi.client.OppdaterDigitalAdresseRequest;
+import no.nav.dokdistdpi.consumer.rdist001.domain.DigitalPostAdresseRequestTo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_OVERSENDT;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
 
 @Component
 public class DokdistAdministrerForsendelseUpdater {
@@ -21,10 +21,18 @@ public class DokdistAdministrerForsendelseUpdater {
 		this.meterRegistry = meterRegistry;
 	}
 
-	public void updateStatus(Exchange exchange) {
-		final String forsendelseId = exchange.getProperty(PROPERTY_FORSENDELSE_ID, String.class);
-		administrerForsendelse.oppdaterForsendelseStatus(forsendelseId, FORSENDELSE_STATUS_OVERSENDT);
+	public void updateStatusDigitalLeverandoerAndPostkasseadresse(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
+		administrerForsendelse.oppdaterForsendelseStatusDigitalLeverandoerAndPostkasseadresse(mapDigitalAdresse(oppdaterDigitalAdresseRequest));
 		meldingTilDpiCounter();
+	}
+
+	private DigitalPostAdresseRequestTo mapDigitalAdresse(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
+		return oppdaterDigitalAdresseRequest == null ? null : DigitalPostAdresseRequestTo.builder()
+				.forsendelseId(oppdaterDigitalAdresseRequest.getForsendelseId())
+				.forsendelseStatus(FORSENDELSE_STATUS_OVERSENDT)
+				.digitalLeverandoeradresse(oppdaterDigitalAdresseRequest.getDigitalLeverandoeradresse())
+				.digitalPostkasseadresse(oppdaterDigitalAdresseRequest.getDigitalPostkasseadresse())
+				.build();
 	}
 
 	private void meldingTilDpiCounter() {

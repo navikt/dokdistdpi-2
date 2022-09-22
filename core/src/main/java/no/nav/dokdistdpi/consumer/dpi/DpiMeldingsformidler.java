@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
+import no.nav.dokdistdpi.consumer.dpi.client.OppdaterDigitalAdresseRequest;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Dokumentpakkefingeravtrykk;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
@@ -28,8 +29,8 @@ import java.text.ParseException;
 import java.util.Base64;
 import java.util.List;
 
-import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.StatusType.OPPRETTET;
-import static no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse.StatusType.SENDT;
+import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.OPPRETTET;
+import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.SENDT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
@@ -60,7 +61,7 @@ public class DpiMeldingsformidler {
 
 	@Handler
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "sendMelding"}, percentiles = {0.5, 0.95}, histogram = true)
-	public ForsendelseStatusResponse sendMelding(Forsendelse forsendelse) {
+	public OppdaterDigitalAdresseRequest sendMelding(Forsendelse forsendelse) {
 		byte[] dokumentpakke = getKryptertDokumentpakke(forsendelse);
 
 		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse,
@@ -71,9 +72,15 @@ public class DpiMeldingsformidler {
 		multipartBodyBuilder.part("dokumentpakke", dokumentpakke, APPLICATION_OCTET_STREAM);
 
 		List<ForsendelseStatusResponse> forsendelseStatusResponses = dpiClient.sendDpiForsendelse(multipartBodyBuilder, forsendelse);
-		return forsendelseStatusResponses.stream()
+		ForsendelseStatusResponse forsendelseStatusResponse = forsendelseStatusResponses.stream()
 				.filter(statusResponse -> SENDT.equals(statusResponse.getStatus()) || OPPRETTET.equals(statusResponse.getStatus()))
 				.findAny().orElse(null);
+		return forsendelseStatusResponse == null ? null : OppdaterDigitalAdresseRequest.builder()
+				.status(forsendelseStatusResponse.getStatus())
+				.forsendelseId(forsendelse.getForsendelseId())
+				.digitalLeverandoeradresse(forsendelse.getDigitalPostLeverandoerAdresse())
+				.digitalPostkasseadresse(forsendelse.getDigital().getMottaker().getPostkasseadresse())
+				.build();
 	}
 
 	private byte[] getKryptertDokumentpakke(Forsendelse forsendelse) {

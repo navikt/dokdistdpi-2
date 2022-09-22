@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.valueOf;
 import static java.util.UUID.randomUUID;
+import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarselType.MELDINGSFEIL;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_FOR_DIST;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.OVERSENDT;
@@ -136,7 +137,7 @@ public class Sdist005Service {
 		try {
 			List<ForsendelseStatusResponse> forsendelseStatusResponses = dpiClient.hentForsendelseStatus(bestillingsId);
 			return forsendelseStatusResponses.stream()
-					.filter(statusResponse -> ForsendelseStatusResponse.StatusType.FEILET == statusResponse.getStatus())
+					.filter(statusResponse -> FEILET == statusResponse.getStatus())
 					.findFirst();
 		} catch (ForsendelseStatusIkkeFunnetException | SikkerDigitalPostException e) {
 			return Optional.empty();

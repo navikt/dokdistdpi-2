@@ -2,6 +2,7 @@ package no.nav.dokdistdpi.consumer.rdist001;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
+import no.nav.dokdistdpi.consumer.rdist001.domain.DigitalPostAdresseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
@@ -100,7 +101,18 @@ public class AdministrerForsendelseConsumer {
 				.queryParam("forsendelseStatus", forsendelseStatus)
 				.toUriString();
 		log.info("Mottatt kall til å oppdatere forsendelse med forsendelseId={} forsendelseStatus={}", forsendelseId, forsendelseStatus);
-		oppdaterForsendelse(uri);
+		oppdaterForsendelse(uri, null);
+	}
+
+	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Monitor(value = DOK_REQUEST, extraTags = {"process", "oppdaterForsendelseStatusDigitalLeverandoerAndPostkasseadresse"}, histogram = true)
+	public void oppdaterForsendelseStatusDigitalLeverandoerAndPostkasseadresse(DigitalPostAdresseRequestTo digitalPostAdresseRequestTo) {
+		String uri = UriComponentsBuilder.fromHttpUrl(url)
+				.path("/oppdaterdigitalinfo")
+				.toUriString();
+		log.info("forsendelse med forsendelseId={} mottatt kall til å oppdatere forsendelseStatus={}, digitalLeverandoeradresse og digitalPostkasseadresse",
+				digitalPostAdresseRequestTo.getForsendelseId(), digitalPostAdresseRequestTo.getForsendelseStatus());
+		oppdaterForsendelse(uri, digitalPostAdresseRequestTo);
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
@@ -111,7 +123,7 @@ public class AdministrerForsendelseConsumer {
 				.queryParam("konversasjonsId", konversasjonsId)
 				.toUriString();
 		log.info("Mottatt kall til å oppdatere forsendelse med forsendelseId={} konversasjonsId={}", forsendelseId, konversasjonsId);
-		oppdaterForsendelse(uri);
+		oppdaterForsendelse(uri, null);
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
@@ -153,15 +165,15 @@ public class AdministrerForsendelseConsumer {
 		}
 	}
 
-	private void oppdaterForsendelse(String uri) {
+	private void oppdaterForsendelse(String uri, DigitalPostAdresseRequestTo digitalPostAdresseRequestTo) {
 		try {
-			HttpEntity<?> entity = new HttpEntity<>(createHeaders());
+			HttpEntity<?> entity = digitalPostAdresseRequestTo == null ? new HttpEntity<>(createHeaders()) :
+					new HttpEntity<>(digitalPostAdresseRequestTo, createHeaders());
 			restTemplate.exchange(uri, PUT, entity, String.class);
 		} catch (HttpClientErrorException e) {
 			log.error("Kall mot rdist001 - oppdaterForsendelse feilet med feilmelding={}", e.getMessage());
 			throw new AdminstrerForsendelseFunctionalException(format("Kall mot rdist001 - oppdaterForsendelse feilet med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()),
 					e);
-
 		} catch (HttpServerErrorException e) {
 			log.error("Kall mot rdist001 - oppdaterForsendelse feilet med feilmelding={}", e.getMessage());
 			throw new AdminstrerForsendelseTechnicalException(format("Kall mot rdist001 - oppdaterForsendelse feilet teknisk med statusCode=%s,feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
