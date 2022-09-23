@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.consumer.rdist001;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.dokdistdpi.consumer.dpi.client.OppdaterDigitalAdresseRequest;
-import no.nav.dokdistdpi.consumer.rdist001.domain.DigitalPostAdresseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +22,12 @@ public class DokdistAdministrerForsendelseUpdater {
 	}
 
 	public void updateStatusDigitalLeverandoerAndPostkasseadresse(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
-		administrerForsendelse.oppdaterForsendelseStatusDigitalLeverandoerAndPostkasseadresse(mapDigitalAdresse(oppdaterDigitalAdresseRequest));
+		administrerForsendelse.oppdaterForsendelseAndDigitalPostkasseInfo(mapDigitalAdresse(oppdaterDigitalAdresseRequest));
 		meldingTilDpiCounter();
 	}
 
-	private DigitalPostAdresseRequestTo mapDigitalAdresse(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
-		return oppdaterDigitalAdresseRequest == null ? null : DigitalPostAdresseRequestTo.builder()
+	private OppdaterForsendelseRequestTo mapDigitalAdresse(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
+		return oppdaterDigitalAdresseRequest == null ? null : OppdaterForsendelseRequestTo.builder()
 				.forsendelseId(oppdaterDigitalAdresseRequest.getForsendelseId())
 				.forsendelseStatus(FORSENDELSE_STATUS_OVERSENDT)
 				.digitalLeverandoeradresse(oppdaterDigitalAdresseRequest.getDigitalLeverandoeradresse())

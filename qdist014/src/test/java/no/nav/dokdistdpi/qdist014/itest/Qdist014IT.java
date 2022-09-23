@@ -2,9 +2,7 @@ package no.nav.dokdistdpi.qdist014.itest;
 
 import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.qdist014.itest.config.ApplicationTestConfig;
-import no.nav.dokdistdpi.qdist014.map.Testutil;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,16 +48,11 @@ import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
-import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.EKSPEDERT;
-import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_FOR_DIST;
-import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
 @ExtendWith(SpringExtension.class)
 @EnableAutoConfiguration
@@ -113,15 +106,15 @@ public class Qdist014IT {
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", OK.value());
-		stubPutOppdaterForsendelse(ForsendelseStatus.EKSPEDERT.name(), FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/leveringskvittering.json"));
 
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
 			verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
-			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse?forsendelseId=1720847&forsendelseStatus=EKSPEDERT")));
+			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
 		});
 	}
 
@@ -131,12 +124,12 @@ public class Qdist014IT {
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", OK.value());
-		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
 		});
@@ -149,12 +142,12 @@ public class Qdist014IT {
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", OK.value());
 		stubPutFeilregistrerforsendelse(OK.value());
-		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/feilkvittering.json"));
 
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
 		});
@@ -166,7 +159,7 @@ public class Qdist014IT {
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", OK.value());
-		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
@@ -176,7 +169,7 @@ public class Qdist014IT {
 			String message = receive(qdist009);
 			assertNotNull(message);
 		});
-		verifyAndCountDpiForsendelse(1, KONVERSASJON_ID, KLAR_FOR_DIST.name());
+		verifyAndCountDpiForsendelse(1, KONVERSASJON_ID);
 
 	}
 
@@ -186,7 +179,7 @@ public class Qdist014IT {
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", OK.value());
-		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
@@ -195,7 +188,7 @@ public class Qdist014IT {
 			String message = receive(qdist009);
 			assertNotNull(message);
 		});
-		verifyAndCountDpiForsendelse(1, KONVERSASJON_ID, KLAR_FOR_DIST.name());
+		verifyAndCountDpiForsendelse(1, KONVERSASJON_ID);
 	}
 
 	@Test
@@ -204,7 +197,7 @@ public class Qdist014IT {
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-feil.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", OK.value());
-		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/leveringskvittering.json"));
@@ -220,14 +213,13 @@ public class Qdist014IT {
 
 	}
 
-
 	@Test
 	void shouldEndAndLogWhenForsendelseStatusErEkspedert() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-ekspedert.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", OK.value());
-		stubPutOppdaterForsendelse(EKSPEDERT.name(), NY_FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
@@ -245,12 +237,12 @@ public class Qdist014IT {
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", null, OK.value());
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", OK.value());
-		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
 		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String response = receive(qdist014FunksjonellFeil);
 			assertNotNull(response);
 
@@ -264,7 +256,7 @@ public class Qdist014IT {
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", HttpStatus.INTERNAL_SERVER_ERROR.value());
-		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
@@ -286,13 +278,13 @@ public class Qdist014IT {
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", OK.value());
-		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/non-kvittering.json"));
 		ListStubMappingsResult stubs = listAllStubMappings();
 
-		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String response = receive(backoutQueue);
 			assertNotNull(response);
 		});
@@ -305,7 +297,7 @@ public class Qdist014IT {
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
 		stubPostPersisterForsendelse("__files/rdist001/persisterForsendelseResponse-happy.json", OK.value());
-		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID, OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, null);
@@ -318,66 +310,17 @@ public class Qdist014IT {
 
 	}
 
-	private void stubGetDPIKvittering(String filepath) {
-		stubFor(get(urlEqualTo("/message/in/dokdist-t"))
-				.willReturn(aResponse()
-						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile(filepath)));
-	}
-
-	private void stubPostBekreftet(String filepath) {
-		stubFor(get(urlEqualTo("/message/in/dokdist-t"))
-				.willReturn(aResponse()
-						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile(filepath)));
-	}
-
-	private void stubPostMottattKvittering() {
-		stubFor(post(urlMatching("/message/in/" + BESTILLING_ID + "/read"))
-				.willReturn(aResponse()
-						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
-	}
-
-	private void stubPostMaskinporten() {
-		stubFor(post(urlMatching("/maskinporten"))
-				.willReturn(aResponse().withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(Testutil.classpathToString("__files/maskinporten/maskinporten_happy_response.json"))));
-
-	}
-
-	private void stubPostDPISend(int status) {
-		stubFor(post(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
-				.willReturn(aResponse()
-						.withStatus(status)
-						.withHeader(CONTENT_TYPE, APPLICATION_PROBLEM_JSON_VALUE)
-						.withBodyFile("dpi/dpi_out_status400.json")));
-	}
-
-	private void verifyAndCountDpiForsendelse(int count, String konversasjonsId, String forsendelseStatus) {
+	private void verifyAndCountDpiForsendelse(int count, String konversasjonsId) {
 		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + konversasjonsId)));
 		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 		verify(count, postRequestedFor(urlMatching("/administrerforsendelse")));
 		verify(count, putRequestedFor(urlMatching("/administrerforsendelse/feilregistrerforsendelse")));
-		verify(count, putRequestedFor(urlEqualTo("/administrerforsendelse?forsendelseId=" + NY_FORSENDELSE_ID + "&forsendelseStatus=" + forsendelseStatus)));
-
+		verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
 	}
 
-	private void verifyAndCountDpiForsendelse(int count, String forsendelseStatus) {
-		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
-		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
-		verify(count, postRequestedFor(urlMatching("/administrerforsendelse")));
-		verify(count, putRequestedFor(urlMatching("/administrerforsendelse/feilregistrerforsendelse")));
-		verify(count, putRequestedFor(urlEqualTo("/administrerforsendelse?forsendelseId=" + NY_FORSENDELSE_ID + "&forsendelseStatus=" + forsendelseStatus)));
-
-	}
-
-	private void stubPutOppdaterForsendelse(String forsendelseStatus, String forsendelseId, int httpStatusvalue) {
-		stubFor(put("/administrerforsendelse?forsendelseId=" + forsendelseId + "&forsendelseStatus=" + forsendelseStatus)
-				.willReturn(aResponse().withStatus(httpStatusvalue)));
+	private void stubPutOppdaterDigitalLeverandoerAndPostkasseadresse() {
+		stubFor(put(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo"))
+				.willReturn(aResponse().withStatus(OK.value())));
 	}
 
 	private void stubGetHentForsendelse(String responsebody, String forsendelseId, int httpStatusvalue) throws IOException {
