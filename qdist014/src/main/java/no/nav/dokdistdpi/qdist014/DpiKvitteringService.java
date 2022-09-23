@@ -5,6 +5,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvitt
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeiletKvittering;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
@@ -75,7 +76,10 @@ public class DpiKvitteringService {
 		validateOppdaterForsendelse(forsendelseResponseTo);
 		createFeilRegistrerForsendelseKvittering(forsendelseId, dpiMelding, request);
 		log.info("Forsendelsen med forsendelseId={} feilregistrerte i dokdist databasen.", forsendelseId);
-		administrerForsendelse.oppdaterForsendelseStatus(valueOf(forsendelseResponseTo.getForsendelseId()), KLAR_FOR_DIST.name());
+		administrerForsendelse.oppdaterForsendelseAndDigitalPostkasseInfo(OppdaterForsendelseRequestTo.builder()
+				.forsendelseId(valueOf(forsendelseResponseTo.getForsendelseId()))
+				.forsendelseStatus(KLAR_FOR_DIST.name())
+				.build());
 		distribuerTilKanal.setForsendelseId(valueOf(forsendelseResponseTo.getForsendelseId()));
 	}
 

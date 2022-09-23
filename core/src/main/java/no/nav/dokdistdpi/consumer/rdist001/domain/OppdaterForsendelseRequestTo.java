@@ -9,10 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DigitalPostAdresseRequestTo {
+public class OppdaterForsendelseRequestTo {
 	private String forsendelseId;
 	private String forsendelseStatus;
+	private  String konversasjonId;
+	private String varselStatus;
 	private String digitalLeverandoeradresse;
 	private String digitalPostkasseadresse;
-
 }

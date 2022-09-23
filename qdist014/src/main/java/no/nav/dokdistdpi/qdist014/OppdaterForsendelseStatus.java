@@ -7,6 +7,7 @@ import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import no.nav.dokdistdpi.exception.functional.InvalidForsendelseStatusException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
@@ -48,7 +49,11 @@ public class OppdaterForsendelseStatus {
 	private void oppdaterForsendelseStatus(DpiMelding dpiMelding, String forsendelseId) {
 		if (dpiMelding instanceof LeveringsKvittering leveringsKvittering) {
 			if (LEVERING.equals(leveringsKvittering.getKvitteringType())) {
-				administrerForsendelse.oppdaterForsendelseStatus(forsendelseId, EKSPEDERT.name());
+				administrerForsendelse.oppdaterForsendelseAndDigitalPostkasseInfo(
+						OppdaterForsendelseRequestTo.builder()
+								.forsendelseId(forsendelseId)
+								.forsendelseStatus(EKSPEDERT.name())
+								.build());
 			}
 		}
 	}

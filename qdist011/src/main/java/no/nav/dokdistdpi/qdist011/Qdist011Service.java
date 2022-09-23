@@ -1,8 +1,8 @@
 package no.nav.dokdistdpi.qdist011;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.cloudstorage.DokDistDokumentFraBucket;
+import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.cloudstorage.JsonSerializer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
@@ -16,6 +16,7 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.kodeverk.DistribusjonstidspunktKode;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
@@ -274,7 +275,10 @@ public class Qdist011Service {
 
 	private String generateKonversasjonsId(String forsendelseId) {
 		String konversasjonsId = UUID.randomUUID().toString();
-		administrerForsendelse.oppdaterKonversasjonsId(forsendelseId, konversasjonsId);
+		administrerForsendelse.oppdaterForsendelseAndDigitalPostkasseInfo(OppdaterForsendelseRequestTo.builder()
+				.forsendelseId(forsendelseId)
+				.konversasjonId(konversasjonsId)
+				.build());
 		log.info("Oppdatert forsendelse med forsendelseId={} til konversasjonsId={}", forsendelseId, konversasjonsId);
 		return konversasjonsId;
 	}

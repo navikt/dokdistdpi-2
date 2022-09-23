@@ -75,7 +75,6 @@ public class Qdist011IT {
 	private static final String VARSEL_TYPE_ID = "SDP_000004";
 	private static final String KONVERSASJON_ID = "601a9fcd-8bae-4076-a2d7-37f9dd17e050";
 	private static final String BESTILLINGS_ID = "b8b297e1-46c1-4657-9f2d-7cf6dd089b9d";
-	private static final String OPPDATERE_FORSENDELSE_URL = "/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT";
 
 	public static final String DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK = "dokumentObjektReferanseHoveddok";
 	public static final String DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1 = "dokumentObjektReferanseVedlegg1";

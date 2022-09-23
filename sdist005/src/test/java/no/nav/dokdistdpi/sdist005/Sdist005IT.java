@@ -86,7 +86,7 @@ public class Sdist005IT {
 		stubHentForsendelse(FORSENDELSE_ID);
 		stubPostPersisterForsendelse();
 		stubPutFeilregistrerforsendelse();
-		stubPutOppdaterForsendelse(KLAR_FOR_DIST.name(), NY_FORSENDELSE_ID);
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 
 		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
@@ -102,6 +102,11 @@ public class Sdist005IT {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("maskinporten/maskinporten_happy_response.json")));
+	}
+
+	private void stubPutOppdaterDigitalLeverandoerAndPostkasseadresse() {
+		stubFor(put(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo"))
+				.willReturn(aResponse().withStatus(OK.value())));
 	}
 
 	private void stubHentUekspedertForsendelse() {
@@ -146,15 +151,6 @@ public class Sdist005IT {
 	@SuppressWarnings("unchecked")
 	private <T> T receive(Queue queue) {
 		Object response = jmsTemplate.receiveAndConvert(queue);
-		if (response instanceof JAXBElement) {
-			response = ((JAXBElement) response).getValue();
-		}
-		return (T) response;
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> T receiveMessage(String message) {
-		Object response = jmsTemplate.receiveAndConvert(message);
 		if (response instanceof JAXBElement) {
 			response = ((JAXBElement) response).getValue();
 		}

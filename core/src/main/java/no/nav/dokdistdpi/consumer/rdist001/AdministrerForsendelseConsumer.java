@@ -2,11 +2,11 @@ package no.nav.dokdistdpi.consumer.rdist001;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
-import no.nav.dokdistdpi.consumer.rdist001.domain.DigitalPostAdresseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseResponseTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
@@ -94,36 +94,14 @@ public class AdministrerForsendelseConsumer {
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {"process", "oppdaterForsendelseStatus"}, histogram = true)
-	public void oppdaterForsendelseStatus(String forsendelseId, String forsendelseStatus) {
-		String uri = UriComponentsBuilder.fromHttpUrl(url)
-				.queryParam(FORSENDELSE_ID, forsendelseId)
-				.queryParam("forsendelseStatus", forsendelseStatus)
-				.toUriString();
-		log.info("Mottatt kall til å oppdatere forsendelse med forsendelseId={} forsendelseStatus={}", forsendelseId, forsendelseStatus);
-		oppdaterForsendelse(uri, null);
-	}
-
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {"process", "oppdaterForsendelseStatusDigitalLeverandoerAndPostkasseadresse"}, histogram = true)
-	public void oppdaterForsendelseStatusDigitalLeverandoerAndPostkasseadresse(DigitalPostAdresseRequestTo digitalPostAdresseRequestTo) {
+	@Monitor(value = DOK_REQUEST, extraTags = {"process", "oppdaterForsendelseAndDigitalPostkasseInfo"}, histogram = true)
+	public void oppdaterForsendelseAndDigitalPostkasseInfo(OppdaterForsendelseRequestTo digitalPostAdresseRequestTo) {
 		String uri = UriComponentsBuilder.fromHttpUrl(url)
 				.path("/oppdaterdigitalinfo")
 				.toUriString();
 		log.info("forsendelse med forsendelseId={} mottatt kall til å oppdatere forsendelseStatus={}, digitalLeverandoeradresse og digitalPostkasseadresse",
 				digitalPostAdresseRequestTo.getForsendelseId(), digitalPostAdresseRequestTo.getForsendelseStatus());
 		oppdaterForsendelse(uri, digitalPostAdresseRequestTo);
-	}
-
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {"process", "oppdaterKonversasjonsId"}, histogram = true)
-	public void oppdaterKonversasjonsId(String forsendelseId, String konversasjonsId) {
-		String uri = UriComponentsBuilder.fromHttpUrl(url)
-				.queryParam(FORSENDELSE_ID, forsendelseId)
-				.queryParam("konversasjonsId", konversasjonsId)
-				.toUriString();
-		log.info("Mottatt kall til å oppdatere forsendelse med forsendelseId={} konversasjonsId={}", forsendelseId, konversasjonsId);
-		oppdaterForsendelse(uri, null);
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
@@ -165,7 +143,7 @@ public class AdministrerForsendelseConsumer {
 		}
 	}
 
-	private void oppdaterForsendelse(String uri, DigitalPostAdresseRequestTo digitalPostAdresseRequestTo) {
+	private void oppdaterForsendelse(String uri, OppdaterForsendelseRequestTo digitalPostAdresseRequestTo) {
 		try {
 			HttpEntity<?> entity = digitalPostAdresseRequestTo == null ? new HttpEntity<>(createHeaders()) :
 					new HttpEntity<>(digitalPostAdresseRequestTo, createHeaders());
