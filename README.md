@@ -1,7 +1,5 @@
 # DOKDISTDPI-2
 
-[![Build Status](https://travis-ci.org/navikt/dokdistdpi-2.svg?branch=master)](https://travis-ci.org/navikt/dokdistdpi-2)
-
 Dokumentasjon: [https://confluence.adeo.no/display/BOA/dokdistdpi](https://confluence.adeo.no/display/BOA/dokdistdpi)
 
 Dokdistdpi-2 er en java-applikasjon for distribusjon av DigitalPost til Innbyggerene(DPI). Dokdistdpi-2 bruker den nye 
@@ -54,3 +52,8 @@ Kjøring lokalt mot testmiljøer (fe.eks bruke q2 env variables fra vault)
 
 ### Contact us
 Interne henvendelser kan sendes via Slack i kanalen [Team Dokumentløsninger](https://nav-it.slack.com/archives/C6W9E5GPJ).
+
+
+### License
+
+MIT License
