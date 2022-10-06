@@ -37,8 +37,12 @@ spec:
       value: {{ JURIDISKLOGG_URL }}
     - name: SECURITY_TOKEN_SERVICE_URL
       value: {{ SECURITY_TOKEN_SERVICE_URL }}
-    - name: MQGATEWAY01_CHANNELNAME
-      value: {{ MQGATEWAY01_CHANNELNAME }}
+    - name: MQGATEWAY01_CHANNEL_NAME
+      value: {{ MQGATEWAY01_CHANNEL_NAME }}
+    - name: MQGATEWAY01_CHANNEL_SECURENAME
+      value: {{ MQGATEWAY01_CHANNEL_SECURENAME }}
+    - name: MQGATEWAY01_CHANNEL_ENABLETLS
+      value: "{{ MQGATEWAY01_CHANNEL_ENABLETLS }}"
     - name: MQGATEWAY01_HOSTNAME
       value: {{ MQGATEWAY01_HOSTNAME }}
     - name: MQGATEWAY01_PORT
@@ -115,6 +119,8 @@ spec:
         mountPath: "/secrets/virksomhetssertifikat/sdp"
       - kvPath: {{ APPDYNAMICS }}
         mountPath: /var/run/secrets/nais.io/appdynamics
+      - kvPath: {{ DOKDISTDPICERT }}
+        mountPath: /var/run/secrets/nais.io/certificate
   azure:
     application:
       enabled: true
