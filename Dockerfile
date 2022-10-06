@@ -13,6 +13,4 @@ USER apprunner
 
 
 ENV MAIN_CLASS="org.springframework.boot.loader.JarLauncher"
-ENV JAVA_OPTS="-Xmx1024m \
-               -Djava.security.egd=file:/dev/./urandom \
-               -Dspring.profiles.active=nais"
+COPY dokdistdpi-java-opts.sh /init-scripts/12-dokdistdpi-java-opts.sh
