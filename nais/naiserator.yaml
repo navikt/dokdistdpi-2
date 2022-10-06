@@ -9,8 +9,10 @@ spec:
   env:
     - name: AZURE_APP_TOKEN_URL
       value: {{AZURE_APP_TOKEN_URL}}
-    - name: AZURE_APP_SCOPE
-      value: {{AZURE_APP_SCOPE}}
+    - name: DOKMET_SCOPE
+      value: {{DOKMET_SCOPE}}
+    - name: DIGDIR_KRR_PROXY_SCOPE
+      value: {{DIGDIR_KRR_PROXY_SCOPE}}
     - name: DOKDISTDPI_PROXY_HOST
       value: {{DOKDISTDPI_PROXY_HOST}}
     - name: DOKDISTDPI_PROXY_PORT

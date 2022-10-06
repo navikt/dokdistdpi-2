@@ -67,10 +67,10 @@ public class AzureTokenConsumer implements TokenConsumer {
 	@Retry(name = AZURE_TOKEN_INSTANCE)
 	@CircuitBreaker(name = AZURE_TOKEN_INSTANCE)
 	@Cacheable(AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE)
-	public TokenResponse getClientCredentialToken() {
+	public TokenResponse getClientCredentialToken(String scope) {
 		try {
 			HttpHeaders headers = createHeaders();
-			String form = "grant_type=client_credentials&scope=" + azureProperties.getScope() + "&client_id=" +
+			String form = "grant_type=client_credentials&scope=" + scope + "&client_id=" +
 					azureProperties.getClientId() + "&client_secret=" + azureProperties.getClientSecret();
 			HttpEntity<String> requestEntity = new HttpEntity<>(form, headers);
 
