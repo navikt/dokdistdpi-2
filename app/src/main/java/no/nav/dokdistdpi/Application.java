@@ -15,6 +15,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import static java.lang.System.getenv;
+import static java.lang.System.setProperty;
+
 @EnableConfigurationProperties({
 		ServiceuserProperties.class,
 		MaskinportenProperties.class,
@@ -31,6 +34,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 public class Application {
 	public static void main(String[] args) {
+		setProperty("javax.net.ssl.keyStorePassword", getenv("DOKDISTDPICERT_KEYSTORE_PASSWORD"));
 		SpringApplication.run(Application.class, args);
 	}
 }

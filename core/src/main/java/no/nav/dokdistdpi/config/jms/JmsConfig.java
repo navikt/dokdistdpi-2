@@ -14,6 +14,7 @@ import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapte
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Queue;
+import javax.net.ssl.SSLSocketFactory;
 import java.util.concurrent.TimeUnit;
 
 import static com.ibm.mq.constants.CMQC.MQENC_NATIVE;
@@ -26,6 +27,7 @@ import static com.ibm.msg.client.wmq.common.CommonConstants.WMQ_CM_CLIENT;
 @Profile({"nais", "local"})
 public class JmsConfig {
 	private static final int UTF_8_WITH_PUA = 1208;
+	private static final String ANY_TLS13_OR_HIGHER = "*TLS13ORHIGHER";
 
 	@Bean
 	public Queue qdist014(@Value("${dokdistdpi_qdist014_kvittering_fra_dpi.queuename}") String qdist014QueueName) throws JMSException {
@@ -68,13 +70,21 @@ public class JmsConfig {
 		MQConnectionFactory mqConnectionFactory = new MQConnectionFactory();
 		mqConnectionFactory.setHostName(mqGatewayProperties.getHostname());
 		mqConnectionFactory.setPort(mqGatewayProperties.getPort());
-		mqConnectionFactory.setChannel(mqGatewayProperties.getChannelname());
 		mqConnectionFactory.setQueueManager(mqGatewayProperties.getName());
 		mqConnectionFactory.setTransportType(WMQ_CM_CLIENT);
 		mqConnectionFactory.setCCSID(UTF_8_WITH_PUA);
 		mqConnectionFactory.setIntProperty(JMS_IBM_ENCODING, MQENC_NATIVE);
 		mqConnectionFactory.setIntProperty(JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA);
 		mqConnectionFactory.setStringProperty(USERID, serviceuserProperties.getUsername());
+
+		if (mqGatewayProperties.getChannel().isEnabletls()) {
+			mqConnectionFactory.setSSLCipherSuite(ANY_TLS13_OR_HIGHER);
+			SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+			mqConnectionFactory.setSSLSocketFactory(factory);
+			mqConnectionFactory.setChannel(mqGatewayProperties.getChannel().getSecurename());
+		} else {
+			mqConnectionFactory.setChannel(mqGatewayProperties.getChannel().getName());
+		}
 
 		UserCredentialsConnectionFactoryAdapter adapter = new UserCredentialsConnectionFactoryAdapter();
 		adapter.setTargetConnectionFactory(mqConnectionFactory);

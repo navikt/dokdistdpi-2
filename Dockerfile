@@ -3,6 +3,7 @@ ENV APPD_ENABLED=true
 
 COPY app/target/app.jar app.jar
 COPY export-vault-secrets.sh /init-scripts/10-export-vault-secrets.sh
+COPY dokdistdpi-java-opts.sh /init-scripts/20-dokdistdpi-java-opts.sh
 
 USER root
 # Brukes for å hente config fra json filer
@@ -13,6 +14,3 @@ USER apprunner
 
 
 ENV MAIN_CLASS="org.springframework.boot.loader.JarLauncher"
-ENV JAVA_OPTS="-Xmx1024m \
-               -Djava.security.egd=file:/dev/./urandom \
-               -Dspring.profiles.active=nais"
