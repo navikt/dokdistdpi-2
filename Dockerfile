@@ -3,7 +3,7 @@ ENV APPD_ENABLED=true
 
 COPY app/target/app.jar app.jar
 COPY export-vault-secrets.sh /init-scripts/10-export-vault-secrets.sh
-COPY dokdistdpi-java-opts.sh /init-scripts/11-dokdistdpi-java-opts.sh
+COPY dokdistdpi-java-opts.sh /init-scripts/20-dokdistdpi-java-opts.sh
 
 USER root
 # Brukes for å hente config fra json filer
