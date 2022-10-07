@@ -24,7 +24,7 @@
   "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.Q1_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
   "SRVDOKDISTDPI2": "/serviceuser/data/dev/srvdokdistdpi-2",
   "DOKDISTDPI_VAULT": "/kv/preprod/fss/dokdistdpi-2/teamdokumenthandtering",
-  "DOKDISTDPICERT": "/kv/preprod/fss/dokdistdpi-2/certificate",
+  "DOKDISTDPI_CERT": "/kv/preprod/fss/dokdistdpi-2/certificate",
   "VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/preprod/shared",
   "APPDYNAMICS": "/apikey/appdynamics/dev",
   "NAMESPACE": "teamdokumenthandtering",
