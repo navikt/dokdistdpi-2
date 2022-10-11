@@ -36,7 +36,6 @@ import static org.springframework.http.HttpMethod.GET;
 
 @Component
 public class DokumentkatalogConsumer implements Dokumentkatalog {
-	private static final String BEARER_PREFIX = "Bearer ";
 	private final String dokumenttypeInfoV4Url;
 	private final String dokmetScope;
 	private final TokenConsumer tokenConsumer;
@@ -99,7 +98,7 @@ public class DokumentkatalogConsumer implements Dokumentkatalog {
 		TokenResponse clientCredentialToken = tokenConsumer.getClientCredentialToken(dokmetScope);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + clientCredentialToken.getAccess_token());
+		headers.setBearerAuth(clientCredentialToken.getAccess_token());
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
 		headers.add(NAV_CALL_ID, MDC.get(CALL_ID));
 		return headers;

@@ -45,7 +45,7 @@ public class CacheConfig {
 				new CaffeineCache(MASKINPORTEN_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(120, TimeUnit.SECONDS).build()),
 				new CaffeineCache(AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(50, TimeUnit.MINUTES).maximumSize(1).build())
+						.expireAfterWrite(50, TimeUnit.MINUTES).maximumSize(2).build())
 		));
 		return manager;
 	}
