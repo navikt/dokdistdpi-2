@@ -23,6 +23,4 @@ public class AzureProperties {
 	private String tenantId;
 	@NotEmpty
 	private String wellKnownUrl;
-	@NotEmpty
-	private String scope;
 }

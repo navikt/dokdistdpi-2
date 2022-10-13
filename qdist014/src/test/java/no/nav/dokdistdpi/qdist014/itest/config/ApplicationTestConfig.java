@@ -49,7 +49,7 @@ public abstract class ApplicationTestConfig {
 		@Bean
 		@Primary
 		TokenConsumer azureTokenConsumer() {
-			return () -> TokenResponse.builder()
+			return (String) -> TokenResponse.builder()
 					.access_token("dummy")
 					.build();
 		}
