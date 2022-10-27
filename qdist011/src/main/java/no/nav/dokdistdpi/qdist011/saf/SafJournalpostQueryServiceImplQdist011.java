@@ -37,13 +37,14 @@ public class SafJournalpostQueryServiceImplQdist011 implements SafJournalpostQue
 		return journalpostQdist011Mapper.map(safJournalpost);
 	}
 
-	private static final String JOURNALPOST_QUERY =
-			"query journalpost($queryJournalpostId: String!) {\n" +
-					"  journalpost(journalpostId: $queryJournalpostId) {\n" +
-					"    dokumenter {\n" +
-					"      dokumentInfoId\n" +
-					"      tittel\n" +
-					"    }\n" +
-					"  }\n" +
-					"}\n";
+	private static final String JOURNALPOST_QUERY = """
+			query journalpost($queryJournalpostId: String!) {
+			  journalpost(journalpostId: $queryJournalpostId) {
+			    dokumenter {
+			      dokumentInfoId
+			      tittel
+			    }
+			  }
+			}
+			""";
 }

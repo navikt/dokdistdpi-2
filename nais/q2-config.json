@@ -1,4 +1,11 @@
 {
+  "APPD_NAME": "dokdistdpi-2",
+  "APP_NAME": "dokdistdpi-2",
+  "MIN_REPLICAS": "1",
+  "MAX_REPLICAS": "2",
+  "INGRESSES": [
+    "https://dokdistdpi-2.dev.intern.nav.no"
+  ],
   "DPI_URL": "https://srest.qa.dataplatfor.ms/dpi/messages",
   "DPI_MPCKANAL": "dokdistdpi-q",
   "ADMINISTRERFORSENDELSE_URL": "https://app-q2.adeo.no/dokdist/rest/v1/administrerforsendelse",
@@ -27,9 +34,6 @@
   "DOKDISTDPI_CERT": "/kv/preprod/fss/dokdistdpi-2/certificate",
   "VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/preprod/shared",
   "APPDYNAMICS": "/apikey/appdynamics/dev",
-  "NAMESPACE": "teamdokumenthandtering",
-  "APPD_NAME": "dokdistdpi-2",
-  "APP_NAME": "dokdistdpi-2",
   "DOKDISTDPI_PROXY_HOST": "webproxy.nais",
   "DOKDISTDPI_PROXY_PORT": "8088",
   "AZURE_APP_TOKEN_URL": "https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/oauth2/v2.0/token",
@@ -38,10 +42,5 @@
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-dev-2c5a",
   "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-dev",
   "DOKDISTMELLOMLAGER_KEYRING": "dokdistmellomlager-keyring-dev",
-  "DOKDISTMELLOMLAGER_KEYID": "dokdistmellomlager-symmetric-dev",
-  "MIN_REPLICAS": "1",
-  "MAX_REPLICAS": "2",
-  "INGRESSES": [
-    "https://dokdistdpi-2.dev.intern.nav.no"
-  ]
+  "DOKDISTMELLOMLAGER_KEYID": "dokdistmellomlager-symmetric-dev"
 }

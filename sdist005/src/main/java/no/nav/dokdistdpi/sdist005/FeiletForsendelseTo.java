@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 @Value
 @Builder
 public class FeiletForsendelseTo {
-	private final String forsendelseId;
-	private final String bestillingsId;
-	private final String feilbeskrivelse;
-	private final LocalDateTime feiltidspunkt;
+	String forsendelseId;
+	String bestillingsId;
+	String feilbeskrivelse;
+	LocalDateTime feiltidspunkt;
 }
 
