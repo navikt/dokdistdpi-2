@@ -70,7 +70,7 @@ public class Qdist011Service {
 	private final DigitalPostService digitalPostService;
 	private final LocalTime kjernetidStart;
 	private final LocalTime kjernetidSlutt;
-	private Clock clock;
+	private final Clock clock;
 
 	@Autowired
 	public Qdist011Service(EncryptedBucketStorage encryptedBucketStorage,
