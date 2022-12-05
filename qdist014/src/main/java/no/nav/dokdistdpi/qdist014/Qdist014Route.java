@@ -109,8 +109,7 @@ public class Qdist014Route extends RouteBuilder {
 	}
 
 	private static String getIdsForLogging() {
-		return "bestillingsId=${exchangeProperty." + PROPERTY_BESTILLINGS_ID + "}, " +
-				"forsendelseId=${exchangeProperty." + PROPERTY_FORSENDELSE_ID + "} og " +
+		return "forsendelseId=${exchangeProperty." + PROPERTY_FORSENDELSE_ID + "} og " +
 				"konversasjonsId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "}";
 	}
 }

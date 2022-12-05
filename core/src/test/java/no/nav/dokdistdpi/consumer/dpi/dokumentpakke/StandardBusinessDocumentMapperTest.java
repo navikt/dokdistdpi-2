@@ -18,7 +18,6 @@ import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.SCOPE_CONVERSA
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.SCOPE_CONVERSATION_ID_IDENTIFIER;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.TYPE_VERSION;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
-import static no.nav.dokdistdpi.utils.ForsendelseData.BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.ForsendelseData.CONVERSATION_ID;
 import static no.nav.dokdistdpi.utils.ForsendelseData.forsendelse;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,7 +51,7 @@ class StandardBusinessDocumentMapperTest {
 				.extracting(PartnerIdentification::getValue).contains(asIso6523(ForsendelseData.MOTTAKER_ORGNO));
 		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getStandard()).isEqualTo(DOCUMENT_IDENTIFICATOR_STANDARD);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getTypeVersion()).isEqualTo(TYPE_VERSION);
-		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier()).isEqualTo(BESTILLINGS_ID);
+		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier()).isEqualTo(CONVERSATION_ID);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType()).isEqualTo(DIGITALPOST_FORRETNINGSMELDING);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope()).hasSize(1);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope())

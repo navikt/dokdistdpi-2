@@ -20,7 +20,6 @@ import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.Kvitt
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.getByValue;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
 
 @Slf4j
@@ -35,7 +34,6 @@ public class ForretningsKvitteringMapper {
 		SimpleStandardBusinessDocument simpleSbd = JsonObjectMapper.mapSimpleSbd(sbdJsonString);
 		DpiKvittering dpiKvittering = JsonObjectMapper.mapKvittering(sbdJsonString);
 		exchange.setProperty(PROPERTY_CONVERSATION_ID, simpleSbd.getConversationId());
-		exchange.setProperty(PROPERTY_BESTILLINGS_ID, simpleSbd.getBestillingsId());
 
 		switch (getByValue(simpleSbd.getType())) {
 			case VARSLINGFEILET -> {
@@ -43,7 +41,6 @@ public class ForretningsKvitteringMapper {
 				log.warn("Kvittering varslingfeilet: {}", maskerBeskrivelse(varslingFeilet));
 				return VarslingFeiletKvittering.builder()
 						.konversasjonsId(simpleSbd.getConversationId())
-						.bestillingsId(simpleSbd.getBestillingsId())
 						.kvitteringType(VARSLINGFEILET)
 						.tidspunkt(varslingFeilet.getTidspunkt())
 						.varslingskanal(varslingFeilet.getVarslingskanal())
@@ -53,7 +50,6 @@ public class ForretningsKvitteringMapper {
 			case LEVERING -> {
 				return LeveringsKvittering.builder()
 						.konversasjonsId(simpleSbd.getConversationId())
-						.bestillingsId(simpleSbd.getBestillingsId())
 						.kvitteringType(LEVERING)
 						.tidspunkt(dpiKvittering.getLeveringskvittering().getTidspunkt())
 						.build();
@@ -63,7 +59,6 @@ public class ForretningsKvitteringMapper {
 				log.warn("Kvittering feilet: {}", dpiFeilKvittering.getDetaljer());
 				return DpiFeilKvittering.builder()
 						.konversasjonsId(simpleSbd.getConversationId())
-						.bestillingsId(simpleSbd.getBestillingsId())
 						.kvitteringType(FEILET)
 						.tidspunkt(dpiFeilKvittering.getTidspunkt())
 						.feiltype(dpiFeilKvittering.getFeiltype())
