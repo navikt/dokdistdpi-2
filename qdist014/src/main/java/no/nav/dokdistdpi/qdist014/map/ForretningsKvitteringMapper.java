@@ -34,16 +34,16 @@ public class ForretningsKvitteringMapper {
 	public DpiMelding mapForretningsKvittering(String sbdJsonString, Exchange exchange) {
 		SimpleStandardBusinessDocument simpleSbd = JsonObjectMapper.mapSimpleSbd(sbdJsonString);
 		DpiKvittering dpiKvittering = JsonObjectMapper.mapKvittering(sbdJsonString);
-		exchange.setProperty(PROPERTY_CONVERSATION_ID, simpleSbd.getConversationId());
-		exchange.setProperty(PROPERTY_BESTILLINGS_ID, simpleSbd.getBestillingsId());
+		exchange.setProperty(PROPERTY_CONVERSATION_ID, simpleSbd.getKonversasjonId());
+		exchange.setProperty(PROPERTY_BESTILLINGS_ID, simpleSbd.getDokumentKonversasjonId());
 
 		switch (getByValue(simpleSbd.getType())) {
 			case VARSLINGFEILET -> {
 				VarslingFeiletKvittering varslingFeilet = dpiKvittering.getVarslingfeiletkvittering();
 				log.warn("Kvittering varslingfeilet: {}", maskerBeskrivelse(varslingFeilet));
 				return VarslingFeiletKvittering.builder()
-						.konversasjonsId(simpleSbd.getConversationId())
-						.bestillingsId(simpleSbd.getBestillingsId())
+						.konversasjonsId(simpleSbd.getKonversasjonId())
+						.documentIdentification(simpleSbd.getDokumentKonversasjonId())
 						.kvitteringType(VARSLINGFEILET)
 						.tidspunkt(varslingFeilet.getTidspunkt())
 						.varslingskanal(varslingFeilet.getVarslingskanal())
@@ -52,8 +52,8 @@ public class ForretningsKvitteringMapper {
 			}
 			case LEVERING -> {
 				return LeveringsKvittering.builder()
-						.konversasjonsId(simpleSbd.getConversationId())
-						.bestillingsId(simpleSbd.getBestillingsId())
+						.konversasjonsId(simpleSbd.getKonversasjonId())
+						.documentIdentification(simpleSbd.getDokumentKonversasjonId())
 						.kvitteringType(LEVERING)
 						.tidspunkt(dpiKvittering.getLeveringskvittering().getTidspunkt())
 						.build();
@@ -62,8 +62,8 @@ public class ForretningsKvitteringMapper {
 				DpiFeilKvittering dpiFeilKvittering = dpiKvittering.getFeil();
 				log.warn("Kvittering feilet: {}", dpiFeilKvittering.getDetaljer());
 				return DpiFeilKvittering.builder()
-						.konversasjonsId(simpleSbd.getConversationId())
-						.bestillingsId(simpleSbd.getBestillingsId())
+						.konversasjonsId(simpleSbd.getKonversasjonId())
+						.documentIdentification(simpleSbd.getDokumentKonversasjonId())
 						.kvitteringType(FEILET)
 						.tidspunkt(dpiFeilKvittering.getTidspunkt())
 						.feiltype(dpiFeilKvittering.getFeiltype())

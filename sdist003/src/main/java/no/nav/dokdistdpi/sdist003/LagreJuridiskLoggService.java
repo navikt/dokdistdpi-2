@@ -31,7 +31,7 @@ public class LagreJuridiskLoggService {
 		try {
 			SimpleStandardBusinessDocument simpleSbd = objectMapper.readValue(payload, SimpleStandardBusinessDocument.class);
 			juridiskLoggConsumer.lagreJuridiskLogg(map(payload, simpleSbd));
-			log.info("Hendelse med konversasjonsId={} logget til juridisk arkiv.", simpleSbd.getConversationId());
+			log.info("Hendelse med konversasjonsId={} logget til juridisk arkiv.", simpleSbd.getKonversasjonId());
 		} catch (JsonProcessingException e) {
 			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 
@@ -40,7 +40,7 @@ public class LagreJuridiskLoggService {
 
 	LoggMeldingRequest map(String payload, SimpleStandardBusinessDocument simpleSbd) {
 		return LoggMeldingRequest.builder()
-				.meldingsId(simpleSbd.getBestillingsId())
+				.meldingsId(simpleSbd.getDokumentKonversasjonId())
 				.avsender(simpleSbd.getSender())
 				.mottaker(APP_NAME + "-" + simpleSbd.getReceiver())
 				.joarkRef(null)

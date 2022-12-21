@@ -59,7 +59,7 @@ public class Sdist003Service {
 		ResponseEntity<HentKvitteringResponse[]> kvitteringResponse = dpiClient.hentKvittering();
 
 		final HentKvitteringResponse[] kvitteringer = kvitteringResponse.getBody();
-		if(kvitteringer == null) {
+		if (kvitteringer == null) {
 			return null;
 		}
 
@@ -75,15 +75,15 @@ public class Sdist003Service {
 					.forEach(payload -> {
 						SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(payload);
 						KvitteringType kvitteringType = getKvitteringType(simpleSbd);
-						log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getConversationId(), kvitteringType);
+						log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getKonversasjonId(), kvitteringType);
 						producerTemplate.sendBody("jms:" + qdist014, payload);
-						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
+						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getKonversasjonId());
 
 						juridiskLoggService.lagreJuridiskLogg(payload);
 
 						countDpiKvittering(kvitteringType);
 
-						dpiClient.bekreft(simpleSbd.getBestillingsId());
+						dpiClient.bekreft(simpleSbd.getDokumentKonversasjonId());
 					});
 		}
 

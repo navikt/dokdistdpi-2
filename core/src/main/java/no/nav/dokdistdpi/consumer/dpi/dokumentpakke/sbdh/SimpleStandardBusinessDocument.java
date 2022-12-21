@@ -25,15 +25,15 @@ public class SimpleStandardBusinessDocument {
 	private StandardBusinessDocument standardBusinessDocument;
 
 	@JsonIgnore
-	public final String getBestillingsId() {
+	public final String getDokumentKonversasjonId() {
 		return getStandardBusinessDocumentHeader().getDocumentIdentification()
 				.getInstanceIdentifier();
 	}
 
 	@JsonIgnore
-	public String getConversationId() {
+	public String getKonversasjonId() {
 		return getScopes().stream()
-				.map(scope -> scope.getInstanceIdentifier())
+				.map(Scope::getInstanceIdentifier)
 				.findFirst().orElse(null);
 	}
 

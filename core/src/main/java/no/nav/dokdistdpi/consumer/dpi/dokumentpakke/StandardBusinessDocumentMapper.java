@@ -33,7 +33,7 @@ public class StandardBusinessDocumentMapper {
 		standardBusinessDocumentHeader.setHeaderVersion(HEADER_VERSION);
 		standardBusinessDocumentHeader.addSender(createSender());
 		standardBusinessDocumentHeader.addReceiver(createReceiver(forsendelse.getDigitalPostLeverandoerAdresse()));
-		standardBusinessDocumentHeader.setDocumentIdentification(createDocumentIdentification(forsendelse.getBestillingsId()));
+		standardBusinessDocumentHeader.setDocumentIdentification(createDocumentIdentification(forsendelse.getKonversasjonId()));
 		BusinessScope businessScope = new BusinessScope();
 		businessScope.addScope(createConversationIdScope(forsendelse.getKonversasjonId()));
 		standardBusinessDocumentHeader.setBusinessScope(businessScope);
