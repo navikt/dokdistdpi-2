@@ -75,9 +75,9 @@ public class Sdist003Service {
 					.forEach(payload -> {
 						SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(payload);
 						KvitteringType kvitteringType = getKvitteringType(simpleSbd);
-						log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getKonversasjonId(), kvitteringType);
+						log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getConversationId(), kvitteringType);
 						producerTemplate.sendBody("jms:" + qdist014, payload);
-						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getKonversasjonId());
+						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
 
 						juridiskLoggService.lagreJuridiskLogg(payload);
 

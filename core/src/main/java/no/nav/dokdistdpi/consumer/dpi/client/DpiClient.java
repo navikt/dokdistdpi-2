@@ -53,7 +53,7 @@ public class DpiClient {
 
 	private static final String LOG_FEIL_MELDING = "Kunne ikke sende til DPI hjørne-2 med status={}, konversasjonId={} og feilmelding={}";
 	private static final String EXCEPTION_FEIL_MELDING = "Kunne ikke sende til DPI hjørne-2 med status=%s, konversasjonId=%s og feilmelding=%s";
-	private static final String KVITTERING_FEIL_MELDING = "Feilet til å markere kvitteringen med konversasjonId=%s som mottatt, feilmelding=%s";
+	private static final String KVITTERING_FEIL_MELDING = "Feilet å markere kvitteringen med konversasjonId=%s som mottatt, feilmelding=%s";
 	private static final String SEND_PATH = "/out";
 	private static final String HENT_PATH = "/in";
 	private static final String READ = "/read";
@@ -86,29 +86,31 @@ public class DpiClient {
 				.queryParam(KANAL, clientProperties.getMpckanal())
 				.toUriString();
 
+		String konversasjonId = forsendelse.getKonversasjonId();
+
 		HttpEntity<?> httpEntity = new HttpEntity<>(multipartBodyBuilder.build(), headers(forsendelse.getDigital().getMaskinportentoken(), MULTIPART_FORM_DATA));
 
 		try {
 			ResponseEntity<String> response = restTemplate.exchange(uri, POST, httpEntity, String.class);
 
 			if (!CREATED.equals(response.getStatusCode())) {
-				log.error(LOG_FEIL_MELDING, response.getStatusCode(), forsendelse.getKonversasjonId(), response.getBody());
-				throw new KunneIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING, response.getStatusCode(), forsendelse.getKonversasjonId(), response.getBody()));
+				log.error(LOG_FEIL_MELDING, response.getStatusCode(), konversasjonId, response.getBody());
+				throw new KunneIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING, response.getStatusCode(), konversasjonId, response.getBody()));
 			}
-			log.info("Brev sendt til DPI hjørne-2 med konversasjonId={}, status={}", forsendelse.getKonversasjonId(), response.getStatusCode());
+			log.info("Brev sendt til DPI hjørne-2 med konversasjonId={}, status={}", konversasjonId, response.getStatusCode());
 
-			return hentForsendelseStatus(forsendelse.getKonversasjonId());
+			return hentForsendelseStatus(konversasjonId);
 		} catch (HttpClientErrorException e) {
 			if (e.getStatusCode() == BAD_REQUEST && e.getMessage() != null && e.getMessage().contains(HJORNE2_DUPLICATE_ERROR_MESSAGE)) {
-				log.info("Brev sendt til DPI hjørne2 tidligere, fortsetter behandling. Dette kallet avvist på duplikatkontroll hos hjørne2. konversasjonId={}, status={}, melding={}",
-						forsendelse.getKonversasjonId(), e.getStatusCode(), e.getMessage());
-				return hentForsendelseStatus(forsendelse.getKonversasjonId());
+				log.info("Brev sendt til DPI hjørne2 tidligere, fortsetter behandling. Dette kallet ble avvist på duplikatkontroll hos hjørne2. konversasjonId={}, status={}, melding={}",
+						konversasjonId, e.getStatusCode(), e.getMessage());
+				return hentForsendelseStatus(konversasjonId);
 			}
-			log.error(LOG_FEIL_MELDING, e.getStatusCode(), forsendelse.getKonversasjonId(), e.getMessage());
-			throw new KunneIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), forsendelse.getKonversasjonId(), e.getMessage()), e);
+			log.error(LOG_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage());
+			throw new KunneIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
-			log.error(LOG_FEIL_MELDING, e.getStatusCode(), forsendelse.getKonversasjonId(), e.getMessage());
-			throw new SikkerDigitalPostException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), forsendelse.getKonversasjonId(), e.getMessage()), e);
+			log.error(LOG_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage());
+			throw new SikkerDigitalPostException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage()), e);
 		}
 	}
 

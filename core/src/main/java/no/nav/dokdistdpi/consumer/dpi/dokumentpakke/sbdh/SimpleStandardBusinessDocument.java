@@ -31,7 +31,7 @@ public class SimpleStandardBusinessDocument {
 	}
 
 	@JsonIgnore
-	public String getKonversasjonId() {
+	public String getConversationId () {
 		return getScopes().stream()
 				.map(Scope::getInstanceIdentifier)
 				.findFirst().orElse(null);

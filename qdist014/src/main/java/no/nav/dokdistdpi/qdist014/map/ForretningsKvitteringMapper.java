@@ -34,7 +34,7 @@ public class ForretningsKvitteringMapper {
 	public DpiMelding mapForretningsKvittering(String sbdJsonString, Exchange exchange) {
 		SimpleStandardBusinessDocument simpleSbd = JsonObjectMapper.mapSimpleSbd(sbdJsonString);
 		DpiKvittering dpiKvittering = JsonObjectMapper.mapKvittering(sbdJsonString);
-		exchange.setProperty(PROPERTY_CONVERSATION_ID, simpleSbd.getKonversasjonId());
+		exchange.setProperty(PROPERTY_CONVERSATION_ID, simpleSbd.getConversationId());
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, simpleSbd.getDokumentKonversasjonId());
 
 		switch (getByValue(simpleSbd.getType())) {
@@ -42,7 +42,7 @@ public class ForretningsKvitteringMapper {
 				VarslingFeiletKvittering varslingFeilet = dpiKvittering.getVarslingfeiletkvittering();
 				log.warn("Kvittering varslingfeilet: {}", maskerBeskrivelse(varslingFeilet));
 				return VarslingFeiletKvittering.builder()
-						.konversasjonsId(simpleSbd.getKonversasjonId())
+						.konversasjonsId(simpleSbd.getConversationId())
 						.documentIdentification(simpleSbd.getDokumentKonversasjonId())
 						.kvitteringType(VARSLINGFEILET)
 						.tidspunkt(varslingFeilet.getTidspunkt())
@@ -52,7 +52,7 @@ public class ForretningsKvitteringMapper {
 			}
 			case LEVERING -> {
 				return LeveringsKvittering.builder()
-						.konversasjonsId(simpleSbd.getKonversasjonId())
+						.konversasjonsId(simpleSbd.getConversationId())
 						.documentIdentification(simpleSbd.getDokumentKonversasjonId())
 						.kvitteringType(LEVERING)
 						.tidspunkt(dpiKvittering.getLeveringskvittering().getTidspunkt())
@@ -62,7 +62,7 @@ public class ForretningsKvitteringMapper {
 				DpiFeilKvittering dpiFeilKvittering = dpiKvittering.getFeil();
 				log.warn("Kvittering feilet: {}", dpiFeilKvittering.getDetaljer());
 				return DpiFeilKvittering.builder()
-						.konversasjonsId(simpleSbd.getKonversasjonId())
+						.konversasjonsId(simpleSbd.getConversationId())
 						.documentIdentification(simpleSbd.getDokumentKonversasjonId())
 						.kvitteringType(FEILET)
 						.tidspunkt(dpiFeilKvittering.getTidspunkt())
