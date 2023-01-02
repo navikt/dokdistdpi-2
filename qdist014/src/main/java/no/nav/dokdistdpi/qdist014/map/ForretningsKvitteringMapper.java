@@ -35,7 +35,6 @@ public class ForretningsKvitteringMapper {
 		SimpleStandardBusinessDocument simpleSbd = JsonObjectMapper.mapSimpleSbd(sbdJsonString);
 		DpiKvittering dpiKvittering = JsonObjectMapper.mapKvittering(sbdJsonString);
 		exchange.setProperty(PROPERTY_CONVERSATION_ID, simpleSbd.getConversationId());
-		exchange.setProperty(PROPERTY_BESTILLINGS_ID, simpleSbd.getDokumentKonversasjonId());
 
 		switch (getByValue(simpleSbd.getType())) {
 			case VARSLINGFEILET -> {
