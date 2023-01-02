@@ -40,7 +40,7 @@ public class LagreJuridiskLoggService {
 
 	LoggMeldingRequest map(String payload, SimpleStandardBusinessDocument simpleSbd) {
 		return LoggMeldingRequest.builder()
-				.meldingsId(simpleSbd.getBestillingsId())
+				.meldingsId(simpleSbd.getDokumentKonversasjonId())
 				.avsender(simpleSbd.getSender())
 				.mottaker(APP_NAME + "-" + simpleSbd.getReceiver())
 				.joarkRef(null)

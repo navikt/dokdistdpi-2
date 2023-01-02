@@ -52,7 +52,7 @@ class StandardBusinessDocumentMapperTest {
 				.extracting(PartnerIdentification::getValue).contains(asIso6523(ForsendelseData.MOTTAKER_ORGNO));
 		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getStandard()).isEqualTo(DOCUMENT_IDENTIFICATOR_STANDARD);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getTypeVersion()).isEqualTo(TYPE_VERSION);
-		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier()).isEqualTo(BESTILLINGS_ID);
+		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getInstanceIdentifier()).isEqualTo(CONVERSATION_ID);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getDocumentIdentification().getType()).isEqualTo(DIGITALPOST_FORRETNINGSMELDING);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope()).hasSize(1);
 		assertThat(sbd.getStandardBusinessDocumentHeader().getBusinessScope().getScope())

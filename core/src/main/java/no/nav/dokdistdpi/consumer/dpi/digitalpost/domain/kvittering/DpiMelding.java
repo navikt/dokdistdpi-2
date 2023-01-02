@@ -19,5 +19,5 @@ public abstract class DpiMelding {
 	private ZonedDateTime tidspunkt;
 	private String konversasjonsId;
 	private KvitteringType kvitteringType;
-	private String bestillingsId;
+	private String documentIdentification;
 }
