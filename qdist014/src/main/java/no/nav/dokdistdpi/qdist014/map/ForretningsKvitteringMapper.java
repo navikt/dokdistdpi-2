@@ -20,7 +20,6 @@ import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.Kvitt
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.getByValue;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
 
 @Slf4j
