@@ -120,7 +120,7 @@ public class Sdist005Service {
 		return ikkeKvitterteForsendelser.stream()
 				.map(f -> {
 					final AvstemForsendelseResponseTo.DokumentInfoTo dokumentInfoTo = f.getDokumenter().get(0);
-					var feiletForsendelse = hentForsendelseStatuser(dokumentInfoTo.getDokumentId());
+					var feiletForsendelse = hentForsendelseStatuser(dokumentInfoTo.getKonversasjonId());
 					if (feiletForsendelse.isPresent()) {
 						ForsendelseStatusResponse forsendelseStatusResponse = feiletForsendelse.get();
 						return FeiletForsendelseTo.builder()
@@ -138,9 +138,9 @@ public class Sdist005Service {
 				.toList();
 	}
 
-	private Optional<ForsendelseStatusResponse> hentForsendelseStatuser(String bestillingsId) {
+	private Optional<ForsendelseStatusResponse> hentForsendelseStatuser(String konversasjonId) {
 		try {
-			List<ForsendelseStatusResponse> forsendelseStatusResponses = dpiClient.hentForsendelseStatus(bestillingsId);
+			List<ForsendelseStatusResponse> forsendelseStatusResponses = dpiClient.hentForsendelseStatus(konversasjonId);
 			return forsendelseStatusResponses.stream()
 					.filter(statusResponse -> FEILET == statusResponse.getStatus())
 					.findFirst();

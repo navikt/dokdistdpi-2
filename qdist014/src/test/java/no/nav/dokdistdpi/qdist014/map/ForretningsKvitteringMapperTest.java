@@ -50,7 +50,7 @@ class ForretningsKvitteringMapperTest {
 
 		DpiFeilKvittering feilKvittering = (DpiFeilKvittering) mapper.mapForretningsKvittering(sbd, exchange);
 		assertEquals(CONVERSATION_ID, feilKvittering.getKonversasjonsId());
-		assertEquals(BESTILLINGS_ID, feilKvittering.getBestillingsId());
+		assertEquals(BESTILLINGS_ID, feilKvittering.getDocumentIdentification());
 		assertEquals(KLIENT, feilKvittering.getFeiltype());
 		assertEquals(KvitteringType.FEILET, feilKvittering.getKvitteringType());
 	}

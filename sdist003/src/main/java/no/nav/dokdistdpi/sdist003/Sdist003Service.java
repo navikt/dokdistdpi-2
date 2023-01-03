@@ -59,7 +59,7 @@ public class Sdist003Service {
 		ResponseEntity<HentKvitteringResponse[]> kvitteringResponse = dpiClient.hentKvittering();
 
 		final HentKvitteringResponse[] kvitteringer = kvitteringResponse.getBody();
-		if(kvitteringer == null) {
+		if (kvitteringer == null) {
 			return null;
 		}
 
@@ -83,7 +83,7 @@ public class Sdist003Service {
 
 						countDpiKvittering(kvitteringType);
 
-						dpiClient.bekreft(simpleSbd.getBestillingsId());
+						dpiClient.bekreft(simpleSbd.getDokumentKonversasjonId());
 					});
 		}
 

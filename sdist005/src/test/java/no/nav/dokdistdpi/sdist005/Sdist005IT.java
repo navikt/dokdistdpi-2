@@ -33,7 +33,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
-import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_FOR_DIST;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -51,9 +50,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @ActiveProfiles("itest")
 public class Sdist005IT {
 
-	private static final String BESTILLING_ID = "ff88849c-e281-4809-8555-7cd54952b916";
+	private static final String KONVERSASJON_ID = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
 	private static final String FORSENDELSE_ID = "5265784";
-	private static final String NY_FORSENDELSE_ID = "5265785";
 
 	@Value("${leder.host}")
 	private String lederHost;
@@ -82,7 +80,7 @@ public class Sdist005IT {
 		when(lederElection.isLeader()).thenReturn(true);
 		stubPostMaskinporten();
 		stubHentUekspedertForsendelse();
-		stubHentForsendelseStatus(BESTILLING_ID);
+		stubHentForsendelseStatus(KONVERSASJON_ID);
 		stubHentForsendelse(FORSENDELSE_ID);
 		stubPostPersisterForsendelse();
 		stubPutFeilregistrerforsendelse();
@@ -94,7 +92,7 @@ public class Sdist005IT {
 		});
 
 		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
-		verify(1, getRequestedFor(urlEqualTo("/message/out/" + BESTILLING_ID + "/statuses")));
+		verify(1, getRequestedFor(urlEqualTo("/message/out/" + KONVERSASJON_ID + "/statuses")));
 	}
 
 	private void stubPostMaskinporten() {
