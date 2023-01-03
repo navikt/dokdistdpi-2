@@ -86,7 +86,7 @@ class Qdist011ServiceTest {
 
 	@Test
 	void skalLageForsendelse() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(TestUtil.buildHentForsendelseResponseWithDokument());
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
@@ -107,7 +107,7 @@ class Qdist011ServiceTest {
 
 	@Test
 	void skalLageForsendelseWithoutVarslerWhenDistribusjonstypeCodeIsANNET() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(TestUtil.buildHentForsendelseResponseWithDokument(ANNET));
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(ANNET));
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
@@ -129,7 +129,7 @@ class Qdist011ServiceTest {
 
 	@Test
 	void shoudThrowExceptionIfMaskinportenttokenIsNull() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(TestUtil.buildHentForsendelseResponseWithDokument());
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(null));
 
 		MaskinportenFunctionalException ex = assertThrows(MaskinportenFunctionalException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
@@ -142,7 +142,7 @@ class Qdist011ServiceTest {
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = createSikkerDigitalKontaktInfo();
 		sikkerDigitalKontaktInfo.setLeverandoerSertifikat(null);
 
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(TestUtil.buildHentForsendelseResponseWithDokument());
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(sikkerDigitalKontaktInfo);
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
