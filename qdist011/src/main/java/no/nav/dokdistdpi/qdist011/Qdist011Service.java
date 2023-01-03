@@ -15,6 +15,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
+import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.kodeverk.DistribusjonstidspunktKode;
@@ -41,6 +42,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
@@ -109,7 +111,7 @@ public class Qdist011Service {
 
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfoTo);
 
-		Varsler varsler = digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
+		Varsler varsler = determineVarsling(hentForsendelseResponse, varselInfoTo, sikkerDigitalKontaktInfo);
 		return Forsendelse.builder()
 				.forsendelseId(distribuerTilKanal.getForsendelseId())
 				.personidentifikator(sikkerDigitalKontaktInfo.getPersonidentifikator())
@@ -281,5 +283,24 @@ public class Qdist011Service {
 				.build());
 		log.info("Oppdatert forsendelse med forsendelseId={} til konversasjonsId={}", forsendelseId, konversasjonsId);
 		return konversasjonsId;
+	}
+
+	private boolean shouldVarsles(DistribusjonsTypeKode distribusjonsTypeKode){
+		if(isNull(distribusjonsTypeKode)){
+			return true;
+		}
+		return switch(distribusjonsTypeKode ){
+			case VIKTIG, VEDTAK -> true;
+			default -> false;
+		};
+	}
+
+	//Varsler skal kun tas med om distribusjonstype er VIKTIG, VEDTAK eller ikke satt
+	private	Varsler determineVarsling(HentForsendelseResponse hentForsendelseResponse, VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo){
+		if(shouldVarsles(hentForsendelseResponse.getDistribusjonstype())){
+			return digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
+		} else {
+			return null;
+		}
 	}
 }

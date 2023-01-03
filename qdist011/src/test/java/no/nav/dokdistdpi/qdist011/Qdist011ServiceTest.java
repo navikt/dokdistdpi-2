@@ -27,6 +27,7 @@ import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_4;
+import static no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode.ANNET;
 import static no.nav.dokdistdpi.qdist011.TestUtil.BESTILLINGS_ID;
 import static no.nav.dokdistdpi.qdist011.TestUtil.KONVERSASJON_ID;
 import static no.nav.dokdistdpi.qdist011.TestUtil.MASKINPORTEN_TOKEN;
@@ -34,7 +35,7 @@ import static no.nav.dokdistdpi.qdist011.TestUtil.MOTTAKER_FNR;
 import static no.nav.dokdistdpi.qdist011.TestUtil.MOTTAKER_ORGNO;
 import static no.nav.dokdistdpi.qdist011.TestUtil.POSTKASSEADRESSE;
 import static no.nav.dokdistdpi.qdist011.TestUtil.TITTEL;
-import static no.nav.dokdistdpi.qdist011.TestUtil.buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon;
+import static no.nav.dokdistdpi.qdist011.TestUtil.buildHentForsendelseResponseWithDokument;
 import static no.nav.dokdistdpi.qdist011.TestUtil.classpathToString;
 import static no.nav.dokdistdpi.qdist011.TestUtil.createDistribuerTilKanal;
 import static no.nav.dokdistdpi.qdist011.TestUtil.createDokumenttypeInfoTo;
@@ -85,7 +86,7 @@ class Qdist011ServiceTest {
 
 	@Test
 	void skalLageForsendelse() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon());
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(TestUtil.buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
@@ -105,8 +106,30 @@ class Qdist011ServiceTest {
 	}
 
 	@Test
+	void skalLageForsendelseWithoutVarslerWhenDistribusjonstypeCodeIsANNET() {
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(TestUtil.buildHentForsendelseResponseWithDokument(ANNET));
+		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
+		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
+		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
+		when(dokumentkatalog.getDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
+
+		Forsendelse forsendelse = qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange);
+
+		assertEquals(MOTTAKER_FNR, forsendelse.getPersonidentifikator());
+		assertEquals(KONVERSASJON_ID, forsendelse.getKonversasjonId());
+		assertEquals(MOTTAKER_FNR, forsendelse.getPersonidentifikator());
+		assertEquals(MOTTAKER_ORGNO, forsendelse.getDigitalPostLeverandoerAdresse());
+		assertEquals(classpathToString("sertifikat/mottakercertificate"), forsendelse.getMottakerSertifikat());
+		assertEquals(MOTTAKER_ORGNO, forsendelse.getDigitalPostLeverandoerAdresse());
+		assertEquals(BESTILLINGS_ID, forsendelse.getBestillingsId());
+		assertDigitalMapping(forsendelse.getDigital());
+		assertNotNull(forsendelse.getDokumentpakke());
+		assertNull(forsendelse.getDigital().getVarsler());
+	}
+
+	@Test
 	void shoudThrowExceptionIfMaskinportenttokenIsNull() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon());
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(TestUtil.buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(null));
 
 		MaskinportenFunctionalException ex = assertThrows(MaskinportenFunctionalException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
@@ -119,7 +142,7 @@ class Qdist011ServiceTest {
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = createSikkerDigitalKontaktInfo();
 		sikkerDigitalKontaktInfo.setLeverandoerSertifikat(null);
 
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon());
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(TestUtil.buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(sikkerDigitalKontaktInfo);
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
