@@ -111,7 +111,7 @@ public class Qdist011Service {
 
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfoTo);
 
-		Varsler varsler = determineVarsling(hentForsendelseResponse, varselInfoTo, sikkerDigitalKontaktInfo);
+		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfoTo, sikkerDigitalKontaktInfo);
 		return Forsendelse.builder()
 				.forsendelseId(distribuerTilKanal.getForsendelseId())
 				.personidentifikator(sikkerDigitalKontaktInfo.getPersonidentifikator())
@@ -285,19 +285,19 @@ public class Qdist011Service {
 		return konversasjonsId;
 	}
 
-	private boolean shouldVarsles(DistribusjonsTypeKode distribusjonsTypeKode){
-		if(isNull(distribusjonsTypeKode)){
+	private boolean distribusjonstypenSkalVarslesFor(DistribusjonsTypeKode distribusjonsTypeKode) {
+		if (isNull(distribusjonsTypeKode)) {
 			return true;
 		}
-		return switch(distribusjonsTypeKode ){
+		return switch (distribusjonsTypeKode) {
 			case VIKTIG, VEDTAK -> true;
 			default -> false;
 		};
 	}
 
 	//Varsler skal kun tas med om distribusjonstype er VIKTIG, VEDTAK eller ikke satt
-	private	Varsler determineVarsling(HentForsendelseResponse hentForsendelseResponse, VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo){
-		if(shouldVarsles(hentForsendelseResponse.getDistribusjonstype())){
+	private Varsler mapVarslerHvisRiktigDistribusjonstype(HentForsendelseResponse hentForsendelseResponse, VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo) {
+		if (distribusjonstypenSkalVarslesFor(hentForsendelseResponse.getDistribusjonstype())) {
 			return digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
 		} else {
 			return null;

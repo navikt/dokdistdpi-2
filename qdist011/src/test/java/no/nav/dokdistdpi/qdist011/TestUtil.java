@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static net.logstash.logback.util.StringUtils.isEmpty;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_4;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.EPOST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
@@ -115,14 +116,14 @@ public final class TestUtil {
 	}
 
 
-	public static HentForsendelseResponse buildHentForsendelseResponseWithDokument(DistribusjonsTypeKode distribusjonsTypeKode) {
+	public static HentForsendelseResponse buildHentForsendelseResponseWithDokument(String distribusjonsTypeKode) {
 		return HentForsendelseResponse.builder()
 				.bestillingsId(BESTILLINGS_ID)
 				.konversasjonId(KONVERSASJON_ID)
 				.mottaker(createMottakerTo())
 				.forsendelseTittel(TITTEL)
 				.dokumenter(buildHovedDokumentWithVedlegg())
-				.distribusjonstype(distribusjonsTypeKode)
+				.distribusjonstype(isEmpty(distribusjonsTypeKode) ? null : DistribusjonsTypeKode.valueOf(distribusjonsTypeKode))
 				.build();
 	}
 

@@ -11,6 +11,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
+import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
@@ -20,6 +21,8 @@ import org.apache.camel.Exchange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 
@@ -84,9 +87,12 @@ class Qdist011ServiceTest {
 		when(encryptedBucketStorage.downloadObject(anyString(), anyString())).thenReturn("{\"pdf\":\"SE9WRURET0tfVEVTVF9DT05URU5U\",\"dokumentObjektReferanse\":null,\"dokumentInfoId\":null}");
 	}
 
-	@Test
-	void skalLageForsendelse() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
+	@ParameterizedTest
+	@CsvSource(value = {
+			"VIKTIG", "ANNET", "NULL"
+	}, nullValues={"NULL"})
+	void skalLageForsendelse(String distribusjonstypecode) {
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(distribusjonstypecode));
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
@@ -107,7 +113,7 @@ class Qdist011ServiceTest {
 
 	@Test
 	void skalLageForsendelseWithoutVarslerWhenDistribusjonstypeCodeIsANNET() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(ANNET));
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(ANNET.toString()));
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
