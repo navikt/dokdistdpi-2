@@ -285,7 +285,15 @@ public class Qdist011Service {
 		return konversasjonsId;
 	}
 
-	private boolean distribusjonstypenSkalVarslesFor(DistribusjonsTypeKode distribusjonsTypeKode) {
+	private Varsler mapVarslerHvisRiktigDistribusjonstype(HentForsendelseResponse hentForsendelseResponse, VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo) {
+		if (skalgiAvsenderstyrtVarsel(hentForsendelseResponse.getDistribusjonstype())) {
+			return digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
+		} else {
+			return null;
+		}
+	}
+	
+	private boolean skalgiAvsenderstyrtVarsel(DistribusjonsTypeKode distribusjonsTypeKode) {
 		if (isNull(distribusjonsTypeKode)) {
 			return true;
 		}
@@ -293,14 +301,5 @@ public class Qdist011Service {
 			case VIKTIG, VEDTAK -> true;
 			default -> false;
 		};
-	}
-
-	//Varsler skal kun tas med om distribusjonstype er VIKTIG, VEDTAK eller ikke satt
-	private Varsler mapVarslerHvisRiktigDistribusjonstype(HentForsendelseResponse hentForsendelseResponse, VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo) {
-		if (distribusjonstypenSkalVarslesFor(hentForsendelseResponse.getDistribusjonstype())) {
-			return digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
-		} else {
-			return null;
-		}
 	}
 }
