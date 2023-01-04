@@ -5,8 +5,8 @@ import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
-import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -24,18 +24,15 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.singletonList;
+import static net.logstash.logback.util.StringUtils.isEmpty;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_4;
-import static no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.ARKIV_SYSTEM_JOARK;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.EPOST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.SMS;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG;
 
 public final class TestUtil {
-	public static final String HENT_FORSENDELSE_RESPONSE_BESTILLINGS_ID = "123456789012341";
-	public static final String ARKIV_INFORMASJON_ARKIV_ID = "123456789012341";
-	public static final String ARKIV_INFORMASJON_ARKIV_SYSTEM_JOARK = "JOARK";
+
 
 	public static final String HOVED_DOKUMENT_INFO_ID = "1";
 	public static final String HOVED_DOKUMENT_REF = "ref-1";
@@ -47,7 +44,6 @@ public final class TestUtil {
 	public static final String VEDLEGG_2_DOKUMENT_REF = "ref-3";
 
 	public static final String TITTEL = "Tittel";
-	public static final String DOKUMENTINFO_ID = "4";
 
 	public static final String MASKINPORTEN_TOKEN = "aølkdsølkdsj==";
 	public static final String MASKINPORTEN_SCOPE = "digitalpostinnbygger:send";
@@ -56,7 +52,6 @@ public final class TestUtil {
 	private static final boolean RESERVASJON = false;
 	private static final String EPOST_VALUE = "epostValue";
 	public static final String MOBIL_VALUE = "mobilValue";
-	private static final String LEVERANDOER_ADRESSE = "leverandoerAdresse";
 
 	private static final String VARSEL_TYPE_ID = "varselTypeId";
 	private static final boolean STOPP_REPETERENDE_VARSEL = false;
@@ -72,10 +67,6 @@ public final class TestUtil {
 	public static final String MOTTAKER_FNR = "04036125433";
 	private static final String MOTTAKER_TYPE = "Person";
 	public static final String POSTKASSEADRESSE = "ove.jonsen#6K5A";
-	private static final String EPOSTADRESSE = "example@email.org";
-	private static final String MOBILTELEFONNUMMER = "4799999999";
-	private static final String VARSLINGSTEKST = "Du har mottatt brev i din digitale postkasse";
-	public static final String VIRKSOMHETMOTTAKER = "984661185";
 	public static final String MOTTAKER_ORGNO = "988015814";
 	public static final String KONVERSASJON_ID = UUID.randomUUID().toString();
 
@@ -124,43 +115,20 @@ public final class TestUtil {
 		return distribuerTilKanal;
 	}
 
-	public static List<JournalpostQdist011.DokumentInfo> buildDokumentInfo() {
-		List<JournalpostQdist011.DokumentInfo> dokumenter = new ArrayList<>();
-		dokumenter.add(
-				JournalpostQdist011
-						.DokumentInfo
-						.builder()
-						.dokumentInfoId("2")
-						.tittel("Joark vedlegg tittel 1")
-						.build()
-		);
-		dokumenter.add(
-				JournalpostQdist011
-						.DokumentInfo
-						.builder()
-						.dokumentInfoId("3")
-						.tittel("Joark vedlegg tittel 2")
-						.build()
-		);
-		return dokumenter;
-	}
 
-	public static HentForsendelseResponse buildHentForsendelseResponseWithDokumentAndArkivSystemAsJoark() {
-		return buildHentForsendelseResponse(buildHovedDokumentWithVedlegg(), ARKIV_SYSTEM_JOARK);
-	}
-
-	public static HentForsendelseResponse buildHentForsendelseResponseWithDokumentAndArkivSystemAsNotJoark() {
-		return buildHentForsendelseResponse(buildHovedDokumentWithVedlegg(), "NOT_JOARK");
-	}
-
-	public static HentForsendelseResponse buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon() {
+	public static HentForsendelseResponse buildHentForsendelseResponseWithDokument(String distribusjonsTypeKode) {
 		return HentForsendelseResponse.builder()
 				.bestillingsId(BESTILLINGS_ID)
 				.konversasjonId(KONVERSASJON_ID)
 				.mottaker(createMottakerTo())
 				.forsendelseTittel(TITTEL)
 				.dokumenter(buildHovedDokumentWithVedlegg())
+				.distribusjonstype(isEmpty(distribusjonsTypeKode) ? null : DistribusjonsTypeKode.valueOf(distribusjonsTypeKode))
 				.build();
+	}
+
+	public static HentForsendelseResponse buildHentForsendelseResponseWithDokument() {
+		return buildHentForsendelseResponseWithDokument(null);
 	}
 
 	public static HentForsendelseResponse.MottakerTo createMottakerTo() {
@@ -168,32 +136,6 @@ public final class TestUtil {
 				.mottakerId(MOTTAKER_FNR)
 				.mottakerNavn(MOTTAKER_TYPE)
 				.mottakerType(MOTTAKER_TYPE)
-				.build();
-	}
-
-	public static HentForsendelseResponse buildHentForsendelseResponseWithDokumentAndArkivSystemAsNull() {
-		return buildHentForsendelseResponse(buildHovedDokumentWithVedlegg(), null);
-	}
-
-	public static HentForsendelseResponse buildHentForsendelseResponseWithEmptyDokumentList() {
-		return buildHentForsendelseResponse(new ArrayList<>(), ARKIV_INFORMASJON_ARKIV_SYSTEM_JOARK);
-	}
-
-	public static HentForsendelseResponse buildHentForsendelseResponse(
-			List<HentForsendelseResponse.DokumentTo> dokumenter,
-			String arkivSystem
-	) {
-		return HentForsendelseResponse
-				.builder()
-				.dokumenter(dokumenter)
-				.bestillingsId(HENT_FORSENDELSE_RESPONSE_BESTILLINGS_ID)
-				.arkivInformasjon(
-						HentForsendelseResponse.ArkivInformasjonTo
-								.builder()
-								.arkivId(ARKIV_INFORMASJON_ARKIV_ID)
-								.arkivSystem(arkivSystem)
-								.build()
-				)
 				.build();
 	}
 
@@ -233,15 +175,6 @@ public final class TestUtil {
 		varslingsMap.put(EPOST, epostVarslingsTekst);
 		varslingsMap.put(SMS, smsVarslingsTekst);
 		return varslingsMap;
-	}
-
-	public static JournalpostQdist011 createJournalpostQdist011() {
-		return JournalpostQdist011.builder()
-				.dokumenter(singletonList(JournalpostQdist011.DokumentInfo.builder()
-						.dokumentInfoId(HOVED_DOKUMENT_INFO_ID)
-						.tittel(TITTEL)
-						.build()))
-				.build();
 	}
 
 	@SneakyThrows

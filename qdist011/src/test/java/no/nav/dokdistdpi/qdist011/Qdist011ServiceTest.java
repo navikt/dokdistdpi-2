@@ -11,6 +11,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
+import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
@@ -20,6 +21,8 @@ import org.apache.camel.Exchange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 
@@ -27,6 +30,7 @@ import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_4;
+import static no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode.ANNET;
 import static no.nav.dokdistdpi.qdist011.TestUtil.BESTILLINGS_ID;
 import static no.nav.dokdistdpi.qdist011.TestUtil.KONVERSASJON_ID;
 import static no.nav.dokdistdpi.qdist011.TestUtil.MASKINPORTEN_TOKEN;
@@ -34,7 +38,7 @@ import static no.nav.dokdistdpi.qdist011.TestUtil.MOTTAKER_FNR;
 import static no.nav.dokdistdpi.qdist011.TestUtil.MOTTAKER_ORGNO;
 import static no.nav.dokdistdpi.qdist011.TestUtil.POSTKASSEADRESSE;
 import static no.nav.dokdistdpi.qdist011.TestUtil.TITTEL;
-import static no.nav.dokdistdpi.qdist011.TestUtil.buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon;
+import static no.nav.dokdistdpi.qdist011.TestUtil.buildHentForsendelseResponseWithDokument;
 import static no.nav.dokdistdpi.qdist011.TestUtil.classpathToString;
 import static no.nav.dokdistdpi.qdist011.TestUtil.createDistribuerTilKanal;
 import static no.nav.dokdistdpi.qdist011.TestUtil.createDokumenttypeInfoTo;
@@ -83,9 +87,12 @@ class Qdist011ServiceTest {
 		when(encryptedBucketStorage.downloadObject(anyString(), anyString())).thenReturn("{\"pdf\":\"SE9WRURET0tfVEVTVF9DT05URU5U\",\"dokumentObjektReferanse\":null,\"dokumentInfoId\":null}");
 	}
 
-	@Test
-	void skalLageForsendelse() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon());
+	@ParameterizedTest
+	@CsvSource(value = {
+			"VIKTIG", "ANNET", "NULL"
+	}, nullValues={"NULL"})
+	void skalLageForsendelse(String distribusjonstypecode) {
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(distribusjonstypecode));
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
@@ -105,8 +112,30 @@ class Qdist011ServiceTest {
 	}
 
 	@Test
+	void skalLageForsendelseWithoutVarslerWhenDistribusjonstypeCodeIsANNET() {
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(ANNET.toString()));
+		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
+		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
+		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
+		when(dokumentkatalog.getDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
+
+		Forsendelse forsendelse = qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange);
+
+		assertEquals(MOTTAKER_FNR, forsendelse.getPersonidentifikator());
+		assertEquals(KONVERSASJON_ID, forsendelse.getKonversasjonId());
+		assertEquals(MOTTAKER_FNR, forsendelse.getPersonidentifikator());
+		assertEquals(MOTTAKER_ORGNO, forsendelse.getDigitalPostLeverandoerAdresse());
+		assertEquals(classpathToString("sertifikat/mottakercertificate"), forsendelse.getMottakerSertifikat());
+		assertEquals(MOTTAKER_ORGNO, forsendelse.getDigitalPostLeverandoerAdresse());
+		assertEquals(BESTILLINGS_ID, forsendelse.getBestillingsId());
+		assertDigitalMapping(forsendelse.getDigital());
+		assertNotNull(forsendelse.getDokumentpakke());
+		assertNull(forsendelse.getDigital().getVarsler());
+	}
+
+	@Test
 	void shoudThrowExceptionIfMaskinportenttokenIsNull() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon());
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(null));
 
 		MaskinportenFunctionalException ex = assertThrows(MaskinportenFunctionalException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
@@ -119,7 +148,7 @@ class Qdist011ServiceTest {
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = createSikkerDigitalKontaktInfo();
 		sikkerDigitalKontaktInfo.setLeverandoerSertifikat(null);
 
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokumentAndWithoutArkivInformasjon());
+		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(sikkerDigitalKontaktInfo);
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
