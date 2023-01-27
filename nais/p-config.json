@@ -1,7 +1,7 @@
 {
   "APP_NAME": "dokdistdpi-2",
   "APPD_NAME": "dokdistdpi-2",
-  "MIN_REPLICAS": "10",
+  "MIN_REPLICAS": "4",
   "MAX_REPLICAS": "10",
   "INGRESSES": [
     "https://dokdistdpi-2.intern.nav.no"
