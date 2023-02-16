@@ -53,7 +53,6 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -114,7 +113,6 @@ public class Qdist011IT {
 		cacheManager.getCache(MASKINPORTEN_CACHE).clear();
 		cacheManager.getCache(STS_CACHE).clear();
 
-		reset(encryptedBucketStorage);
 		when(encryptedBucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString()))
 				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
 		when(encryptedBucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString()))
@@ -140,7 +138,6 @@ public class Qdist011IT {
 		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
-		ListStubMappingsResult stubs = listAllStubMappings();
 		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
