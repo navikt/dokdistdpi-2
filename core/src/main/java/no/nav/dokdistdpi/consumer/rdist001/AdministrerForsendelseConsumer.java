@@ -7,6 +7,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterVarselInfoRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseResponseTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
@@ -155,6 +156,28 @@ public class AdministrerForsendelseConsumer {
 		} catch (HttpServerErrorException e) {
 			log.error("Kall mot rdist001 - oppdaterForsendelse feilet med feilmelding={}", e.getMessage());
 			throw new AdminstrerForsendelseTechnicalException(format("Kall mot rdist001 - oppdaterForsendelse feilet teknisk med statusCode=%s,feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
+		}
+	}
+
+	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "oppdaterVarselInfo"}, histogram = true)
+	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	public void oppdaterVarselInfo(OppdaterVarselInfoRequest oppdaterVarselInfo) {
+		log.info("Mottatt kall til å oppdatere varselinfo={} tilhørende forsendelseId={}", oppdaterVarselInfo.forsendelseId());
+		oppdaterVarselInfo(url + "/oppdatervarselinfo", oppdaterVarselInfo);
+
+	}
+
+	private void oppdaterVarselInfo(String uri, OppdaterVarselInfoRequest oppdaterVarselInfoRequest) {
+		try {
+			HttpEntity<?> entity = new HttpEntity<>(oppdaterVarselInfoRequest, createHeaders());
+			restTemplate.exchange(uri, PUT, entity, String.class);
+		} catch (HttpClientErrorException e) {
+			throw new AdminstrerForsendelseFunctionalException(format("Kall mot rdist001 - oppdaterVarselInfo feilet med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()),
+					e);
+
+		} catch (HttpServerErrorException e) {
+			throw new AbstractDokdistdpiTechnicalException(format("Kall mot rdist001 - oppdaterVarselInfo feilet teknisk med statusCode=%s,feilmelding=%s", e.getStatusCode(), e.getMessage()), e) {
+			};
 		}
 	}
 
