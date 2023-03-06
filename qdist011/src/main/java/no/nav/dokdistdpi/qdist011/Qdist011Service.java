@@ -105,7 +105,6 @@ public class Qdist011Service {
 
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
 		exchange.setProperty(PROPERTY_CONVERSATION_ID, konversasjonId);
-		exchange.setProperty(PROPERTY_DISTRIBUSJONS_TYPE, hentForsendelseResponse.getDistribusjonstype());
 
 		String maskinportenToken = digitalPostService.getMaskinportenToken();
 
@@ -124,6 +123,7 @@ public class Qdist011Service {
 				.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())
 				.bestillingsId(hentForsendelseResponse.getBestillingsId())
 				.konversasjonId(konversasjonId)
+				.distribusjonsTypeKode(hentForsendelseResponse.getDistribusjonstype())
 				.digital(DigitalPost.builder()
 						.avsender(Avsender.builder()
 								.virksomhetsidentifikator(Identifikator.builder()

@@ -14,11 +14,8 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.StandardBusinessDocumentMapper;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.StandardBusinessDocument;
-import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.map.OppdaterVarselInfoMapper;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import no.nav.dokdistdpi.metrics.Monitor;
-import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +28,11 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.OPPRETTET;
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.SENDT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_DISTRIBUSJONS_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 
 /**
@@ -52,26 +47,22 @@ public class DpiMeldingsformidler {
 	private final AppCertificate appCertificate;
 	private final ObjectMapper objectMapper;
 	private final DpiClient dpiClient;
-	private final AdministrerForsendelseConsumer administrerForsendelseConsumer;
-	private final OppdaterVarselInfoMapper oppdaterVarselInfoMapper;
 
 	@Autowired
 	public DpiMeldingsformidler(@Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper,
-								StandardBusinessDocumentMapper sbdMapper, DigitalPostContentPackager digitalPostContentPackager,
-								AppCertificate appCertificate, DpiClient dpiClient,
-								AdministrerForsendelseConsumer administrerForsendelseConsumer) {
+								StandardBusinessDocumentMapper sbdMapper,
+								DigitalPostContentPackager digitalPostContentPackager,
+								AppCertificate appCertificate, DpiClient dpiClient) {
 		this.objectMapper = dpiObjectMapper;
 		this.sbdMapper = sbdMapper;
 		this.digitalPostContentPackager = digitalPostContentPackager;
 		this.appCertificate = appCertificate;
 		this.dpiClient = dpiClient;
-		this.administrerForsendelseConsumer = administrerForsendelseConsumer;
-		this.oppdaterVarselInfoMapper = new OppdaterVarselInfoMapper();
 	}
 
 	@Handler
 	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "sendMelding"}, percentiles = {0.5, 0.95}, histogram = true)
-	public OppdaterDigitalAdresseRequest sendMelding(Forsendelse forsendelse, Exchange exchange) {
+	public OppdaterDigitalAdresseRequest sendMelding(Forsendelse forsendelse) {
 		byte[] dokumentpakke = getKryptertDokumentpakke(forsendelse);
 
 		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse,
@@ -85,15 +76,14 @@ public class DpiMeldingsformidler {
 		ForsendelseStatusResponse forsendelseStatusResponse = forsendelseStatusResponses.stream()
 				.filter(statusResponse -> SENDT.equals(statusResponse.getStatus()) || OPPRETTET.equals(statusResponse.getStatus()))
 				.findAny().orElse(null);
-		if (SENDT.equals(forsendelseStatusResponse.getStatus()) || OPPRETTET.equals(forsendelseStatusResponse.getStatus())) {
-			administrerForsendelseConsumer.oppdaterVarselInfo(oppdaterVarselInfoMapper.mapVarselInfo(forsendelse.getForsendelseId(),
-					forsendelse.getDigital().getVarsler(), exchange.getProperty(PROPERTY_DISTRIBUSJONS_TYPE, String.class)));
-		}
+
 		return forsendelseStatusResponse == null ? null : OppdaterDigitalAdresseRequest.builder()
 				.status(forsendelseStatusResponse.getStatus())
 				.forsendelseId(forsendelse.getForsendelseId())
 				.digitalLeverandoeradresse(forsendelse.getDigitalPostLeverandoerAdresse())
 				.digitalPostkasseadresse(forsendelse.getDigital().getMottaker().getPostkasseadresse())
+				.varsler(forsendelse.getDigital().getVarsler())
+				.distribusjonsTypeKode(forsendelse.getDistribusjonsTypeKode())
 				.build();
 	}
 

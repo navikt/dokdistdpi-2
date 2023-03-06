@@ -148,8 +148,8 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
-			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdatervarselinfo")));
 			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
+			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdatervarselinfo")));
 		});
 	}
 
