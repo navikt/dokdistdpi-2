@@ -13,6 +13,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
 
 @Configuration
 public class CoreConfig {
+
 	@Bean
 	Clock clock() {
 		return Clock.system(DEFAULT_ZONE_ID);

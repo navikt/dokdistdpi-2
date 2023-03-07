@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.qdist011;
 
 import com.ibm.msg.client.jms.DetailedJMSException;
 import no.nav.dokdistdpi.common.MDCHeaderProcessor;
-import no.nav.dokdistdpi.config.prop.DokdistDpiProperties;
+import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.dpi.DpiMeldingsformidler;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistAdministrerForsendelseUpdater;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
@@ -40,7 +40,7 @@ public class Qdist011Route extends RouteBuilder {
 	private static final String OPPDATER_DIGITALPOST_INFO = "digitalPostAdresseAndStatus";
 	private static final String OPPDATER_VARSELINFO = "oppdaterVarselInfo";
 
-	private final DokdistDpiProperties.Qdist011 qdist011Properties;
+	private final DokdistdpiProperties.Qdist011 qdist011Properties;
 	private final Queue qdist011;
 	private final Queue qdist011FunksjonellFeil;
 	private final Queue qdist011UtenforKjernetid;
@@ -51,7 +51,7 @@ public class Qdist011Route extends RouteBuilder {
 
 
 	@Autowired
-	public Qdist011Route(DokdistDpiProperties dokdistDpiProperties,
+	public Qdist011Route(DokdistdpiProperties dokdistDpiProperties,
 						 Queue qdist011,
 						 Queue qdist011FunksjonellFeil,
 						 Queue qdist011UtenforKjernetid,

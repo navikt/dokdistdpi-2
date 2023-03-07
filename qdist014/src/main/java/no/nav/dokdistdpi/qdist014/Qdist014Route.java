@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.qdist014;
 
-import no.nav.dokdistdpi.config.prop.DokdistDpiProperties;
+import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.qdist014.map.ForretningsKvitteringMapper;
 import no.nav.dokdistdpi.qdist014.metrics.Qdist014HeaderProcessor;
@@ -36,7 +36,7 @@ public class Qdist014Route extends RouteBuilder {
 	private static final String SERVICE_ID = "qdist014";
 	private static final String BEHANDLINGEN_AVSLUTTES = "Behandling av kvitteringen avsluttes, ";
 
-	private final DokdistDpiProperties.Qdist014 qdist014Properties;
+	private final DokdistdpiProperties.Qdist014 qdist014Properties;
 	private final Qdist014Service qdist014Service;
 	private final Queue qdist014;
 	private final Queue qdist009;
@@ -52,7 +52,7 @@ public class Qdist014Route extends RouteBuilder {
 						 Qdist014MetricsRoutePolicy qdist014MetricsRoutePolicy,
 						 ForretningsKvitteringMapper forretningsKvitteringMapper,
 						 OppdaterForsendelseStatus oppdaterForsendelseStatus,
-						 DpiKvitteringService dpiKvitteringService, DokdistDpiProperties dokdistDpiProperties) {
+						 DpiKvitteringService dpiKvitteringService, DokdistdpiProperties dokdistDpiProperties) {
 		super(context);
 		this.qdist014Service = qdist014Service;
 		this.qdist014 = qdist014;

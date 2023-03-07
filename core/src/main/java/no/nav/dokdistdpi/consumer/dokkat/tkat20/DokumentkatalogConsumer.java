@@ -1,9 +1,7 @@
 package no.nav.dokdistdpi.consumer.dokkat.tkat20;
 
 import no.nav.dokdistdpi.azure.TokenConsumer;
-import no.nav.dokdistdpi.azure.TokenResponse;
 import no.nav.dokdistdpi.config.cache.CacheConfig;
-import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.exception.functional.Tkat020FunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.Tkat020TechnicalException;
@@ -17,7 +15,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -30,8 +27,13 @@ import java.time.Duration;
 
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.*;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DISTRIBUSJONS_SDP_KANAL;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
 import static org.springframework.http.HttpMethod.GET;
 
 @Component
@@ -95,10 +97,10 @@ public class DokumentkatalogConsumer implements Dokumentkatalog {
 	}
 
 	private HttpHeaders createHeaders() {
-		TokenResponse clientCredentialToken = tokenConsumer.getClientCredentialToken(dokmetScope);
+		String clientCredentialToken = tokenConsumer.getClientCredentialToken(dokmetScope);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.setBearerAuth(clientCredentialToken.getAccess_token());
+		headers.setBearerAuth(clientCredentialToken);
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
 		headers.add(NAV_CALL_ID, MDC.get(CALL_ID));
 		return headers;

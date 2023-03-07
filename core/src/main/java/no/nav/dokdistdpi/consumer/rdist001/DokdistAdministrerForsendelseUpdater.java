@@ -15,13 +15,16 @@ public class DokdistAdministrerForsendelseUpdater {
 	private final AdministrerForsendelseConsumer administrerForsendelse;
 	private final MeterRegistry meterRegistry;
 	private final OppdaterVarselInfoMapper oppdaterVarselInfoMapper;
+	private final DokdistadminConsumer dokdistadminConsumer;
 
 	@Autowired
 	public DokdistAdministrerForsendelseUpdater(AdministrerForsendelseConsumer administrerForsendelse,
-												MeterRegistry meterRegistry) {
+												MeterRegistry meterRegistry,
+												DokdistadminConsumer dokdistadminConsumer) {
 		this.administrerForsendelse = administrerForsendelse;
 		this.meterRegistry = meterRegistry;
 		this.oppdaterVarselInfoMapper = new OppdaterVarselInfoMapper();
+		this.dokdistadminConsumer = dokdistadminConsumer;
 	}
 
 	public void updateStatusDigitalLeverandoerAndPostkasseadresse(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
@@ -39,7 +42,7 @@ public class DokdistAdministrerForsendelseUpdater {
 	}
 
 	public void oppdaterVarselInfo(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
-		administrerForsendelse.oppdaterVarselInfo(oppdaterVarselInfoMapper.mapVarselInfo(oppdaterDigitalAdresseRequest));
+		dokdistadminConsumer.oppdaterVarselInfo(oppdaterVarselInfoMapper.mapVarselInfo(oppdaterDigitalAdresseRequest));
 	}
 
 	private void meldingTilDpiCounter() {

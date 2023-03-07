@@ -2,7 +2,6 @@ package no.nav.dokdistdpi.consumer.dkif;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.azure.TokenConsumer;
-import no.nav.dokdistdpi.azure.TokenResponse;
 import no.nav.dokdistdpi.exception.functional.DigitalKontaktinformasjonFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.DigitalKontaktinformasjonTechnicalException;
@@ -98,10 +97,10 @@ public class DigitalKontaktinformasjonConsumer {
 	}
 
 	private HttpHeaders createHeaders() {
-		TokenResponse clientCredentialToken = tokenConsumer.getClientCredentialToken(dkiScope);
+		String clientCredentialToken = tokenConsumer.getClientCredentialToken(dkiScope);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + clientCredentialToken.getAccess_token());
+		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + clientCredentialToken);
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
 		headers.add(NAV_CALL_ID, MDC.get(CALL_ID));
 		return headers;
