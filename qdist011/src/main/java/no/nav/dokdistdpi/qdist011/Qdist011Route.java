@@ -9,7 +9,6 @@ import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalExcept
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
 import no.nav.dokdistdpi.exception.functional.UtenforKjernetidFunctionalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.ValidationException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -86,7 +85,7 @@ public class Qdist011Route extends RouteBuilder {
 		onException(UtenforKjernetidFunctionalException.class)
 				.handled(true)
 				.useOriginalMessage()
-				.log(LoggingLevel.INFO, log, "${exception}; " + getIdsForLogging())
+				.log(INFO, log, "${exception}; " + getIdsForLogging())
 				.to("jms:" + qdist011UtenforKjernetid.getQueueName());
 
 		onException(AbstractDokdistdpiFunctionalException.class, ValidationException.class)
@@ -119,26 +118,11 @@ public class Qdist011Route extends RouteBuilder {
 				.bean(dpiMeldingsformidler)
 				.choice()
 					.when(or(simple("${body.status}").isEqualTo(SENDT), simple("${body.status}").isEqualTo(OPPRETTET)))
-						.log(LoggingLevel.INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
-						.multicast().parallelProcessing()
-						.to("direct:" + OPPDATER_DIGITALPOST_INFO, "direct:" + OPPDATER_VARSELINFO)
+						.log(INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
+						.bean(administrerForsendelseUpdater, "updateStatusDigitalpostkasseInfoAndVarselInfo")
+						.log(INFO, log, "qdist011 har oppdatert varselInfo, dokdistDb med forsendelseStatus=OVERSENDT og avslutter behandling av forsendelse med " + getIdsForLogging())
 				.endChoice()
 				.end();
-
-		from("direct:" + OPPDATER_DIGITALPOST_INFO)
-				.routeId(OPPDATER_DIGITALPOST_INFO)
-				.setExchangePattern(InOnly)
-				.bean(administrerForsendelseUpdater, "updateStatusDigitalLeverandoerAndPostkasseadresse")
-				.log(LoggingLevel.INFO, log, "qdist011 har oppdatert dokdistDb med forsendelseStatus=OVERSENDT og konversasjonId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} og avslutter behandling av forsendelse med " + getIdsForLogging())
-				.end();
-
-		from("direct:" + OPPDATER_VARSELINFO)
-				.routeId(OPPDATER_VARSELINFO)
-				.setExchangePattern(InOnly)
-				.bean(administrerForsendelseUpdater, "oppdaterVarselInfo")
-				.log(LoggingLevel.INFO, log, "qdist011 har oppdatert varselInfo i dokdistDB og avslutter behandling av forsendelse med " + getIdsForLogging())
-				.end();
-
 		//@formatter:on
 	}
 

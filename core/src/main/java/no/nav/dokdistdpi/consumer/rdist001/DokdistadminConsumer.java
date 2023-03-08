@@ -1,5 +1,6 @@
 package no.nav.dokdistdpi.consumer.rdist001;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.azure.AzureTokenConsumer;
 import no.nav.dokdistdpi.common.NavHeadersFilter;
 import no.nav.dokdistdpi.config.WebClientAzureAuthentication;
@@ -16,6 +17,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 
+@Slf4j
 @Component
 public class DokdistadminConsumer {
 
@@ -34,6 +36,7 @@ public class DokdistadminConsumer {
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public void oppdaterVarselInfo(OppdaterVarselInfoRequest oppdaterVarselInfoRequest) {
+		log.info("Mottatt kall til å oppdatere varselInfo. forsendelseId={}", oppdaterVarselInfoRequest.forsendelseId());
 		webClient.put()
 				.uri("/oppdatervarselinfo")
 				.bodyValue(oppdaterVarselInfoRequest)

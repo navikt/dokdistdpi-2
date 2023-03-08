@@ -56,6 +56,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -95,6 +96,9 @@ public class Qdist011IT {
 
 	@Autowired
 	private Queue qdist011FunksjonellFeil;
+
+	@Autowired
+	private Queue backoutQueue;
 
 	@BeforeEach
 	public void setupBefore() {
@@ -250,6 +254,39 @@ public class Qdist011IT {
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
 		});
+	}
+
+	@SneakyThrows
+	@Test
+	public void shouldThrowTechnicalExceptionWhenDigitalKontaktInfoIsNotAccessable() {
+		stubAzure();
+		stubGetDigitalKontaktInformasjon(INTERNAL_SERVER_ERROR.value());
+		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
+		stubGetVarselInfo();
+		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
+		stubPostSecurityToken();
+		stubPutForsendelseStatusAndkonversasjonsId();
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", FORSENDELSE_ID, OK.value());
+		stubPostMaskinporten();
+		stubPostDPISend();
+		stubGetDPIStatus();
+		stubPutVarselInfo();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+			String message = receive(backoutQueue);
+			assertNotNull(message);
+		});
+
+		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+		verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
+		verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
+		verify(3, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+		verify(0, postRequestedFor(urlEqualTo("/safgraphql")));
+		verify(0, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
+
 	}
 
 	private void stubPostDPISend() {

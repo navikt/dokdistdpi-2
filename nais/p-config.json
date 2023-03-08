@@ -36,8 +36,6 @@
   "DOKDISTDPI_CERT": "/kv/prod/fss/dokdistdpi-2/certificate",
   "VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/prod/sdp",
   "APPDYNAMICS": "/apikey/appdynamics/prod",
-  "DOKDISTDPI_PROXY_HOST": "webproxy.nais",
-  "DOKDISTDPI_PROXY_PORT": "8088",
   "DIGDIR_KRR_PROXY_SCOPE": "api://prod-gcp.team-rocket.digdir-krr-proxy/.default",
   "DOKMET_SCOPE": "api://prod-fss.teamdokumenthandtering.dokmet/.default",
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-prod-a63b",

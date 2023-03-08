@@ -36,7 +36,6 @@
   "DOKDISTDPI_CERT": "/kv/preprod/fss/dokdistdpi-2/certificate",
   "VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/preprod/shared",
   "APPDYNAMICS": "/apikey/appdynamics/dev",
-  "DOKDISTDPI_PROXY_HOST": "webproxy.nais",
   "DIGDIR_KRR_PROXY_SCOPE": "api://dev-gcp.team-rocket.digdir-krr-proxy/.default",
   "DOKMET_SCOPE": "api://dev-fss.teamdokumenthandtering.dokmet/.default",
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-dev-2c5a",

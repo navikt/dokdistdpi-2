@@ -27,7 +27,12 @@ public class DokdistAdministrerForsendelseUpdater {
 		this.dokdistadminConsumer = dokdistadminConsumer;
 	}
 
-	public void updateStatusDigitalLeverandoerAndPostkasseadresse(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
+	public void updateStatusDigitalpostkasseInfoAndVarselInfo(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
+		oppdaterVarselInfo(oppdaterDigitalAdresseRequest);
+		updateStatusDigitalLeverandoerAndPostkasseadresse(oppdaterDigitalAdresseRequest);
+	}
+
+	private void updateStatusDigitalLeverandoerAndPostkasseadresse(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
 		administrerForsendelse.oppdaterForsendelseAndDigitalPostkasseInfo(mapDigitalAdresse(oppdaterDigitalAdresseRequest));
 		meldingTilDpiCounter();
 	}
@@ -41,7 +46,7 @@ public class DokdistAdministrerForsendelseUpdater {
 				.build();
 	}
 
-	public void oppdaterVarselInfo(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
+	private void oppdaterVarselInfo(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
 		dokdistadminConsumer.oppdaterVarselInfo(oppdaterVarselInfoMapper.mapVarselInfo(oppdaterDigitalAdresseRequest));
 	}
 

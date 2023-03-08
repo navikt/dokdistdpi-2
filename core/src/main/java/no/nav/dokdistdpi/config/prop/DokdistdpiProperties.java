@@ -22,7 +22,6 @@ public class DokdistdpiProperties {
 	private final Qdist014 qdist014 = new Qdist014();
 	private final Sdist003 sdist003 = new Sdist003();
 	private final Sdist005 sdist005 = new Sdist005();
-	private final Proxy proxy = new Proxy();
 	private final Endpoints endpoints = new Endpoints();
 
 	@Data
@@ -80,17 +79,6 @@ public class DokdistdpiProperties {
 			return "scheduler://sdist005?timeUnit=SECONDS" +
 					"&initialDelay=5" +
 					"&delay=" + polldelay.toSeconds();
-		}
-	}
-
-	@Data
-	@Validated
-	public static class Proxy {
-		private String host;
-		private int port;
-
-		public boolean isSet() {
-			return (host!=null && !host.equals(""));
 		}
 	}
 
