@@ -30,7 +30,7 @@ import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DISTRIBUSJONS_SDP_KANAL;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
@@ -102,7 +102,7 @@ public class DokumentkatalogConsumer implements Dokumentkatalog {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setBearerAuth(clientCredentialToken);
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
-		headers.add(NAV_CALL_ID, MDC.get(CALL_ID));
+		headers.add(NAV_CALL_ID, MDC.get(NAV_CALLID));
 		return headers;
 	}
 }

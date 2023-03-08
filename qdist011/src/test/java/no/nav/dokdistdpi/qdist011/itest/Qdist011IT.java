@@ -274,7 +274,7 @@ public class Qdist011IT {
 		stubPutVarselInfo();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
-		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String message = receive(backoutQueue);
 			assertNotNull(message);
 		});

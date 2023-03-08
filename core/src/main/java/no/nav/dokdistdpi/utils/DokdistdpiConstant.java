@@ -9,8 +9,9 @@ public class DokdistdpiConstant {
 
 	public static final String QDIST011_SERVICE_ID = "qdist011";
 
-	public static final String CALL_ID = "callId";
+	// Dette callId brukes intern i teamdokumentløsninger apper.
 	public static final String NAV_CALLID = "Nav-Callid";
+	// Dette callId bruker for kall mot digdir-krr-proxy
 	public static final String NAV_CALL_ID = "Nav-Call-Id";
 	public static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";
 	public static final String APP_NAME = "dokdistdpi";
