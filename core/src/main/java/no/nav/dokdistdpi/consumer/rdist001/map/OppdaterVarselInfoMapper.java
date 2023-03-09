@@ -9,18 +9,18 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.Notifikasjon;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterVarselInfoRequest;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static no.nav.dokdistdpi.consumer.rdist001.kodeverk.VarslingKanalCode.EPOST;
+import static no.nav.dokdistdpi.consumer.rdist001.kodeverk.VarslingKanalCode.MOBILTELEFON;
 
 public class OppdaterVarselInfoMapper {
 
 	public static final String EPOST_VARSELTITTEL_VEDTAK = "Varsel om post";
 	public static final String EPOST_VARSELTITTEL_ANNET = "Du har en ny melding";
-	private static final String EPOST = "EPOST";
-	private static final String MOBILTELEFON = "MOBILTELEFON";
 
 	public OppdaterVarselInfoRequest mapVarselInfo(OppdaterDigitalAdresseRequest digitalAdresseRequest) {
 		if (isNull(digitalAdresseRequest)) {
@@ -30,8 +30,8 @@ public class OppdaterVarselInfoMapper {
 		return new OppdaterVarselInfoRequest(digitalAdresseRequest.getForsendelseId(), mapNotifikasjon(digitalAdresseRequest.getVarsler(), digitalAdresseRequest.getDistribusjonsTypeKode()));
 	}
 
-	private Set<Notifikasjon> mapNotifikasjon(Varsler varsler, DistribusjonsTypeKode distribusjonsType) {
-		Set<Notifikasjon> notifikasjons = new HashSet<>();
+	private List<Notifikasjon> mapNotifikasjon(Varsler varsler, DistribusjonsTypeKode distribusjonsType) {
+		List<Notifikasjon> notifikasjons = new ArrayList<>();
 
 		EpostVarsel epostvarsel = varsler.getEpostvarsel();
 		SmsVarsel smsvarsel = varsler.getSmsvarsel();

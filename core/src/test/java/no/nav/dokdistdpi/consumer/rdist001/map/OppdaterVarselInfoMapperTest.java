@@ -12,6 +12,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode.ANNET;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode.VEDTAK;
+import static no.nav.dokdistdpi.consumer.rdist001.kodeverk.VarslingKanalCode.EPOST;
+import static no.nav.dokdistdpi.consumer.rdist001.kodeverk.VarslingKanalCode.MOBILTELEFON;
 import static no.nav.dokdistdpi.consumer.rdist001.map.OppdaterVarselInfoMapper.EPOST_VARSELTITTEL_ANNET;
 import static no.nav.dokdistdpi.consumer.rdist001.map.OppdaterVarselInfoMapper.EPOST_VARSELTITTEL_VEDTAK;
 import static no.nav.dokdistdpi.utils.ForsendelseData.EPOSTADRESSE;
@@ -38,7 +40,7 @@ class OppdaterVarselInfoMapperTest {
 		oppdaterVarselInfo.notifikasjoner().forEach(notifikasjon -> {
 			assertEquals(EPOSTADRESSE, notifikasjon.kontaktInfo());
 			assertEquals(VEDTAK_TEKST, notifikasjon.tekst());
-			assertEquals("EPOST", notifikasjon.kanal());
+			assertEquals(EPOST, notifikasjon.kanal());
 			assertEquals(EPOST_VARSELTITTEL_VEDTAK, notifikasjon.tittel());
 			assertNotNull(notifikasjon.varslingstidspunkt());
 		});
@@ -55,8 +57,8 @@ class OppdaterVarselInfoMapperTest {
 		assertEquals(FORSENDELSE_ID, oppdaterVarselInfo.forsendelseId());
 
 		assertThat(oppdaterVarselInfo.notifikasjoner()).extracting("kontaktInfo", "tekst", "kanal", "tittel")
-				.contains(tuple(EPOSTADRESSE, VEDTAK_TEKST, "EPOST", EPOST_VARSELTITTEL_VEDTAK),
-						tuple(MOBILNUMMER, VEDTAK_TEKST, "MOBILTELEFON", null));
+				.contains(tuple(EPOSTADRESSE, VEDTAK_TEKST, EPOST, EPOST_VARSELTITTEL_VEDTAK),
+						tuple(MOBILNUMMER, VEDTAK_TEKST, MOBILTELEFON, null));
 
 	}
 
@@ -69,10 +71,10 @@ class OppdaterVarselInfoMapperTest {
 
 		assertEquals(FORSENDELSE_ID, oppdaterVarselInfo.forsendelseId());
 
-		oppdaterVarselInfo.notifikasjoner().stream().forEach(notifikasjon -> {
+		oppdaterVarselInfo.notifikasjoner().forEach(notifikasjon -> {
 			assertEquals(EPOSTADRESSE, notifikasjon.kontaktInfo());
 			assertEquals(VEDTAK_TEKST, notifikasjon.tekst());
-			assertEquals("EPOST", notifikasjon.kanal());
+			assertEquals(EPOST, notifikasjon.kanal());
 			assertEquals(EPOST_VARSELTITTEL_VEDTAK, notifikasjon.tittel());
 			assertNotNull(notifikasjon.varslingstidspunkt());
 		});
@@ -86,10 +88,10 @@ class OppdaterVarselInfoMapperTest {
 
 		assertEquals(FORSENDELSE_ID, oppdaterVarselInfo.forsendelseId());
 
-		oppdaterVarselInfo.notifikasjoner().stream().forEach(notifikasjon -> {
+		oppdaterVarselInfo.notifikasjoner().forEach(notifikasjon -> {
 			assertEquals(EPOSTADRESSE, notifikasjon.kontaktInfo());
 			assertEquals(VEDTAK_TEKST, notifikasjon.tekst());
-			assertEquals("EPOST", notifikasjon.kanal());
+			assertEquals(EPOST, notifikasjon.kanal());
 			assertEquals(EPOST_VARSELTITTEL_ANNET, notifikasjon.tittel());
 			assertNotNull(notifikasjon.varslingstidspunkt());
 		});
@@ -104,10 +106,10 @@ class OppdaterVarselInfoMapperTest {
 
 		assertEquals(FORSENDELSE_ID, oppdaterVarselInfo.forsendelseId());
 
-		oppdaterVarselInfo.notifikasjoner().stream().forEach(notifikasjon -> {
+		oppdaterVarselInfo.notifikasjoner().forEach(notifikasjon -> {
 			assertEquals(EPOSTADRESSE, notifikasjon.kontaktInfo());
 			assertEquals(VEDTAK_TEKST, notifikasjon.tekst());
-			assertEquals("EPOST", notifikasjon.kanal());
+			assertEquals(EPOST, notifikasjon.kanal());
 			assertNull(notifikasjon.tittel());
 			assertNotNull(notifikasjon.varslingstidspunkt());
 		});

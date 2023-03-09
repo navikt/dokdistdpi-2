@@ -1,13 +1,14 @@
 package no.nav.dokdistdpi.consumer.rdist001.domain;
 
 
+import no.nav.dokdistdpi.consumer.rdist001.kodeverk.VarslingKanalCode;
+
 import java.time.LocalDateTime;
 
 public record Notifikasjon(
-		String kanal,
+		VarslingKanalCode kanal,
 		String tittel,
 		String tekst,
 		String kontaktInfo,
-		LocalDateTime varslingstidspunkt
-) {
+		LocalDateTime varslingstidspunkt) {
 }

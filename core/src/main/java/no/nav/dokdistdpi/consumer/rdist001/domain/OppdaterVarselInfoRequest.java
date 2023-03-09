@@ -1,11 +1,11 @@
 package no.nav.dokdistdpi.consumer.rdist001.domain;
 
 
-import java.util.Set;
+import java.util.List;
 
 public record OppdaterVarselInfoRequest(
 		String forsendelseId,
-		Set<Notifikasjon> notifikasjoner
+		List<Notifikasjon> notifikasjoner
 ) {
 
 }
