@@ -36,9 +36,6 @@ import static org.apache.camel.support.builder.PredicateBuilder.or;
 @Component
 public class Qdist011Route extends RouteBuilder {
 
-	private static final String OPPDATER_DIGITALPOST_INFO = "digitalPostAdresseAndStatus";
-	private static final String OPPDATER_VARSELINFO = "oppdaterVarselInfo";
-
 	private final DokdistdpiProperties.Qdist011 qdist011Properties;
 	private final Queue qdist011;
 	private final Queue qdist011FunksjonellFeil;
@@ -120,7 +117,7 @@ public class Qdist011Route extends RouteBuilder {
 					.when(or(simple("${body.status}").isEqualTo(SENDT), simple("${body.status}").isEqualTo(OPPRETTET)))
 						.log(INFO, log, "qdist011 har sendt forsendelse med " + getIdsForLogging() + " til DPI")
 						.bean(administrerForsendelseUpdater, "updateStatusDigitalpostkasseInfoAndVarselInfo")
-						.log(INFO, log, "qdist011 har oppdatert varselInfo, dokdistDb med forsendelseStatus=OVERSENDT og avslutter behandling av forsendelse med " + getIdsForLogging())
+						.log(INFO, log, "qdist011 har oppdatert varselInfo, forsendelseStatus=OVERSENDT og avslutter behandling av forsendelse med " + getIdsForLogging())
 				.endChoice()
 				.end();
 		//@formatter:on

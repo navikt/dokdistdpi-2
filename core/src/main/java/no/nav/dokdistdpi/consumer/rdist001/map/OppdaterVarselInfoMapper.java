@@ -11,6 +11,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterVarselInfoRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -32,6 +33,10 @@ public class OppdaterVarselInfoMapper {
 
 	private List<Notifikasjon> mapNotifikasjon(Varsler varsler, DistribusjonsTypeKode distribusjonsType) {
 		List<Notifikasjon> notifikasjons = new ArrayList<>();
+
+		if (Objects.isNull(varsler)) {
+			return null;
+		}
 
 		EpostVarsel epostvarsel = varsler.getEpostvarsel();
 		SmsVarsel smsvarsel = varsler.getSmsvarsel();
