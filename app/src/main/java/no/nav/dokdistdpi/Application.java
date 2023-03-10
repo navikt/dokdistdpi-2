@@ -2,7 +2,8 @@ package no.nav.dokdistdpi;
 
 import no.nav.dokdistdpi.azure.AzureProperties;
 import no.nav.dokdistdpi.certificate.KeyStoreProperties;
-import no.nav.dokdistdpi.config.prop.DokdistDpiProperties;
+import no.nav.dokdistdpi.config.WebClientConfig;
+import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.config.prop.DokdistmellomlagerProperties;
 import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
@@ -25,10 +26,11 @@ import static java.lang.System.setProperty;
 		DpiClientProperties.class,
 		KeyStoreProperties.class,
 		DokdistmellomlagerProperties.class,
-		DokdistDpiProperties.class,
+		DokdistdpiProperties.class,
 		AzureProperties.class,
 })
-@Import({CoreConfig.class})
+@Import({CoreConfig.class,
+		WebClientConfig.class})
 @EnableRetry
 @EnableScheduling
 @SpringBootApplication

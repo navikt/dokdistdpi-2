@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.sdist005;
 
-import no.nav.dokdistdpi.config.prop.DokdistDpiProperties;
+import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
@@ -34,14 +34,14 @@ public class Sdist005Route extends RouteBuilder {
 	private final LederElectionConsumer lederElection;
 	private final Sdist005Service sdist005Service;
 	private final Queue qdist009;
-	private final DokdistDpiProperties.Sdist005 sdist005Properties;
+	private final DokdistdpiProperties.Sdist005 sdist005Properties;
 
 	@Autowired
 	public Sdist005Route(CamelContext context,
 						 LederElectionConsumer lederElection,
 						 Sdist005Service sdist005Service,
 						 Queue qdist009,
-						 DokdistDpiProperties dokdistDpiProperties) {
+						 DokdistdpiProperties dokdistDpiProperties) {
 		super(context);
 		this.lederElection = lederElection;
 		this.sdist005Service = sdist005Service;

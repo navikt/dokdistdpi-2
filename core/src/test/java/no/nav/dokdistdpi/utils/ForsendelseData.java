@@ -32,13 +32,16 @@ public class ForsendelseData {
 	public static final String BESTILLINGS_ID = UUID.randomUUID().toString();
 	private static final String MOTTAKER_FNR = "04036125433";
 	private static final String POSTKASSEADRESSE = "ove.jonsen#6K5A";
-	private static final String EPOSTADRESSE = "example@email.org";
+	public static final String EPOSTADRESSE = "example@email.org";
 	private static final String MOBILTELEFONNUMMER = "4799999999";
 	private static final String VARSLINGSTEKST = "Du har mottatt brev i din digitale postkasse";
 	public static final String VIRKSOMHETMOTTAKER = "984661185";
 	public static final String MOTTAKER_ORGNO = "988015814";
 	public static final String CONVERSATION_ID = UUID.randomUUID().toString();
 	private static final String TITTEL = "Ikke-sensitiv tittel for forsendelsen";
+	public static final String VEDTAK_TEKST = "Du har fått et vedtak fra NAV. Les det i din digitale postkasse.";
+	public static final String MOBILNUMMER = "11111111";
+	public static final String FORSENDELSE_ID = "11";
 
 
 	public static Forsendelse forsendelse(Dokumentpakke dokumentpakke) {

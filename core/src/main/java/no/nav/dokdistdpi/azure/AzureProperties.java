@@ -10,17 +10,13 @@ import javax.validation.constraints.NotEmpty;
  * Konfigurert av naiserator. https://doc.nais.io/security/auth/azure-ad/#runtime-variables-credentials
  */
 @Data
-@ConfigurationProperties("azure.app")
+@ConfigurationProperties("azure")
 @Validated
 public class AzureProperties {
 	@NotEmpty
-	private String tokenUrl;
+	private String appClientId;
 	@NotEmpty
-	private String clientId;
+	private String appClientSecret;
 	@NotEmpty
-	private String clientSecret;
-	@NotEmpty
-	private String tenantId;
-	@NotEmpty
-	private String wellKnownUrl;
+	private String openidConfigTokenEndpoint;
 }

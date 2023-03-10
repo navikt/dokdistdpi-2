@@ -1,16 +1,10 @@
 package no.nav.dokdistdpi.sdist003.itest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import io.micrometer.core.instrument.MeterRegistry;
-import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
-import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
-import no.nav.dokdistdpi.sdist003.Sdist003Service;
 import no.nav.dokdistdpi.sdist003.TestUtil;
 import no.nav.dokdistdpi.sdist003.itest.config.ApplicationTestConfig;
-import org.apache.camel.ProducerTemplate;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,22 +71,11 @@ public class Sdist003ITest {
 	private Queue qdist014;
 
 	@Autowired
-	private ProducerTemplate producerTemplate;
-
-	@Autowired
-	private DpiClient dpiClient;
-	@Autowired
-	private MaskinportenTokenConsumer maskinportenToken;
-
-	@Autowired
 	private LederElectionConsumer lederElection;
-	@Autowired
-	private Sdist003Service sdist003Service;
+
 	@Autowired
 	private CacheManager cacheManager;
-	@Autowired
-	private MeterRegistry meterRegistry;
-	private ObjectMapper objectMapper;
+
 
 	@BeforeEach
 	void setUp() {

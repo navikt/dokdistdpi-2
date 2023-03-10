@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
 
@@ -15,13 +16,13 @@ import java.time.Duration;
 @Data
 @ConfigurationProperties("dokdistdpi")
 @Validated
-public class DokdistDpiProperties {
+public class DokdistdpiProperties {
 
 	private final Qdist011 qdist011 = new Qdist011();
 	private final Qdist014 qdist014 = new Qdist014();
 	private final Sdist003 sdist003 = new Sdist003();
 	private final Sdist005 sdist005 = new Sdist005();
-	private final Proxy proxy = new Proxy();
+	private final Endpoints endpoints = new Endpoints();
 
 	@Data
 	@Validated
@@ -83,12 +84,28 @@ public class DokdistDpiProperties {
 
 	@Data
 	@Validated
-	public static class Proxy {
-		private String host;
-		private int port;
+	public static class Endpoints {
+		/**
+		 * URL til dokdistadmin journalpost api.
+		 */
+		@NotNull
+		private AppEndpoint dokdistadmin;
 
-		public boolean isSet() {
-			return (host!=null && !host.equals(""));
-		}
+	}
+
+	@Data
+	@Validated
+	public static class AppEndpoint {
+		/**
+		 * Url til tjeneste som har azure autorisasjon
+		 */
+		@NotEmpty
+		private String url;
+
+		/**
+		 * Scope til azure client credential flow
+		 */
+		@NotEmpty
+		private String scope;
 	}
 }

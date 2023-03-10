@@ -3,6 +3,7 @@
   "konversasjonId": null,
   "forsendelseStatus": "KLAR_FOR_DIST",
   "forsendelseTittel": "forsendelseTittel",
+  "distribusjonstype": "VIKTIG",
   "mottaker": {
     "mottakerId": "22027838743",
     "mottakerNavn": "mottakerNavn",

@@ -2,7 +2,6 @@ package no.nav.dokdistdpi.consumer.dkif;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.azure.TokenConsumer;
-import no.nav.dokdistdpi.azure.TokenResponse;
 import no.nav.dokdistdpi.exception.functional.DigitalKontaktinformasjonFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.DigitalKontaktinformasjonTechnicalException;
@@ -28,7 +27,7 @@ import static java.lang.String.format;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
 
@@ -98,12 +97,12 @@ public class DigitalKontaktinformasjonConsumer {
 	}
 
 	private HttpHeaders createHeaders() {
-		TokenResponse clientCredentialToken = tokenConsumer.getClientCredentialToken(dkiScope);
+		String clientCredentialToken = tokenConsumer.getClientCredentialToken(dkiScope);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + clientCredentialToken.getAccess_token());
+		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + clientCredentialToken);
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
-		headers.add(NAV_CALL_ID, MDC.get(CALL_ID));
+		headers.add(NAV_CALL_ID, MDC.get(NAV_CALLID));
 		return headers;
 	}
 }

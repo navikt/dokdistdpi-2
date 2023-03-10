@@ -50,7 +50,8 @@ public class DpiMeldingsformidler {
 
 	@Autowired
 	public DpiMeldingsformidler(@Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper,
-								StandardBusinessDocumentMapper sbdMapper, DigitalPostContentPackager digitalPostContentPackager,
+								StandardBusinessDocumentMapper sbdMapper,
+								DigitalPostContentPackager digitalPostContentPackager,
 								AppCertificate appCertificate, DpiClient dpiClient) {
 		this.objectMapper = dpiObjectMapper;
 		this.sbdMapper = sbdMapper;
@@ -75,11 +76,14 @@ public class DpiMeldingsformidler {
 		ForsendelseStatusResponse forsendelseStatusResponse = forsendelseStatusResponses.stream()
 				.filter(statusResponse -> SENDT.equals(statusResponse.getStatus()) || OPPRETTET.equals(statusResponse.getStatus()))
 				.findAny().orElse(null);
+
 		return forsendelseStatusResponse == null ? null : OppdaterDigitalAdresseRequest.builder()
 				.status(forsendelseStatusResponse.getStatus())
 				.forsendelseId(forsendelse.getForsendelseId())
 				.digitalLeverandoeradresse(forsendelse.getDigitalPostLeverandoerAdresse())
 				.digitalPostkasseadresse(forsendelse.getDigital().getMottaker().getPostkasseadresse())
+				.varsler(forsendelse.getDigital().getVarsler())
+				.distribusjonsTypeKode(forsendelse.getDistribusjonsTypeKode())
 				.build();
 	}
 

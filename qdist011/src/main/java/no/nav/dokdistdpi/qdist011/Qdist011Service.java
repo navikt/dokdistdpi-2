@@ -51,6 +51,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_OPPR
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_DISTRIBUSJONS_TYPE;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG_TITTEL_PREFIX;
@@ -101,8 +102,10 @@ public class Qdist011Service {
 		validateKjernetid(hentForsendelseResponse.getDistribusjonstidspunkt(), hentForsendelseResponse.getBestillingsId());
 
 		String konversasjonId = getConversationId(hentForsendelseResponse, distribuerTilKanal.getForsendelseId());
+
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
 		exchange.setProperty(PROPERTY_CONVERSATION_ID, konversasjonId);
+
 		String maskinportenToken = digitalPostService.getMaskinportenToken();
 
 		DokumenttypeInfoTo dokumenttypeInfo = digitalPostService.getDokumenttypeInfo(hentForsendelseResponse);
@@ -112,6 +115,7 @@ public class Qdist011Service {
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfoTo);
 
 		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfoTo, sikkerDigitalKontaktInfo);
+
 		return Forsendelse.builder()
 				.forsendelseId(distribuerTilKanal.getForsendelseId())
 				.personidentifikator(sikkerDigitalKontaktInfo.getPersonidentifikator())
@@ -119,6 +123,7 @@ public class Qdist011Service {
 				.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())
 				.bestillingsId(hentForsendelseResponse.getBestillingsId())
 				.konversasjonId(konversasjonId)
+				.distribusjonsTypeKode(hentForsendelseResponse.getDistribusjonstype())
 				.digital(DigitalPost.builder()
 						.avsender(Avsender.builder()
 								.virksomhetsidentifikator(Identifikator.builder()
@@ -292,7 +297,7 @@ public class Qdist011Service {
 			return null;
 		}
 	}
-	
+
 	private boolean skalgiAvsenderstyrtVarsel(DistribusjonsTypeKode distribusjonsTypeKode) {
 		if (isNull(distribusjonsTypeKode)) {
 			return true;
