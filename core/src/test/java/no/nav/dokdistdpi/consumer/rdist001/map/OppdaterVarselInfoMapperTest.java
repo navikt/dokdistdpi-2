@@ -62,6 +62,14 @@ class OppdaterVarselInfoMapperTest {
 
 	}
 
+	@Test
+	public void shouldReturnNullWhenVarselIsNull() {
+		OppdaterVarselInfoRequest oppdaterVarselInfo = mapper.mapVarselInfo(createOppdaterDigitalAdresseRequest(null, VEDTAK));
+
+		assertEquals(FORSENDELSE_ID, oppdaterVarselInfo.forsendelseId());
+		assertNull(oppdaterVarselInfo.notifikasjoner());
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {"VIKTIG", "VEDTAK"})
 	public void shouldMapEpostVarselTittelWhenDistribusjonsTypeIsVedtakOrViktig(DistribusjonsTypeKode distribusjonsType) {

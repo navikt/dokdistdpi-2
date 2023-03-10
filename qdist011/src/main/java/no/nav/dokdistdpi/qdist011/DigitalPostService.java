@@ -21,6 +21,7 @@ import no.nav.dokdistdpi.exception.functional.Tkat020FunctionalException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
@@ -81,6 +82,9 @@ public class DigitalPostService {
 	}
 
 	public Varsler mapVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, DistribusjonsTypeKode distribusjonsType) {
+		if (Objects.isNull(varselInfoTo)) {
+			return null;
+		}
 		String varslingstekst = determineVarslingstekst(distribusjonsType);
 		return Varsler.builder()
 				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))

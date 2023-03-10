@@ -127,7 +127,7 @@ public class Qdist011IT {
 		stubAzure();
 		stubGetDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo();
+		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutForsendelseStatusAndkonversasjonsId();
@@ -154,12 +154,43 @@ public class Qdist011IT {
 		});
 	}
 
+	@SneakyThrows
+	@Test
+	public void shouldProcessForsendelseWhenVarselIsNull() {
+		stubAzure();
+		stubGetDigitalKontaktInformasjon(OK.value());
+		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
+		stubGetVarselInfo("varselinfov1/tkat021-null.json");
+		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
+		stubPostSecurityToken();
+		stubPutForsendelseStatusAndkonversasjonsId();
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", FORSENDELSE_ID, OK.value());
+		stubPostMaskinporten();
+		stubPostDPISend();
+		stubGetDPIStatus();
+		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
+			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
+			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
+			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
+			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
+		});
+	}
+
 	@Test
 	void shouldHandleForsendelseOversendtWhenDuplikatForsendelse() {
 		stubAzure();
 		stubGetDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo();
+		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
@@ -192,7 +223,7 @@ public class Qdist011IT {
 		stubAzure();
 		stubGetDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo();
+		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutForsendelseStatusAndkonversasjonsId();
@@ -223,7 +254,7 @@ public class Qdist011IT {
 		stubAzure();
 		stubGetDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo();
+		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutForsendelseStatusAndkonversasjonsId();
@@ -262,7 +293,7 @@ public class Qdist011IT {
 		stubAzure();
 		stubGetDigitalKontaktInformasjon(INTERNAL_SERVER_ERROR.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo();
+		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutForsendelseStatusAndkonversasjonsId();
@@ -366,10 +397,10 @@ public class Qdist011IT {
 				.withBodyFile(bodyFileName)));
 	}
 
-	private void stubGetVarselInfo() {
+	private void stubGetVarselInfo(String path) {
 		stubFor(get(urlMatching("/varselinfo/" + VARSEL_TYPE_ID)).willReturn(aResponse().withStatus(OK.value())
 				.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-				.withBodyFile("varselinfov1/tkat021-happy.json")));
+				.withBodyFile(path)));
 	}
 
 	private void stubPutVarselInfo() {
