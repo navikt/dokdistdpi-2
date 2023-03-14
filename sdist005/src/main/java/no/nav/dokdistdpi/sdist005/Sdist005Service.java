@@ -4,14 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
+import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.UekspedertForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.AvstemForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseRequestTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseResponseTo;
-import no.nav.dokdistdpi.consumer.rdist001.map.PersisterForsendelseMapper;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.map.OpprettForsendelseMapper;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusIkkeFunnetException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
@@ -25,7 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.lang.String.valueOf;
 import static java.util.UUID.randomUUID;
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarselType.MELDINGSFEIL;
@@ -39,17 +38,20 @@ public class Sdist005Service {
 
 	private final AdministrerForsendelseConsumer administrerForsendelseConsumer;
 	private final UekspedertForsendelseConsumer uekspedertForsendelseConsumer;
+	private final DokdistadminConsumer dokdistadminConsumer;
 	private final DpiClient dpiClient;
-	private final PersisterForsendelseMapper persisterForsendelseMapper;
+	private final OpprettForsendelseMapper opprettForsendelseMapper;
 
 	@Autowired
 	public Sdist005Service(AdministrerForsendelseConsumer administrerForsendelseConsumer,
 						   UekspedertForsendelseConsumer uekspedertForsendelseConsumer,
+						   DokdistadminConsumer dokdistadminConsumer,
 						   DpiClient dpiClient) {
 		this.administrerForsendelseConsumer = administrerForsendelseConsumer;
 		this.uekspedertForsendelseConsumer = uekspedertForsendelseConsumer;
+		this.dokdistadminConsumer = dokdistadminConsumer;
 		this.dpiClient = dpiClient;
-		this.persisterForsendelseMapper = new PersisterForsendelseMapper();
+		this.opprettForsendelseMapper = new OpprettForsendelseMapper();
 	}
 
 	@Handler
@@ -83,9 +85,10 @@ public class Sdist005Service {
 				feiletForsendelse.getForsendelseId(), feiletForsendelse.getBestillingsId());
 		HentForsendelseResponse hentForsendelseResponse = administrerForsendelseConsumer.hentForsendelse(feiletForsendelse.getForsendelseId());
 		final String bestillingsId = randomUUID().toString();
-		PersisterForsendelseRequestTo persisterForsendelseRequestTo = persisterForsendelseMapper.map(hentForsendelseResponse, bestillingsId);
-		PersisterForsendelseResponseTo persisterForsendelseResponseTo = administrerForsendelseConsumer.persisterForsendelse(persisterForsendelseRequestTo);
-		final String nyForsendelseId = valueOf(persisterForsendelseResponseTo.getForsendelseId());
+
+		OpprettForsendelseRequestTo opprettForsendelseRequestTo = opprettForsendelseMapper.map(hentForsendelseResponse, bestillingsId);
+		String nyForsendelseId = dokdistadminConsumer.opprettForsendelse(opprettForsendelseRequestTo);
+
 		log.info("Sdist005 har opprettet ny forsendelse med forsendelseId={}, bestillingsId={}", nyForsendelseId, bestillingsId);
 
 		administrerForsendelseConsumer.feilRegistrerForsendelse(FeilRegistrerForsendelseRequest.builder()

@@ -7,8 +7,6 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseRequestTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseResponseTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.AdminstrerForsendelseTechnicalException;
@@ -32,11 +30,10 @@ import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -73,23 +70,6 @@ public class AdministrerForsendelseConsumer {
 		} catch (HttpServerErrorException e) {
 			log.error("Kall mot rdist001 feilet teknisk med forsendelseId={}, feilmelding={}", forsendelseId, e.getMessage());
 			throw new AdminstrerForsendelseTechnicalException(format("Kall mot rdist001 feilet teknisk med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
-		}
-	}
-
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {"process", "persisterForsendelse"}, histogram = true)
-	public PersisterForsendelseResponseTo persisterForsendelse(final PersisterForsendelseRequestTo forsendelseRequestTo) {
-		try {
-			HttpEntity<?> entity = new HttpEntity<>(forsendelseRequestTo, createHeaders());
-			ResponseEntity<PersisterForsendelseResponseTo> response = restTemplate.exchange(url, POST, entity, PersisterForsendelseResponseTo.class);
-			return response.getBody();
-
-		} catch (HttpClientErrorException e) {
-			log.error(ERROR_MESSAGE, forsendelseRequestTo.getBestillingsId(), e.getMessage());
-			throw new AdminstrerForsendelseFunctionalException(format(EXCEPTION_MESSAGE, forsendelseRequestTo.getBestillingsId(), e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			log.error(ERROR_MESSAGE, forsendelseRequestTo.getBestillingsId(), e.getMessage());
-			throw new AdminstrerForsendelseTechnicalException(format(EXCEPTION_MESSAGE, forsendelseRequestTo.getBestillingsId(), e.getMessage()), e);
 		}
 	}
 

@@ -78,11 +78,12 @@ public class Sdist005IT {
 	@Test
 	public void shouldGetKvitteringFromDpiAccessPoint() {
 		when(lederElection.isLeader()).thenReturn(true);
+		stubAzure();
 		stubPostMaskinporten();
 		stubHentUekspedertForsendelse();
 		stubHentForsendelseStatus(KONVERSASJON_ID);
 		stubHentForsendelse(FORSENDELSE_ID);
-		stubPostPersisterForsendelse();
+		stubPostOpprettForsendelse();
 		stubPutFeilregistrerforsendelse();
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 
@@ -128,17 +129,25 @@ public class Sdist005IT {
 						.withBodyFile("rdist001/hentForsendelseresponse-happy.json")));
 	}
 
-	private void stubPostPersisterForsendelse() {
-		stubFor(post(urlEqualTo("/administrerforsendelse"))
+	private void stubPostOpprettForsendelse() {
+		stubFor(post(urlEqualTo("/rest/administrerforsendelse"))
 				.willReturn(aResponse()
 						.withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 						.withStatus(OK.value())
-						.withBodyFile("rdist001/persisterForsendelseResponse-happy.json")));
+						.withBodyFile("rdist001/opprettForsendelseResponse-happy.json")));
 	}
 
 	private void stubPutFeilregistrerforsendelse() {
 		stubFor(put("/administrerforsendelse/feilregistrerforsendelse")
 				.willReturn(aResponse().withStatus(OK.value())));
+	}
+
+	void stubAzure() {
+		stubFor(post("/azure_token")
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("azure/token_response.json")));
 	}
 
 	private void stubPutOppdaterForsendelse(String forsendelseStatus, String forsendelseId) {

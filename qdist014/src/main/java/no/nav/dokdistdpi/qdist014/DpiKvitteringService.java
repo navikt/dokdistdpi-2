@@ -5,14 +5,14 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvitt
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeiletKvittering;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
-import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseRequestTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseResponseTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
-import static java.lang.String.valueOf;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarselType.MELDINGSFEIL;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarselType.VARSLINGSFEIL;
@@ -42,10 +41,13 @@ public class DpiKvitteringService {
 	private static final String KONVERSASJONS_ID = "konversasjonsId";
 
 	private final AdministrerForsendelseConsumer administrerForsendelse;
+	private final DokdistadminConsumer dokdistadminConsumer;
 
 	@Autowired
-	public DpiKvitteringService(AdministrerForsendelseConsumer administrerForsendelse) {
+	public DpiKvitteringService(AdministrerForsendelseConsumer administrerForsendelse,
+								DokdistadminConsumer dokdistadminConsumer) {
 		this.administrerForsendelse = administrerForsendelse;
+		this.dokdistadminConsumer = dokdistadminConsumer;
 	}
 
 	boolean erStatusEkspedertOrReturOrFeilet(DpiMelding dpiMelding, Exchange exchange) {
@@ -59,7 +61,7 @@ public class DpiKvitteringService {
 	}
 
 	DistribuerTilKanal persistAndCreateNewForsendelse(DpiMelding dpiMelding,
-													  PersisterForsendelseRequestTo request, String forsendelseId) {
+													  OpprettForsendelseRequestTo request, String forsendelseId) {
 		DistribuerTilKanal distribuerTilKanal = new DistribuerTilKanal();
 		if (dpiMelding instanceof VarslingFeiletKvittering varslingFeiletKvittering) {
 			if (VARSLINGFEILET.equals(varslingFeiletKvittering.getKvitteringType())) {
@@ -71,20 +73,24 @@ public class DpiKvitteringService {
 		return distribuerTilKanal;
 	}
 
-	private void createAndUpdateFeilForsendelse(DpiMelding dpiMelding, PersisterForsendelseRequestTo request, String forsendelseId, DistribuerTilKanal distribuerTilKanal) {
-		PersisterForsendelseResponseTo forsendelseResponseTo = administrerForsendelse.persisterForsendelse(request);
-		validateOppdaterForsendelse(forsendelseResponseTo);
+	private void createAndUpdateFeilForsendelse(DpiMelding dpiMelding, OpprettForsendelseRequestTo request, String forsendelseId, DistribuerTilKanal distribuerTilKanal) {
+
+		String nyForsendelseId = dokdistadminConsumer.opprettForsendelse(request);
+
 		createFeilRegistrerForsendelseKvittering(forsendelseId, dpiMelding, request);
+
 		log.info("Forsendelsen med forsendelseId={} feilregistrerte i dokdist databasen.", forsendelseId);
+
 		administrerForsendelse.oppdaterForsendelseAndDigitalPostkasseInfo(OppdaterForsendelseRequestTo.builder()
-				.forsendelseId(valueOf(forsendelseResponseTo.getForsendelseId()))
+				.forsendelseId(nyForsendelseId)
 				.forsendelseStatus(KLAR_FOR_DIST.name())
 				.build());
-		distribuerTilKanal.setForsendelseId(valueOf(forsendelseResponseTo.getForsendelseId()));
+
+		distribuerTilKanal.setForsendelseId(nyForsendelseId);
 	}
 
 	private void createFeilRegistrerForsendelseKvittering(String forsendelseId, DpiMelding dpiMelding,
-														  PersisterForsendelseRequestTo request) {
+														  OpprettForsendelseRequestTo request) {
 		if (dpiMelding instanceof VarslingFeiletKvittering varslingFeiletKvittering) {
 			administrerForsendelse.feilRegistrerForsendelse(FeilRegistrerForsendelseRequest.builder()
 					.forsendelseId(forsendelseId)
@@ -118,11 +124,6 @@ public class DpiKvitteringService {
 				.verdi(konversasjonsId)
 				.build();
 		return administrerForsendelse.finnForsendelse(finnForsendelseRequest);
-	}
-
-	private void validateOppdaterForsendelse(PersisterForsendelseResponseTo responseTo) {
-		assertNotNull("PersisterForsendelseResponseTo", responseTo);
-		assertNotBlank("PersisterForsendelseResponseTo.ForsendelseId", valueOf(responseTo.getForsendelseId()));
 	}
 
 	private void validateFinnForsendelse(FinnForsendelseResponseTo responseTo) {
