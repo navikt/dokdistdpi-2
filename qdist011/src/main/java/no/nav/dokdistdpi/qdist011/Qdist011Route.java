@@ -42,7 +42,6 @@ public class Qdist011Route extends RouteBuilder {
 	private final Queue qdist011UtenforKjernetid;
 	private final Qdist011Service qdist011Service;
 	private final DpiMeldingsformidler dpiMeldingsformidler;
-	private final Qdist011MetricsRoutePolicy routePolicy;
 	private final DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater;
 
 
@@ -53,7 +52,6 @@ public class Qdist011Route extends RouteBuilder {
 						 Queue qdist011UtenforKjernetid,
 						 Qdist011Service qdist011Service,
 						 DpiMeldingsformidler dpiMeldingsformidler,
-						 Qdist011MetricsRoutePolicy routePolicy,
 						 DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater) {
 		this.qdist011Properties = dokdistDpiProperties.getQdist011();
 		this.qdist011 = qdist011;
@@ -61,7 +59,6 @@ public class Qdist011Route extends RouteBuilder {
 		this.qdist011UtenforKjernetid = qdist011UtenforKjernetid;
 		this.qdist011Service = qdist011Service;
 		this.dpiMeldingsformidler = dpiMeldingsformidler;
-		this.routePolicy = routePolicy;
 		this.administrerForsendelseUpdater = administrerForsendelseUpdater;
 	}
 
@@ -105,7 +102,6 @@ public class Qdist011Route extends RouteBuilder {
 		from("jms:" + qdist011.getQueueName() + "?transacted=true&concurrentConsumers=1")
 				.autoStartup(qdist011Properties.isAutostartup())
 				.routeId(QDIST011_SERVICE_ID)
-				.routePolicy(routePolicy)
 				.setExchangePattern(InOnly)
 				.process(new MDCHeaderProcessor())
 				.log(INFO, log, "qdist011 har mottatt forsendelse med " + logForsendelseId())

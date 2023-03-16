@@ -10,7 +10,6 @@ import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseExc
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.KunneIkkeHentKvitteringException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -37,8 +36,6 @@ import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.KANAL;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.PAGE_SIZE;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -77,7 +74,6 @@ public class DpiClient {
 				.build();
 	}
 
-	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "dpiSendClient"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public List<ForsendelseStatusResponse> sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
 
@@ -114,7 +110,6 @@ public class DpiClient {
 		}
 	}
 
-	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "hentForsendelseStatus"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public List<ForsendelseStatusResponse> hentForsendelseStatus(String konversasjonId) {
 
@@ -135,7 +130,6 @@ public class DpiClient {
 		}
 	}
 
-	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "hentKvittering"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public ResponseEntity<HentKvitteringResponse[]> hentKvittering() {
 
@@ -155,7 +149,6 @@ public class DpiClient {
 		}
 	}
 
-	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "bekreft"}, percentiles = {0.5, 0.95}, histogram = true)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public HttpStatus bekreft(String konversasjonId) {
 

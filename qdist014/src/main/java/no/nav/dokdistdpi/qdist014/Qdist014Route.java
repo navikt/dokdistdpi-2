@@ -4,7 +4,6 @@ import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.qdist014.map.ForretningsKvitteringMapper;
 import no.nav.dokdistdpi.qdist014.metrics.Qdist014HeaderProcessor;
-import no.nav.dokdistdpi.qdist014.metrics.Qdist014MetricsRoutePolicy;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.CamelContext;
 import org.apache.camel.ExchangePattern;
@@ -41,7 +40,6 @@ public class Qdist014Route extends RouteBuilder {
 	private final Queue qdist014;
 	private final Queue qdist009;
 	private final Queue qdist014FunksjonellFeil;
-	private final Qdist014MetricsRoutePolicy qdist014MetricsRoutePolicy;
 	private final ForretningsKvitteringMapper forretningsKvitteringMapper;
 	private final OppdaterForsendelseStatus oppdaterForsendelseStatus;
 	private final DpiKvitteringService dpiKvitteringService;
@@ -49,7 +47,6 @@ public class Qdist014Route extends RouteBuilder {
 	@Autowired
 	public Qdist014Route(CamelContext context, Qdist014Service qdist014Service,
 						 Queue qdist014, Queue qdist009, Queue qdist014FunksjonellFeil,
-						 Qdist014MetricsRoutePolicy qdist014MetricsRoutePolicy,
 						 ForretningsKvitteringMapper forretningsKvitteringMapper,
 						 OppdaterForsendelseStatus oppdaterForsendelseStatus,
 						 DpiKvitteringService dpiKvitteringService, DokdistdpiProperties dokdistDpiProperties) {
@@ -58,7 +55,6 @@ public class Qdist014Route extends RouteBuilder {
 		this.qdist014 = qdist014;
 		this.qdist009 = qdist009;
 		this.qdist014FunksjonellFeil = qdist014FunksjonellFeil;
-		this.qdist014MetricsRoutePolicy = qdist014MetricsRoutePolicy;
 		this.forretningsKvitteringMapper = forretningsKvitteringMapper;
 		this.oppdaterForsendelseStatus = oppdaterForsendelseStatus;
 		this.dpiKvitteringService = dpiKvitteringService;
@@ -82,7 +78,6 @@ public class Qdist014Route extends RouteBuilder {
 		from("jms:" + qdist014.getQueueName() + "?transacted=true")
 				.autoStartup(qdist014Properties.isAutostartup())
 				.routeId(SERVICE_ID)
-				.routePolicy(qdist014MetricsRoutePolicy)
 				.setExchangePattern(ExchangePattern.InOnly)
 				.process(new Qdist014HeaderProcessor())
 				.log(INFO, log, "qdist014 har mottatt kvittering fra sdist003")

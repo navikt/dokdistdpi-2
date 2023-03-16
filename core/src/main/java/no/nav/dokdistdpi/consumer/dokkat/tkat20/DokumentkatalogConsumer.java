@@ -5,7 +5,6 @@ import no.nav.dokdistdpi.config.cache.CacheConfig;
 import no.nav.dokdistdpi.exception.functional.Tkat020FunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.Tkat020TechnicalException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import no.nav.dokkat.api.tkat020.DistribusjonVarselTo;
 import no.nav.dokkat.api.tkat020.v4.DokumentTypeInfoToV4;
 import org.slf4j.MDC;
@@ -15,7 +14,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -30,11 +28,12 @@ import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DISTRIBUSJONS_SDP_KANAL;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Component
 public class DokumentkatalogConsumer implements Dokumentkatalog {
@@ -60,7 +59,6 @@ public class DokumentkatalogConsumer implements Dokumentkatalog {
 	@Override
 	@Cacheable(CacheConfig.TKAT020_CACHE)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = "dok_consumer", extraTags = {"process", "getDokumenttypeInfo"}, histogram = true)
 	public DokumenttypeInfoTo getDokumenttypeInfo(String dokumenttypeId) {
 		HttpHeaders headers = createHeaders();
 		try {
@@ -99,7 +97,7 @@ public class DokumentkatalogConsumer implements Dokumentkatalog {
 	private HttpHeaders createHeaders() {
 		String clientCredentialToken = tokenConsumer.getClientCredentialToken(dokmetScope);
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setContentType(APPLICATION_JSON);
 		headers.setBearerAuth(clientCredentialToken);
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
 		headers.add(NAV_CALL_ID, MDC.get(NAV_CALLID));

@@ -15,7 +15,6 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.StandardBusinessDocumentMapp
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.StandardBusinessDocument;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +30,8 @@ import java.util.List;
 
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.OPPRETTET;
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.SENDT;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 
-/**
- * @author Tsigab A. Gebremedhin, NAV
- */
 @Slf4j
 @Component
 public class DpiMeldingsformidler {
@@ -61,7 +55,6 @@ public class DpiMeldingsformidler {
 	}
 
 	@Handler
-	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "sendMelding"}, percentiles = {0.5, 0.95}, histogram = true)
 	public OppdaterDigitalAdresseRequest sendMelding(Forsendelse forsendelse) {
 		byte[] dokumentpakke = getKryptertDokumentpakke(forsendelse);
 
