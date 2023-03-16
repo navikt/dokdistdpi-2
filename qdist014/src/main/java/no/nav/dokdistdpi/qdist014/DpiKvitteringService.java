@@ -79,7 +79,7 @@ public class DpiKvitteringService {
 
 		createFeilRegistrerForsendelseKvittering(forsendelseId, dpiMelding, request);
 
-		log.info("Forsendelsen med forsendelseId={} feilregistrerte i dokdist databasen.", forsendelseId);
+		log.info("Forsendelsen med forsendelseId={} er feilregistrert i dokdist databasen.", forsendelseId);
 
 		administrerForsendelse.oppdaterForsendelseAndDigitalPostkasseInfo(OppdaterForsendelseRequestTo.builder()
 				.forsendelseId(nyForsendelseId)
