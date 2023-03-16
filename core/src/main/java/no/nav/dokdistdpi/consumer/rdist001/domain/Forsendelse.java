@@ -13,6 +13,6 @@ public class Forsendelse {
 		if (forsendelseId == null) {
 			throw new IllegalArgumentException("forsendelseId kan ikke være null");
 		}
-		this.forsendelseId = valueOf(forsendelseId);
+		this.forsendelseId = forsendelseId.toString();
 	}
 }
