@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @Builder
-public class PersisterForsendelseResponseTo {
+public class OpprettForsendelseResponseTo {
 	private Long forsendelseId;
 }

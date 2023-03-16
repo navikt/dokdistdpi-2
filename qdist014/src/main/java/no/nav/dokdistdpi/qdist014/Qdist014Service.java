@@ -4,8 +4,8 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
-import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseRequestTo;
-import no.nav.dokdistdpi.consumer.rdist001.map.PersisterForsendelseMapper;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.map.OpprettForsendelseMapper;
 import no.nav.dokdistdpi.exception.functional.InvalidForsendelseStatusException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
@@ -25,12 +25,12 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID
 public class Qdist014Service {
 
 	private final DpiKvitteringService dpiKvitteringService;
-	private final PersisterForsendelseMapper mapper;
+	private final OpprettForsendelseMapper mapper;
 
 	@Autowired
 	public Qdist014Service(DpiKvitteringService dpiKvitteringService) {
 		this.dpiKvitteringService = dpiKvitteringService;
-		this.mapper = new PersisterForsendelseMapper();
+		this.mapper = new OpprettForsendelseMapper();
 	}
 
 
@@ -43,13 +43,13 @@ public class Qdist014Service {
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingId);
 		FinnForsendelseResponseTo finnForsendelseResponse = dpiKvitteringService.finnForsendelse(konversasjonsId);
 		HentForsendelseResponse hentForsendelseResponse = dpiKvitteringService.hentForsendelse(finnForsendelseResponse);
-		PersisterForsendelseRequestTo persisterForsendelseRequestTo = mapper.map(hentForsendelseResponse, bestillingId);
+		OpprettForsendelseRequestTo opprettForsendelseRequestTo = mapper.map(hentForsendelseResponse, bestillingId);
 		ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 
 		validateForsendelseStatusErKlarForDist(forsendelseStatus);
 
 		if (isOversendtOrBekreftet(forsendelseStatus)) {
-			distribuerTilKanal = dpiKvitteringService.persistAndCreateNewForsendelse(dpiMelding, persisterForsendelseRequestTo, finnForsendelseResponse.getForsendelseId());
+			distribuerTilKanal = dpiKvitteringService.persistAndCreateNewForsendelse(dpiMelding, opprettForsendelseRequestTo, finnForsendelseResponse.getForsendelseId());
 			exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
 		}
 		return distribuerTilKanal;

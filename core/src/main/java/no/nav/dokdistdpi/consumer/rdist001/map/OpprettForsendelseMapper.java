@@ -1,7 +1,7 @@
 package no.nav.dokdistdpi.consumer.rdist001.map;
 
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
-import no.nav.dokdistdpi.consumer.rdist001.domain.PersisterForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -11,19 +11,19 @@ import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotNull;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
-public class PersisterForsendelseMapper {
+public class OpprettForsendelseMapper {
 	private static final String DISTRIBUSJON_KANAL_PRINT = "PRINT";
 	private static final String DOKUMENTTYPE_ID = "U000001";
 	private static final String HOVEDDOKUMENT = "HOVEDDOKUMENT";
 
-	public PersisterForsendelseRequestTo map(HentForsendelseResponse hentForsendelseResponse, String bestillingsId) {
+	public OpprettForsendelseRequestTo map(HentForsendelseResponse hentForsendelseResponse, String bestillingsId) {
 		assertNotBlank("bestillingsId", bestillingsId);
 		if (hentForsendelseResponse == null) {
 			throw new IllegalArgumentException("HentForsendelseResponseTo kan ikke være null");
 		}
 		assertThatAllRequiredFieldsArePresent(hentForsendelseResponse);
 		AtomicReference<Integer> rekkefolge = new AtomicReference<>(2);
-		return PersisterForsendelseRequestTo.builder()
+		return OpprettForsendelseRequestTo.builder()
 				.bestillingsId(bestillingsId)
 				.distribusjonsKanal(DISTRIBUSJON_KANAL_PRINT)
 				.tema(hentForsendelseResponse.getTema())
@@ -40,7 +40,7 @@ public class PersisterForsendelseMapper {
 							if (isHoveddokument(dokumentTo.getTilknyttetSom())) {
 								return mapDokument(dokumentTo, 1);
 							} else {
-								PersisterForsendelseRequestTo.DokumentTo dok = mapDokument(dokumentTo, rekkefolge.get());
+								OpprettForsendelseRequestTo.DokumentTo dok = mapDokument(dokumentTo, rekkefolge.get());
 								rekkefolge.getAndSet(rekkefolge.get() + 1);
 								return dok;
 							}
@@ -49,8 +49,8 @@ public class PersisterForsendelseMapper {
 				.build();
 	}
 
-	private PersisterForsendelseRequestTo.DokumentTo mapDokument(HentForsendelseResponse.DokumentTo dokumentTo, Integer rekkefolge) {
-		return PersisterForsendelseRequestTo.DokumentTo.builder()
+	private OpprettForsendelseRequestTo.DokumentTo mapDokument(HentForsendelseResponse.DokumentTo dokumentTo, Integer rekkefolge) {
+		return OpprettForsendelseRequestTo.DokumentTo.builder()
 				.tilknyttetSom(dokumentTo.getTilknyttetSom())
 				.dokumentObjektReferanse(dokumentTo.getDokumentObjektReferanse())
 				.arkivDokumentInfoId(dokumentTo.getArkivDokumentInfoId())
@@ -59,8 +59,8 @@ public class PersisterForsendelseMapper {
 				.build();
 	}
 
-	private PersisterForsendelseRequestTo.PostadresseTo mapPostadresse(HentForsendelseResponse.PostadresseTo postadresseTo) {
-		return isEmpty(postadresseTo) ? null : PersisterForsendelseRequestTo.PostadresseTo.builder()
+	private OpprettForsendelseRequestTo.PostadresseTo mapPostadresse(HentForsendelseResponse.PostadresseTo postadresseTo) {
+		return isEmpty(postadresseTo) ? null : OpprettForsendelseRequestTo.PostadresseTo.builder()
 				.adresselinje1(postadresseTo.getAdresselinje1())
 				.adresselinje2(postadresseTo.getAdresselinje2())
 				.adresselinje3(postadresseTo.getAdresselinje3())
@@ -70,16 +70,16 @@ public class PersisterForsendelseMapper {
 				.build();
 	}
 
-	private PersisterForsendelseRequestTo.ArkivInformasjonTo mapArkivInformasjonTo(HentForsendelseResponse.ArkivInformasjonTo arkivInformasjonTo) {
-		return PersisterForsendelseRequestTo.ArkivInformasjonTo.builder()
+	private OpprettForsendelseRequestTo.ArkivInformasjonTo mapArkivInformasjonTo(HentForsendelseResponse.ArkivInformasjonTo arkivInformasjonTo) {
+		return OpprettForsendelseRequestTo.ArkivInformasjonTo.builder()
 				.arkivSystem(arkivInformasjonTo.getArkivSystem())
 				.arkivId(arkivInformasjonTo.getArkivId())
 				.build();
 	}
 
-	private PersisterForsendelseRequestTo.MottakerTo mapMottakerTo(HentForsendelseResponse.MottakerTo mottakerTo) {
+	private OpprettForsendelseRequestTo.MottakerTo mapMottakerTo(HentForsendelseResponse.MottakerTo mottakerTo) {
 		assertNotNull("Mottaker", mottakerTo);
-		return PersisterForsendelseRequestTo.MottakerTo.builder()
+		return OpprettForsendelseRequestTo.MottakerTo.builder()
 				.mottakerId(mottakerTo.getMottakerId())
 				.mottakerNavn(mottakerTo.getMottakerNavn())
 				.mottakerType(mottakerTo.getMottakerType())
