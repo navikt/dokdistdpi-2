@@ -11,7 +11,6 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseResponseTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AdminstrerForsendelseTechnicalException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -55,7 +53,6 @@ public class DokdistadminConsumer {
 	}
 
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {"process", "opprettForsendelse"}, histogram = true)
 	public String opprettForsendelse(final OpprettForsendelseRequestTo opprettForsendelseRequest) {
 		var bestillingsId = opprettForsendelseRequest.getBestillingsId();
 
