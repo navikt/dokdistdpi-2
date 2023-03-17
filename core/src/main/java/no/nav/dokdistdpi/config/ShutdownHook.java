@@ -2,7 +2,6 @@ package no.nav.dokdistdpi.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.jms.pool.PooledConnectionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -15,8 +14,11 @@ import javax.jms.ConnectionFactory;
 @Component
 public class ShutdownHook {
 
-	@Autowired
-	private ConnectionFactory connectionFactory;
+	private final ConnectionFactory connectionFactory;
+
+	public ShutdownHook(ConnectionFactory connectionFactory) {
+		this.connectionFactory = connectionFactory;
+	}
 
 	@PreDestroy
 	public void destroy() {

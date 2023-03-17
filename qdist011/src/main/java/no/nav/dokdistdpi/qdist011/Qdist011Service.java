@@ -51,7 +51,6 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_OPPR
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_DISTRIBUSJONS_TYPE;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG_TITTEL_PREFIX;
@@ -59,9 +58,6 @@ import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-/**
- * @author Tsigab A. Gebremedhin, NAV
- */
 @Slf4j
 @Component
 public class Qdist011Service {

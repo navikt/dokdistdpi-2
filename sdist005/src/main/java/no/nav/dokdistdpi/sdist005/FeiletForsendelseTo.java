@@ -7,8 +7,6 @@ import java.time.LocalDateTime;
 
 /**
  * Holder referanse til en forsendelse og status fra DPI
- *
- * @author Joakim Bjørnstad, Jbit AS
  */
 @Value
 @Builder

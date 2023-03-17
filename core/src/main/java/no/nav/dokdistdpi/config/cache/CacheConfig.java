@@ -11,7 +11,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Configuration
 @EnableCaching
@@ -32,20 +35,20 @@ public class CacheConfig {
 		SimpleCacheManager manager = new SimpleCacheManager();
 		manager.setCaches(Arrays.asList(
 				new CaffeineCache(TKAT020_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(1, TimeUnit.DAYS)
-						.build()),
+						.expireAfterWrite(1, DAYS).build()),
 				new CaffeineCache(TKAT021_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(1, TimeUnit.DAYS).build()),
+						.expireAfterWrite(1, DAYS).build()),
 				new CaffeineCache(STS_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(55, TimeUnit.MINUTES).build()),
+						.expireAfterWrite(55, MINUTES).build()),
 				new CaffeineCache(LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(30, TimeUnit.SECONDS).build()),
+						.expireAfterWrite(30, SECONDS).build()),
 				new CaffeineCache(SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(30, TimeUnit.SECONDS).build()),
+						.expireAfterWrite(30, SECONDS).build()),
 				new CaffeineCache(MASKINPORTEN_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(120, TimeUnit.SECONDS).build()),
+						.expireAfterWrite(120, SECONDS).build()),
 				new CaffeineCache(AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(50, TimeUnit.MINUTES).maximumSize(2).build())
+						.expireAfterWrite(50, MINUTES)
+						.maximumSize(2).build())
 		));
 		return manager;
 	}

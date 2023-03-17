@@ -6,11 +6,6 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotEmpty;
 
-/**
- * Konfigurasjon for Google Cloud Storage bucket
- *
- * @author Joakim Bjørnstad, Jbit AS
- */
 @Data
 @ConfigurationProperties("dokdistmellomlager")
 @Validated

@@ -11,7 +11,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiUtils.setOrGenerateCallIdToMdc;
 public class MDCHeaderProcessor implements Processor {
 
 	@Override
-	public void process(Exchange exchange) throws Exception {
+	public void process(Exchange exchange) {
 		setOrGenerateCallIdToMdc(exchange);
 		setForsendelseIdAsProperty(exchange);
 		setConsumerIdToMdc(exchange);

@@ -30,9 +30,6 @@ import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.WARN;
 import static org.apache.camel.support.builder.PredicateBuilder.or;
 
-/**
- * @author Tsigab A. Gebremedhin, NAV
- */
 @Component
 public class Qdist011Route extends RouteBuilder {
 

@@ -74,6 +74,7 @@
 			<groupId>no.nav.dokkat</groupId>
 			<artifactId>dokkat-schemas</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-storage</artifactId>
