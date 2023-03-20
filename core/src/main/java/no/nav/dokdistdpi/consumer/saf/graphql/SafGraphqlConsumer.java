@@ -10,14 +10,12 @@ import no.nav.dokdistdpi.exception.functional.SafJournalpostIkkeFunnetException;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SafJournalpostQueryTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SafJournalpostQueryUnauthorizedException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -32,6 +30,7 @@ import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @Component
@@ -52,7 +51,6 @@ public class SafGraphqlConsumer {
 		this.stsConsumer = stsConsumer;
 	}
 
-	@Monitor(value = "dok_consumer", extraTags = {"process", "safJournalpostquery"}, histogram = true)
 	@Retryable(include = SafJournalpostQueryTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public SafJournalpostResponse performQuery(GraphQLRequest graphQLRequest) {
 		try {
@@ -75,7 +73,7 @@ public class SafGraphqlConsumer {
 
 	private HttpHeaders createAuthorizationHeader() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setContentType(APPLICATION_JSON);
 		headers.setBearerAuth(stsConsumer.getStsOidcToken());
 		return headers;
 	}

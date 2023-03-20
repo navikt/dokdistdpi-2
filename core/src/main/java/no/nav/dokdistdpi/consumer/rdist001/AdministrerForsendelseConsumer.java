@@ -10,7 +10,6 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.AdminstrerForsendelseTechnicalException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,9 +29,7 @@ import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -40,9 +37,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Slf4j
 @Component
 public class AdministrerForsendelseConsumer {
-	private static final String ERROR_MESSAGE = "Rdist001 feilet til å opprette forsendelse med bestillingsId={}, feilmelding={}";
-	private static final String EXCEPTION_MESSAGE = "Kall mot rdist001 - feilet til å opprette forsendelse med bestillingsId=%s, feilmelding=%s";
-	private static final String FORSENDELSE_ID = "forsendelseId";
 	private final String url;
 	private final RestTemplate restTemplate;
 
@@ -58,7 +52,6 @@ public class AdministrerForsendelseConsumer {
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "hentIdent"}, percentiles = {0.5, 0.95}, histogram = true)
 	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
 		try {
 			HttpEntity<?> httpEntity = new HttpEntity<>(createHeaders());
@@ -74,7 +67,6 @@ public class AdministrerForsendelseConsumer {
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {"process", "oppdaterForsendelseAndDigitalPostkasseInfo"}, histogram = true)
 	public void oppdaterForsendelseAndDigitalPostkasseInfo(OppdaterForsendelseRequestTo digitalPostAdresseRequestTo) {
 		String uri = UriComponentsBuilder.fromHttpUrl(url)
 				.path("/oppdaterdigitalinfo")
@@ -85,7 +77,6 @@ public class AdministrerForsendelseConsumer {
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {"process", "finnForsendelse"}, histogram = true)
 	public FinnForsendelseResponseTo finnForsendelse(final FinnForsendelseRequestTo finnForsendelseRequestTo) {
 		String uri = UriComponentsBuilder.fromHttpUrl(url)
 				.path("/finnforsendelse")
@@ -108,7 +99,6 @@ public class AdministrerForsendelseConsumer {
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {"process", "feilRegistrerForsendelse"}, histogram = true)
 	public void feilRegistrerForsendelse(FeilRegistrerForsendelseRequest feilRegistrerForsendelse) {
 
 		try {

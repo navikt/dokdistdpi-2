@@ -5,7 +5,6 @@ import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.exception.functional.LagreJuridiskLoggFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.LagreJuridiskLoggTechnicalException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -23,8 +22,6 @@ import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -46,7 +43,6 @@ public class JuridiskLoggConsumer {
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "lagreJuridiskLogg"}, histogram = true)
 	public LoggMeldingResponse lagreJuridiskLogg(final LoggMeldingRequest loggMeldingRequest) {
 		try {
 			HttpEntity<LoggMeldingRequest> meldingRequestHttpEntity = new HttpEntity<>(loggMeldingRequest, createHeaders());

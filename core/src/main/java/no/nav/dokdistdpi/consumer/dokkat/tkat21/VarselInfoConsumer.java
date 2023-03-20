@@ -5,7 +5,6 @@ import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.exception.functional.Tkat021FunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.Tkat021TechnicalException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import no.nav.dokkat.schemas.tkat021.VarselInfoRestTo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,8 +27,6 @@ import static java.time.Duration.ofSeconds;
 import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROCESS;
 
 @Slf4j
 @Component
@@ -52,7 +49,6 @@ public class VarselInfoConsumer implements VarselInfo {
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {PROCESS, "getVarselInfo"}, histogram = true)
 	public VarselInfoTo getVarselInfo(String varselTypeId) {
 		try {
 			VarselInfoRestTo response = restTemplate.getForObject(this.varselInfoUrl + "/" + varselTypeId, VarselInfoRestTo.class);

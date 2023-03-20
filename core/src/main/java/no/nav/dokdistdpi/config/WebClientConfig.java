@@ -13,7 +13,8 @@ public class WebClientConfig {
 
 	@Bean
 	public WebClient webClient(WebClient.Builder webClientBuilder) {
-		HttpClient httpClient = HttpClient.create().responseTimeout(ofSeconds(20))
+		HttpClient httpClient = HttpClient.create()
+				.responseTimeout(ofSeconds(20))
 				.proxyWithSystemProperties();
 		return webClientBuilder
 				.clone()

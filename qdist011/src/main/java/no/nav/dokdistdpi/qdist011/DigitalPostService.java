@@ -31,10 +31,6 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-/**
- * @author Tsigab A. Gebremedhin, NAV
- */
-
 @Component
 @Slf4j
 public class DigitalPostService {

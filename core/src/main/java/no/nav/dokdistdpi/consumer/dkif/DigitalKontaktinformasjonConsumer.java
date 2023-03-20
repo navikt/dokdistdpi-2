@@ -5,14 +5,12 @@ import no.nav.dokdistdpi.azure.TokenConsumer;
 import no.nav.dokdistdpi.exception.functional.DigitalKontaktinformasjonFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.DigitalKontaktinformasjonTechnicalException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -30,6 +28,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @Component
@@ -40,7 +39,6 @@ public class DigitalKontaktinformasjonConsumer {
 	private final RestTemplate restTemplate;
 	private final String dkiUrl;
 	private final String dkiScope;
-	private static final String BEARER_PREFIX = "Bearer ";
 
 	@Autowired
 	public DigitalKontaktinformasjonConsumer(@Value("${digdir_krr_proxy_url}") String dkiUrl,
@@ -58,7 +56,6 @@ public class DigitalKontaktinformasjonConsumer {
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = "dok_consumer", extraTags = {"process", "hentSikkerDigitalPostadresse"}, percentiles = {0.5, 0.95}, histogram = true)
 	public SikkerDigitalKontaktInfo hentSikkerDigitalPostadresse(final String personidentifikator) {
 		HttpHeaders headers = createHeaders();
 		final String fnrTrimmed = personidentifikator.strip();
@@ -99,8 +96,8 @@ public class DigitalKontaktinformasjonConsumer {
 	private HttpHeaders createHeaders() {
 		String clientCredentialToken = tokenConsumer.getClientCredentialToken(dkiScope);
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + clientCredentialToken);
+		headers.setContentType(APPLICATION_JSON);
+		headers.setBearerAuth(clientCredentialToken);
 		headers.add(NAV_CONSUMER_ID, APP_NAME);
 		headers.add(NAV_CALL_ID, MDC.get(NAV_CALLID));
 		return headers;

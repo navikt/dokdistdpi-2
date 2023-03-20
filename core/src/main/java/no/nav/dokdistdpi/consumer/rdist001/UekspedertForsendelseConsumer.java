@@ -6,7 +6,6 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.AvstemForsendelseResponseTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.AdminstrerForsendelseTechnicalException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +30,6 @@ import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DOK_REQUEST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -42,7 +40,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Slf4j
 @Component
 public class UekspedertForsendelseConsumer {
-	private static final String FORSENDELSE_ID = "forsendelseId";
 	private final String url;
 	private final RestTemplate restTemplate;
 
@@ -58,7 +55,6 @@ public class UekspedertForsendelseConsumer {
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	@Monitor(value = DOK_REQUEST, extraTags = {"process", "hentForsendelserKvitteringIkkeMottatt"}, histogram = true)
 	public List<AvstemForsendelseResponseTo> hentForsendelserKvitteringIkkeMottatt(String distribusjonKanal, int antallTimer) {
 		try {
 			HttpHeaders httpHeaders = createHeaders();

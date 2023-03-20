@@ -8,11 +8,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
 
-/**
- * Konfigurasjon for appen. Endres i vault
- *
- * @author Joakim Bjørnstad, Jbit AS
- */
 @Data
 @ConfigurationProperties("dokdistdpi")
 @Validated

@@ -14,7 +14,7 @@ public class NavHeadersFilter implements ExchangeFilterFunction {
 	@Override
 	public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
 
-		if(MDC.get(NAV_CALLID) != null) {
+		if (MDC.get(NAV_CALLID) != null) {
 			return next.exchange(ClientRequest.from(request).headers((headers) -> headers.set(NAV_CALLID, MDC.get(NAV_CALLID))).build());
 		}
 		return next.exchange(request);

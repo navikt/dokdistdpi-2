@@ -7,7 +7,6 @@ import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.consumer.dpi.GenerateJwt;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.exception.technical.MaskinportenTechnicalException;
-import no.nav.dokdistdpi.metrics.Monitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
@@ -66,7 +65,6 @@ public class MaskinportenTokenConsumer {
 	}
 
 	@Cacheable(MASKINPORTEN_CACHE)
-	@Monitor(value = "dok_consumer", extraTags = {"process", "maskinporten_fetchtoken"}, percentiles = {0.5, 0.95}, histogram = true)
 	public OidcTokenResponse fetchToken() {
 		URI accessTokenUri;
 		try {
@@ -85,7 +83,6 @@ public class MaskinportenTokenConsumer {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(APPLICATION_FORM_URLENCODED);
 		HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(attrMap, headers);
-
 
 		try {
 			log.info("Henter accessToken fra maskinporten på url={}", maskinportenUrl);
