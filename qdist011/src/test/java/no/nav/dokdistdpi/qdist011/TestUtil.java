@@ -7,6 +7,8 @@ import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokument;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -32,7 +34,6 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.SMS;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG;
 
 public final class TestUtil {
-
 
 	public static final String HOVED_DOKUMENT_INFO_ID = "1";
 	public static final String HOVED_DOKUMENT_REF = "ref-1";
@@ -131,18 +132,18 @@ public final class TestUtil {
 		return buildHentForsendelseResponseWithDokument(null);
 	}
 
-	public static HentForsendelseResponse.MottakerTo createMottakerTo() {
-		return HentForsendelseResponse.MottakerTo.builder()
+	public static Mottaker createMottakerTo() {
+		return Mottaker.builder()
 				.mottakerId(MOTTAKER_FNR)
 				.mottakerNavn(MOTTAKER_TYPE)
 				.mottakerType(MOTTAKER_TYPE)
 				.build();
 	}
 
-	public static List<HentForsendelseResponse.DokumentTo> buildHovedDokumentWithVedlegg() {
-		List<HentForsendelseResponse.DokumentTo> dokumenter = new ArrayList<>();
+	public static List<Dokument> buildHovedDokumentWithVedlegg() {
+		List<Dokument> dokumenter = new ArrayList<>();
 		dokumenter.add(
-				HentForsendelseResponse.DokumentTo.builder()
+				Dokument.builder()
 						.tilknyttetSom(HOVEDDOKUMENT)
 						.arkivDokumentInfoId(HOVED_DOKUMENT_INFO_ID)
 						.dokumentObjektReferanse(HOVED_DOKUMENT_REF)
@@ -150,14 +151,14 @@ public final class TestUtil {
 						.build()
 		);
 		dokumenter.add(
-				HentForsendelseResponse.DokumentTo.builder()
+				Dokument.builder()
 						.tilknyttetSom(VEDLEGG)
 						.arkivDokumentInfoId(VEDLEGG_1_DOKUMENT_INFO_ID)
 						.dokumentObjektReferanse(VEDLEGG_1_DOKUMENT_REF)
 						.build()
 		);
 		dokumenter.add(
-				HentForsendelseResponse.DokumentTo.builder()
+				Dokument.builder()
 						.tilknyttetSom(VEDLEGG)
 						.arkivDokumentInfoId(VEDLEGG_2_DOKUMENT_INFO_ID)
 						.dokumentObjektReferanse(VEDLEGG_2_DOKUMENT_REF)

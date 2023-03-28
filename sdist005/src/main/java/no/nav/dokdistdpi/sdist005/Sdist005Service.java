@@ -17,7 +17,6 @@ import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -42,7 +41,6 @@ public class Sdist005Service {
 	private final DpiClient dpiClient;
 	private final OpprettForsendelseMapper opprettForsendelseMapper;
 
-	@Autowired
 	public Sdist005Service(AdministrerForsendelseConsumer administrerForsendelseConsumer,
 						   UekspedertForsendelseConsumer uekspedertForsendelseConsumer,
 						   DokdistadminConsumer dokdistadminConsumer,
@@ -83,7 +81,7 @@ public class Sdist005Service {
 	private String behandleFeiletForsendelse(FeiletForsendelseTo feiletForsendelse) {
 		log.info("Sdist005 behandler feilet forsendelse med forsendelseId={}, bestillingsId={} som har endelig status FAILED fra hjørne2",
 				feiletForsendelse.getForsendelseId(), feiletForsendelse.getBestillingsId());
-		HentForsendelseResponse hentForsendelseResponse = administrerForsendelseConsumer.hentForsendelse(feiletForsendelse.getForsendelseId());
+		HentForsendelseResponse hentForsendelseResponse = dokdistadminConsumer.hentForsendelse(feiletForsendelse.getForsendelseId());
 		final String bestillingsId = randomUUID().toString();
 
 		OpprettForsendelseRequestTo opprettForsendelseRequestTo = opprettForsendelseMapper.map(hentForsendelseResponse, bestillingsId);

@@ -4,18 +4,14 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.jms.Queue;
 import javax.xml.bind.JAXBElement;
@@ -42,7 +38,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@ExtendWith(SpringExtension.class)
 @EnableAutoConfiguration
 @SpringBootTest(classes = {ApplicationTestConfig.class},
 		webEnvironment = RANDOM_PORT)
@@ -52,6 +47,9 @@ public class Sdist005IT {
 
 	private static final String KONVERSASJON_ID = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
 	private static final String FORSENDELSE_ID = "5265784";
+
+	private static final String OPPRETTFORSENDELSE_URL = "/rest/v1/administrerforsendelse";
+	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/" + FORSENDELSE_ID;
 
 	@Value("${leder.host}")
 	private String lederHost;
@@ -82,7 +80,7 @@ public class Sdist005IT {
 		stubPostMaskinporten();
 		stubHentUekspedertForsendelse();
 		stubHentForsendelseStatus(KONVERSASJON_ID);
-		stubHentForsendelse(FORSENDELSE_ID);
+		stubHentForsendelse();
 		stubPostOpprettForsendelse();
 		stubPutFeilregistrerforsendelse();
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
@@ -98,61 +96,62 @@ public class Sdist005IT {
 
 	private void stubPostMaskinporten() {
 		stubFor(post(urlMatching("/maskinporten"))
-				.willReturn(aResponse().withStatus(OK.value())
+				.willReturn(aResponse()
+						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("maskinporten/maskinporten_happy_response.json")));
 	}
 
 	private void stubPutOppdaterDigitalLeverandoerAndPostkasseadresse() {
 		stubFor(put(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo"))
-				.willReturn(aResponse().withStatus(OK.value())));
+				.willReturn(aResponse()
+						.withStatus(OK.value())));
 	}
 
 	private void stubHentUekspedertForsendelse() {
 		stubFor(get(urlMatching("/administrerforsendelse/henteuekspederforsendelse/SDP/6"))
-				.willReturn(aResponse().withStatus(OK.value())
+				.willReturn(aResponse()
+						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("rdist001/henteuekspedertforsendelse-dpi.json")));
 	}
 
 	private void stubHentForsendelseStatus(String bestillingsId) {
 		stubFor(get(urlMatching("/message/out/" + bestillingsId + "/statuses"))
-				.willReturn(aResponse().withStatus(OK.value())
+				.willReturn(aResponse()
+						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("dpi/status-feilet.json")));
 	}
 
-	private void stubHentForsendelse(String forsendelseId) {
-		stubFor(get(urlMatching("/administrerforsendelse/" + forsendelseId))
-				.willReturn(aResponse().withStatus(OK.value())
+	private void stubHentForsendelse() {
+		stubFor(get(urlMatching(HENTFORSENDELSE_URL))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("rdist001/hentForsendelseresponse-happy.json")));
 	}
 
 	private void stubPostOpprettForsendelse() {
-		stubFor(post(urlEqualTo("/rest/administrerforsendelse"))
+		stubFor(post(urlEqualTo(OPPRETTFORSENDELSE_URL))
 				.willReturn(aResponse()
-						.withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("rdist001/opprettForsendelseResponse-happy.json")));
 	}
 
 	private void stubPutFeilregistrerforsendelse() {
 		stubFor(put("/administrerforsendelse/feilregistrerforsendelse")
-				.willReturn(aResponse().withStatus(OK.value())));
+				.willReturn(aResponse()
+						.withStatus(OK.value())));
 	}
 
 	void stubAzure() {
 		stubFor(post("/azure_token")
 				.willReturn(aResponse()
 						.withStatus(OK.value())
-						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("azure/token_response.json")));
-	}
-
-	private void stubPutOppdaterForsendelse(String forsendelseStatus, String forsendelseId) {
-		stubFor(put("/administrerforsendelse?forsendelseId=" + forsendelseId + "&forsendelseStatus=" + forsendelseStatus)
-				.willReturn(aResponse().withStatus(OK.value())));
 	}
 
 	@SuppressWarnings("unchecked")

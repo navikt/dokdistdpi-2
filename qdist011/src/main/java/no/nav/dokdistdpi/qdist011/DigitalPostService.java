@@ -15,10 +15,10 @@ import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.exception.functional.Tkat020FunctionalException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -41,7 +41,6 @@ public class DigitalPostService {
 	private final DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator;
 	private final Dokumentkatalog dokumentkatalog;
 
-	@Autowired
 	public DigitalPostService(MaskinportenTokenConsumer maskinportenTokenConsumer, DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator,
 							  DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer, VarselInfo varselInfo,
 							  Dokumentkatalog dokumentkatalog) {
@@ -81,6 +80,7 @@ public class DigitalPostService {
 		if (Objects.isNull(varselInfoTo)) {
 			return null;
 		}
+
 		String varslingstekst = determineVarslingstekst(distribusjonsType);
 		return Varsler.builder()
 				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
@@ -92,6 +92,7 @@ public class DigitalPostService {
 		if (isBlank(digitalKontaktInfo.getMobiltelefonnummer())) {
 			return null;
 		}
+
 		return SmsVarsel.builder()
 				.mobiltelefonnummer(digitalKontaktInfo.getMobiltelefonnummer())
 				.varslingstekst(varslingstekst)
@@ -103,6 +104,7 @@ public class DigitalPostService {
 		if (isBlank(digitalKontaktInfo.getEpostadresse())) {
 			return null;
 		}
+
 		return EpostVarsel.builder()
 				.epostadresse(digitalKontaktInfo.getEpostadresse())
 				.varslingstekst(varslingstekst)
@@ -114,7 +116,8 @@ public class DigitalPostService {
 		if (isNull(hentMottakerResponse) && isNull(hentMottakerResponse.getMottaker())) {
 			throw new AdminstrerForsendelseFunctionalException("Mottaker kan ikke være null");
 		}
-		HentForsendelseResponse.MottakerTo mottakerTo = hentMottakerResponse.getMottaker();
-		return requireNonNull(mottakerTo.getMottakerId(), "MottakerId kan ikke være null");
+
+		Mottaker mottaker = hentMottakerResponse.getMottaker();
+		return requireNonNull(mottaker.getMottakerId(), "MottakerId kan ikke være null");
 	}
 }

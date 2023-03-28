@@ -1,24 +1,19 @@
 package no.nav.dokdistdpi.qdist014.itest;
 
-import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import no.nav.dokdistdpi.qdist014.itest.config.ApplicationTestConfig;
 import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.jms.Queue;
 import javax.jms.TextMessage;
@@ -28,12 +23,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.listAllStubMappings;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
@@ -42,7 +35,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
@@ -50,10 +45,11 @@ import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@ExtendWith(SpringExtension.class)
 @EnableAutoConfiguration
 @SpringBootTest(classes = {ApplicationTestConfig.class},
 		webEnvironment = RANDOM_PORT)
@@ -67,6 +63,8 @@ public class Qdist014IT {
 	private static final String BESTILLING_ID = "ff88849c-e281-4809-8555-7cd54952b916";
 	private static final String KONVERSASJON_ID_VAR = "2049057a-9b53-41bb-9cc3-d10f55fa0f87";
 	private static String CALL_ID;
+
+	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/%s";
 
 	@Autowired
 	private CacheManager cacheManager;
@@ -110,10 +108,9 @@ public class Qdist014IT {
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/leveringskvittering.json"));
 
-		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
-			verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+			verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
 		});
 	}
@@ -128,8 +125,8 @@ public class Qdist014IT {
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
-		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
 		});
@@ -146,8 +143,7 @@ public class Qdist014IT {
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/feilkvittering.json"));
 
-		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
 		});
@@ -164,13 +160,12 @@ public class Qdist014IT {
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
 
-		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
 		});
-		verifyAndCountDpiForsendelse(1, KONVERSASJON_ID);
 
+		verifyAndCountDpiForsendelse(1, KONVERSASJON_ID);
 	}
 
 	@Test
@@ -183,11 +178,11 @@ public class Qdist014IT {
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
-		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
 		});
+
 		verifyAndCountDpiForsendelse(1, KONVERSASJON_ID);
 	}
 
@@ -201,15 +196,14 @@ public class Qdist014IT {
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/leveringskvittering.json"));
-		ListStubMappingsResult stubs = listAllStubMappings();
 
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(qdist014FunksjonellFeil);
 			assertNotNull(response);
 		});
 
 		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
-		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 
 	}
 
@@ -223,16 +217,15 @@ public class Qdist014IT {
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
-		ListStubMappingsResult stubs = listAllStubMappings();
 
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
-			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+			verify(1, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 		});
 	}
 
 	@Test
-	void shouldThrowsFunctionlaExceptionWhenFinnForsendelseReturnsNull() throws IOException {
+	void shouldThrowFunctionalExceptionWhenFinnForsendelseReturnsNull() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-feil.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", null, OK.value());
 		//Oversendt og bekreftet er gyldig status.
@@ -242,38 +235,37 @@ public class Qdist014IT {
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
 
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(qdist014FunksjonellFeil);
 			assertNotNull(response);
 
 		});
+
 		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
 	}
 
 	@Test
-	void throwsTechnicalExceptionWhenServerErrorHappens() throws IOException {
+	void shouldThrowTechnicalExceptionWhenServerErrorHappens() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
-		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", HttpStatus.INTERNAL_SERVER_ERROR.value());
+		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", INTERNAL_SERVER_ERROR.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
-		ListStubMappingsResult stubs = listAllStubMappings();
 
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(backoutQueue);
 			assertNotNull(response);
 		});
 
 		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
-		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
+		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 	}
 
-
 	@Test
-	void throwsFunctionalExceptionWhenKvitteringenErNeitherSDPKvitteringNorSDPFeil() throws IOException {
+	void shouldThrowFunctionalExceptionWhenKvitteringenErNeitherSDPKvitteringNorSDPFeil() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
@@ -283,15 +275,14 @@ public class Qdist014IT {
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/non-kvittering.json"));
 
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(backoutQueue);
 			assertNotNull(response);
 		});
 	}
 
-
 	@Test
-	void throwsFunctionalExceptionWhenKvitteringenBodyErNull() throws IOException {
+	void shouldThrowFunctionalExceptionWhenKvitteringenBodyErNull() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID_VAR, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt og bekreftet er gyldig status.
@@ -301,11 +292,10 @@ public class Qdist014IT {
 
 		sendStringMessage(qdist014, null);
 
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			//TextMessage response = receiveTextMessage(qdist014FunksjonellFeil);
 			//assertNotNull(response);
 		});
-
 	}
 
 	@Test
@@ -316,7 +306,7 @@ public class Qdist014IT {
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
 
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(qdist014FunksjonellFeil);
 			assertNotNull(response);
 		});
@@ -324,39 +314,44 @@ public class Qdist014IT {
 
 	private void verifyAndCountDpiForsendelse(int count, String konversasjonsId) {
 		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + konversasjonsId)));
-		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/" + FORSENDELSE_ID)));
-		verify(count, postRequestedFor(urlMatching("/rest/administrerforsendelse")));
+		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
+		verify(count, postRequestedFor(urlMatching("/rest/v1/administrerforsendelse")));
 		verify(count, putRequestedFor(urlMatching("/administrerforsendelse/feilregistrerforsendelse")));
 		verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
 	}
 
 	private void stubPutOppdaterDigitalLeverandoerAndPostkasseadresse() {
 		stubFor(put(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo"))
-				.willReturn(aResponse().withStatus(OK.value())));
+				.willReturn(aResponse()
+						.withStatus(OK.value())));
 	}
 
 	private void stubGetHentForsendelse(String responsebody, String forsendelseId, int httpStatusvalue) throws IOException {
-		stubFor(get("/administrerforsendelse/" + forsendelseId).willReturn(aResponse().withStatus(httpStatusvalue)
-				.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
-				.withBody(classpathToString(responsebody))));
+		stubFor(get(format(HENTFORSENDELSE_URL, forsendelseId))
+				.willReturn(aResponse()
+						.withStatus(httpStatusvalue)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody(classpathToString(responsebody))));
 	}
 
 	private void stubPutFeilregistrerforsendelse(int httpStatusValue) {
 		stubFor(put("/administrerforsendelse/feilregistrerforsendelse")
-				.willReturn(aResponse().withStatus(httpStatusValue)));
+				.willReturn(aResponse()
+						.withStatus(httpStatusValue)));
 	}
 
 	void stubGetFinnForsendelse(String responseBody, String konversasjonsId, int httpStatusValue) throws IOException {
 		stubFor(get("/administrerforsendelse/finnforsendelse?konversasjonsId=" + konversasjonsId)
-				.willReturn(aResponse().withStatus(httpStatusValue)
-						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+				.willReturn(aResponse()
+						.withStatus(httpStatusValue)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString(responseBody))));
 	}
 
 	private void stubPostOpprettForsendelse(String responseBody, int httpStatusValue) {
-		stubFor(post(urlMatching("/rest/administrerforsendelse"))
+		stubFor(post(urlMatching("/rest/v1/administrerforsendelse"))
 				.willReturn(aResponse()
-						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withStatus(httpStatusValue)
 						.withBodyFile(responseBody)));
 	}
@@ -365,14 +360,13 @@ public class Qdist014IT {
 		stubFor(post("/azure_token")
 				.willReturn(aResponse()
 						.withStatus(OK.value())
-						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("azure/token_response.json")));
 	}
 
 	private static String classpathToString(String classpathResource) throws IOException {
 		InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
 		return IOUtils.toString(inputStream, UTF_8);
-
 	}
 
 	private void sendStringMessage(Queue queue, final String message) {

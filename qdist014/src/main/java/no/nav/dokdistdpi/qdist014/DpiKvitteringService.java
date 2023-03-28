@@ -114,7 +114,7 @@ public class DpiKvitteringService {
 	HentForsendelseResponse hentForsendelse(FinnForsendelseResponseTo finnForsendelseResponse) {
 		validateFinnForsendelse(finnForsendelseResponse);
 		log.info("Fant forsendelse med forsendelseId={}", finnForsendelseResponse.getForsendelseId());
-		return administrerForsendelse.hentForsendelse(finnForsendelseResponse.getForsendelseId());
+		return dokdistadminConsumer.hentForsendelse(finnForsendelseResponse.getForsendelseId());
 	}
 
 	FinnForsendelseResponseTo finnForsendelse(String konversasjonsId) {
