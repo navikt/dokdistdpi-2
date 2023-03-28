@@ -15,8 +15,10 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
+import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokument;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.kodeverk.DistribusjonstidspunktKode;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
@@ -65,6 +67,7 @@ public class Qdist011Service {
 
 	private final EncryptedBucketStorage encryptedBucketStorage;
 	private final AdministrerForsendelseConsumer administrerForsendelse;
+	private final DokdistadminConsumer dokdistadminConsumer;
 	private final SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService;
 	private final DigitalPostService digitalPostService;
 	private final LocalTime kjernetidStart;
@@ -74,12 +77,14 @@ public class Qdist011Service {
 	@Autowired
 	public Qdist011Service(EncryptedBucketStorage encryptedBucketStorage,
 						   AdministrerForsendelseConsumer administrerForsendelse,
+						   DokdistadminConsumer dokdistadminConsumer,
 						   DigitalPostService digitalPostService,
 						   @Qualifier("SafJournalpostQueryServiceQdist011") SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService,
 						   @Value("${kjernetidStart}") String kjernetidStart,
 						   @Value("${kjernetidSlutt}") String kjernetidSlutt) {
 		this.encryptedBucketStorage = encryptedBucketStorage;
 		this.administrerForsendelse = administrerForsendelse;
+		this.dokdistadminConsumer = dokdistadminConsumer;
 		this.safJournalpostQueryService = safJournalpostQueryService;
 		this.digitalPostService = digitalPostService;
 		this.kjernetidStart = LocalTime.parse(kjernetidStart);
@@ -90,7 +95,7 @@ public class Qdist011Service {
 	@Handler
 	public Forsendelse createForsendelse(DistribuerTilKanal distribuerTilKanal, Exchange exchange) {
 		validateDistribuerForsendelseTilDpi(distribuerTilKanal);
-		HentForsendelseResponse hentForsendelseResponse = administrerForsendelse.hentForsendelse(distribuerTilKanal.getForsendelseId());
+		HentForsendelseResponse hentForsendelseResponse = dokdistadminConsumer.hentForsendelse(distribuerTilKanal.getForsendelseId());
 		assertForsendelseNotNull(hentForsendelseResponse);
 		exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
 
@@ -191,7 +196,7 @@ public class Qdist011Service {
 				.build();
 	}
 
-	private DokDistDokumentFraBucket getDocumentFromBucket(HentForsendelseResponse.DokumentTo dokument, String bestillingsId) {
+	private DokDistDokumentFraBucket getDocumentFromBucket(Dokument dokument, String bestillingsId) {
 		String jsonPayload = encryptedBucketStorage.downloadObject(dokument.getDokumentObjektReferanse(), bestillingsId);
 		DokDistDokumentFraBucket dokDistDokumentFraBucket = deserializeBucketJsonPayloadToDokdistDokument(jsonPayload, dokument.getDokumentObjektReferanse());
 		dokDistDokumentFraBucket.setDokumentInfoId(dokument.getArkivDokumentInfoId());
@@ -203,7 +208,7 @@ public class Qdist011Service {
 		return hentForsendelseResponseTo.getDokumenter().stream()
 				.filter(dokumentTo -> HOVEDDOKUMENT.equals(dokumentTo.getTilknyttetSom()))
 				.findAny()
-				.map(HentForsendelseResponse.DokumentTo::getDokumentObjektReferanse)
+				.map(Dokument::getDokumentObjektReferanse)
 				.orElseThrow(() -> new KunneIkkeFinneDokumentException(
 						format("Kunne ikke finne hoveddokument for bestilling med bestillingsId=%s",
 								hentForsendelseResponseTo.getBestillingsId())))
@@ -211,12 +216,13 @@ public class Qdist011Service {
 	}
 
 	private String getVedleggTittel(JournalpostQdist011 journalpostQdist011,
-									HentForsendelseResponse.DokumentTo dokumentTo, int vedleggIdx) {
+									Dokument dokument,
+									int vedleggIdx) {
 		if (journalpostQdist011 == null) {
 			return VEDLEGG_TITTEL_PREFIX + vedleggIdx;
 		}
 
-		String arkivDokumentInfoId = dokumentTo.getArkivDokumentInfoId();
+		String arkivDokumentInfoId = dokument.getArkivDokumentInfoId();
 		return journalpostQdist011.getDokumenter().stream()
 				.filter(dokumentInfo -> dokumentInfo.getDokumentInfoId().equals(arkivDokumentInfoId))
 				.findAny()

@@ -49,40 +49,40 @@ public class OpprettForsendelseMapper {
 				.build();
 	}
 
-	private OpprettForsendelseRequestTo.DokumentTo mapDokument(HentForsendelseResponse.DokumentTo dokumentTo, Integer rekkefolge) {
+	private OpprettForsendelseRequestTo.DokumentTo mapDokument(HentForsendelseResponse.Dokument dokument, Integer rekkefolge) {
 		return OpprettForsendelseRequestTo.DokumentTo.builder()
-				.tilknyttetSom(dokumentTo.getTilknyttetSom())
-				.dokumentObjektReferanse(dokumentTo.getDokumentObjektReferanse())
-				.arkivDokumentInfoId(dokumentTo.getArkivDokumentInfoId())
+				.tilknyttetSom(dokument.getTilknyttetSom())
+				.dokumentObjektReferanse(dokument.getDokumentObjektReferanse())
+				.arkivDokumentInfoId(dokument.getArkivDokumentInfoId())
 				.rekkefolge(rekkefolge)
 				.dokumenttypeId(DOKUMENTTYPE_ID)
 				.build();
 	}
 
-	private OpprettForsendelseRequestTo.PostadresseTo mapPostadresse(HentForsendelseResponse.PostadresseTo postadresseTo) {
-		return isEmpty(postadresseTo) ? null : OpprettForsendelseRequestTo.PostadresseTo.builder()
-				.adresselinje1(postadresseTo.getAdresselinje1())
-				.adresselinje2(postadresseTo.getAdresselinje2())
-				.adresselinje3(postadresseTo.getAdresselinje3())
-				.postnummer(postadresseTo.getPostnummer())
-				.poststed(postadresseTo.getPoststed())
-				.landkode(postadresseTo.getLandkode())
+	private OpprettForsendelseRequestTo.PostadresseTo mapPostadresse(HentForsendelseResponse.Postadresse postadresse) {
+		return isEmpty(postadresse) ? null : OpprettForsendelseRequestTo.PostadresseTo.builder()
+				.adresselinje1(postadresse.getAdresselinje1())
+				.adresselinje2(postadresse.getAdresselinje2())
+				.adresselinje3(postadresse.getAdresselinje3())
+				.postnummer(postadresse.getPostnummer())
+				.poststed(postadresse.getPoststed())
+				.landkode(postadresse.getLandkode())
 				.build();
 	}
 
-	private OpprettForsendelseRequestTo.ArkivInformasjonTo mapArkivInformasjonTo(HentForsendelseResponse.ArkivInformasjonTo arkivInformasjonTo) {
+	private OpprettForsendelseRequestTo.ArkivInformasjonTo mapArkivInformasjonTo(HentForsendelseResponse.ArkivInformasjon arkivInformasjon) {
 		return OpprettForsendelseRequestTo.ArkivInformasjonTo.builder()
-				.arkivSystem(arkivInformasjonTo.getArkivSystem())
-				.arkivId(arkivInformasjonTo.getArkivId())
+				.arkivSystem(arkivInformasjon.getArkivSystem())
+				.arkivId(arkivInformasjon.getArkivId())
 				.build();
 	}
 
-	private OpprettForsendelseRequestTo.MottakerTo mapMottakerTo(HentForsendelseResponse.MottakerTo mottakerTo) {
-		assertNotNull("Mottaker", mottakerTo);
+	private OpprettForsendelseRequestTo.MottakerTo mapMottakerTo(HentForsendelseResponse.Mottaker mottaker) {
+		assertNotNull("Mottaker", mottaker);
 		return OpprettForsendelseRequestTo.MottakerTo.builder()
-				.mottakerId(mottakerTo.getMottakerId())
-				.mottakerNavn(mottakerTo.getMottakerNavn())
-				.mottakerType(mottakerTo.getMottakerType())
+				.mottakerId(mottaker.getMottakerId())
+				.mottakerNavn(mottaker.getMottakerNavn())
+				.mottakerType(mottaker.getMottakerType())
 				.build();
 	}
 
@@ -113,17 +113,17 @@ public class OpprettForsendelseMapper {
 
 	}
 
-	private void assertDokument(HentForsendelseResponse.DokumentTo dokumentTo, HentForsendelseResponse.ArkivInformasjonTo arkivInformasjonTo) {
-		assertNotNull("dokumenter.dokument.tilknyttetSom", dokumentTo.getTilknyttetSom());
-		assertNotNull("dokumenter.dokument.dokumentObjektReferanse", dokumentTo.getDokumentObjektReferanse());
-		assertNotNull("dokumenter.dokument.dokumenttypeId", dokumentTo.getDokumenttypeId());
-		if (arkivInformasjonTo != null) {
-			assertNotNull("dokumenter.dokument.arkivdokumentInfoId", dokumentTo.getArkivDokumentInfoId());
+	private void assertDokument(HentForsendelseResponse.Dokument dokument, HentForsendelseResponse.ArkivInformasjon arkivInformasjon) {
+		assertNotNull("dokumenter.dokument.tilknyttetSom", dokument.getTilknyttetSom());
+		assertNotNull("dokumenter.dokument.dokumentObjektReferanse", dokument.getDokumentObjektReferanse());
+		assertNotNull("dokumenter.dokument.dokumenttypeId", dokument.getDokumenttypeId());
+		if (arkivInformasjon != null) {
+			assertNotNull("dokumenter.dokument.arkivdokumentInfoId", dokument.getArkivDokumentInfoId());
 		}
 	}
 
-	private void assertThatAtLeastOneDocumentIsPresent(List<HentForsendelseResponse.DokumentTo> dokumentToList) {
-		if (dokumentToList == null || dokumentToList.isEmpty()) {
+	private void assertThatAtLeastOneDocumentIsPresent(List<HentForsendelseResponse.Dokument> dokumentList) {
+		if (dokumentList == null || dokumentList.isEmpty()) {
 			throw new IllegalArgumentException("Ugyldig input: Feltet dokumenter må være en liste som inneholder minst ett dokumnet");
 		}
 	}

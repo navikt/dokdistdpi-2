@@ -5,13 +5,11 @@ import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.AdminstrerForsendelseTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -37,11 +35,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Slf4j
 @Component
 public class AdministrerForsendelseConsumer {
+
 	private final String url;
 	private final RestTemplate restTemplate;
 
-	@Autowired
-	public AdministrerForsendelseConsumer(RestTemplateBuilder restTemplateBuilder, ServiceuserProperties serviceuser,
+	public AdministrerForsendelseConsumer(RestTemplateBuilder restTemplateBuilder,
+										  ServiceuserProperties serviceuser,
 										  @Value("${administrerforsendelse.url}") String url) {
 		this.url = url;
 		this.restTemplate = restTemplateBuilder
@@ -49,21 +48,6 @@ public class AdministrerForsendelseConsumer {
 				.setConnectTimeout(ofSeconds(5))
 				.setReadTimeout(ofSeconds(20))
 				.build();
-	}
-
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
-		try {
-			HttpEntity<?> httpEntity = new HttpEntity<>(createHeaders());
-			ResponseEntity<HentForsendelseResponse> response = restTemplate.exchange(url + "/" + forsendelseId, GET, httpEntity, HentForsendelseResponse.class);
-			return response.getBody();
-		} catch (HttpClientErrorException e) {
-			log.error("Kall mot rdist001 feilet funksjonell med forsendelseId={}, feilmelding={}", forsendelseId, e.getMessage());
-			throw new AdminstrerForsendelseFunctionalException(format("Kall mot rdist001 - hentForsendelse feilet med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			log.error("Kall mot rdist001 feilet teknisk med forsendelseId={}, feilmelding={}", forsendelseId, e.getMessage());
-			throw new AdminstrerForsendelseTechnicalException(format("Kall mot rdist001 feilet teknisk med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
-		}
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))

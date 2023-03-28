@@ -1,6 +1,9 @@
 package no.nav.dokdistdpi.consumer.rdist001.map;
 
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokument;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Postadresse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class OpprettForsendelseMapperTest {
+
 	private static final String BESTILLINGS_ID = UUID.randomUUID().toString();
 	private static final String OLD_BESTILLINGS_ID = UUID.randomUUID().toString();
 	private static final String BATCH_ID = "batchId";
@@ -40,7 +44,6 @@ class OpprettForsendelseMapperTest {
 	private static final String ARKIV_DOKUMENTINFO_ID_1 = "arkivDokumentinfoId1";
 	private static final String ARKIV_DOKUMENTINFO_ID_2 = "arkivDokumentinfoId2";
 
-
 	private final OpprettForsendelseMapper mapper = new OpprettForsendelseMapper();
 
 	@Test
@@ -58,13 +61,11 @@ class OpprettForsendelseMapperTest {
 		assertEquals(request.getOriginalDistribusjonId(), OLD_BESTILLINGS_ID);
 		assertPostadresseTo(request.getPostadresse());
 		assertDokument(request.getDokumenter().get(1));
-
 	}
 
 	@Test
 	public void shouldMapForsendelserWhenAdresseErNull() {
-		HentForsendelseResponse hentForsendelseResponse = createHentForsendelseResponse();
-		hentForsendelseResponse.setPostadresse(null);
+		HentForsendelseResponse hentForsendelseResponse = createHentForsendelseResponseWithPostadresseNull();
 		OpprettForsendelseRequestTo request = mapper.map(hentForsendelseResponse, BESTILLINGS_ID);
 
 		assertEquals(request.getBestillingsId(), BESTILLINGS_ID);
@@ -78,7 +79,6 @@ class OpprettForsendelseMapperTest {
 		assertEquals(request.getOriginalDistribusjonId(), OLD_BESTILLINGS_ID);
 		assertNull(request.getPostadresse());
 		assertDokument(request.getDokumenter().get(1));
-
 	}
 
 	@Test
@@ -109,45 +109,11 @@ class OpprettForsendelseMapperTest {
 	}
 
 	private void assertDokument(OpprettForsendelseRequestTo.DokumentTo dokumentTo) {
-
 		assertEquals(dokumentTo.getDokumenttypeId(), DOKUMENTTYPE_ID_2);
 		assertEquals(dokumentTo.getDokumentObjektReferanse(), OBJEKT_REFERANSE_2);
 		assertEquals(dokumentTo.getTilknyttetSom(), TILKNYTTET_SOM_VEDLEGG);
 		assertEquals(dokumentTo.getRekkefolge(), 2);
 		assertEquals(dokumentTo.getArkivDokumentInfoId(), ARKIV_DOKUMENTINFO_ID_2);
-
-
-	}
-
-	private HentForsendelseResponse createHentForsendelseResponseToPostAdresseNull() {
-		return HentForsendelseResponse.builder()
-				.bestillingsId(OLD_BESTILLINGS_ID)
-				.tema(TEMA)
-				.bestillendeFagsystem(BESTILLENDE_FAGSYSTEM)
-				.batchId(BATCH_ID)
-				.forsendelseTittel(FORSENDELSE_TITTEL)
-				.dokumentProdApp(DOKUMENT_PROD_APP)
-				.arkivInformasjon(HentForsendelseResponse.ArkivInformasjonTo.builder()
-						.arkivSystem(ARKIV_SYSTEM)
-						.arkivId(ARKIV_ID).build())
-				.mottaker(createMottakerTo())
-				.postadresse(null)
-				.dokumenter(createDokument()).build();
-	}
-
-	private HentForsendelseResponse createHentForsendelseResponseWithMottakerNull() {
-		return HentForsendelseResponse.builder()
-				.bestillingsId(OLD_BESTILLINGS_ID)
-				.tema(TEMA)
-				.bestillendeFagsystem(BESTILLENDE_FAGSYSTEM)
-				.batchId(BATCH_ID)
-				.forsendelseTittel(FORSENDELSE_TITTEL)
-				.dokumentProdApp(DOKUMENT_PROD_APP)
-				.arkivInformasjon(HentForsendelseResponse.ArkivInformasjonTo.builder()
-						.arkivId(ARKIV_ID).build())
-				.mottaker(null)
-				.postadresse(createPostadresse())
-				.dokumenter(createDokument()).build();
 	}
 
 	private HentForsendelseResponse createHentForsendelseResponse() {
@@ -158,30 +124,64 @@ class OpprettForsendelseMapperTest {
 				.batchId(BATCH_ID)
 				.forsendelseTittel(FORSENDELSE_TITTEL)
 				.dokumentProdApp(DOKUMENT_PROD_APP)
-				.arkivInformasjon(HentForsendelseResponse.ArkivInformasjonTo.builder()
+				.arkivInformasjon(HentForsendelseResponse.ArkivInformasjon.builder()
 						.arkivSystem(ARKIV_SYSTEM)
 						.arkivId(ARKIV_ID).build())
 				.mottaker(createMottakerTo())
 				.postadresse(createPostadresse())
-				.dokumenter(createDokument()).build();
+				.dokumenter(createDokument())
+				.build();
 	}
 
-	private List<HentForsendelseResponse.DokumentTo> createDokument() {
+	private HentForsendelseResponse createHentForsendelseResponseWithMottakerNull() {
+		return HentForsendelseResponse.builder()
+				.bestillingsId(OLD_BESTILLINGS_ID)
+				.tema(TEMA)
+				.bestillendeFagsystem(BESTILLENDE_FAGSYSTEM)
+				.batchId(BATCH_ID)
+				.forsendelseTittel(FORSENDELSE_TITTEL)
+				.dokumentProdApp(DOKUMENT_PROD_APP)
+				.arkivInformasjon(HentForsendelseResponse.ArkivInformasjon.builder()
+						.arkivId(ARKIV_ID).build())
+				.mottaker(null)
+				.postadresse(createPostadresse())
+				.dokumenter(createDokument())
+				.build();
+	}
+
+	private HentForsendelseResponse createHentForsendelseResponseWithPostadresseNull() {
+		return HentForsendelseResponse.builder()
+				.bestillingsId(OLD_BESTILLINGS_ID)
+				.tema(TEMA)
+				.bestillendeFagsystem(BESTILLENDE_FAGSYSTEM)
+				.batchId(BATCH_ID)
+				.forsendelseTittel(FORSENDELSE_TITTEL)
+				.dokumentProdApp(DOKUMENT_PROD_APP)
+				.arkivInformasjon(HentForsendelseResponse.ArkivInformasjon.builder()
+						.arkivSystem(ARKIV_SYSTEM)
+						.arkivId(ARKIV_ID).build())
+				.mottaker(createMottakerTo())
+				.postadresse(null)
+				.dokumenter(createDokument())
+				.build();
+	}
+
+	private List<Dokument> createDokument() {
 
 		return Arrays.asList(
-				HentForsendelseResponse.DokumentTo.builder()
+				Dokument.builder()
 						.dokumenttypeId(DOKUMENTTYPE_ID_1)
 						.dokumentObjektReferanse(OBJEKT_REFERANSE_1)
 						.tilknyttetSom(TILKNYTTET_SOM_HOVEDDOK)
 						.arkivDokumentInfoId(ARKIV_DOKUMENTINFO_ID_1)
 						.build(),
-				HentForsendelseResponse.DokumentTo.builder()
+				Dokument.builder()
 						.dokumenttypeId(DOKUMENTTYPE_ID_2)
 						.dokumentObjektReferanse(OBJEKT_REFERANSE_2)
 						.tilknyttetSom(TILKNYTTET_SOM_VEDLEGG)
 						.arkivDokumentInfoId(ARKIV_DOKUMENTINFO_ID_2)
 						.build(),
-				HentForsendelseResponse.DokumentTo.builder()
+				Dokument.builder()
 						.dokumenttypeId("1234")
 						.dokumentObjektReferanse(OBJEKT_REFERANSE_1)
 						.tilknyttetSom(TILKNYTTET_SOM_VEDLEGG)
@@ -191,8 +191,8 @@ class OpprettForsendelseMapperTest {
 
 	}
 
-	private HentForsendelseResponse.PostadresseTo createPostadresse() {
-		return HentForsendelseResponse.PostadresseTo.builder()
+	private Postadresse createPostadresse() {
+		return Postadresse.builder()
 				.adresselinje1(ADRESSELINJE_1)
 				.adresselinje2(ADRESSELINJE_2)
 				.adresselinje3(ADRESSELINJE_3)
@@ -202,8 +202,8 @@ class OpprettForsendelseMapperTest {
 				.build();
 	}
 
-	private HentForsendelseResponse.MottakerTo createMottakerTo() {
-		return HentForsendelseResponse.MottakerTo.builder()
+	private Mottaker createMottakerTo() {
+		return Mottaker.builder()
 				.mottakerNavn(MOTTAKER_ID_NAVN)
 				.mottakerId(MOTTAKER_ID)
 				.mottakerType("PERSON")

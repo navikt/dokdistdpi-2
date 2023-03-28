@@ -6,6 +6,9 @@ import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
 import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.ArkivInformasjon;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokument;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -23,7 +26,6 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.singletonList;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_4;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.ARKIV_SYSTEM_JOARK;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.EPOST;
@@ -142,8 +144,8 @@ public final class TestUtil {
 				.build();
 	}
 
-	public static HentForsendelseResponse.MottakerTo createMottakerTo() {
-		return HentForsendelseResponse.MottakerTo.builder()
+	public static Mottaker createMottakerTo() {
+		return Mottaker.builder()
 				.mottakerId(MOTTAKER_FNR)
 				.mottakerNavn(MOTTAKER_TYPE)
 				.mottakerType(MOTTAKER_TYPE)
@@ -159,7 +161,7 @@ public final class TestUtil {
 	}
 
 	public static HentForsendelseResponse buildHentForsendelseResponse(
-			List<HentForsendelseResponse.DokumentTo> dokumenter,
+			List<Dokument> dokumenter,
 			String arkivSystem
 	) {
 		return HentForsendelseResponse
@@ -167,7 +169,7 @@ public final class TestUtil {
 				.dokumenter(dokumenter)
 				.bestillingsId(HENT_FORSENDELSE_RESPONSE_BESTILLINGS_ID)
 				.arkivInformasjon(
-						HentForsendelseResponse.ArkivInformasjonTo
+						ArkivInformasjon
 								.builder()
 								.arkivId(ARKIV_INFORMASJON_ARKIV_ID)
 								.arkivSystem(arkivSystem)
@@ -176,10 +178,10 @@ public final class TestUtil {
 				.build();
 	}
 
-	public static List<HentForsendelseResponse.DokumentTo> buildHovedDokumentWithVedlegg() {
-		List<HentForsendelseResponse.DokumentTo> dokumenter = new ArrayList<>();
+	public static List<Dokument> buildHovedDokumentWithVedlegg() {
+		List<Dokument> dokumenter = new ArrayList<>();
 		dokumenter.add(
-				HentForsendelseResponse.DokumentTo.builder()
+				Dokument.builder()
 						.tilknyttetSom(HOVEDDOKUMENT)
 						.arkivDokumentInfoId(HOVED_DOKUMENT_INFO_ID)
 						.dokumentObjektReferanse(HOVED_DOKUMENT_REF)
@@ -187,14 +189,14 @@ public final class TestUtil {
 						.build()
 		);
 		dokumenter.add(
-				HentForsendelseResponse.DokumentTo.builder()
+				Dokument.builder()
 						.tilknyttetSom(VEDLEGG)
 						.arkivDokumentInfoId(VEDLEGG_1_DOKUMENT_INFO_ID)
 						.dokumentObjektReferanse(VEDLEGG_1_DOKUMENT_REF)
 						.build()
 		);
 		dokumenter.add(
-				HentForsendelseResponse.DokumentTo.builder()
+				Dokument.builder()
 						.tilknyttetSom(VEDLEGG)
 						.arkivDokumentInfoId(VEDLEGG_2_DOKUMENT_INFO_ID)
 						.dokumentObjektReferanse(VEDLEGG_2_DOKUMENT_REF)

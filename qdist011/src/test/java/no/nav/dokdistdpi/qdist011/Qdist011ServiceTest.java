@@ -11,7 +11,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
+import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
@@ -59,6 +59,7 @@ import static org.mockito.quality.Strictness.LENIENT;
 class Qdist011ServiceTest {
 
 	private AdministrerForsendelseConsumer administrerForsendelse;
+	private DokdistadminConsumer dokdistadminConsumer;
 	private Qdist011Service qdist011Service;
 
 	private MaskinportenTokenConsumer maskinportenTokenConsumer;
@@ -70,6 +71,7 @@ class Qdist011ServiceTest {
 	@BeforeEach
 	void setup() {
 		administrerForsendelse = mock(AdministrerForsendelseConsumer.class);
+		dokdistadminConsumer = mock(DokdistadminConsumer.class);
 		SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService = mock(SafJournalpostQueryServiceImplQdist011.class);
 		maskinportenTokenConsumer = mock(MaskinportenTokenConsumer.class);
 		digitalKontaktinformasjonConsumer = mock(DigitalKontaktinformasjonConsumer.class);
@@ -82,7 +84,7 @@ class Qdist011ServiceTest {
 		DigitalPostService digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
 				digitalKontaktinformasjonConsumer, varselInfo, dokumentkatalog);
 
-		qdist011Service = new Qdist011Service(encryptedBucketStorage, administrerForsendelse, digitalPostService, safJournalpostQueryService, "07:00:00", "23:00:00");
+		qdist011Service = new Qdist011Service(encryptedBucketStorage, administrerForsendelse, dokdistadminConsumer, digitalPostService, safJournalpostQueryService, "07:00:00", "23:00:00");
 
 		when(encryptedBucketStorage.downloadObject(anyString(), anyString())).thenReturn("{\"pdf\":\"SE9WRURET0tfVEVTVF9DT05URU5U\",\"dokumentObjektReferanse\":null,\"dokumentInfoId\":null}");
 	}
@@ -92,7 +94,7 @@ class Qdist011ServiceTest {
 			"VIKTIG", "ANNET", "NULL"
 	}, nullValues={"NULL"})
 	void skalLageForsendelse(String distribusjonstypecode) {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(distribusjonstypecode));
+		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(distribusjonstypecode));
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
@@ -113,7 +115,7 @@ class Qdist011ServiceTest {
 
 	@Test
 	void skalLageForsendelseWithoutVarslerWhenDistribusjonstypeCodeIsANNET() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(ANNET.toString()));
+		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(ANNET.toString()));
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
@@ -135,7 +137,7 @@ class Qdist011ServiceTest {
 
 	@Test
 	void shoudThrowExceptionIfMaskinportenttokenIsNull() {
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
+		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(null));
 
 		MaskinportenFunctionalException ex = assertThrows(MaskinportenFunctionalException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
@@ -148,7 +150,7 @@ class Qdist011ServiceTest {
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = createSikkerDigitalKontaktInfo();
 		sikkerDigitalKontaktInfo.setLeverandoerSertifikat(null);
 
-		when(administrerForsendelse.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
+		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(sikkerDigitalKontaktInfo);
 		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());

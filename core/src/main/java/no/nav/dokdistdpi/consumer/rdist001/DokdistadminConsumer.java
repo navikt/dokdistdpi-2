@@ -6,6 +6,7 @@ import no.nav.dokdistdpi.common.NavHeadersFilter;
 import no.nav.dokdistdpi.config.WebClientAzureAuthentication;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.rdist001.domain.Forsendelse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterVarselInfoRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseResponseTo;
@@ -69,6 +70,25 @@ public class DokdistadminConsumer {
 		log.info("opprettForsendelse har opprettet forsendelse med forsendelseId={} og bestillingsId={}", forsendelseId, bestillingsId);
 
 		return forsendelseId;
+	}
+
+	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
+
+		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
+
+		var response = webClient.get()
+				.uri(uriBuilder -> uriBuilder
+						.path("/{forsendelseId}")
+						.build(forsendelseId))
+				.retrieve()
+				.bodyToMono(HentForsendelseResponse.class)
+				.doOnError(this::handleError)
+				.block();
+
+		log.info("hentForsendelse har hentet forsendelse med forsendelseId={}", forsendelseId);
+
+		return response;
 	}
 
 	private void handleError(Throwable error) {
