@@ -1,10 +1,13 @@
 package no.nav.dokdistdpi.consumer.rdist001.map;
 
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.ArkivInformasjon;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokument;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Postadresse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo.DokumentTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo.PostadresseTo;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -99,7 +102,7 @@ class OpprettForsendelseMapperTest {
 		assertEquals(exception.getMessage(), "Mottaker kan ikke være null");
 	}
 
-	private void assertPostadresseTo(OpprettForsendelseRequestTo.PostadresseTo postadresse) {
+	private void assertPostadresseTo(PostadresseTo postadresse) {
 		assertEquals(postadresse.getAdresselinje1(), ADRESSELINJE_1);
 		assertEquals(postadresse.getAdresselinje2(), ADRESSELINJE_2);
 		assertEquals(postadresse.getAdresselinje3(), ADRESSELINJE_3);
@@ -108,7 +111,7 @@ class OpprettForsendelseMapperTest {
 		assertEquals(postadresse.getLandkode(), LAND);
 	}
 
-	private void assertDokument(OpprettForsendelseRequestTo.DokumentTo dokumentTo) {
+	private void assertDokument(DokumentTo dokumentTo) {
 		assertEquals(dokumentTo.getDokumenttypeId(), DOKUMENTTYPE_ID_2);
 		assertEquals(dokumentTo.getDokumentObjektReferanse(), OBJEKT_REFERANSE_2);
 		assertEquals(dokumentTo.getTilknyttetSom(), TILKNYTTET_SOM_VEDLEGG);
@@ -124,7 +127,7 @@ class OpprettForsendelseMapperTest {
 				.batchId(BATCH_ID)
 				.forsendelseTittel(FORSENDELSE_TITTEL)
 				.dokumentProdApp(DOKUMENT_PROD_APP)
-				.arkivInformasjon(HentForsendelseResponse.ArkivInformasjon.builder()
+				.arkivInformasjon(ArkivInformasjon.builder()
 						.arkivSystem(ARKIV_SYSTEM)
 						.arkivId(ARKIV_ID).build())
 				.mottaker(createMottakerTo())
@@ -141,7 +144,7 @@ class OpprettForsendelseMapperTest {
 				.batchId(BATCH_ID)
 				.forsendelseTittel(FORSENDELSE_TITTEL)
 				.dokumentProdApp(DOKUMENT_PROD_APP)
-				.arkivInformasjon(HentForsendelseResponse.ArkivInformasjon.builder()
+				.arkivInformasjon(ArkivInformasjon.builder()
 						.arkivId(ARKIV_ID).build())
 				.mottaker(null)
 				.postadresse(createPostadresse())
@@ -157,7 +160,7 @@ class OpprettForsendelseMapperTest {
 				.batchId(BATCH_ID)
 				.forsendelseTittel(FORSENDELSE_TITTEL)
 				.dokumentProdApp(DOKUMENT_PROD_APP)
-				.arkivInformasjon(HentForsendelseResponse.ArkivInformasjon.builder()
+				.arkivInformasjon(ArkivInformasjon.builder()
 						.arkivSystem(ARKIV_SYSTEM)
 						.arkivId(ARKIV_ID).build())
 				.mottaker(createMottakerTo())

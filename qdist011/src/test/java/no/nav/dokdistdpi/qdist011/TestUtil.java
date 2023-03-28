@@ -35,7 +35,6 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG;
 
 public final class TestUtil {
 
-
 	public static final String HOVED_DOKUMENT_INFO_ID = "1";
 	public static final String HOVED_DOKUMENT_REF = "ref-1";
 
