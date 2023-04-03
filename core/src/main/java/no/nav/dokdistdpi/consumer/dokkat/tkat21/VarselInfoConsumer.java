@@ -1,7 +1,6 @@
 package no.nav.dokdistdpi.consumer.dokkat.tkat21;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.exception.functional.Tkat021FunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.Tkat021TechnicalException;
@@ -37,15 +36,12 @@ public class VarselInfoConsumer implements VarselInfo {
 
 	@Autowired
 	public VarselInfoConsumer(RestTemplateBuilder restTemplateBuilder,
-							  @Value("${VarselInfo_v1_url}") String varselInfoUrl,
-							  ServiceuserProperties serviceuserProperties) {
+							  @Value("${varselinfo_v1_url}") String varselInfoUrl) {
 		this.varselInfoUrl = varselInfoUrl;
 		this.restTemplate = restTemplateBuilder
 				.setConnectTimeout(ofSeconds(5))
 				.setReadTimeout(ofSeconds(20))
-				.basicAuthentication(serviceuserProperties.getUsername(), serviceuserProperties.getPassword())
 				.build();
-
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))

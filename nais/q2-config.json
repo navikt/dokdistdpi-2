@@ -12,7 +12,7 @@
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://dev-fss.teamdokumenthandtering.dokdistadmin/.default",
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_URL": "https://dokdistadmin.dev.intern.nav.no/rest/v1/administrerforsendelse",
   "DOKUMENTTYPEINFO_V4_URL": "https://dokmet.dev.intern.nav.no/rest/dokumenttypeinfo",
-  "VARSELINFO_V1_URL": "https://app-q2.adeo.no/dokkat/rest/varselinfo/v1",
+  "VARSELINFO_V1_URL": "https://dokmet.dev.intern.nav.no/rest/varselinfo",
   "DIGDIR_KRR_PROXY_URL": "https://digdir-krr-proxy.dev.intern.nav.no",
   "SAF_GRAPHQL_URL": "https://saf.dev.intern.nav.no/graphql",
   "JURIDISKLOGG_URL": "https://app-q1.adeo.no/juridisklogg/api/rest/logg",
