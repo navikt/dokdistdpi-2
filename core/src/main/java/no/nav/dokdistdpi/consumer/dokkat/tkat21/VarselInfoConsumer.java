@@ -38,7 +38,7 @@ public class VarselInfoConsumer implements VarselInfo {
 
 	@Autowired
 	public VarselInfoConsumer(RestTemplateBuilder restTemplateBuilder,
-							  @Value("${varselinfo_v1_url}") String varselInfoUrl) {
+							  @Value("${varselinfo_url}") String varselInfoUrl) {
 		this.varselInfoUrl = varselInfoUrl;
 		this.restTemplate = restTemplateBuilder
 				.setConnectTimeout(ofSeconds(5))

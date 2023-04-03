@@ -29,8 +29,8 @@ spec:
       value: {{ DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_URL }}
     - name: DOKUMENTTYPEINFO_V4_URL
       value: {{ DOKUMENTTYPEINFO_V4_URL }}
-    - name: VARSELINFO_V1_URL
-      value: {{ VARSELINFO_V1_URL }}
+    - name: VARSELINFO_URL
+      value: {{ VARSELINFO_URL }}
     - name: DIGDIR_KRR_PROXY_URL
       value: {{ DIGDIR_KRR_PROXY_URL }}
     - name: MASKINPORTEN_URL
