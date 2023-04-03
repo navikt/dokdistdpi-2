@@ -8,6 +8,7 @@ import no.nav.dokkat.schemas.tkat021.VarselInfoRestTo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import java.util.stream.IntStream;
 import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
 import static java.util.Objects.isNull;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.VARSELINFO_CACHE;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 
@@ -44,6 +46,7 @@ public class VarselInfoConsumer implements VarselInfo {
 				.build();
 	}
 
+	@Cacheable(VARSELINFO_CACHE)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public VarselInfoTo getVarselInfo(String varselTypeId) {
 		try {
@@ -69,7 +72,6 @@ public class VarselInfoConsumer implements VarselInfo {
 	}
 
 	private Map<String, String> getVarslingsTekst(VarselInfoRestTo varselInfoRestTo) {
-
 		Map<String, String> varslingsTekst = new HashMap<>();
 		varselInfoRestTo.getVarselmals().forEach(
 				varselMalRestTo -> varslingsTekst.put(varselMalRestTo.getKanal(), varselMalRestTo.getFoerstegangsvarselTekst()));

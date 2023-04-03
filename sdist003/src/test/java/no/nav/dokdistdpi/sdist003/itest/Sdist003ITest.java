@@ -40,8 +40,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -81,8 +79,6 @@ public class Sdist003ITest {
 	void setUp() {
 		System.setProperty("ELECTOR_PATH", lederHost);
 		lederElection = mock(LederElectionConsumer.class);
-		cacheManager.getCache(MASKINPORTEN_CACHE).clear();
-		cacheManager.getCache(STS_CACHE).clear();
 		WireMock.reset();
 		WireMock.resetAllRequests();
 		WireMock.removeAllMappings();

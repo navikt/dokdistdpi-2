@@ -36,10 +36,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
 import static no.nav.dokdistdpi.qdist011.TestUtil.classpathToString;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -105,11 +101,6 @@ public class Qdist011IT {
 		WireMock.resetAllRequests();
 		WireMock.removeAllMappings();
 
-		cacheManager.getCache(TKAT020_CACHE).clear();
-		cacheManager.getCache(TKAT021_CACHE).clear();
-		cacheManager.getCache(MASKINPORTEN_CACHE).clear();
-		cacheManager.getCache(STS_CACHE).clear();
-
 		when(encryptedBucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString()))
 				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
 		when(encryptedBucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_VEDLEGG1), anyString()))
@@ -140,7 +131,7 @@ public class Qdist011IT {
 
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(2, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
@@ -173,7 +164,7 @@ public class Qdist011IT {
 
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(2, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
@@ -205,7 +196,7 @@ public class Qdist011IT {
 
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(2, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));

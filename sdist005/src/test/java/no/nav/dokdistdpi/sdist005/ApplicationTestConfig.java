@@ -28,6 +28,7 @@ import org.springframework.retry.annotation.EnableRetry;
 		AzureProperties.class
 })
 @Import({CacheConfig.class,
+		LocalTestCacheConfig.class,
 		JmsItestConfig.class
 })
 @ComponentScan(basePackages = "no.nav.dokdistdpi")

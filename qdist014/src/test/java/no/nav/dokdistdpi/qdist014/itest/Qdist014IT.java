@@ -38,10 +38,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -90,12 +86,6 @@ public class Qdist014IT {
 		WireMock.reset();
 		WireMock.resetAllRequests();
 		WireMock.removeAllMappings();
-
-		cacheManager.getCache(TKAT020_CACHE).clear();
-		cacheManager.getCache(TKAT021_CACHE).clear();
-		cacheManager.getCache(MASKINPORTEN_CACHE).clear();
-		cacheManager.getCache(STS_CACHE).clear();
-
 		stubAzure();
 	}
 

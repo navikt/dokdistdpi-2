@@ -32,7 +32,8 @@ import static org.mockito.Mockito.mock;
 		AzureProperties.class
 })
 @Import({CacheConfig.class,
-		JmsItestConfig.class,
+		LocalTestCacheConfig.class,
+		JmsItestConfig.class
 })
 @ComponentScan(basePackages = "no.nav.dokdistdpi")
 public abstract class ApplicationTestConfig {
