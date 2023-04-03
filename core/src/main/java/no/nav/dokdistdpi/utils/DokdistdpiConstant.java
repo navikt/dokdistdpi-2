@@ -16,9 +16,6 @@ public class DokdistdpiConstant {
 	public static final String NAV_CONSUMER_ID = "Nav-Consumer-Id";
 	public static final String APP_NAME = "dokdistdpi";
 
-	public static final String STS_CACHE = "stsCache";
-	public static final String PROCESS = "process";
-	public static final String DOK_REQUEST = "dok_request";
 	public static final String DISTRIBUSJONS_SDP_KANAL = "SDP";
 	public static final String EPOST = "EPOST";
 	public static final String SMS = "SMS";
@@ -31,7 +28,6 @@ public class DokdistdpiConstant {
 	public static final String PROPERTY_FORSENDELSE_ID = "forsendelseId";
 	public static final String PROPERTY_CONVERSATION_ID = "konversasjonId";
 	public static final String PROPERTY_FORSENDELSE_STATUS = "forsendelseStatus";
-	public static final String PROPERTY_DISTRIBUSJONS_TYPE = "distribusjonstype";
 
 	public static final int BACKOFF_DELAY = 500;
 	public static final int BACKOFF_MULTIPLIER = 3;

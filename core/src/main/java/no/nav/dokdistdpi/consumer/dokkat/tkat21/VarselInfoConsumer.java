@@ -1,7 +1,6 @@
 package no.nav.dokdistdpi.consumer.dokkat.tkat21;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.exception.functional.Tkat021FunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.Tkat021TechnicalException;
@@ -9,6 +8,7 @@ import no.nav.dokkat.schemas.tkat021.VarselInfoRestTo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -25,6 +25,7 @@ import java.util.stream.IntStream;
 import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
 import static java.util.Objects.isNull;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.VARSELINFO_CACHE;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 
@@ -37,17 +38,15 @@ public class VarselInfoConsumer implements VarselInfo {
 
 	@Autowired
 	public VarselInfoConsumer(RestTemplateBuilder restTemplateBuilder,
-							  @Value("${VarselInfo_v1_url}") String varselInfoUrl,
-							  ServiceuserProperties serviceuserProperties) {
+							  @Value("${varselinfo_url}") String varselInfoUrl) {
 		this.varselInfoUrl = varselInfoUrl;
 		this.restTemplate = restTemplateBuilder
 				.setConnectTimeout(ofSeconds(5))
 				.setReadTimeout(ofSeconds(20))
-				.basicAuthentication(serviceuserProperties.getUsername(), serviceuserProperties.getPassword())
 				.build();
-
 	}
 
+	@Cacheable(VARSELINFO_CACHE)
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public VarselInfoTo getVarselInfo(String varselTypeId) {
 		try {
@@ -73,7 +72,6 @@ public class VarselInfoConsumer implements VarselInfo {
 	}
 
 	private Map<String, String> getVarslingsTekst(VarselInfoRestTo varselInfoRestTo) {
-
 		Map<String, String> varslingsTekst = new HashMap<>();
 		varselInfoRestTo.getVarselmals().forEach(
 				varselMalRestTo -> varslingsTekst.put(varselMalRestTo.getKanal(), varselMalRestTo.getFoerstegangsvarselTekst()));

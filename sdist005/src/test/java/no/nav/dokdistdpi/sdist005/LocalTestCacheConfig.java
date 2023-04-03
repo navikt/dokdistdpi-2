@@ -5,36 +5,43 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.SAF_JOURNALPOST_QDIST011_CACHE;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.VARSELINFO_CACHE;
 
+@Configuration
 public class LocalTestCacheConfig {
-
-	public static final String TKAT020_CACHE = "tkat020Cache";
-	public static final String TKAT021_CACHE = "tkat021Cache";
-	public static final String STS_CACHE = "stsCache";
 
 	@Bean
 	CacheManager cacheManager() {
 		SimpleCacheManager manager = new SimpleCacheManager();
 		manager.setCaches(Arrays.asList(
 				new CaffeineCache(TKAT020_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(0, TimeUnit.MINUTES)
-						.maximumSize(0)
-						.build()),
-				new CaffeineCache(TKAT021_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(0, TimeUnit.MINUTES)
-						.maximumSize(0)
-						.build()),
+						.expireAfterWrite(0, DAYS).build()),
+				new CaffeineCache(VARSELINFO_CACHE, Caffeine.newBuilder()
+						.expireAfterWrite(0, DAYS).build()),
 				new CaffeineCache(STS_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(0, TimeUnit.MINUTES)
-						.build()),
+						.expireAfterWrite(0, MINUTES).build()),
 				new CaffeineCache(LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(0, TimeUnit.MINUTES)
-						.build())
+						.expireAfterWrite(0, SECONDS).build()),
+				new CaffeineCache(SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()
+						.expireAfterWrite(0, SECONDS).build()),
+				new CaffeineCache(MASKINPORTEN_CACHE, Caffeine.newBuilder()
+						.expireAfterWrite(0, SECONDS).build()),
+				new CaffeineCache(AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE, Caffeine.newBuilder()
+						.expireAfterWrite(0, MINUTES)
+						.maximumSize(2).build())
 		));
 		return manager;
 	}

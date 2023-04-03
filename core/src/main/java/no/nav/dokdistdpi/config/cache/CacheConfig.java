@@ -21,7 +21,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class CacheConfig {
 
 	public static final String TKAT020_CACHE = "tkat020Cache";
-	public static final String TKAT021_CACHE = "tkat021Cache";
+	public static final String VARSELINFO_CACHE = "varselinfoCache";
 	public static final String STS_CACHE = "stsCache";
 	public static final String MASKINPORTEN_CACHE = "maskinportenCache";
 	public static final String LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE = "LightweightSafJournalpostQdist011Cache";
@@ -36,7 +36,7 @@ public class CacheConfig {
 		manager.setCaches(Arrays.asList(
 				new CaffeineCache(TKAT020_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(1, DAYS).build()),
-				new CaffeineCache(TKAT021_CACHE, Caffeine.newBuilder()
+				new CaffeineCache(VARSELINFO_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(1, DAYS).build()),
 				new CaffeineCache(STS_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(55, MINUTES).build()),
