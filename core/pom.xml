@@ -64,17 +64,10 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 		</dependency>
-
-		<!-- dokumentkatalog-->
 		<dependency>
-			<groupId>no.nav.dokkat</groupId>
-			<artifactId>dokkat-api</artifactId>
+			<groupId>no.nav.dokmet</groupId>
+			<artifactId>api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>no.nav.dokkat</groupId>
-			<artifactId>dokkat-schemas</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-storage</artifactId>

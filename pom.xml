@@ -43,7 +43,7 @@
 		<sdp-xsd.version>3.1.1</sdp-xsd.version>
 
 		<!-- NAV -->
-		<dokkat.version>11.0.5</dokkat.version>
+		<dokmet.api.version>13-5459a4f</dokmet.api.version>
 		<melding-virksomhet-dokdistfordeling.version>5-7ff79fc</melding-virksomhet-dokdistfordeling.version>
 
 		<!-- Test -->
@@ -156,30 +156,21 @@
 				<artifactId>tink-gcpkms</artifactId>
 				<version>${google-tink.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>io.github.resilience4j</groupId>
+				<artifactId>resilience4j-spring-boot2</artifactId>
+				<version>${resilience4j-spring-boot2.version}</version>
+			</dependency>
 			<!--Tjenester-->
 			<dependency>
 				<groupId>no.nav.meldinger.virksomhet</groupId>
 				<artifactId>melding-virksomhet-dokdistfordeling</artifactId>
 				<version>${melding-virksomhet-dokdistfordeling.version}</version>
 			</dependency>
-
-			<!--Dokkat-->
 			<dependency>
-				<groupId>no.nav.dokkat</groupId>
-				<artifactId>dokkat-api</artifactId>
-				<version>${dokkat.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.dokkat</groupId>
-				<artifactId>dokkat-schemas</artifactId>
-				<version>${dokkat.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>io.github.resilience4j</groupId>
-				<artifactId>resilience4j-spring-boot2</artifactId>
-				<version>${resilience4j-spring-boot2.version}</version>
+				<groupId>no.nav.dokmet</groupId>
+				<artifactId>api</artifactId>
+				<version>${dokmet.api.version}</version>
 			</dependency>
 
 			<!-- test -->
