@@ -96,7 +96,6 @@ public class Qdist011IT {
 	@BeforeEach
 	public void setupBefore() {
 		CALL_ID = UUID.randomUUID().toString();
-
 		WireMock.reset();
 		WireMock.resetAllRequests();
 		WireMock.removeAllMappings();
@@ -172,6 +171,7 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
+			verify(0, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
 		});
 	}
 
@@ -204,6 +204,7 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
 		});
 	}
 
