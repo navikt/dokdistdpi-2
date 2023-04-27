@@ -19,7 +19,7 @@ import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokument;
-import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.kodeverk.DistribusjonstidspunktKode;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
@@ -66,7 +66,6 @@ public class Qdist011Service {
 	private static final String SPRAAK = "NO";
 
 	private final EncryptedBucketStorage encryptedBucketStorage;
-	private final AdministrerForsendelseConsumer administrerForsendelse;
 	private final DokdistadminConsumer dokdistadminConsumer;
 	private final SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService;
 	private final DigitalPostService digitalPostService;
@@ -76,14 +75,12 @@ public class Qdist011Service {
 
 	@Autowired
 	public Qdist011Service(EncryptedBucketStorage encryptedBucketStorage,
-						   AdministrerForsendelseConsumer administrerForsendelse,
 						   DokdistadminConsumer dokdistadminConsumer,
 						   DigitalPostService digitalPostService,
 						   @Qualifier("SafJournalpostQueryServiceQdist011") SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService,
 						   @Value("${kjernetidStart}") String kjernetidStart,
 						   @Value("${kjernetidSlutt}") String kjernetidSlutt) {
 		this.encryptedBucketStorage = encryptedBucketStorage;
-		this.administrerForsendelse = administrerForsendelse;
 		this.dokdistadminConsumer = dokdistadminConsumer;
 		this.safJournalpostQueryService = safJournalpostQueryService;
 		this.digitalPostService = digitalPostService;
@@ -95,14 +92,17 @@ public class Qdist011Service {
 	@Handler
 	public Forsendelse createForsendelse(DistribuerTilKanal distribuerTilKanal, Exchange exchange) {
 		validateDistribuerForsendelseTilDpi(distribuerTilKanal);
+
 		HentForsendelseResponse hentForsendelseResponse = dokdistadminConsumer.hentForsendelse(distribuerTilKanal.getForsendelseId());
 		assertForsendelseNotNull(hentForsendelseResponse);
-		exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
 
-		validateStatus(hentForsendelseResponse.getForsendelseStatus(), distribuerTilKanal.getForsendelseId());
+		Long forsendelseId = Long.valueOf(distribuerTilKanal.getForsendelseId());
+		exchange.setProperty(PROPERTY_FORSENDELSE_ID, forsendelseId);
+
+		validateStatus(hentForsendelseResponse.getForsendelseStatus(), forsendelseId);
 		validateKjernetid(hentForsendelseResponse.getDistribusjonstidspunkt(), hentForsendelseResponse.getBestillingsId());
 
-		String konversasjonId = getConversationId(hentForsendelseResponse, distribuerTilKanal.getForsendelseId());
+		String konversasjonId = getConversationId(hentForsendelseResponse, forsendelseId);
 
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
 		exchange.setProperty(PROPERTY_CONVERSATION_ID, konversasjonId);
@@ -118,7 +118,7 @@ public class Qdist011Service {
 		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfoTo, sikkerDigitalKontaktInfo);
 
 		return Forsendelse.builder()
-				.forsendelseId(distribuerTilKanal.getForsendelseId())
+				.forsendelseId(forsendelseId)
 				.personidentifikator(sikkerDigitalKontaktInfo.getPersonidentifikator())
 				.mottakerSertifikat(sikkerDigitalKontaktInfo.getLeverandoerSertifikat())
 				.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())
@@ -231,7 +231,7 @@ public class Qdist011Service {
 				.getTittel();
 	}
 
-	private void validateStatus(String forsendelseStatus, String forsendelseId) {
+	private void validateStatus(String forsendelseStatus, Long forsendelseId) {
 		if (FORSENDELSE_STATUS_EKSPEDERT.equals(forsendelseStatus)) {
 			log.info("Forsendelse med forsendelseId={}, status={} er ekspdert og behandlingen avsluttes",
 					forsendelseId, forsendelseStatus);
@@ -278,13 +278,13 @@ public class Qdist011Service {
 		return dokDistDokumentFraBucket;
 	}
 
-	private String getConversationId(HentForsendelseResponse hentForsendelse, String forsendelseId) {
+	private String getConversationId(HentForsendelseResponse hentForsendelse, Long forsendelseId) {
 		return isBlank(hentForsendelse.getKonversasjonId()) ? generateKonversasjonsId(forsendelseId) : hentForsendelse.getKonversasjonId();
 	}
 
-	private String generateKonversasjonsId(String forsendelseId) {
+	private String generateKonversasjonsId(Long forsendelseId) {
 		String konversasjonsId = UUID.randomUUID().toString();
-		administrerForsendelse.oppdaterForsendelseAndDigitalPostkasseInfo(OppdaterForsendelseRequestTo.builder()
+		dokdistadminConsumer.oppdaterForsendelse(OppdaterForsendelseRequest.builder()
 				.forsendelseId(forsendelseId)
 				.konversasjonId(konversasjonsId)
 				.build());

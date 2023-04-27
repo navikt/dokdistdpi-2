@@ -7,9 +7,9 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 
 @Data
 @Builder
-public class OppdaterDigitalAdresseRequest {
+public class OppdaterForsendelseAndVarselRequest {
 	private StatusType status;
-	private String forsendelseId;
+	private Long forsendelseId;
 	private String digitalLeverandoeradresse;
 	private String digitalPostkasseadresse;
 	private Varsler varsler;

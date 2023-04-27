@@ -11,7 +11,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
-import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
@@ -81,8 +81,8 @@ public class DpiKvitteringService {
 
 		log.info("Forsendelsen med forsendelseId={} er feilregistrert i dokdist databasen.", forsendelseId);
 
-		administrerForsendelse.oppdaterForsendelseAndDigitalPostkasseInfo(OppdaterForsendelseRequestTo.builder()
-				.forsendelseId(nyForsendelseId)
+		dokdistadminConsumer.oppdaterForsendelse(OppdaterForsendelseRequest.builder()
+				.forsendelseId(Long.valueOf(nyForsendelseId))
 				.forsendelseStatus(KLAR_FOR_DIST.name())
 				.build());
 

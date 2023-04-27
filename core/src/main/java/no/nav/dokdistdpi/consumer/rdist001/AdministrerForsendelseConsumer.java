@@ -5,7 +5,6 @@ import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.AdminstrerForsendelseTechnicalException;
@@ -51,16 +50,6 @@ public class AdministrerForsendelseConsumer {
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public void oppdaterForsendelseAndDigitalPostkasseInfo(OppdaterForsendelseRequestTo digitalPostAdresseRequestTo) {
-		String uri = UriComponentsBuilder.fromHttpUrl(url)
-				.path("/oppdaterdigitalinfo")
-				.toUriString();
-		log.info("forsendelse med forsendelseId={} mottatt kall til å oppdatere forsendelseStatus={}, digitalLeverandoeradresse og digitalPostkasseadresse",
-				digitalPostAdresseRequestTo.getForsendelseId(), digitalPostAdresseRequestTo.getForsendelseStatus());
-		oppdaterForsendelse(uri, digitalPostAdresseRequestTo);
-	}
-
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public FinnForsendelseResponseTo finnForsendelse(final FinnForsendelseRequestTo finnForsendelseRequestTo) {
 		String uri = UriComponentsBuilder.fromHttpUrl(url)
 				.path("/finnforsendelse")
@@ -94,21 +83,6 @@ public class AdministrerForsendelseConsumer {
 		} catch (HttpServerErrorException e) {
 			log.error("Kall mot rdist001 - feilet til å feilregistrer forsendelse med forsendelseId={}, feilmelding={}", feilRegistrerForsendelse.getForsendelseId(), e.getMessage());
 			throw new AdminstrerForsendelseTechnicalException(format("Kall mot rdist001 - feilet til å opprette forsendelse med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
-		}
-	}
-
-	private void oppdaterForsendelse(String uri, OppdaterForsendelseRequestTo digitalPostAdresseRequestTo) {
-		try {
-			HttpEntity<?> entity = digitalPostAdresseRequestTo == null ? new HttpEntity<>(createHeaders()) :
-					new HttpEntity<>(digitalPostAdresseRequestTo, createHeaders());
-			restTemplate.exchange(uri, PUT, entity, String.class);
-		} catch (HttpClientErrorException e) {
-			log.error("Kall mot rdist001 - oppdaterForsendelse feilet med feilmelding={}", e.getMessage());
-			throw new AdminstrerForsendelseFunctionalException(format("Kall mot rdist001 - oppdaterForsendelse feilet med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()),
-					e);
-		} catch (HttpServerErrorException e) {
-			log.error("Kall mot rdist001 - oppdaterForsendelse feilet med feilmelding={}", e.getMessage());
-			throw new AdminstrerForsendelseTechnicalException(format("Kall mot rdist001 - oppdaterForsendelse feilet teknisk med statusCode=%s,feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
 		}
 	}
 

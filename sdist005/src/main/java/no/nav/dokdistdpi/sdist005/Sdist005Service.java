@@ -9,7 +9,7 @@ import no.nav.dokdistdpi.consumer.rdist001.UekspedertForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.AvstemForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
-import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.map.OpprettForsendelseMapper;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusIkkeFunnetException;
@@ -100,9 +100,9 @@ public class Sdist005Service {
 		log.info("Sdist005 har feilregistrert forsendelse med forsendelseId={}, bestillingsId={}",
 				feiletForsendelse.getForsendelseId(), feiletForsendelse.getBestillingsId());
 
-		administrerForsendelseConsumer.oppdaterForsendelseAndDigitalPostkasseInfo(
-				OppdaterForsendelseRequestTo.builder()
-						.forsendelseId(nyForsendelseId)
+		dokdistadminConsumer.oppdaterForsendelse(
+				OppdaterForsendelseRequest.builder()
+						.forsendelseId(Long.valueOf(nyForsendelseId))
 						.forsendelseStatus(KLAR_FOR_DIST.name())
 						.build());
 		log.info("Sdist005 har oppdatert ny forsendelse med forsendelseId={}, bestillingsId={} til KLAR_FOR_DIST",

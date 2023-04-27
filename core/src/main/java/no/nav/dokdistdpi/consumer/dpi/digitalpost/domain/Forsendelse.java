@@ -8,7 +8,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 @Data
 @Builder
 public class Forsendelse {
-	private String forsendelseId;
+	private Long forsendelseId;
 	private String personidentifikator;
 	private String mottakerSertifikat;
 	private String digitalPostLeverandoerAdresse;

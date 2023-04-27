@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.consumer.rdist001.map;
 
-import no.nav.dokdistdpi.consumer.dpi.client.OppdaterDigitalAdresseRequest;
+import no.nav.dokdistdpi.consumer.dpi.client.OppdaterForsendelseAndVarselRequest;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
@@ -23,7 +23,7 @@ public class OppdaterVarselInfoMapper {
 	public static final String EPOST_VARSELTITTEL_VEDTAK = "Varsel om post";
 	public static final String EPOST_VARSELTITTEL_ANNET = "Du har en ny melding";
 
-	public OppdaterVarselInfoRequest mapVarselInfo(OppdaterDigitalAdresseRequest digitalAdresseRequest) {
+	public OppdaterVarselInfoRequest mapVarselInfo(OppdaterForsendelseAndVarselRequest digitalAdresseRequest) {
 		if (isNull(digitalAdresseRequest)) {
 			return null;
 		}

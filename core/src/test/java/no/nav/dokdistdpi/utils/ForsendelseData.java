@@ -41,7 +41,7 @@ public class ForsendelseData {
 	private static final String TITTEL = "Ikke-sensitiv tittel for forsendelsen";
 	public static final String VEDTAK_TEKST = "Du har fått et vedtak fra NAV. Les det i din digitale postkasse.";
 	public static final String MOBILNUMMER = "11111111";
-	public static final String FORSENDELSE_ID = "11";
+	public static final Long FORSENDELSE_ID = 11L;
 
 
 	public static Forsendelse forsendelse(Dokumentpakke dokumentpakke) {

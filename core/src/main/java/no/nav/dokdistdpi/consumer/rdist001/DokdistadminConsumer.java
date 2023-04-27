@@ -7,6 +7,7 @@ import no.nav.dokdistdpi.config.WebClientAzureAuthentication;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.rdist001.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterVarselInfoRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseResponseTo;
@@ -75,7 +76,7 @@ public class DokdistadminConsumer {
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
 
-		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
+		log.info("hentForsendelse mottatt kall til å hente forsendelse med forsendelseId={}", forsendelseId);
 
 		var response = webClient.get()
 				.uri(uriBuilder -> uriBuilder
@@ -89,6 +90,20 @@ public class DokdistadminConsumer {
 		log.info("hentForsendelse har hentet forsendelse med forsendelseId={}", forsendelseId);
 
 		return response;
+	}
+
+	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	public void oppdaterForsendelse(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
+		log.info("forsendelse med forsendelseId={} mottatt kall til å oppdatere forsendelseStatus={}, digitalLeverandoeradresse og digitalPostkasseadresse",
+				oppdaterForsendelseRequest.getForsendelseId(), oppdaterForsendelseRequest.getForsendelseStatus());
+
+		webClient.put()
+				.uri("/oppdaterforsendelse")
+				.bodyValue(oppdaterForsendelseRequest)
+				.retrieve()
+				.toBodilessEntity()
+				.doOnError(this::handleError)
+				.block();
 	}
 
 	private void handleError(Throwable error) {

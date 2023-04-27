@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -48,6 +47,7 @@ public class Sdist005IT {
 
 	private static final String OPPRETTFORSENDELSE_URL = "/rest/v1/administrerforsendelse";
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/" + FORSENDELSE_ID;
+	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 
 	@Value("${leder.host}")
 	private String lederHost;
@@ -57,8 +57,6 @@ public class Sdist005IT {
 	private Queue qdist009;
 	@Autowired
 	private LederElectionConsumer lederElection;
-	@Autowired
-	private CacheManager cacheManager;
 
 	@BeforeEach
 	void setUp() {
@@ -99,7 +97,7 @@ public class Sdist005IT {
 	}
 
 	private void stubPutOppdaterDigitalLeverandoerAndPostkasseadresse() {
-		stubFor(put(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo"))
+		stubFor(put(urlEqualTo(OPPDATERFORSENDELSE_URL))
 				.willReturn(aResponse()
 						.withStatus(OK.value())));
 	}
