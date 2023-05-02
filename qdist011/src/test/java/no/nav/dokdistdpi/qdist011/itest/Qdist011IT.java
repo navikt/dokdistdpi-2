@@ -127,7 +127,7 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 
-		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(2, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
@@ -159,7 +159,7 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 
-		await().atMost(100, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(2, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));

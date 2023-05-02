@@ -76,7 +76,7 @@ public class DokdistadminConsumer {
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
 
-		log.info("hentForsendelse mottatt kall til å hente forsendelse med forsendelseId={}", forsendelseId);
+		log.info("hentForsendelse blir mottatt et kall til å hente forsendelse med forsendelseId={}", forsendelseId);
 
 		var response = webClient.get()
 				.uri(uriBuilder -> uriBuilder
@@ -94,7 +94,7 @@ public class DokdistadminConsumer {
 
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public void oppdaterForsendelse(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
-		log.info("forsendelse med forsendelseId={} mottatt kall til å oppdatere forsendelseStatus={}, digitalLeverandoeradresse og digitalPostkasseadresse",
+		log.info("forsendelse med forsendelseId={} blir mottatt et kall til å oppdatere forsendelseStatus={}, digitalLeverandoeradresse og digitalPostkasseadresse",
 				oppdaterForsendelseRequest.getForsendelseId(), oppdaterForsendelseRequest.getForsendelseStatus());
 
 		webClient.put()
