@@ -2,8 +2,8 @@ package no.nav.dokdistdpi.consumer.rdist001;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.consumer.dpi.client.OppdaterDigitalAdresseRequest;
-import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.dpi.client.OppdaterForsendelseAndVarselRequest;
+import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.map.OppdaterVarselInfoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,7 +30,7 @@ public class DokdistAdministrerForsendelseUpdater {
 		this.dokdistadminConsumer = dokdistadminConsumer;
 	}
 
-	public void updateStatusDigitalpostkasseInfoAndVarselInfo(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
+	public void updateStatusDigitalpostkasseInfoAndVarselInfo(OppdaterForsendelseAndVarselRequest oppdaterDigitalAdresseRequest) {
 		updateStatusDigitalLeverandoerAndPostkasseadresse(oppdaterDigitalAdresseRequest);
 		log.info("qdist011 har oppdatert digital postkasse info og forsendelseStatus=OVERSENDT med forsendelseId={}", oppdaterDigitalAdresseRequest.getForsendelseId());
 
@@ -38,13 +38,13 @@ public class DokdistAdministrerForsendelseUpdater {
 		log.info("qdist011 har oppdatert varselInfo i dokdistDb med forsendelseId={}", oppdaterDigitalAdresseRequest.getForsendelseId());
 	}
 
-	private void updateStatusDigitalLeverandoerAndPostkasseadresse(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
-		administrerForsendelse.oppdaterForsendelseAndDigitalPostkasseInfo(mapDigitalAdresse(oppdaterDigitalAdresseRequest));
+	private void updateStatusDigitalLeverandoerAndPostkasseadresse(OppdaterForsendelseAndVarselRequest oppdaterDigitalAdresseRequest) {
+		dokdistadminConsumer.oppdaterForsendelse(mapDigitalAdresse(oppdaterDigitalAdresseRequest));
 		meldingTilDpiCounter();
 	}
 
-	private OppdaterForsendelseRequestTo mapDigitalAdresse(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
-		return oppdaterDigitalAdresseRequest == null ? null : OppdaterForsendelseRequestTo.builder()
+	private OppdaterForsendelseRequest mapDigitalAdresse(OppdaterForsendelseAndVarselRequest oppdaterDigitalAdresseRequest) {
+		return oppdaterDigitalAdresseRequest == null ? null : OppdaterForsendelseRequest.builder()
 				.forsendelseId(oppdaterDigitalAdresseRequest.getForsendelseId())
 				.forsendelseStatus(FORSENDELSE_STATUS_OVERSENDT)
 				.digitalLeverandoeradresse(oppdaterDigitalAdresseRequest.getDigitalLeverandoeradresse())
@@ -52,7 +52,7 @@ public class DokdistAdministrerForsendelseUpdater {
 				.build();
 	}
 
-	private void oppdaterVarselInfo(OppdaterDigitalAdresseRequest oppdaterDigitalAdresseRequest) {
+	private void oppdaterVarselInfo(OppdaterForsendelseAndVarselRequest oppdaterDigitalAdresseRequest) {
 		if (nonNull(oppdaterDigitalAdresseRequest.getVarsler())) {
 			dokdistadminConsumer.oppdaterVarselInfo(oppdaterVarselInfoMapper.mapVarselInfo(oppdaterDigitalAdresseRequest));
 		}

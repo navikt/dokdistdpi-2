@@ -74,6 +74,7 @@ public class Qdist011IT {
 
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/" + FORSENDELSE_ID;
 	private static final String OPPDATERVARSELINFO_URL = "/rest/v1/administrerforsendelse/oppdatervarselinfo";
+	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 
 	@Autowired
 	@Lazy
@@ -117,14 +118,12 @@ public class Qdist011IT {
 		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
-		stubPutForsendelseStatusAndkonversasjonsId();
-		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
+		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
 		stubPostDPISend();
 		stubGetDPIStatus();
 		stubPutVarselInfo();
-		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 
@@ -137,7 +136,7 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
-			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
 		});
 	}
@@ -151,13 +150,12 @@ public class Qdist011IT {
 		stubGetVarselInfo("varselinfov1/tkat021-null.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
-		stubPutForsendelseStatusAndkonversasjonsId();
-		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
+		stubPutOppdaterForsendelse();
+		stubPutVarselInfo();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
 		stubPostDPISend();
 		stubGetDPIStatus();
-		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 
@@ -170,7 +168,7 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
-			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 			verify(0, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
 		});
 	}
@@ -183,14 +181,12 @@ public class Qdist011IT {
 		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
-		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
-		stubPutOgOppdaterKonversasjonsId(OK.value());
+		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
 		stubPostDPIDuplicate();
 		stubGetDPIStatus();
 		stubPutVarselInfo();
-		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 
@@ -203,8 +199,7 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
-			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
-			verify(1, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 		});
 	}
 
@@ -217,12 +212,10 @@ public class Qdist011IT {
 		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
-		stubPutForsendelseStatusAndkonversasjonsId();
-		stubPutOgOppdaterKonversasjonsId(OK.value());
+		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
 		stubPostDPISend(BAD_REQUEST.value());
-		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 
@@ -249,12 +242,10 @@ public class Qdist011IT {
 		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
-		stubPutForsendelseStatusAndkonversasjonsId();
-		stubPutOgOppdaterKonversasjonsId(OK.value());
+		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinportenFeil(BAD_REQUEST.value());
 		stubPostDPISend();
-		stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 
@@ -289,8 +280,7 @@ public class Qdist011IT {
 		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
-		stubPutForsendelseStatusAndkonversasjonsId();
-		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
+		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
 		stubPostDPISend();
@@ -361,21 +351,8 @@ public class Qdist011IT {
 
 	}
 
-	private void stubPutOgOppdaterKonversasjonsId(int statusValue) {
-		stubFor(put(urlPathMatching("/administrerforsendelse?(.*?)"))
-				.willReturn(aResponse()
-						.withStatus(statusValue)
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
-	}
-
-	private void stubPutForsendelseStatusAndkonversasjonsId() {
-		stubFor(put(urlEqualTo("/administrerforsendelse?forsendelseId=" + FORSENDELSE_ID + "&forsendelseStatus=OVERSENDT&konversasjonsId=" + KONVERSASJON_ID))
-				.willReturn(aResponse()
-						.withStatus(OK.value())));
-	}
-
-	private void stubPutOppdaterDigitalLeverandoerAndPostkasseadresse() {
-		stubFor(put(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo"))
+	private void stubPutOppdaterForsendelse() {
+		stubFor(put(urlEqualTo("/rest/v1/administrerforsendelse/oppdaterforsendelse"))
 				.willReturn(aResponse()
 						.withStatus(OK.value())));
 	}
@@ -425,12 +402,6 @@ public class Qdist011IT {
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString("__files/digitalkontaktinformasjonv1/dki-happy.json"))));
-	}
-
-	private void stubPutAdministrerforsendelseOppdatertForsendelsestatusAndkonvId() {
-		stubFor(put(urlMatching("/administrerforsendelse\\?forsendelseId=" + FORSENDELSE_ID + "\\&forsendelseStatus=OVERSENDT\\&konversasjonsId=.*"))
-				.willReturn(aResponse()
-						.withStatus(OK.value())));
 	}
 
 	void stubAzure() {

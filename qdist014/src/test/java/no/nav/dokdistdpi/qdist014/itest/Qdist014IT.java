@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jms.core.JmsTemplate;
@@ -18,8 +17,6 @@ import org.springframework.test.context.ActiveProfiles;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
@@ -54,16 +51,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class Qdist014IT {
 
 	private static final String FORSENDELSE_ID = "1720847";
-	private static final String NY_FORSENDELSE_ID = "33333";
 	private static final String KONVERSASJON_ID = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
-	private static final String BESTILLING_ID = "ff88849c-e281-4809-8555-7cd54952b916";
 	private static final String KONVERSASJON_ID_VAR = "2049057a-9b53-41bb-9cc3-d10f55fa0f87";
 	private static String CALL_ID;
 
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/%s";
-
-	@Autowired
-	private CacheManager cacheManager;
+	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 
 	@Autowired
 	private JmsTemplate jmsTemplate;
@@ -101,7 +94,7 @@ public class Qdist014IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
 			verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
-			verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 		});
 	}
 
@@ -307,11 +300,11 @@ public class Qdist014IT {
 		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 		verify(count, postRequestedFor(urlMatching("/rest/v1/administrerforsendelse")));
 		verify(count, putRequestedFor(urlMatching("/administrerforsendelse/feilregistrerforsendelse")));
-		verify(1, putRequestedFor(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo")));
+		verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 	}
 
 	private void stubPutOppdaterDigitalLeverandoerAndPostkasseadresse() {
-		stubFor(put(urlEqualTo("/administrerforsendelse/oppdaterdigitalinfo"))
+		stubFor(put(urlEqualTo(OPPDATERFORSENDELSE_URL))
 				.willReturn(aResponse()
 						.withStatus(OK.value())));
 	}
@@ -382,19 +375,4 @@ public class Qdist014IT {
 		}
 		return (T) response;
 	}
-
-	protected TextMessage receiveTextMessage(final Queue queue) {
-		return (TextMessage) jmsTemplate.receive(queue);
-	}
-
-	private String getRequestAsJson(String filename) throws IOException {
-
-		File file = new ClassPathResource(filename).getFile();
-		byte[] data = new byte[(int) file.length()];
-		FileInputStream fileInputStream = new FileInputStream(file);
-		fileInputStream.read(data);
-		fileInputStream.close();
-		return new String(data);
-	}
-
 }

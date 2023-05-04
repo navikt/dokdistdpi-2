@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import reactor.core.publisher.Mono;
 
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
 
 public class NavHeadersFilter implements ExchangeFilterFunction {
@@ -14,8 +15,8 @@ public class NavHeadersFilter implements ExchangeFilterFunction {
 	@Override
 	public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
 
-		if (MDC.get(NAV_CALLID) != null) {
-			return next.exchange(ClientRequest.from(request).headers((headers) -> headers.set(NAV_CALLID, MDC.get(NAV_CALLID))).build());
+		if (MDC.get(CALL_ID) != null) {
+			return next.exchange(ClientRequest.from(request).headers((headers) -> headers.set(NAV_CALLID, MDC.get(CALL_ID))).build());
 		}
 		return next.exchange(request);
 	}

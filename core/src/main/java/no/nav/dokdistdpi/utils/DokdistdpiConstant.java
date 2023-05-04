@@ -8,7 +8,7 @@ public class DokdistdpiConstant {
 	public static final ZoneId DEFAULT_ZONE_ID = DEFAULT_TIME_ZONE.toZoneId();
 
 	public static final String QDIST011_SERVICE_ID = "qdist011";
-
+	public static final String CALL_ID = "callId";
 	// Dette callId brukes intern i teamdokumentløsninger apper.
 	public static final String NAV_CALLID = "Nav-Callid";
 	// Dette callId bruker for kall mot digdir-krr-proxy

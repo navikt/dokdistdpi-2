@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.consumer.rdist001.map;
 
-import no.nav.dokdistdpi.consumer.dpi.client.OppdaterDigitalAdresseRequest;
+import no.nav.dokdistdpi.consumer.dpi.client.OppdaterForsendelseAndVarselRequest;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
@@ -124,8 +124,8 @@ class OppdaterVarselInfoMapperTest {
 	}
 
 
-	private static OppdaterDigitalAdresseRequest createOppdaterDigitalAdresseRequest(Varsler varsler, DistribusjonsTypeKode distribusjonsType) {
-		return OppdaterDigitalAdresseRequest.builder().forsendelseId(FORSENDELSE_ID)
+	private static OppdaterForsendelseAndVarselRequest createOppdaterDigitalAdresseRequest(Varsler varsler, DistribusjonsTypeKode distribusjonsType) {
+		return OppdaterForsendelseAndVarselRequest.builder().forsendelseId(FORSENDELSE_ID)
 				.varsler(varsler)
 				.distribusjonsTypeKode(distribusjonsType)
 				.build();

@@ -5,7 +5,6 @@ import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequestTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.AdminstrerForsendelseTechnicalException;
@@ -27,6 +26,7 @@ import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PUT;
@@ -48,16 +48,6 @@ public class AdministrerForsendelseConsumer {
 				.setConnectTimeout(ofSeconds(5))
 				.setReadTimeout(ofSeconds(20))
 				.build();
-	}
-
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public void oppdaterForsendelseAndDigitalPostkasseInfo(OppdaterForsendelseRequestTo digitalPostAdresseRequestTo) {
-		String uri = UriComponentsBuilder.fromHttpUrl(url)
-				.path("/oppdaterdigitalinfo")
-				.toUriString();
-		log.info("forsendelse med forsendelseId={} mottatt kall til å oppdatere forsendelseStatus={}, digitalLeverandoeradresse og digitalPostkasseadresse",
-				digitalPostAdresseRequestTo.getForsendelseId(), digitalPostAdresseRequestTo.getForsendelseStatus());
-		oppdaterForsendelse(uri, digitalPostAdresseRequestTo);
 	}
 
 	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
@@ -97,25 +87,10 @@ public class AdministrerForsendelseConsumer {
 		}
 	}
 
-	private void oppdaterForsendelse(String uri, OppdaterForsendelseRequestTo digitalPostAdresseRequestTo) {
-		try {
-			HttpEntity<?> entity = digitalPostAdresseRequestTo == null ? new HttpEntity<>(createHeaders()) :
-					new HttpEntity<>(digitalPostAdresseRequestTo, createHeaders());
-			restTemplate.exchange(uri, PUT, entity, String.class);
-		} catch (HttpClientErrorException e) {
-			log.error("Kall mot rdist001 - oppdaterForsendelse feilet med feilmelding={}", e.getMessage());
-			throw new AdminstrerForsendelseFunctionalException(format("Kall mot rdist001 - oppdaterForsendelse feilet med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()),
-					e);
-		} catch (HttpServerErrorException e) {
-			log.error("Kall mot rdist001 - oppdaterForsendelse feilet med feilmelding={}", e.getMessage());
-			throw new AdminstrerForsendelseTechnicalException(format("Kall mot rdist001 - oppdaterForsendelse feilet teknisk med statusCode=%s,feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
-		}
-	}
-
 	private HttpHeaders createHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(APPLICATION_JSON);
-		headers.add(NAV_CALLID, MDC.get(NAV_CALLID));
+		headers.add(NAV_CALLID, MDC.get(CALL_ID));
 		return headers;
 	}
 }

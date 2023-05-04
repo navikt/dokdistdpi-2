@@ -10,7 +10,6 @@ import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
@@ -58,7 +57,6 @@ import static org.mockito.quality.Strictness.LENIENT;
 @MockitoSettings(strictness = LENIENT)
 class Qdist011ServiceTest {
 
-	private AdministrerForsendelseConsumer administrerForsendelse;
 	private DokdistadminConsumer dokdistadminConsumer;
 	private Qdist011Service qdist011Service;
 
@@ -70,7 +68,6 @@ class Qdist011ServiceTest {
 
 	@BeforeEach
 	void setup() {
-		administrerForsendelse = mock(AdministrerForsendelseConsumer.class);
 		dokdistadminConsumer = mock(DokdistadminConsumer.class);
 		SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService = mock(SafJournalpostQueryServiceImplQdist011.class);
 		maskinportenTokenConsumer = mock(MaskinportenTokenConsumer.class);
@@ -84,7 +81,7 @@ class Qdist011ServiceTest {
 		DigitalPostService digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
 				digitalKontaktinformasjonConsumer, varselInfo, dokumentkatalog);
 
-		qdist011Service = new Qdist011Service(encryptedBucketStorage, administrerForsendelse, dokdistadminConsumer, digitalPostService, safJournalpostQueryService, "07:00:00", "23:00:00");
+		qdist011Service = new Qdist011Service(encryptedBucketStorage, dokdistadminConsumer, digitalPostService, safJournalpostQueryService, "07:00:00", "23:00:00");
 
 		when(encryptedBucketStorage.downloadObject(anyString(), anyString())).thenReturn("{\"pdf\":\"SE9WRURET0tfVEVTVF9DT05URU5U\",\"dokumentObjektReferanse\":null,\"dokumentInfoId\":null}");
 	}
@@ -92,7 +89,7 @@ class Qdist011ServiceTest {
 	@ParameterizedTest
 	@CsvSource(value = {
 			"VIKTIG", "ANNET", "NULL"
-	}, nullValues={"NULL"})
+	}, nullValues = {"NULL"})
 	void skalLageForsendelse(String distribusjonstypecode) {
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(distribusjonstypecode));
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));

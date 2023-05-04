@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
-import no.nav.dokdistdpi.consumer.dpi.client.OppdaterDigitalAdresseRequest;
+import no.nav.dokdistdpi.consumer.dpi.client.OppdaterForsendelseAndVarselRequest;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Dokumentpakkefingeravtrykk;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
@@ -55,7 +55,7 @@ public class DpiMeldingsformidler {
 	}
 
 	@Handler
-	public OppdaterDigitalAdresseRequest sendMelding(Forsendelse forsendelse) {
+	public OppdaterForsendelseAndVarselRequest sendMelding(Forsendelse forsendelse) {
 		byte[] dokumentpakke = getKryptertDokumentpakke(forsendelse);
 
 		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse,
@@ -70,7 +70,7 @@ public class DpiMeldingsformidler {
 				.filter(statusResponse -> SENDT.equals(statusResponse.getStatus()) || OPPRETTET.equals(statusResponse.getStatus()))
 				.findAny().orElse(null);
 
-		return forsendelseStatusResponse == null ? null : OppdaterDigitalAdresseRequest.builder()
+		return forsendelseStatusResponse == null ? null : OppdaterForsendelseAndVarselRequest.builder()
 				.status(forsendelseStatusResponse.getStatus())
 				.forsendelseId(forsendelse.getForsendelseId())
 				.digitalLeverandoeradresse(forsendelse.getDigitalPostLeverandoerAdresse())
