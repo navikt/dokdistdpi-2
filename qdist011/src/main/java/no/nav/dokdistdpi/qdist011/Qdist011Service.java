@@ -14,7 +14,6 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Identifikator;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
-import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
@@ -288,7 +287,6 @@ public class Qdist011Service {
 				.forsendelseId(forsendelseId)
 				.konversasjonId(konversasjonsId)
 				.build());
-		log.info("Oppdatert forsendelse med forsendelseId={} til konversasjonsId={}", forsendelseId, konversasjonsId);
 		return konversasjonsId;
 	}
 

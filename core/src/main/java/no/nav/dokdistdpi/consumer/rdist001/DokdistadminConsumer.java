@@ -44,7 +44,7 @@ public class DokdistadminConsumer {
 
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public void oppdaterVarselInfo(OppdaterVarselInfoRequest oppdaterVarselInfoRequest) {
-		log.info("Mottatt kall til å oppdatere varselInfo. forsendelseId={}", oppdaterVarselInfoRequest.forsendelseId());
+		log.info("oppdaterVarselInfo oppdaterer varselInfo med forsendelseId={}", oppdaterVarselInfoRequest.forsendelseId());
 		webClient.put()
 				.uri("/oppdatervarselinfo")
 				.bodyValue(oppdaterVarselInfoRequest)
@@ -52,6 +52,8 @@ public class DokdistadminConsumer {
 				.toBodilessEntity()
 				.doOnError(this::handleError)
 				.block();
+
+		log.info("oppdaterVarselInfo har oppdatert varselInfo med forsendelseId={}", oppdaterVarselInfoRequest.forsendelseId());
 	}
 
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
@@ -76,7 +78,7 @@ public class DokdistadminConsumer {
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
 
-		log.info("hentForsendelse blir mottatt et kall til å hente forsendelse med forsendelseId={}", forsendelseId);
+		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
 
 		var response = webClient.get()
 				.uri(uriBuilder -> uriBuilder
@@ -93,17 +95,18 @@ public class DokdistadminConsumer {
 	}
 
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public void oppdaterForsendelse(OppdaterForsendelseRequest oppdaterForsendelseRequest) {
-		log.info("forsendelse med forsendelseId={} blir mottatt et kall til å oppdatere forsendelseStatus={}, digitalLeverandoeradresse og digitalPostkasseadresse",
-				oppdaterForsendelseRequest.getForsendelseId(), oppdaterForsendelseRequest.getForsendelseStatus());
+	public void oppdaterForsendelse(OppdaterForsendelseRequest oppdaterForsendelse) {
+		log.info("oppdaterForsendelse oppdaterer forsendelse med forsendelseId={}", oppdaterForsendelse.getForsendelseId());
 
 		webClient.put()
 				.uri("/oppdaterforsendelse")
-				.bodyValue(oppdaterForsendelseRequest)
+				.bodyValue(oppdaterForsendelse)
 				.retrieve()
 				.toBodilessEntity()
 				.doOnError(this::handleError)
 				.block();
+
+		log.info("oppdaterForsendelse har oppdatert forsendelse med forsendelseId={}", oppdaterForsendelse.getForsendelseId());
 	}
 
 	private void handleError(Throwable error) {

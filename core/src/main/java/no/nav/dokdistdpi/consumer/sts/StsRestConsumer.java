@@ -23,7 +23,7 @@ import static java.util.Objects.requireNonNull;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -61,7 +61,7 @@ public class StsRestConsumer {
 	private HttpEntity<?> httpEntity() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(APPLICATION_JSON);
-		headers.add(NAV_CALL_ID, MDC.get(NAV_CALLID));
+		headers.add(NAV_CALL_ID, MDC.get(CALL_ID));
 		return new HttpEntity<>(headers);
 	}
 }

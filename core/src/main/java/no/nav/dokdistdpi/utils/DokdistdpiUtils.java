@@ -7,8 +7,7 @@ import org.slf4j.MDC;
 import java.util.UUID;
 
 import static java.lang.String.format;
-import static java.util.Objects.isNull;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -37,13 +36,13 @@ public class DokdistdpiUtils {
 	}
 
 	public static void setOrGenerateCallIdToMdc(Exchange exchange) {
-		final String callId = exchange.getIn().getHeader(NAV_CALLID, String.class);
-		if (isNull(callId) || isBlank(callId)) {
+		final String callId = exchange.getIn().getHeader(CALL_ID, String.class);
+		if (isBlank(callId)) {
 			String newCallId = UUID.randomUUID().toString();
-			exchange.getIn().setHeader(NAV_CALLID, newCallId);
-			MDC.put(NAV_CALLID, newCallId);
+			exchange.getIn().setHeader(CALL_ID, newCallId);
+			MDC.put(CALL_ID, newCallId);
 		} else {
-			MDC.put(NAV_CALLID, callId);
+			MDC.put(CALL_ID, callId);
 		}
 	}
 
