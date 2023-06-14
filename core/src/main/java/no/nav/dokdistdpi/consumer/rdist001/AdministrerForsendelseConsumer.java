@@ -2,7 +2,6 @@ package no.nav.dokdistdpi.consumer.rdist001;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
-import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
@@ -29,7 +28,6 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALLID;
 import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -69,21 +67,6 @@ public class AdministrerForsendelseConsumer {
 		} catch (HttpServerErrorException e) {
 			log.error("Kall mot rdist001 - finnForsendelse feilet med {}={}, feilmelding={}", finnForsendelseRequestTo.getOppslagsNoekkel(), finnForsendelseRequestTo.getVerdi(), e.getMessage());
 			throw new AdminstrerForsendelseTechnicalException(format("Kall mot rdist001 - finnFrosendelse feilet teknisk med statusCode=%s,feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
-		}
-	}
-
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public void feilRegistrerForsendelse(FeilRegistrerForsendelseRequest feilRegistrerForsendelse) {
-
-		try {
-			HttpEntity<?> entity = new HttpEntity<>(feilRegistrerForsendelse, createHeaders());
-			restTemplate.exchange(url + "/feilregistrerforsendelse", PUT, entity, Object.class).getBody();
-		} catch (HttpClientErrorException e) {
-			log.error("Kall mot rdist001 - feilet til å feilregistrer forsendelse med forsendelseId={}, feilmelding={}", feilRegistrerForsendelse.getForsendelseId(), e.getMessage());
-			throw new AdminstrerForsendelseFunctionalException(format("Kall mot rdist001 - feilet til å opprette forsendelse med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			log.error("Kall mot rdist001 - feilet til å feilregistrer forsendelse med forsendelseId={}, feilmelding={}", feilRegistrerForsendelse.getForsendelseId(), e.getMessage());
-			throw new AdminstrerForsendelseTechnicalException(format("Kall mot rdist001 - feilet til å opprette forsendelse med statusCode=%s, feilmelding=%s", e.getStatusCode(), e.getMessage()), e);
 		}
 	}
 

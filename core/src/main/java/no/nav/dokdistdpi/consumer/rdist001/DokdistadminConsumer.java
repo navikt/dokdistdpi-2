@@ -5,6 +5,7 @@ import no.nav.dokdistdpi.azure.AzureTokenConsumer;
 import no.nav.dokdistdpi.common.NavHeadersFilter;
 import no.nav.dokdistdpi.config.WebClientAzureAuthentication;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
+import no.nav.dokdistdpi.consumer.rdist001.domain.FeilregistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
@@ -107,6 +108,21 @@ public class DokdistadminConsumer {
 				.block();
 
 		log.info("oppdaterForsendelse har oppdatert forsendelse med forsendelseId={}", oppdaterForsendelse.getForsendelseId());
+	}
+
+	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	public void feilregistrerForsendelse(FeilregistrerForsendelseRequest feilregistrerForsendelse) {
+		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
+
+		webClient.put()
+				.uri("/feilregistrerforsendelse")
+				.bodyValue(feilregistrerForsendelse)
+				.retrieve()
+				.toBodilessEntity()
+				.doOnError(this::handleError)
+				.block();
+
+		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 	}
 
 	private void handleError(Throwable error) {
