@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import static java.lang.String.format;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -126,17 +127,26 @@ public class DokdistadminConsumer {
 	}
 
 	private void handleError(Throwable error) {
-		if (error instanceof WebClientResponseException response && ((WebClientResponseException) error).getStatusCode().is4xxClientError()) {
-			throw new AdminstrerForsendelseFunctionalException(
-					String.format("Kall mot rdist001 feilet funksjonelt med status: %s, feilmelding: %s",
-							response.getRawStatusCode(),
-							response.getMessage()),
-					error);
+		if (!(error instanceof WebClientResponseException response)) {
+			String feilmelding = format("Kall mot rdist001 feilet teknisk med feilmelding=%s", error.getMessage());
+
+			log.warn(feilmelding);
+
+			throw new AdminstrerForsendelseTechnicalException(feilmelding, error);
+		}
+
+		String feilmelding = format("Kall mot rdist001 feilet %s med status=%s, feilmelding=%s, response=%s",
+				response.getStatusCode().is4xxClientError() ? "funksjonelt" : "teknisk",
+				response.getRawStatusCode(),
+				response.getMessage(),
+				response.getResponseBodyAsString());
+
+		log.warn(feilmelding);
+
+		if (response.getStatusCode().is4xxClientError()) {
+			throw new AdminstrerForsendelseFunctionalException(feilmelding, error);
 		} else {
-			throw new AdminstrerForsendelseTechnicalException(
-					String.format("Kall mot rdist001 feilet feilet teknisk med feilmelding: %s", error.getMessage()),
-					error) {
-			};
+			throw new AdminstrerForsendelseTechnicalException(feilmelding, error);
 		}
 	}
 }
