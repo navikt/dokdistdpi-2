@@ -48,6 +48,7 @@ public class Sdist005IT {
 	private static final String OPPRETTFORSENDELSE_URL = "/rest/v1/administrerforsendelse";
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/" + FORSENDELSE_ID;
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
+	private static final String FEILREGISTRERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
 
 	@Value("${leder.host}")
 	private String lederHost;
@@ -135,7 +136,7 @@ public class Sdist005IT {
 	}
 
 	private void stubPutFeilregistrerforsendelse() {
-		stubFor(put("/administrerforsendelse/feilregistrerforsendelse")
+		stubFor(put(FEILREGISTRERFORSENDELSE_URL)
 				.willReturn(aResponse()
 						.withStatus(OK.value())));
 	}

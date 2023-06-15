@@ -6,7 +6,7 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeiletKvittering;
 import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
+import no.nav.dokdistdpi.consumer.rdist001.domain.FeilregistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
@@ -16,7 +16,6 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -43,7 +42,6 @@ public class DpiKvitteringService {
 	private final AdministrerForsendelseConsumer administrerForsendelse;
 	private final DokdistadminConsumer dokdistadminConsumer;
 
-	@Autowired
 	public DpiKvitteringService(AdministrerForsendelseConsumer administrerForsendelse,
 								DokdistadminConsumer dokdistadminConsumer) {
 		this.administrerForsendelse = administrerForsendelse;
@@ -92,17 +90,17 @@ public class DpiKvitteringService {
 	private void createFeilRegistrerForsendelseKvittering(String forsendelseId, DpiMelding dpiMelding,
 														  OpprettForsendelseRequestTo request) {
 		if (dpiMelding instanceof VarslingFeiletKvittering varslingFeiletKvittering) {
-			administrerForsendelse.feilRegistrerForsendelse(FeilRegistrerForsendelseRequest.builder()
-					.forsendelseId(forsendelseId)
-					.type(VARSLINGSFEIL.name())
+			dokdistadminConsumer.feilregistrerForsendelse(FeilregistrerForsendelseRequest.builder()
+					.forsendelseId(Long.valueOf(forsendelseId))
+					.feilTypeCode(VARSLINGSFEIL.name())
 					.tidspunkt(varslingFeiletKvittering.getTidspunkt().toLocalDateTime())
 					.detaljer(varslingFeiletKvittering.getVarslingskanal() + ":" + varslingFeiletKvittering.getBeskrivelse())
 					.resendingDistribusjonId(request.getBestillingsId())
 					.build());
 		} else if (dpiMelding instanceof DpiFeilKvittering dpiFeil) {
-			administrerForsendelse.feilRegistrerForsendelse(FeilRegistrerForsendelseRequest.builder()
-					.forsendelseId(forsendelseId)
-					.type(MELDINGSFEIL.name())
+			dokdistadminConsumer.feilregistrerForsendelse(FeilregistrerForsendelseRequest.builder()
+					.forsendelseId(Long.valueOf(forsendelseId))
+					.feilTypeCode(MELDINGSFEIL.name())
 					.part(dpiFeil.getFeiltype().name())
 					.tidspunkt(dpiFeil.getTidspunkt().toLocalDateTime())
 					.detaljer(dpiFeil.getDetaljer())

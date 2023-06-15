@@ -57,6 +57,7 @@ public class Qdist014IT {
 
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/%s";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
+	private static final String FEILREGISTRERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
 
 	@Autowired
 	private JmsTemplate jmsTemplate;
@@ -299,7 +300,7 @@ public class Qdist014IT {
 		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + konversasjonsId)));
 		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 		verify(count, postRequestedFor(urlMatching("/rest/v1/administrerforsendelse")));
-		verify(count, putRequestedFor(urlMatching("/administrerforsendelse/feilregistrerforsendelse")));
+		verify(count, putRequestedFor(urlMatching(FEILREGISTRERFORSENDELSE_URL)));
 		verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 	}
 
@@ -318,7 +319,7 @@ public class Qdist014IT {
 	}
 
 	private void stubPutFeilregistrerforsendelse(int httpStatusValue) {
-		stubFor(put("/administrerforsendelse/feilregistrerforsendelse")
+		stubFor(put(FEILREGISTRERFORSENDELSE_URL)
 				.willReturn(aResponse()
 						.withStatus(httpStatusValue)));
 	}

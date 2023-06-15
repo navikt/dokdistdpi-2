@@ -7,7 +7,7 @@ import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.UekspedertForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.AvstemForsendelseResponseTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.FeilRegistrerForsendelseRequest;
+import no.nav.dokdistdpi.consumer.rdist001.domain.FeilregistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
@@ -89,9 +89,9 @@ public class Sdist005Service {
 
 		log.info("Sdist005 har opprettet ny forsendelse med forsendelseId={}, bestillingsId={}", nyForsendelseId, bestillingsId);
 
-		administrerForsendelseConsumer.feilRegistrerForsendelse(FeilRegistrerForsendelseRequest.builder()
-				.forsendelseId(feiletForsendelse.getForsendelseId())
-				.type(MELDINGSFEIL.name())
+		dokdistadminConsumer.feilregistrerForsendelse(FeilregistrerForsendelseRequest.builder()
+				.forsendelseId(Long.valueOf(feiletForsendelse.getForsendelseId()))
+				.feilTypeCode(MELDINGSFEIL.name())
 				.part("AKSESSPUNKT")
 				.tidspunkt(feiletForsendelse.getFeiltidspunkt())
 				.detaljer(feiletForsendelse.getFeilbeskrivelse())
