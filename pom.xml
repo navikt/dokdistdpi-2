@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.10</version>
+		<version>2.7.12</version>
 	</parent>
 
 	<groupId>no.nav.dokdistdpi</groupId>
@@ -28,13 +28,14 @@
 	<properties>
 		<java.version>17</java.version>
 
-		<google-cloud.version>26.10.0</google-cloud.version>
-		<google-tink.version>1.8.0</google-tink.version>
+		<google-cloud.version>26.17.0</google-cloud.version>
+		<tink.version>1.9.0</tink.version>
+		<tink-gcpkms.version>1.8.0</tink-gcpkms.version>
 		<bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
-		<camel.version>3.20.2</camel.version>
-		<commons-compress.version>1.22</commons-compress.version>
-		<commons-io.version>2.11.0</commons-io.version>
-		<ibm-mq.version>9.3.2.0</ibm-mq.version>
+		<camel.version>3.20.5</camel.version>
+		<commons-compress.version>1.23.0</commons-compress.version>
+		<commons-io.version>2.13.0</commons-io.version>
+		<ibm-mq.version>9.3.2.1</ibm-mq.version>
 		<logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
 		<nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
 		<resilience4j-spring-boot2.version>2.0.2</resilience4j-spring-boot2.version>
@@ -47,7 +48,7 @@
 		<melding-virksomhet-dokdistfordeling.version>5-7ff79fc</melding-virksomhet-dokdistfordeling.version>
 
 		<!-- Test -->
-		<spring-cloud-contract-wiremock.version>3.1.6</spring-cloud-contract-wiremock.version>
+		<spring-cloud-contract-wiremock.version>3.1.7</spring-cloud-contract-wiremock.version>
 
 		<!-- Plugins -->
 		<maven-toolchains-plugin.version>3.1.0</maven-toolchains-plugin.version>
@@ -149,12 +150,12 @@
 			<dependency>
 				<groupId>com.google.crypto.tink</groupId>
 				<artifactId>tink</artifactId>
-				<version>${google-tink.version}</version>
+				<version>${tink.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.crypto.tink</groupId>
 				<artifactId>tink-gcpkms</artifactId>
-				<version>${google-tink.version}</version>
+				<version>${tink-gcpkms.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.github.resilience4j</groupId>
