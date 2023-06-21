@@ -38,15 +38,15 @@ public class Qdist014Service {
 		String konversasjonsId = dpiMelding.getKonversasjonsId();
 		final String bestillingId = UUID.randomUUID().toString();
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingId);
-		FinnForsendelseResponse finnForsendelseResponse = dpiKvitteringService.finnForsendelse(konversasjonsId);
-		HentForsendelseResponse hentForsendelseResponse = dpiKvitteringService.hentForsendelse(finnForsendelseResponse);
+		String forsendelseId = dpiKvitteringService.finnForsendelse(konversasjonsId);
+		HentForsendelseResponse hentForsendelseResponse = dpiKvitteringService.hentForsendelse(forsendelseId);
 		OpprettForsendelseRequestTo opprettForsendelseRequestTo = mapper.map(hentForsendelseResponse, bestillingId);
 		ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 
 		validateForsendelseStatusErKlarForDist(forsendelseStatus);
 
 		if (isOversendtOrBekreftet(forsendelseStatus)) {
-			distribuerTilKanal = dpiKvitteringService.persistAndCreateNewForsendelse(dpiMelding, opprettForsendelseRequestTo, finnForsendelseResponse.getForsendelseId());
+			distribuerTilKanal = dpiKvitteringService.persistAndCreateNewForsendelse(dpiMelding, opprettForsendelseRequestTo, forsendelseId);
 			exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
 		}
 		return distribuerTilKanal;

@@ -85,7 +85,7 @@ public class DokdistadminConsumer {
 	}
 
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public FinnForsendelseResponse finnForsendelse(final FinnForsendelseRequest finnForsendelseRequest) {
+	public String finnForsendelse(final FinnForsendelseRequest finnForsendelseRequest) {
 		var oppslagsnoekkel = finnForsendelseRequest.getOppslagsnoekkel();
 		var verdi = finnForsendelseRequest.getVerdi();
 
@@ -97,10 +97,11 @@ public class DokdistadminConsumer {
 						.build(oppslagsnoekkel, verdi))
 				.retrieve()
 				.bodyToMono(FinnForsendelseResponse.class)
+				.map(FinnForsendelseResponse::getForsendelseId)
 				.doOnError(this::handleError)
 				.block();
 
-		log.info("finnForsendelse har hentet forsendelse med {}={}", oppslagsnoekkel, verdi);
+		log.info("finnForsendelse har hentet forsendelse med forsendelseId={} og {}={}", response, oppslagsnoekkel, verdi);
 
 		return response;
 	}

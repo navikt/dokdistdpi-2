@@ -45,10 +45,11 @@ public class DpiKvitteringService {
 	}
 
 	boolean erStatusEkspedertOrReturOrFeilet(DpiMelding dpiMelding, Exchange exchange) {
-		FinnForsendelseResponse finnForsendelseResponse = finnForsendelse(dpiMelding.getKonversasjonsId());
-		HentForsendelseResponse hentForsendelseResponse = hentForsendelse(finnForsendelseResponse);
+		String forsendelseId = finnForsendelse(dpiMelding.getKonversasjonsId());
+		HentForsendelseResponse hentForsendelseResponse = hentForsendelse(forsendelseId);
 		assertNotNull("HentForsendelseResponseTo", hentForsendelseResponse);
-		exchange.setProperty(PROPERTY_FORSENDELSE_ID, finnForsendelseResponse.getForsendelseId());
+
+		exchange.setProperty(PROPERTY_FORSENDELSE_ID, forsendelseId);
 		exchange.setProperty(PROPERTY_FORSENDELSE_STATUS, hentForsendelseResponse.getForsendelseStatus());
 
 		return isFerdigstiltForsendelseStatus(ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus()));
@@ -105,13 +106,13 @@ public class DpiKvitteringService {
 		}
 	}
 
-	HentForsendelseResponse hentForsendelse(FinnForsendelseResponse finnForsendelseResponse) {
-		validateFinnForsendelse(finnForsendelseResponse);
-		log.info("Fant forsendelse med forsendelseId={}", finnForsendelseResponse.getForsendelseId());
-		return dokdistadminConsumer.hentForsendelse(finnForsendelseResponse.getForsendelseId());
+	HentForsendelseResponse hentForsendelse(String forsendelseId) {
+		validateFinnForsendelse(forsendelseId);
+		log.info("Fant forsendelse med forsendelseId={}", forsendelseId);
+		return dokdistadminConsumer.hentForsendelse(forsendelseId);
 	}
 
-	FinnForsendelseResponse finnForsendelse(String konversasjonsId) {
+	String finnForsendelse(String konversasjonsId) {
 		assertNotBlank("konversasjonsId", konversasjonsId);
 		FinnForsendelseRequest finnForsendelseRequest = FinnForsendelseRequest.builder()
 				.oppslagsnoekkel(KONVERSASJONS_ID)
@@ -120,10 +121,8 @@ public class DpiKvitteringService {
 		return dokdistadminConsumer.finnForsendelse(finnForsendelseRequest);
 	}
 
-	private void validateFinnForsendelse(FinnForsendelseResponse responseTo) {
-		assertNotNull("FinnForsendelseResponseTo", responseTo);
-		assertNotBlank("FinnForsendelseResponseTo.ForsendelseId", String.valueOf(responseTo.getForsendelseId()));
-
+	private void validateFinnForsendelse(String forsendelseId) {
+		assertNotBlank("ForsendelseId", forsendelseId);
 	}
 
 	private boolean isFerdigstiltForsendelseStatus(ForsendelseStatus forsendelseStatus) {

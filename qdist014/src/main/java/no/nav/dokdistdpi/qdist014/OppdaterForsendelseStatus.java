@@ -35,14 +35,14 @@ public class OppdaterForsendelseStatus {
 	@Handler
 	public void oppdaterForsendelseStatusToEkspedert(DpiMelding dpiMelding, Exchange exchange) {
 		String konversasjonsId = dpiMelding.getKonversasjonsId();
-		FinnForsendelseResponse finnForsendelseResponse = dpiKvitteringService.finnForsendelse(konversasjonsId);
-		HentForsendelseResponse hentForsendelseResponse = dpiKvitteringService.hentForsendelse(finnForsendelseResponse);
+		String forsendelseId = dpiKvitteringService.finnForsendelse(konversasjonsId);
+		HentForsendelseResponse hentForsendelseResponse = dpiKvitteringService.hentForsendelse(forsendelseId);
 		ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
 
 		validateKlarForDistStatus(forsendelseStatus);
 		if (dpiKvitteringService.isOversendtOrBekreftet(forsendelseStatus)) {
-			oppdaterForsendelseStatus(dpiMelding, finnForsendelseResponse.getForsendelseId());
+			oppdaterForsendelseStatus(dpiMelding, forsendelseId);
 		}
 	}
 
