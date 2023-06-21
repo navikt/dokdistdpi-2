@@ -7,11 +7,11 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeil
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilregistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequest;
-import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.Oppslagsnoekkel;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.commons.lang3.StringUtils;
@@ -29,14 +29,13 @@ import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.FEILE
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_FOR_DIST;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.OVERSENDT;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.RETURPOSTBEHANDLET;
+import static no.nav.dokdistdpi.consumer.rdist001.domain.Oppslagsnoekkel.KONVERSASJONSID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_STATUS;
 
 @Slf4j
 @Component
 public class DpiKvitteringService {
-
-	private static final String KONVERSASJONS_ID = "konversasjonsId";
 
 	private final DokdistadminConsumer dokdistadminConsumer;
 
@@ -115,7 +114,7 @@ public class DpiKvitteringService {
 	String finnForsendelse(String konversasjonsId) {
 		assertNotBlank("konversasjonsId", konversasjonsId);
 		FinnForsendelseRequest finnForsendelseRequest = FinnForsendelseRequest.builder()
-				.oppslagsnoekkel(KONVERSASJONS_ID)
+				.oppslagsnoekkel(KONVERSASJONSID)
 				.verdi(konversasjonsId)
 				.build();
 		return dokdistadminConsumer.finnForsendelse(finnForsendelseRequest);

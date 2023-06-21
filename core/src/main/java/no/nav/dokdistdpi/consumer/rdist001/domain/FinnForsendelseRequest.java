@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class FinnForsendelseRequest {
-	private String oppslagsnoekkel;
+	private Oppslagsnoekkel oppslagsnoekkel;
 	private String verdi;
 }

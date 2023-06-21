@@ -86,7 +86,7 @@ public class DokdistadminConsumer {
 
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public String finnForsendelse(final FinnForsendelseRequest finnForsendelseRequest) {
-		var oppslagsnoekkel = finnForsendelseRequest.getOppslagsnoekkel();
+		var oppslagsnoekkel = finnForsendelseRequest.getOppslagsnoekkel().noekkel;
 		var verdi = finnForsendelseRequest.getVerdi();
 
 		log.info("finnForsendelse henter forsendelse med {}={}", oppslagsnoekkel, verdi);
