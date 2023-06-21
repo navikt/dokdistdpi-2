@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.client.OppdaterForsendelseAndVarselRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.map.OppdaterVarselInfoMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.nonNull;
@@ -14,17 +13,14 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_OVER
 @Slf4j
 @Component
 public class DokdistAdministrerForsendelseUpdater {
+
 	private static final String FORSENDELSE_TIL_DPI_COUNTER = "forsendelse_til_dpi_counter";
-	private final AdministrerForsendelseConsumer administrerForsendelse;
 	private final MeterRegistry meterRegistry;
 	private final OppdaterVarselInfoMapper oppdaterVarselInfoMapper;
 	private final DokdistadminConsumer dokdistadminConsumer;
 
-	@Autowired
-	public DokdistAdministrerForsendelseUpdater(AdministrerForsendelseConsumer administrerForsendelse,
-												MeterRegistry meterRegistry,
+	public DokdistAdministrerForsendelseUpdater(MeterRegistry meterRegistry,
 												DokdistadminConsumer dokdistadminConsumer) {
-		this.administrerForsendelse = administrerForsendelse;
 		this.meterRegistry = meterRegistry;
 		this.oppdaterVarselInfoMapper = new OppdaterVarselInfoMapper();
 		this.dokdistadminConsumer = dokdistadminConsumer;

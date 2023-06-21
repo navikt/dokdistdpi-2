@@ -1,7 +1,7 @@
 package no.nav.dokdistdpi.qdist014;
 
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
-import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
@@ -10,7 +10,6 @@ import no.nav.dokdistdpi.exception.functional.InvalidForsendelseStatusException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -27,12 +26,10 @@ public class Qdist014Service {
 	private final DpiKvitteringService dpiKvitteringService;
 	private final OpprettForsendelseMapper mapper;
 
-	@Autowired
 	public Qdist014Service(DpiKvitteringService dpiKvitteringService) {
 		this.dpiKvitteringService = dpiKvitteringService;
 		this.mapper = new OpprettForsendelseMapper();
 	}
-
 
 	@Handler
 	public DistribuerTilKanal handleKvitteringFraDpi(DpiMelding dpiMelding, Exchange exchange) {
@@ -41,7 +38,7 @@ public class Qdist014Service {
 		String konversasjonsId = dpiMelding.getKonversasjonsId();
 		final String bestillingId = UUID.randomUUID().toString();
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingId);
-		FinnForsendelseResponseTo finnForsendelseResponse = dpiKvitteringService.finnForsendelse(konversasjonsId);
+		FinnForsendelseResponse finnForsendelseResponse = dpiKvitteringService.finnForsendelse(konversasjonsId);
 		HentForsendelseResponse hentForsendelseResponse = dpiKvitteringService.hentForsendelse(finnForsendelseResponse);
 		OpprettForsendelseRequestTo opprettForsendelseRequestTo = mapper.map(hentForsendelseResponse, bestillingId);
 		ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());

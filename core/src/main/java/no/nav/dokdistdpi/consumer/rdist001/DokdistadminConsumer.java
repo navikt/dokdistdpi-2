@@ -6,6 +6,8 @@ import no.nav.dokdistdpi.common.NavHeadersFilter;
 import no.nav.dokdistdpi.config.WebClientAzureAuthentication;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilregistrerForsendelseRequest;
+import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequest;
+import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
@@ -42,20 +44,6 @@ public class DokdistadminConsumer {
 				.filter(new NavHeadersFilter())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.build();
-	}
-
-	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public void oppdaterVarselInfo(OppdaterVarselInfoRequest oppdaterVarselInfoRequest) {
-		log.info("oppdaterVarselInfo oppdaterer varselInfo med forsendelseId={}", oppdaterVarselInfoRequest.forsendelseId());
-		webClient.put()
-				.uri("/oppdatervarselinfo")
-				.bodyValue(oppdaterVarselInfoRequest)
-				.retrieve()
-				.toBodilessEntity()
-				.doOnError(this::handleError)
-				.block();
-
-		log.info("oppdaterVarselInfo har oppdatert varselInfo med forsendelseId={}", oppdaterVarselInfoRequest.forsendelseId());
 	}
 
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
@@ -97,6 +85,27 @@ public class DokdistadminConsumer {
 	}
 
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	public FinnForsendelseResponse finnForsendelse(final FinnForsendelseRequest finnForsendelseRequest) {
+		var oppslagsnoekkel = finnForsendelseRequest.getOppslagsnoekkel();
+		var verdi = finnForsendelseRequest.getVerdi();
+
+		log.info("finnForsendelse henter forsendelse med {}={}", oppslagsnoekkel, verdi);
+
+		var response = webClient.get()
+				.uri(uriBuilder -> uriBuilder
+						.path("/finnforsendelse/{oppslagsnoekkel}/{verdi}")
+						.build(oppslagsnoekkel, verdi))
+				.retrieve()
+				.bodyToMono(FinnForsendelseResponse.class)
+				.doOnError(this::handleError)
+				.block();
+
+		log.info("finnForsendelse har hentet forsendelse med {}={}", oppslagsnoekkel, verdi);
+
+		return response;
+	}
+
+	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public void oppdaterForsendelse(OppdaterForsendelseRequest oppdaterForsendelse) {
 		log.info("oppdaterForsendelse oppdaterer forsendelse med forsendelseId={}", oppdaterForsendelse.getForsendelseId());
 
@@ -124,6 +133,20 @@ public class DokdistadminConsumer {
 				.block();
 
 		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
+	}
+
+	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	public void oppdaterVarselInfo(OppdaterVarselInfoRequest oppdaterVarselInfoRequest) {
+		log.info("oppdaterVarselInfo oppdaterer varselInfo med forsendelseId={}", oppdaterVarselInfoRequest.forsendelseId());
+		webClient.put()
+				.uri("/oppdatervarselinfo")
+				.bodyValue(oppdaterVarselInfoRequest)
+				.retrieve()
+				.toBodilessEntity()
+				.doOnError(this::handleError)
+				.block();
+
+		log.info("oppdaterVarselInfo har oppdatert varselInfo med forsendelseId={}", oppdaterVarselInfoRequest.forsendelseId());
 	}
 
 	private void handleError(Throwable error) {

@@ -3,7 +3,6 @@ package no.nav.dokdistdpi.sdist005;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
-import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.UekspedertForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.AvstemForsendelseResponseTo;
@@ -35,17 +34,14 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DISTRIBUSJONS_SDP_KANAL
 @Component
 public class Sdist005Service {
 
-	private final AdministrerForsendelseConsumer administrerForsendelseConsumer;
 	private final UekspedertForsendelseConsumer uekspedertForsendelseConsumer;
 	private final DokdistadminConsumer dokdistadminConsumer;
 	private final DpiClient dpiClient;
 	private final OpprettForsendelseMapper opprettForsendelseMapper;
 
-	public Sdist005Service(AdministrerForsendelseConsumer administrerForsendelseConsumer,
-						   UekspedertForsendelseConsumer uekspedertForsendelseConsumer,
+	public Sdist005Service(UekspedertForsendelseConsumer uekspedertForsendelseConsumer,
 						   DokdistadminConsumer dokdistadminConsumer,
 						   DpiClient dpiClient) {
-		this.administrerForsendelseConsumer = administrerForsendelseConsumer;
 		this.uekspedertForsendelseConsumer = uekspedertForsendelseConsumer;
 		this.dokdistadminConsumer = dokdistadminConsumer;
 		this.dpiClient = dpiClient;

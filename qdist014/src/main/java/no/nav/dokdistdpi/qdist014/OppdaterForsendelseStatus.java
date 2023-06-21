@@ -4,14 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.LeveringsKvittering;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.exception.functional.InvalidForsendelseStatusException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.lang.Long.valueOf;
@@ -27,7 +26,6 @@ public class OppdaterForsendelseStatus {
 	private final DokdistadminConsumer dokdistadminConsumer;
 	private final DpiKvitteringService dpiKvitteringService;
 
-	@Autowired
 	public OppdaterForsendelseStatus(DpiKvitteringService dpiKvitteringService,
 									 DokdistadminConsumer dokdistadminConsumer) {
 		this.dpiKvitteringService = dpiKvitteringService;
@@ -37,7 +35,7 @@ public class OppdaterForsendelseStatus {
 	@Handler
 	public void oppdaterForsendelseStatusToEkspedert(DpiMelding dpiMelding, Exchange exchange) {
 		String konversasjonsId = dpiMelding.getKonversasjonsId();
-		FinnForsendelseResponseTo finnForsendelseResponse = dpiKvitteringService.finnForsendelse(konversasjonsId);
+		FinnForsendelseResponse finnForsendelseResponse = dpiKvitteringService.finnForsendelse(konversasjonsId);
 		HentForsendelseResponse hentForsendelseResponse = dpiKvitteringService.hentForsendelse(finnForsendelseResponse);
 		ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
