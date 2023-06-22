@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
+import no.nav.dokdistdpi.consumer.rdist001.HentUekspederteForsendelserConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilregistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentUekspederteForsendelserResponse.DokumentInfoTo;
@@ -36,12 +37,15 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DISTRIBUSJONS_SDP_KANAL
 public class Sdist005Service {
 
 	private final DokdistadminConsumer dokdistadminConsumer;
+	private final HentUekspederteForsendelserConsumer hentUekspederteForsendelserConsumer;
 	private final DpiClient dpiClient;
 	private final OpprettForsendelseMapper opprettForsendelseMapper;
 
 	public Sdist005Service(DokdistadminConsumer dokdistadminConsumer,
+						   HentUekspederteForsendelserConsumer hentUekspederteForsendelserConsumer,
 						   DpiClient dpiClient) {
 		this.dokdistadminConsumer = dokdistadminConsumer;
+		this.hentUekspederteForsendelserConsumer = hentUekspederteForsendelserConsumer;
 		this.dpiClient = dpiClient;
 		this.opprettForsendelseMapper = new OpprettForsendelseMapper();
 	}
@@ -105,7 +109,7 @@ public class Sdist005Service {
 	}
 
 	private List<UekspedertForsendelse> hentIkkeKvitterteForsendelser() {
-		var response = dokdistadminConsumer.hentForsendelserKvitteringIkkeMottatt(DISTRIBUSJONS_SDP_KANAL, 6);
+		var response = hentUekspederteForsendelserConsumer.hentForsendelserKvitteringIkkeMottatt(DISTRIBUSJONS_SDP_KANAL, 6);
 
 		return response.getUekspederteForsendelser()
 				.stream()
