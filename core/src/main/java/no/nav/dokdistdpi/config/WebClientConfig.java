@@ -6,6 +6,7 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
+import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
 
 @Configuration
@@ -15,6 +16,17 @@ public class WebClientConfig {
 	public WebClient webClient(WebClient.Builder webClientBuilder) {
 		HttpClient httpClient = HttpClient.create()
 				.responseTimeout(ofSeconds(20))
+				.proxyWithSystemProperties();
+		return webClientBuilder
+				.clone()
+				.clientConnector(new ReactorClientHttpConnector(httpClient))
+				.build();
+	}
+
+	@Bean
+	public WebClient webClientLongResponseTimeout(WebClient.Builder webClientBuilder) {
+		HttpClient httpClient = HttpClient.create()
+				.responseTimeout(ofMinutes(10))
 				.proxyWithSystemProperties();
 		return webClientBuilder
 				.clone()
