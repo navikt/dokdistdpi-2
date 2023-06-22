@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class FinnForsendelseResponseTo {
-	private String forsendelseId;
+public class FinnForsendelseRequest {
+	private Oppslagsnoekkel oppslagsnoekkel;
+	private String verdi;
 }

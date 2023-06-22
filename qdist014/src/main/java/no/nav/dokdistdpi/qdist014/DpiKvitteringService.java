@@ -4,15 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeiletKvittering;
-import no.nav.dokdistdpi.consumer.rdist001.AdministrerForsendelseConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilregistrerForsendelseRequest;
-import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequestTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponseTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.Oppslagsnoekkel;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +29,7 @@ import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.FEILE
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_FOR_DIST;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.OVERSENDT;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.RETURPOSTBEHANDLET;
+import static no.nav.dokdistdpi.consumer.rdist001.domain.Oppslagsnoekkel.KONVERSASJONSID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_STATUS;
 
@@ -37,22 +37,18 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ST
 @Component
 public class DpiKvitteringService {
 
-	private static final String KONVERSASJONS_ID = "konversasjonsId";
-
-	private final AdministrerForsendelseConsumer administrerForsendelse;
 	private final DokdistadminConsumer dokdistadminConsumer;
 
-	public DpiKvitteringService(AdministrerForsendelseConsumer administrerForsendelse,
-								DokdistadminConsumer dokdistadminConsumer) {
-		this.administrerForsendelse = administrerForsendelse;
+	public DpiKvitteringService(DokdistadminConsumer dokdistadminConsumer) {
 		this.dokdistadminConsumer = dokdistadminConsumer;
 	}
 
 	boolean erStatusEkspedertOrReturOrFeilet(DpiMelding dpiMelding, Exchange exchange) {
-		FinnForsendelseResponseTo finnForsendelseResponse = finnForsendelse(dpiMelding.getKonversasjonsId());
-		HentForsendelseResponse hentForsendelseResponse = hentForsendelse(finnForsendelseResponse);
+		String forsendelseId = finnForsendelse(dpiMelding.getKonversasjonsId());
+		HentForsendelseResponse hentForsendelseResponse = hentForsendelse(forsendelseId);
 		assertNotNull("HentForsendelseResponseTo", hentForsendelseResponse);
-		exchange.setProperty(PROPERTY_FORSENDELSE_ID, finnForsendelseResponse.getForsendelseId());
+
+		exchange.setProperty(PROPERTY_FORSENDELSE_ID, forsendelseId);
 		exchange.setProperty(PROPERTY_FORSENDELSE_STATUS, hentForsendelseResponse.getForsendelseStatus());
 
 		return isFerdigstiltForsendelseStatus(ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus()));
@@ -109,25 +105,23 @@ public class DpiKvitteringService {
 		}
 	}
 
-	HentForsendelseResponse hentForsendelse(FinnForsendelseResponseTo finnForsendelseResponse) {
-		validateFinnForsendelse(finnForsendelseResponse);
-		log.info("Fant forsendelse med forsendelseId={}", finnForsendelseResponse.getForsendelseId());
-		return dokdistadminConsumer.hentForsendelse(finnForsendelseResponse.getForsendelseId());
+	HentForsendelseResponse hentForsendelse(String forsendelseId) {
+		validateFinnForsendelse(forsendelseId);
+		log.info("Fant forsendelse med forsendelseId={}", forsendelseId);
+		return dokdistadminConsumer.hentForsendelse(forsendelseId);
 	}
 
-	FinnForsendelseResponseTo finnForsendelse(String konversasjonsId) {
+	String finnForsendelse(String konversasjonsId) {
 		assertNotBlank("konversasjonsId", konversasjonsId);
-		FinnForsendelseRequestTo finnForsendelseRequest = FinnForsendelseRequestTo.builder()
-				.oppslagsNoekkel(KONVERSASJONS_ID)
+		FinnForsendelseRequest finnForsendelseRequest = FinnForsendelseRequest.builder()
+				.oppslagsnoekkel(KONVERSASJONSID)
 				.verdi(konversasjonsId)
 				.build();
-		return administrerForsendelse.finnForsendelse(finnForsendelseRequest);
+		return dokdistadminConsumer.finnForsendelse(finnForsendelseRequest);
 	}
 
-	private void validateFinnForsendelse(FinnForsendelseResponseTo responseTo) {
-		assertNotNull("FinnForsendelseResponseTo", responseTo);
-		assertNotBlank("FinnForsendelseResponseTo.ForsendelseId", String.valueOf(responseTo.getForsendelseId()));
-
+	private void validateFinnForsendelse(String forsendelseId) {
+		assertNotBlank("ForsendelseId", forsendelseId);
 	}
 
 	private boolean isFerdigstiltForsendelseStatus(ForsendelseStatus forsendelseStatus) {

@@ -53,9 +53,11 @@ public class Qdist014IT {
 	private static final String FORSENDELSE_ID = "1720847";
 	private static final String KONVERSASJON_ID = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
 	private static final String KONVERSASJON_ID_VAR = "2049057a-9b53-41bb-9cc3-d10f55fa0f87";
+	private static final String OPPSLAGSNOEKKEL_KONVERSASJONSID = "konversasjonsId";
 	private static String CALL_ID;
 
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/%s";
+	private static final String FINNFORSENDELSE_URL = "/rest/v1/administrerforsendelse/finnforsendelse/%s/%s";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 	private static final String FEILREGISTRERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
 
@@ -93,7 +95,7 @@ public class Qdist014IT {
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/leveringskvittering.json"));
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
-			verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
+			verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
 			verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 		});
@@ -186,7 +188,7 @@ public class Qdist014IT {
 			assertNotNull(response);
 		});
 
-		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
+		verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
 		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 
 	}
@@ -203,7 +205,7 @@ public class Qdist014IT {
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
-			verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
+			verify(1, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
 			verify(1, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 		});
 	}
@@ -225,7 +227,7 @@ public class Qdist014IT {
 
 		});
 
-		verify(1, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
+		verify(1, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
 	}
 
 	@Test
@@ -244,7 +246,7 @@ public class Qdist014IT {
 			assertNotNull(response);
 		});
 
-		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + KONVERSASJON_ID)));
+		verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
 		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 	}
 
@@ -297,7 +299,7 @@ public class Qdist014IT {
 	}
 
 	private void verifyAndCountDpiForsendelse(int count, String konversasjonsId) {
-		verify(2, getRequestedFor(urlEqualTo("/administrerforsendelse/finnforsendelse?konversasjonsId=" + konversasjonsId)));
+		verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, konversasjonsId))));
 		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 		verify(count, postRequestedFor(urlMatching("/rest/v1/administrerforsendelse")));
 		verify(count, putRequestedFor(urlMatching(FEILREGISTRERFORSENDELSE_URL)));
@@ -325,7 +327,7 @@ public class Qdist014IT {
 	}
 
 	void stubGetFinnForsendelse(String responseBody, String konversasjonsId, int httpStatusValue) throws IOException {
-		stubFor(get("/administrerforsendelse/finnforsendelse?konversasjonsId=" + konversasjonsId)
+		stubFor(get(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, konversasjonsId))
 				.willReturn(aResponse()
 						.withStatus(httpStatusValue)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
