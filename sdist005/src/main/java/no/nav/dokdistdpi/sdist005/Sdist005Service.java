@@ -4,10 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.UekspedertForsendelseConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.domain.AvstemForsendelseResponseTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FeilregistrerForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentUekspederteForsendelserResponse.DokumentInfoTo;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentUekspederteForsendelserResponse.UekspedertForsendelse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.map.OpprettForsendelseMapper;
@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarselType.MELDINGSFEIL;
@@ -34,15 +35,12 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DISTRIBUSJONS_SDP_KANAL
 @Component
 public class Sdist005Service {
 
-	private final UekspedertForsendelseConsumer uekspedertForsendelseConsumer;
 	private final DokdistadminConsumer dokdistadminConsumer;
 	private final DpiClient dpiClient;
 	private final OpprettForsendelseMapper opprettForsendelseMapper;
 
-	public Sdist005Service(UekspedertForsendelseConsumer uekspedertForsendelseConsumer,
-						   DokdistadminConsumer dokdistadminConsumer,
+	public Sdist005Service(DokdistadminConsumer dokdistadminConsumer,
 						   DpiClient dpiClient) {
-		this.uekspedertForsendelseConsumer = uekspedertForsendelseConsumer;
 		this.dokdistadminConsumer = dokdistadminConsumer;
 		this.dpiClient = dpiClient;
 		this.opprettForsendelseMapper = new OpprettForsendelseMapper();
@@ -51,9 +49,9 @@ public class Sdist005Service {
 	@Handler
 	public List<DistribuerTilKanal> hentStatusFraAksesspunkt(Exchange exchange) {
 		log.info("Sdist005 leter etter ukvitterte forsendelser");
-		List<AvstemForsendelseResponseTo> ikkeKvitterteForsendelser = hentIkkeKvitterteForsendelser();
+		List<UekspedertForsendelse> ikkeKvitterteForsendelser = hentIkkeKvitterteForsendelser();
 		if (ikkeKvitterteForsendelser.isEmpty()) {
-			return List.of();
+			return emptyList();
 		}
 		log.info("Sdist005 fant antall={} ikke-kvitterte forsendelser", ikkeKvitterteForsendelser.size());
 
@@ -106,17 +104,19 @@ public class Sdist005Service {
 		return nyForsendelseId;
 	}
 
-	private List<AvstemForsendelseResponseTo> hentIkkeKvitterteForsendelser() {
-		return uekspedertForsendelseConsumer.hentForsendelserKvitteringIkkeMottatt(DISTRIBUSJONS_SDP_KANAL, 6)
+	private List<UekspedertForsendelse> hentIkkeKvitterteForsendelser() {
+		var response = dokdistadminConsumer.hentForsendelserKvitteringIkkeMottatt(DISTRIBUSJONS_SDP_KANAL, 6);
+
+		return response.getUekspederteForsendelser()
 				.stream()
 				.filter(f -> OVERSENDT.name().equals(f.getDistribusjonStatus()))
 				.toList();
 	}
 
-	private List<FeiletForsendelseTo> finnFeiledeForsendelser(List<AvstemForsendelseResponseTo> ikkeKvitterteForsendelser) {
+	private List<FeiletForsendelseTo> finnFeiledeForsendelser(List<UekspedertForsendelse> ikkeKvitterteForsendelser) {
 		return ikkeKvitterteForsendelser.stream()
 				.map(f -> {
-					final AvstemForsendelseResponseTo.DokumentInfoTo dokumentInfoTo = f.getDokumenter().get(0);
+					final DokumentInfoTo dokumentInfoTo = f.getDokumenter().get(0);
 					var feiletForsendelse = hentForsendelseStatuser(dokumentInfoTo.getKonversasjonId());
 					if (feiletForsendelse.isPresent()) {
 						ForsendelseStatusResponse forsendelseStatusResponse = feiletForsendelse.get();

@@ -1,29 +1,26 @@
 package no.nav.dokdistdpi.consumer.rdist001.domain;
 
-
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * Subsett av respons fra /henteuekspederforsendelse
- * Kun feltene denne appen behøver.
- */
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class AvstemForsendelseResponseTo {
+public class HentUekspederteForsendelserResponse {
 
-	private String distribusjonId;
-	private List<DokumentInfoTo> dokumenter;
-	private String distribusjonKanal;
-	private String distribusjonStatus;
-	private String opprettetDato;
-	private String distribusjonDato;
+	private List<UekspedertForsendelse> uekspederteForsendelser;
+
+	@Data
+	@Builder
+	public static class UekspedertForsendelse {
+		private String distribusjonId;
+		private List<DokumentInfoTo> dokumenter;
+		private String distribusjonKanal;
+		private String distribusjonStatus;
+		private String opprettetDato;
+		private String distribusjonDato;
+	}
 
 	@Data
 	@Builder

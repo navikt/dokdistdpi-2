@@ -10,6 +10,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
+import no.nav.dokdistdpi.consumer.rdist001.domain.HentUekspederteForsendelserResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterVarselInfoRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
@@ -23,6 +24,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static java.lang.String.format;
+import static java.time.Duration.ofMinutes;
+import static java.util.Collections.emptyList;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -31,6 +34,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 @Component
 public class DokdistadminConsumer {
+
+	private final HentUekspederteForsendelserResponse EMPTY_UEKSPEDERTEFORSENDELSER = HentUekspederteForsendelserResponse.builder()
+			.uekspederteForsendelser(emptyList())
+			.build();
 
 	private final WebClient webClient;
 
@@ -134,6 +141,25 @@ public class DokdistadminConsumer {
 				.block();
 
 		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
+	}
+
+	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	public HentUekspederteForsendelserResponse hentForsendelserKvitteringIkkeMottatt(String distribusjonskanal, int antallTimer) {
+		log.info("hentForsendelserKvitteringIkkeMottatt henter uekspederte forsendelser med distribusjonskanal={}, antallTimer={}",
+				distribusjonskanal, antallTimer);
+
+		var response = webClient.get()
+				.uri("/hentuekspederteforsendelser/{distribusjonkanal}/{antallTimer}", distribusjonskanal, antallTimer)
+				.retrieve()
+				.bodyToMono(HentUekspederteForsendelserResponse.class)
+				.timeout(ofMinutes(10)) // potensielt tidkrevende kall
+				.defaultIfEmpty(EMPTY_UEKSPEDERTEFORSENDELSER) // Håndtering av HttpStatus NO_CONTENT (204)
+				.doOnError(this::handleError)
+				.block();
+		log.info("hentForsendelserKvitteringIkkeMottatt har hentet {} uekspederte forsendelser med distribusjonskanal={}, antallTimer={}",
+				response == null ? 0 : response.getUekspederteForsendelser().size(), distribusjonskanal, antallTimer);
+
+		return response;
 	}
 
 	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))

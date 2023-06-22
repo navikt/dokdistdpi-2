@@ -1,23 +1,25 @@
-[
-  {
-    "distribusjonId": "ff88849c-e281-4809-8555-7cd54952b916",
-    "resendingDistribusjonId": null,
-    "originalDistribusjonId": null,
-    "dokumenter": [
-      {
-        "forsendelseId": "5265784",
-        "dokumentId": "ff88849c-e281-4809-8555-7cd54952b916",
-        "dokumentStatus": "OVERSENDT",
-        "konversasjonId": "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
-        "bestillendeFagsystem": "FORELDREPENGER",
-        "fagomradeCode": "FOR",
-        "journalpostId": "23017",
-        "brevProduksjonApplikasjon": "FORELDREPENGER"
-      }
-    ],
-    "distribusjonKanal": "SDP",
-    "distribusjonStatus": "OVERSENDT",
-    "opprettetDato": "2020-01-14 13:00:48",
-    "distribusjonDato": "2020-01-14 13:00:48"
-  }
-]
+{
+  "uekspederteForsendelser": [
+    {
+      "distribusjonId": "ff88849c-e281-4809-8555-7cd54952b916",
+      "resendingDistribusjonId": null,
+      "originalDistribusjonId": null,
+      "dokumenter": [
+        {
+          "forsendelseId": "5265784",
+          "dokumentId": "ff88849c-e281-4809-8555-7cd54952b916",
+          "dokumentStatus": "OVERSENDT",
+          "konversasjonId": "37efbd4c-413d-4e2c-bbc5-257ef4a65a45",
+          "bestillendeFagsystem": "FORELDREPENGER",
+          "fagomradeCode": "FOR",
+          "journalpostId": "23017",
+          "brevProduksjonApplikasjon": "FORELDREPENGER"
+        }
+      ],
+      "distribusjonKanal": "SDP",
+      "distribusjonStatus": "OVERSENDT",
+      "opprettetDato": "2020-01-14 13:00:48",
+      "distribusjonDato": "2020-01-14 13:00:48"
+    }
+  ]
+}

@@ -26,6 +26,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static java.lang.String.format;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -48,6 +49,7 @@ public class Sdist005IT {
 	private static final String OPPRETTFORSENDELSE_URL = "/rest/v1/administrerforsendelse";
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/" + FORSENDELSE_ID;
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
+	private static final String HENTUEKSPEDERTEFORSENDELSER_URL = "/rest/v1/administrerforsendelse/hentuekspederteforsendelser/%s/%s";
 	private static final String FEILREGISTRERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
 
 	@Value("${leder.host}")
@@ -73,7 +75,7 @@ public class Sdist005IT {
 		when(lederElection.isLeader()).thenReturn(true);
 		stubAzure();
 		stubPostMaskinporten();
-		stubHentUekspedertForsendelse();
+		stubHentUekspederteForsendelser();
 		stubHentForsendelseStatus(KONVERSASJON_ID);
 		stubHentForsendelse();
 		stubPostOpprettForsendelse();
@@ -103,8 +105,8 @@ public class Sdist005IT {
 						.withStatus(OK.value())));
 	}
 
-	private void stubHentUekspedertForsendelse() {
-		stubFor(get(urlMatching("/administrerforsendelse/henteuekspederforsendelse/SDP/6"))
+	private void stubHentUekspederteForsendelser() {
+		stubFor(get(urlMatching(format(HENTUEKSPEDERTEFORSENDELSER_URL, "SDP", 6)))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
