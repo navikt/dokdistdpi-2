@@ -8,7 +8,6 @@
   ],
   "DPI_URL": "https://srest.dataplatfor.ms/dpi/messages",
   "DPI_MPCKANAL": "dokdistdpi-p",
-  "ADMINISTRERFORSENDELSE_URL": "https://app.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "DOKUMENTTYPEINFO_V4_URL": "https://dokmet.intern.nav.no/rest/dokumenttypeinfo",
   "VARSELINFO_URL": "https://dokmet.intern.nav.no/rest/varselinfo",
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://prod-fss.teamdokumenthandtering.dokdistadmin/.default",

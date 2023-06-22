@@ -6,12 +6,9 @@ import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalExcept
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.CamelContext;
-import org.apache.camel.ExchangePattern;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.jms.Queue;
@@ -20,6 +17,8 @@ import java.io.IOException;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
+import static org.apache.camel.ExchangePattern.InOnly;
+import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 
 @Component
@@ -36,7 +35,6 @@ public class Sdist005Route extends RouteBuilder {
 	private final Queue qdist009;
 	private final DokdistdpiProperties.Sdist005 sdist005Properties;
 
-	@Autowired
 	public Sdist005Route(CamelContext context,
 						 LederElectionConsumer lederElection,
 						 Sdist005Service sdist005Service,
@@ -56,32 +54,32 @@ public class Sdist005Route extends RouteBuilder {
 		onException(AbstractDokdistdpiFunctionalException.class, RuntimeCamelException.class)
 				.id(FUNCTIONAL_ERROR_HANDLER)
 				.handled(true)
-				.log(LoggingLevel.ERROR, log, "Sdist005 feilet funksjonelt. ${exception}.");
+				.log(ERROR, log, "Sdist005 feilet funksjonelt. ${exception}.");
 
 		onException(AbstractDokdistdpiTechnicalException.class, IOException.class)
 				.id(TECHNICAL_ERROR_HANDLER)
 				.handled(true)
 				.logStackTrace(true)
-				.log(LoggingLevel.ERROR, log, "Sdist005 feilet teknisk. ${exception}.");
+				.log(ERROR, log, "Sdist005 feilet teknisk. ${exception}.");
 
 		onException(Exception.class)
 				.id(UNKNOWN_ERROR_HANDLER)
 				.handled(true)
 				.logStackTrace(true)
-				.log(LoggingLevel.ERROR, log, "Sdist005 feilet med ukjent feil. ${exception}.");
+				.log(ERROR, log, "Sdist005 feilet med ukjent feil. ${exception}.");
 
 		from(sdist005Properties.camelUri())
 				.routeId(ROUTEID + "-dpiScheduler")
 				.autoStartup(sdist005Properties.isAutostartup())
 				.process(new Sdist005HeaderProcessor())
-				.setExchangePattern(ExchangePattern.InOnly)
+				.setExchangePattern(InOnly)
 				.choice()
 					.when(method(lederElection, "isLeader").isEqualTo(true))
-						.setExchangePattern(ExchangePattern.InOnly)
+						.setExchangePattern(InOnly)
 						.bean(sdist005Service)
 						.choice()
 							.when(simple("${body.size}").isEqualTo(0))
-								.log(LoggingLevel.INFO, log, "Sdist005 fant ingen feilede forsendelser")
+								.log(INFO, log, "Sdist005 fant ingen feilede forsendelser")
 						.otherwise()
 							.split(simple("${body}"))
 								.setProperty(PROPERTY_FORSENDELSE_ID, simple("${body.forsendelseId}"))

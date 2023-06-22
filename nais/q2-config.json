@@ -8,7 +8,6 @@
   ],
   "DPI_URL": "https://srest.qa.dataplatfor.ms/dpi/messages",
   "DPI_MPCKANAL": "dokdistdpi-q",
-  "ADMINISTRERFORSENDELSE_URL": "https://app-q2.adeo.no/dokdist/rest/v1/administrerforsendelse",
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://dev-fss.teamdokumenthandtering.dokdistadmin/.default",
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_URL": "https://dokdistadmin.dev.intern.nav.no/rest/v1/administrerforsendelse",
   "DOKUMENTTYPEINFO_V4_URL": "https://dokmet.dev.intern.nav.no/rest/dokumenttypeinfo",
