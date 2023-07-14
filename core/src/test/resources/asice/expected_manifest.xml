@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<manifest xmlns="http://begrep.difi.no/sdp/schema_v10">
+	<mottaker>
+		<person>
+			<personidentifikator>04036125433</personidentifikator>
+			<postkasseadresse>ove.jonsen#6K5A</postkasseadresse>
+		</person>
+	</mottaker>
+	<avsender>
+		<organisasjon authority="iso6523-actorid-upis">0192:889640782</organisasjon>
+	</avsender>
+	<hoveddokument href="hoveddokument.pdf" mime="application/pdf">
+		<tittel lang="no">Ikke-sensitiv tittel for forsendelsen</tittel>
+	</hoveddokument>
+	<vedlegg href="test1.pdf" mime="application/pdf">
+		<tittel lang="no">Ikke-sensitiv tittel for forsendelsen</tittel>
+	</vedlegg>
+	<vedlegg href="test2.pdf" mime="application/pdf">
+		<tittel lang="no">Ikke-sensitiv tittel for forsendelsen</tittel>
+	</vedlegg>
+</manifest>

@@ -58,7 +58,6 @@ public class XmlManifestCreator {
 	}
 
 	private Dokument mapDokument(DpiDokument dpiDokument) {
-
 		Tittel tittel = new Tittel();
 		tittel.setLang(DOKUMENT_LANG);
 		tittel.setValue(dpiDokument.getTittel());

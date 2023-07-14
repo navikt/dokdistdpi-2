@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument.fromHoveddokument;
 import static no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument.fromVedlegg;
 import static no.nav.dokdistdpi.utils.ForsendelseData.forsendelse;
@@ -57,6 +58,7 @@ class AsiceCreatorTest {
 						"test1.pdf",
 						"test2.pdf",
 						"META-INF/signatures.xml"));
+		assertFileContents(zipEntries, "manifest.xml", IOUtils.resourceToString("/asice/expected_manifest.xml", UTF_8));
 		assertFileContents(zipEntries, HOVEDDOKUMENT_NAME, HOVEDDOKUMENT_CONTENTS);
 		assertFileContents(zipEntries, DOKUMENT_1_NAME, DOKUMENT_1_CONTENTS);
 		assertFileContents(zipEntries, DOKUMENT_2_NAME, DOKUMENT_2_CONTENTS);
@@ -81,11 +83,11 @@ class AsiceCreatorTest {
 	}
 
 	private void assertFileContents(List<ZipFile> zipEntries, String filename, String expectedFileContents) {
-		final ZipFile digitalPostMeldingXml = zipEntries.stream()
+		final ZipFile zipFile = zipEntries.stream()
 				.filter(z -> filename.equals(z.getName()))
 				.findFirst()
 				.orElseThrow(IllegalStateException::new);
-		assertEquals(digitalPostMeldingXml.getContentsAsString(), expectedFileContents);
+		assertThat(zipFile.getContentsAsString()).isEqualToIgnoringWhitespace(expectedFileContents);
 	}
 
 }
