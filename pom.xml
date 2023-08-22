@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.13</version>
+		<version>3.1.1</version>
 	</parent>
 
 	<groupId>no.nav.dokdistdpi</groupId>
@@ -32,23 +32,30 @@
 		<tink.version>1.9.0</tink.version>
 		<tink-gcpkms.version>1.8.0</tink-gcpkms.version>
 		<bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
-		<camel.version>3.21.0</camel.version>
+		<camel.version>4.0.0</camel.version>
 		<commons-compress.version>1.23.0</commons-compress.version>
 		<commons-io.version>2.13.0</commons-io.version>
-		<ibm-mq.version>9.3.2.1</ibm-mq.version>
+		<ibm.mq.client.version>9.3.3.0</ibm.mq.client.version>
 		<logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
 		<nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
 		<resilience4j-spring-boot2.version>2.1.0</resilience4j-spring-boot2.version>
+		<httpclient.version>4.5.14</httpclient.version>
+		<org.apache.cxf.xjcplugins.version>4.0.0</org.apache.cxf.xjcplugins.version>
+
+		<hisrc-jaxb.version>2.1.0</hisrc-jaxb.version>
+		<jaxb-xew-plugin.version>2.1</jaxb-xew-plugin.version>
+		<!-- plugins -->
+		<hisrc-jaxb.version>2.1.0</hisrc-jaxb.version>
 
 		<!-- Digipost -->
-		<sdp-xsd.version>3.1.1</sdp-xsd.version>
+		<sdp-xsd.version>4.0.1</sdp-xsd.version>
 
 		<!-- NAV -->
 		<dokmet.api.version>13-5459a4f</dokmet.api.version>
-		<melding-virksomhet-dokdistfordeling.version>5-7ff79fc</melding-virksomhet-dokdistfordeling.version>
+		<melding-virksomhet-dokdistfordeling.version>6-4049b35</melding-virksomhet-dokdistfordeling.version>
 
 		<!-- Test -->
-		<spring-cloud-contract-wiremock.version>3.1.7</spring-cloud-contract-wiremock.version>
+		<spring-cloud-contract-wiremock.version>4.0.4</spring-cloud-contract-wiremock.version>
 
 		<!-- Plugins -->
 		<maven-toolchains-plugin.version>3.1.0</maven-toolchains-plugin.version>
@@ -91,7 +98,6 @@
 				<artifactId>app</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<!--Apache -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -114,8 +120,8 @@
 			<!--IBM MQ -->
 			<dependency>
 				<groupId>com.ibm.mq</groupId>
-				<artifactId>com.ibm.mq.allclient</artifactId>
-				<version>${ibm-mq.version}</version>
+				<artifactId>com.ibm.mq.jakarta.client</artifactId>
+				<version>${ibm.mq.client.version}</version>
 			</dependency>
 
 			<dependency>
@@ -158,6 +164,18 @@
 				<version>${tink-gcpkms.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${httpclient.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
 				<groupId>io.github.resilience4j</groupId>
 				<artifactId>resilience4j-spring-boot2</artifactId>
 				<version>${resilience4j-spring-boot2.version}</version>
@@ -174,6 +192,16 @@
 				<version>${dokmet.api.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.patrodyne.jvnet</groupId>
+				<artifactId>hisrc-basicjaxb-plugins</artifactId>
+				<version>${hisrc-jaxb.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.patrodyne.jvnet</groupId>
+				<artifactId>hisrc-hyperjaxb-annox-plugin</artifactId>
+				<version>${hisrc-jaxb.version}</version>
+			</dependency>
 			<!-- test -->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
@@ -190,6 +218,11 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>artemis-jakarta-server</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -198,6 +231,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-toolchains-plugin</artifactId>

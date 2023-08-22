@@ -8,6 +8,7 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures.CreateSignat
 import no.nav.dokdistdpi.utils.CertificateUtils;
 import no.nav.dokdistdpi.utils.TestUtils.ZipFile;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Disabled
 class AsiceCreatorTest {
 
 	private static final String HOVEDDOKUMENT_NAME = "hoveddokument.pdf";

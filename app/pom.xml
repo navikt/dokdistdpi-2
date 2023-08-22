@@ -33,6 +33,7 @@
 			<groupId>no.nav.dokdistdpi</groupId>
 			<artifactId>sdist005</artifactId>
 		</dependency>
+
 	</dependencies>
 
 	<build>

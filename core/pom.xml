@@ -17,7 +17,6 @@
 			<groupId>no.nav.dokdistdpi</groupId>
 			<artifactId>dpischema</artifactId>
 		</dependency>
-
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -61,10 +60,6 @@
 			<artifactId>resilience4j-spring-boot2</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>no.nav.dokmet</groupId>
 			<artifactId>api</artifactId>
 		</dependency>
@@ -81,14 +76,22 @@
 			<artifactId>tink-gcpkms</artifactId>
 		</dependency>
 
+		<!-- Runtime-avhengigheit brukt av google-cloud-storage -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 		<!-- apache -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-jms-pool</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -132,9 +135,12 @@
 		</dependency>
 		<dependency>
 			<groupId>com.ibm.mq</groupId>
-			<artifactId>com.ibm.mq.allclient</artifactId>
+			<artifactId>com.ibm.mq.jakarta.client</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>org.messaginghub</groupId>
+			<artifactId>pooled-jms</artifactId>
+		</dependency>
 		<!--Encryption-->
 		<dependency>
 			<groupId>no.digipost</groupId>
@@ -144,7 +150,10 @@
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+		</dependency>
 		<!--Caching-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -163,11 +172,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-broker</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

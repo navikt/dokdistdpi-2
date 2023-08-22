@@ -1,13 +1,13 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.xmlmanifest;
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import no.difi.begrep.sdp.schema_v10.Manifest;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.io.OutputStream;
 
 @Slf4j

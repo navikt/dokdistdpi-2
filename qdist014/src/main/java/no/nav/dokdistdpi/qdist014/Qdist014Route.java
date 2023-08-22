@@ -1,5 +1,6 @@
 package no.nav.dokdistdpi.qdist014;
 
+import jakarta.jms.Queue;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.qdist014.map.ForretningsKvitteringMapper;
@@ -14,10 +15,9 @@ import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.jms.Queue;
-import javax.xml.bind.JAXBContext;
 import java.nio.charset.StandardCharsets;
 
+import static jakarta.xml.bind.JAXBContext.newInstance;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
@@ -94,7 +94,7 @@ public class Qdist014Route extends RouteBuilder {
 								.log(INFO, log,"qdist014 har oppdatert forsendelse med " + getIdsForLogging() + " til EKSPEDERT")
 							.when(or(simple("${body.kvitteringType}").isEqualTo(VARSLINGFEILET), simple("${body.kvitteringType}").isEqualTo(FEILET)))
 								.bean(qdist014Service)
-								.marshal(new JaxbDataFormat(JAXBContext.newInstance(DistribuerTilKanal.class)))
+								.marshal(new JaxbDataFormat(newInstance(DistribuerTilKanal.class)))
 								.convertBodyTo(String.class, StandardCharsets.UTF_8.toString())
 								.to("jms:" + qdist009.getQueueName())
 								.log(INFO, log,"qdist014 har lagt forsendelse med " + getIdsForLogging() + " på kø til qdist009 for distribusjon av forsendelse")

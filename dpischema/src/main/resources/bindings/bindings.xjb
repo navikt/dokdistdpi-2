@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<jaxb:bindings version="3.0"
+			   xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+			   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+			   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			   xsi:schemaLocation="https://jakarta.ee/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd"
+			   xmlns:annox="http://jvnet.org/basicjaxb/xjc/annox"
+			   jaxb:extensionBindingPrefixes="annox">
+	<jaxb:bindings schemaLocation="../xsd/sdpmanifest.xsd" node="/xs:schema">
+		<jaxb:globalBindings generateElementProperty="false"/>
+		<jaxb:bindings node="xs:complexType[@name='Manifest']">
+			<annox:annotate>
+				<annox:annotate annox:class="jakarta.xml.bind.annotation.XmlRootElement" name="manifest"/>
+			</annox:annotate>
+		</jaxb:bindings>
+	</jaxb:bindings>
+</jaxb:bindings>

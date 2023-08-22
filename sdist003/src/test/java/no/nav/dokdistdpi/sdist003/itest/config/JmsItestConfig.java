@@ -1,16 +1,16 @@
 package no.nav.dokdistdpi.sdist003.itest.config;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.RedeliveryPolicy;
-import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.command.ActiveMQQueue;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Queue;
+import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
+import org.messaginghub.pooled.jms.JmsPoolConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Queue;
 
 @Configuration
 @Profile("itest")
@@ -47,18 +47,18 @@ public class JmsItestConfig {
 	}
 
 	@Bean(initMethod = "start", destroyMethod = "stop")
-	public BrokerService broker() {
-		BrokerService service = new BrokerService();
-		service.setPersistent(false);
-		return service;
+	public EmbeddedActiveMQ activeMQServer() {
+		EmbeddedActiveMQ embeddedActiveMQ = new EmbeddedActiveMQ();
+		embeddedActiveMQ.setConfigResourcePath("artemis-server.xml");
+		return embeddedActiveMQ;
 	}
 
 	@Bean
-	public ConnectionFactory activemqConnectionFactory() {
-		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://localhost?create=false");
-		RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-		redeliveryPolicy.setMaximumRedeliveries(0);
-		activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy);
-		return activeMQConnectionFactory;
+	public ConnectionFactory activemqConnectionFactory(EmbeddedActiveMQ embeddedActiveMQ) {
+		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://0");
+		JmsPoolConnectionFactory pooledFactory = new JmsPoolConnectionFactory();
+		pooledFactory.setConnectionFactory(activeMQConnectionFactory);
+		pooledFactory.setMaxConnections(1);
+		return pooledFactory;
 	}
 }

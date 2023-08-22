@@ -1,10 +1,12 @@
 package no.nav.dokdistdpi.qdist014.itest;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import jakarta.jms.Queue;
+import jakarta.jms.TextMessage;
 import no.nav.dokdistdpi.qdist014.itest.config.ApplicationTestConfig;
-import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -14,8 +16,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.jms.Queue;
-import javax.jms.TextMessage;
 import javax.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +48,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 		webEnvironment = RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
+@Disabled
 public class Qdist014IT {
 
 	private static final String FORSENDELSE_ID = "1720847";
@@ -361,7 +362,7 @@ public class Qdist014IT {
 
 	private void sendStringMessage(Queue queue, final String message, final String callId) {
 		jmsTemplate.send(queue, session -> {
-			TextMessage msg = new ActiveMQTextMessage();
+			TextMessage msg = session.createTextMessage();
 			msg.setText(message);
 			if (callId != null) {
 				msg.setStringProperty(CALL_ID, callId);

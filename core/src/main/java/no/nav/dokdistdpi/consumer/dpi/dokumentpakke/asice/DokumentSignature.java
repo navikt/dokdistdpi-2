@@ -1,8 +1,8 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.asice;
 
+import jakarta.activation.DataSource;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 
-import javax.activation.DataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

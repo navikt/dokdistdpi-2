@@ -2,6 +2,7 @@ package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures;
 
 import lombok.extern.slf4j.Slf4j;
 import no.digipost.org.w3.xmldsig.X509IssuerSerialType;
+import no.digipost.org.w3.xmldsig.DigestMethod;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import org.etsi.uri._01903.v1_3.CertIDType;
@@ -31,7 +32,7 @@ import static org.apache.commons.codec.digest.DigestUtils.sha1;
 @Component
 public class CreateXAdESArtifacts {
 
-	private static final no.digipost.org.w3.xmldsig.DigestMethod sha1DigestMethod = new no.digipost.org.w3.xmldsig.DigestMethod(emptyList(), SHA1);
+	private static final DigestMethod sha1DigestMethod = new DigestMethod(emptyList(), SHA1);
 	private final Clock clock;
 
 	@Autowired
