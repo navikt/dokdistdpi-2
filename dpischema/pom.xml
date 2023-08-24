@@ -41,6 +41,10 @@
 						</goals>
 						<configuration>
 							<schemaDirectory>src/main/resources/xsd</schemaDirectory>
+							<schemaIncludes>
+								<schemaInclude>XAdES.xsd</schemaInclude>
+								<schemaInclude>sdpmanifest.xsd</schemaInclude>
+							</schemaIncludes>
 							<bindingDirectory>src/main/resources/bindings</bindingDirectory>
 							<plugins>
 								<dependency>

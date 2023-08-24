@@ -21,31 +21,6 @@ public class JmsItestConfig {
 		return new ActiveMQQueue(qdist014QueueName);
 	}
 
-	@Bean
-	public Queue qdist014FunksjonellFeil(@Value("${dokdistdpi_qdist014_funk_feil.queuename}") String qdist014FunksjonellFeil) {
-		return new ActiveMQQueue(qdist014FunksjonellFeil);
-	}
-
-	@Bean
-	public Queue qdist009(@Value("${dokdistsentralprint_qdist009_dist_s_print.queuename}") String qdist009QueueName) {
-		return new ActiveMQQueue(qdist009QueueName);
-	}
-
-	@Bean
-	public Queue qdist011(@Value("${dokdistdpi_qdist011_dist_til_dpi.queuename}") String qdist011QueueName) {
-		return new ActiveMQQueue(qdist011QueueName);
-	}
-
-	@Bean
-	public Queue qdist011FunksjonellFeil(@Value("${dokdistdpi_qdist011_funk_feil.queuename}") String qdist011FunksjonellFeil) {
-		return new ActiveMQQueue(qdist011FunksjonellFeil);
-	}
-
-	@Bean
-	public Queue backoutQueue() {
-		return new ActiveMQQueue("ActiveMQ.DLQ");
-	}
-
 	@Bean(initMethod = "start", destroyMethod = "stop")
 	public EmbeddedActiveMQ activeMQServer() {
 		EmbeddedActiveMQ embeddedActiveMQ = new EmbeddedActiveMQ();

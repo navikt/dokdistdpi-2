@@ -143,10 +143,6 @@
 		</dependency>
 		<!--Encryption-->
 		<dependency>
-			<groupId>no.digipost</groupId>
-			<artifactId>sdp-xsd</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
 		</dependency>

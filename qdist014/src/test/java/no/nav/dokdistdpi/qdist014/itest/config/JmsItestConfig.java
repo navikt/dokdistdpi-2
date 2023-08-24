@@ -16,6 +16,8 @@ import jakarta.jms.Queue;
 @Profile("itest")
 public class JmsItestConfig {
 
+	public static final String QDIST014_BQ = "qdist014Bq";
+
 	@Bean
 	public Queue qdist014(@Value("${dokdistdpi_qdist014_kvittering_fra_dpi.queuename}") String qdist014QueueName) {
 		return new ActiveMQQueue(qdist014QueueName);
@@ -43,7 +45,7 @@ public class JmsItestConfig {
 
 	@Bean
 	public Queue backoutQueue() {
-		return new ActiveMQQueue("ActiveMQ.DLQ");
+		return new ActiveMQQueue(QDIST014_BQ);
 	}
 
 	@Bean(initMethod = "start", destroyMethod = "stop")

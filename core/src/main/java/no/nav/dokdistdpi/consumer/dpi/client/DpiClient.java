@@ -110,7 +110,7 @@ public class DpiClient {
 		}
 	}
 
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public List<ForsendelseStatusResponse> hentForsendelseStatus(String konversasjonId) {
 
 		String uri = UriComponentsBuilder
@@ -130,7 +130,7 @@ public class DpiClient {
 		}
 	}
 
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public ResponseEntity<HentKvitteringResponse[]> hentKvittering() {
 
 		String uri = UriComponentsBuilder
@@ -149,7 +149,7 @@ public class DpiClient {
 		}
 	}
 
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public HttpStatusCode bekreft(String konversasjonId) {
 
 		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl())

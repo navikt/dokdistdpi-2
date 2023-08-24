@@ -14,4 +14,21 @@
 			</annox:annotate>
 		</jaxb:bindings>
 	</jaxb:bindings>
+	<jaxb:bindings schemaLocation="../xsd/XAdES.xsd" node="/xs:schema">
+		<jaxb:bindings node="xs:complexType[@name='QualifyingPropertiesType']">
+			<annox:annotate>
+				<annox:annotate annox:class="jakarta.xml.bind.annotation.XmlRootElement" name="QualifyingProperties"/>
+			</annox:annotate>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:complexType[@name='SignedPropertiesType']">
+			<annox:annotate>
+				<annox:annotate annox:class="jakarta.xml.bind.annotation.XmlRootElement" name="SignedProperties"/>
+			</annox:annotate>
+		</jaxb:bindings>
+		<jaxb:bindings node="xs:complexType[@name='UnsignedPropertiesType']">
+			<annox:annotate>
+				<annox:annotate annox:class="jakarta.xml.bind.annotation.XmlRootElement" name="UnsignedProperties"/>
+			</annox:annotate>
+		</jaxb:bindings>
+	</jaxb:bindings>
 </jaxb:bindings>

@@ -47,9 +47,6 @@
 		<!-- plugins -->
 		<hisrc-jaxb.version>2.1.0</hisrc-jaxb.version>
 
-		<!-- Digipost -->
-		<sdp-xsd.version>4.0.1</sdp-xsd.version>
-
 		<!-- NAV -->
 		<dokmet.api.version>13-5459a4f</dokmet.api.version>
 		<melding-virksomhet-dokdistfordeling.version>6-4049b35</melding-virksomhet-dokdistfordeling.version>
@@ -131,11 +128,6 @@
 			</dependency>
 
 			<!--Encryption-->
-			<dependency>
-				<groupId>no.digipost</groupId>
-				<artifactId>sdp-xsd</artifactId>
-				<version>${sdp-xsd.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>

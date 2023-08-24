@@ -1,9 +1,10 @@
 package no.nav.dokdistdpi.sdist005;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import jakarta.jms.Queue;
+import jakarta.xml.bind.JAXBElement;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,8 +14,6 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
-import jakarta.jms.Queue;
-import javax.xml.bind.JAXBElement;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -42,7 +41,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 		webEnvironment = RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("itest")
-@Disabled
 public class Sdist005IT {
 
 	private static final String KONVERSASJON_ID = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
@@ -84,7 +82,7 @@ public class Sdist005IT {
 		stubPutFeilregistrerforsendelse();
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 
-		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
 		});
