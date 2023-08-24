@@ -46,7 +46,7 @@ public class XmlManifestCreator {
 		manifest.setAvsender(avsender);
 		manifest.setMottaker(mottaker);
 		manifest.setHoveddokument(hoveddokument);
-		dokumentpakke.getVedlegg().forEach(dokument ->
+		dokumentpakke.getVedlegg().stream().forEach(dokument ->
 				manifest.getVedleggs().add(mapDokument(dokument))
 		);
 
