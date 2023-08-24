@@ -4,15 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import org.etsi.uri._01903.v1_3.CertIDType;
-import org.etsi.uri._01903.v1_3.DataObjectFormatType;
+import org.etsi.uri._01903.v1_3.DataObjectFormat;
 import org.etsi.uri._01903.v1_3.DigestAlgAndValueType;
-import org.etsi.uri._01903.v1_3.QualifyingPropertiesType;
-import org.etsi.uri._01903.v1_3.SignedDataObjectPropertiesType;
-import org.etsi.uri._01903.v1_3.SignedPropertiesType;
-import org.etsi.uri._01903.v1_3.SignedSignaturePropertiesType;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.etsi.uri._01903.v1_3.QualifyingProperties;
+import org.etsi.uri._01903.v1_3.SignedDataObjectProperties;
+import org.etsi.uri._01903.v1_3.SignedProperties;
+import org.etsi.uri._01903.v1_3.SignedSignatureProperties;
 import org.springframework.stereotype.Component;
-import org.w3._2000._09.xmldsig_.DigestMethodType;
+import org.w3._2000._09.xmldsig_.DigestMethod;
 import org.w3._2000._09.xmldsig_.X509IssuerSerialType;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -20,7 +19,6 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.time.Clock;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,13 +31,7 @@ import static org.apache.commons.codec.digest.DigestUtils.sha1;
 @Component
 public class CreateXAdESArtifacts {
 
-	private static final DigestMethodType sha1DigestMethod = new DigestMethodType();
-	private final Clock clock;
-
-	@Autowired
-	CreateXAdESArtifacts(Clock clock) {
-		this.clock = clock;
-	}
+	private static final DigestMethod sha1DigestMethod = new DigestMethod();
 
 	XAdESArtifacts createArtifactsToSign(List<AsicEVedlegg> files, AppCertificate appCertificate) {
 		sha1DigestMethod.setAlgorithm(SHA1);
@@ -58,19 +50,19 @@ public class CreateXAdESArtifacts {
 			certIDType.setCertDigest(certificateDigest);
 			certIDType.setIssuerSerial(certificateIssuer);
 
-			SignedSignaturePropertiesType signedSignatureProperties = new SignedSignaturePropertiesType();
+			SignedSignatureProperties signedSignatureProperties = new SignedSignatureProperties();
 			signedSignatureProperties.setSigningTime(getSigningTime());
 			signedSignatureProperties.setSigningCertificate(singletonList(certIDType));
 
-			SignedDataObjectPropertiesType signedDataObjectProperties = new SignedDataObjectPropertiesType();
-			signedDataObjectProperties.getDataObjectFormat().addAll(dataObjectFormats(files));
+			SignedDataObjectProperties signedDataObjectProperties = new SignedDataObjectProperties();
+			signedDataObjectProperties.getDataObjectFormats().addAll(dataObjectFormats(files));
 
-			SignedPropertiesType signedProperties = new SignedPropertiesType();
+			SignedProperties signedProperties = new SignedProperties();
 			signedProperties.setSignedSignatureProperties(signedSignatureProperties);
 			signedProperties.setSignedDataObjectProperties(signedDataObjectProperties);
 			signedProperties.setId("SignedProperties");
 
-			QualifyingPropertiesType qualifyingProperties = new QualifyingPropertiesType();
+			QualifyingProperties qualifyingProperties = new QualifyingProperties();
 			qualifyingProperties.setSignedProperties(signedProperties);
 			qualifyingProperties.setTarget("#Signature");
 
@@ -81,14 +73,14 @@ public class CreateXAdESArtifacts {
 		}
 	}
 
-	private static List<DataObjectFormatType> dataObjectFormats(List<AsicEVedlegg> files) {
+	private static List<DataObjectFormat> dataObjectFormats(List<AsicEVedlegg> files) {
 		AtomicInteger count = new AtomicInteger(0);
 		return files.stream().map(file -> {
 			String signatureElementIdReference = "#ID_" + count.getAndIncrement();
-			DataObjectFormatType dataObjectFormatType = new DataObjectFormatType();
-			dataObjectFormatType.setMimeType(file.getMimeType());
-			dataObjectFormatType.setObjectReference(signatureElementIdReference);
-			return dataObjectFormatType;
+			DataObjectFormat dataObjectFormat = new DataObjectFormat();
+			dataObjectFormat.setMimeType(file.getMimeType());
+			dataObjectFormat.setObjectReference(signatureElementIdReference);
+			return dataObjectFormat;
 		}).toList();
 	}
 

@@ -73,7 +73,7 @@ public class CreateSignature {
 	}
 
 	public CreateSignature(Clock clock) {
-		this(new CreateXAdESArtifacts(clock));
+		this(new CreateXAdESArtifacts());
 	}
 
 	public CreateSignature(CreateXAdESArtifacts createXAdESProperties) {

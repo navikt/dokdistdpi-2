@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures;
 
-import org.etsi.uri._01903.v1_3.QualifyingPropertiesType;
+import org.etsi.uri._01903.v1_3.QualifyingProperties;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -27,10 +27,10 @@ public class XAdESArtifacts {
 
 	static {
 		marshaller = new Jaxb2Marshaller();
-		marshaller.setClassesToBeBound(QualifyingPropertiesType.class);
+		marshaller.setClassesToBeBound(QualifyingProperties.class);
 	}
 
-	public static XAdESArtifacts from(QualifyingPropertiesType qualifyingProperties) {
+	public static XAdESArtifacts from(QualifyingProperties qualifyingProperties) {
 		DOMResult domResult = new DOMResult();
 		marshaller.marshal(qualifyingProperties, domResult);
 		return from((Document) domResult.getNode());

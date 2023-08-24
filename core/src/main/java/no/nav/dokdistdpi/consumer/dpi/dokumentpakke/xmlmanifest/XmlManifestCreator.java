@@ -46,8 +46,8 @@ public class XmlManifestCreator {
 		manifest.setAvsender(avsender);
 		manifest.setMottaker(mottaker);
 		manifest.setHoveddokument(hoveddokument);
-		dokumentpakke.getVedlegg().stream().forEach(dokument ->
-				manifest.getVedlegg().add(mapDokument(dokument))
+		dokumentpakke.getVedlegg().forEach(dokument ->
+				manifest.getVedleggs().add(mapDokument(dokument))
 		);
 
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
