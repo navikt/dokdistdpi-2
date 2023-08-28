@@ -2,11 +2,14 @@ package no.nav.dokdistdpi.sdist003;
 
 import com.nimbusds.jose.JOSEObject;
 import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.jms.JMSException;
+import jakarta.jms.Queue;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.HentKvitteringResponse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
+import no.nav.dokdistdpi.exception.technical.JmsTechnicalException;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import no.nav.dokdistdpi.exception.technical.KunneIkkeHentKvitteringException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
@@ -17,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import jakarta.jms.Queue;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -76,7 +78,11 @@ public class Sdist003Service {
 						SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(payload);
 						KvitteringType kvitteringType = getKvitteringType(simpleSbd);
 						log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getConversationId(), kvitteringType);
-						producerTemplate.sendBody("jms:" + qdist014, payload);
+						try {
+							producerTemplate.sendBody("jms:" + qdist014.getQueueName(), payload);
+						} catch (JMSException e) {
+							throw new JmsTechnicalException("Kunne ikke skrive melding til qdist014", e);
+						}
 						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
 
 						juridiskLoggService.lagreJuridiskLogg(payload);

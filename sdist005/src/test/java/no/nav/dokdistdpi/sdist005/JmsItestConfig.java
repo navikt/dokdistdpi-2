@@ -22,7 +22,7 @@ public class JmsItestConfig {
 
 	@Bean
 	public Queue backoutQueue() {
-		return new ActiveMQQueue("ActiveMQ.DLQ");
+		return new ActiveMQQueue("qdist009Bq");
 	}
 
 	@Bean(initMethod = "start", destroyMethod = "stop")

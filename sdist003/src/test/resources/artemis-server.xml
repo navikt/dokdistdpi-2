@@ -15,14 +15,9 @@
 		</address-settings>
 
 		<addresses>
-			<address name="qdist011">
+			<address name="qdist014">
 				<anycast>
-					<queue name="qdist011"/>
-				</anycast>
-			</address>
-			<address name="qdist011FunkFeil">
-				<anycast>
-					<queue name="qdist011FunkFeil"/>
+					<queue name="qdist014"/>
 				</anycast>
 			</address>
 			<address name="qdist014Bq">
@@ -33,16 +28,6 @@
 			<address name="qdist014FunkFeil">
 				<anycast>
 					<queue name="qdist014FunkFeil"/>
-				</anycast>
-			</address>
-			<address name="qdist014">
-				<anycast>
-					<queue name="qdist014"/>
-				</anycast>
-			</address>
-			<address name="qdist009">
-				<anycast>
-					<queue name="qdist009"/>
 				</anycast>
 			</address>
 		</addresses>

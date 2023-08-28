@@ -1,15 +1,12 @@
 package no.nav.dokdistdpi.sdist003.itest;
 
-import com.github.tomakehurst.wiremock.admin.model.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import jakarta.jms.Queue;
 import jakarta.xml.bind.JAXBElement;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import no.nav.dokdistdpi.sdist003.TestUtil;
 import no.nav.dokdistdpi.sdist003.itest.config.ApplicationTestConfig;
-import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.listAllStubMappings;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -69,7 +65,6 @@ public class Sdist003ITest {
 	@Autowired
 	private CacheManager cacheManager;
 
-
 	@BeforeEach
 	void setUp() {
 		System.setProperty("ELECTOR_PATH", lederHost);
@@ -80,15 +75,13 @@ public class Sdist003ITest {
 	}
 
 	@Test
-	@Disabled
 	public void shouldGetKvitteringFromDpiAccessPoint() {
 		when(lederElection.isLeader()).thenReturn(true);
 		stubGetKvittering();
 		stubPostMottattKvittering();
 		stubPostMaskinporten();
 		stubPostJuridiskLogg(HttpStatus.OK, "__files/juridisklogg/juridiskloggresponse.json");
-		ListStubMappingsResult stubs = listAllStubMappings();
-		await().atMost(60, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String message = receive(qdist014);
 			assertNotNull(message);
 		});
