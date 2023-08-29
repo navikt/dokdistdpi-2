@@ -8,6 +8,7 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures.CreateSignat
 import no.nav.dokdistdpi.utils.CertificateUtils;
 import no.nav.dokdistdpi.utils.TestUtils.ZipFile;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;

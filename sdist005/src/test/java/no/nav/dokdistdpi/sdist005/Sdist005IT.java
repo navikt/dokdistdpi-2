@@ -1,6 +1,8 @@
 package no.nav.dokdistdpi.sdist005;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import jakarta.jms.Queue;
+import jakarta.xml.bind.JAXBElement;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,8 +14,6 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.jms.Queue;
-import javax.xml.bind.JAXBElement;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -82,7 +82,7 @@ public class Sdist005IT {
 		stubPutFeilregistrerforsendelse();
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 
-		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
 		});

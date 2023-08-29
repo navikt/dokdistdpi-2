@@ -22,65 +22,51 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.15.1</version>
+				<groupId>org.patrodyne.jvnet</groupId>
+				<artifactId>hisrc-higherjaxb30-maven-plugin</artifactId>
+				<version>${hisrc-jaxb.version}</version>
 				<dependencies>
 					<dependency>
-						<groupId>org.glassfish.jaxb</groupId>
-						<artifactId>jaxb-runtime</artifactId>
-						<version>2.3.5</version>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+						<version>${glassfish-jaxb.version}</version>
 					</dependency>
 				</dependencies>
-				<configuration>
-					<strict>false</strict>
-					<plugins>
-						<plugin>
-							<groupId>org.jvnet.jaxb2_commons</groupId>
-							<artifactId>jaxb2-basics</artifactId>
-							<version>1.11.1</version>
-						</plugin>
-						<plugin>
-							<groupId>org.jvnet.jaxb2_commons</groupId>
-							<artifactId>jaxb2-basics-annotate</artifactId>
-							<version>1.1.0</version>
-						</plugin>
-						<plugin>
-							<groupId>org.jvnet.jaxb2_commons</groupId>
-							<artifactId>jaxb2-fluent-api</artifactId>
-							<version>3.0</version>
-						</plugin>
-						<plugin>
-							<groupId>com.github.jaxb-xew-plugin</groupId>
-							<artifactId>jaxb-xew-plugin</artifactId>
-							<version>1.11</version>
-						</plugin>
-					</plugins>
-					<args>
-						<arg>-Xxew</arg>
-						<arg>-Xannotate</arg>
-						<arg>-Xfluent-api</arg>
-					</args>
-				</configuration>
 				<executions>
 					<execution>
-						<id>xsd-generate</id>
+						<id>generate-jaxb-sdp</id>
 						<phase>generate-sources</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<schemaDirectory>${basedir}/src/main/resources</schemaDirectory>
+							<schemaDirectory>src/main/resources/xsd</schemaDirectory>
 							<schemaIncludes>
-								<include>sdpmanifest.xsd</include>
+								<schemaInclude>XAdES.xsd</schemaInclude>
+								<schemaInclude>sdpmanifest.xsd</schemaInclude>
 							</schemaIncludes>
-							<bindingDirectory>
-								${basedir}/src/main/resources
-							</bindingDirectory>
-							<bindingIncludes>
-								<include>bindings.xjb</include>
-							</bindingIncludes>
-							<generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+							<bindingDirectory>src/main/resources/bindings</bindingDirectory>
+							<plugins>
+								<dependency>
+									<groupId>org.patrodyne.jvnet</groupId>
+									<artifactId>hisrc-basicjaxb-plugins</artifactId>
+									<version>${hisrc-jaxb.version}</version>
+								</dependency>
+								<plugin>
+									<groupId>org.patrodyne.jvnet</groupId>
+									<artifactId>hisrc-hyperjaxb-annox-plugin</artifactId>
+									<version>${hisrc-jaxb.version}</version>
+								</plugin>
+								<plugin>
+									<groupId>com.github.jaxb-xew-plugin</groupId>
+									<artifactId>jaxb-xew-plugin</artifactId>
+									<version>${jaxb-xew-plugin.version}</version>
+								</plugin>
+							</plugins>
+							<args>
+								<arg>-Xxew</arg>
+								<arg>-Xannotate</arg>
+							</args>
 						</configuration>
 					</execution>
 				</executions>

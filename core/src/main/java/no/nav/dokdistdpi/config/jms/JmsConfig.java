@@ -1,27 +1,27 @@
 package no.nav.dokdistdpi.config.jms;
 
-import com.ibm.mq.jms.MQConnectionFactory;
-import com.ibm.mq.jms.MQQueue;
+import com.ibm.mq.jakarta.jms.MQConnectionFactory;
+import com.ibm.mq.jakarta.jms.MQQueue;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.JMSException;
+import jakarta.jms.Queue;
 import no.nav.dokdistdpi.config.prop.MqGatewayProperties;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
-import org.apache.activemq.jms.pool.PooledConnectionFactory;
+import org.messaginghub.pooled.jms.JmsPoolConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jms.connection.UserCredentialsConnectionFactoryAdapter;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.Queue;
 import javax.net.ssl.SSLSocketFactory;
-import java.util.concurrent.TimeUnit;
 
 import static com.ibm.mq.constants.CMQC.MQENC_NATIVE;
-import static com.ibm.msg.client.jms.JmsConstants.JMS_IBM_CHARACTER_SET;
-import static com.ibm.msg.client.jms.JmsConstants.JMS_IBM_ENCODING;
-import static com.ibm.msg.client.jms.JmsConstants.USERID;
-import static com.ibm.msg.client.wmq.common.CommonConstants.WMQ_CM_CLIENT;
+import static com.ibm.msg.client.jakarta.jms.JmsConstants.JMS_IBM_CHARACTER_SET;
+import static com.ibm.msg.client.jakarta.jms.JmsConstants.JMS_IBM_ENCODING;
+import static com.ibm.msg.client.jakarta.jms.JmsConstants.USERID;
+import static com.ibm.msg.client.jakarta.wmq.common.CommonConstants.WMQ_CM_CLIENT;
+
 
 @Configuration
 @Profile({"nais", "local"})
@@ -65,8 +65,8 @@ public class JmsConfig {
 		return createConnectionFactory(mqGatewayProperties, serviceuserProperties);
 	}
 
-	private PooledConnectionFactory createConnectionFactory(final MqGatewayProperties mqGatewayProperties,
-															final ServiceuserProperties serviceuserProperties) throws JMSException {
+	private JmsPoolConnectionFactory createConnectionFactory(final MqGatewayProperties mqGatewayProperties,
+															 final ServiceuserProperties serviceuserProperties) throws JMSException {
 		MQConnectionFactory mqConnectionFactory = new MQConnectionFactory();
 		mqConnectionFactory.setHostName(mqGatewayProperties.getHostname());
 		mqConnectionFactory.setPort(mqGatewayProperties.getPort());
@@ -91,12 +91,10 @@ public class JmsConfig {
 		adapter.setUsername(serviceuserProperties.getUsername());
 		adapter.setPassword(serviceuserProperties.getPassword());
 
-		PooledConnectionFactory pooledFactory = new PooledConnectionFactory();
+		JmsPoolConnectionFactory pooledFactory = new JmsPoolConnectionFactory();
 		pooledFactory.setConnectionFactory(adapter);
 		pooledFactory.setMaxConnections(10);
-		pooledFactory.setMaximumActiveSessionPerConnection(10);
-		pooledFactory.setReconnectOnException(true);
-		pooledFactory.setExpiryTimeout(TimeUnit.HOURS.toMillis(24));
+		pooledFactory.setMaxSessionsPerConnection(10);
 		return pooledFactory;
 	}
 }

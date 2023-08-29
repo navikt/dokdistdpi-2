@@ -38,7 +38,6 @@ public class AsiceCreator {
 		this.createSignature = createSignature;
 	}
 
-
 	public OutputStream createAsiceStreamed(Forsendelse forsendelse, AppCertificate appCertificate) throws IOException {
 		DpiDokument hoveddokument = forsendelse.getDokumentpakke().getHoveddokument();
 		List<DpiDokument> vedlegg = forsendelse.getDokumentpakke().getVedlegg();

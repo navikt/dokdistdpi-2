@@ -2,7 +2,6 @@ package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.xmlmanifest;
 
 import no.difi.begrep.sdp.schema_v10.Avsender;
 import no.difi.begrep.sdp.schema_v10.Dokument;
-import no.difi.begrep.sdp.schema_v10.Iso6523Authority;
 import no.difi.begrep.sdp.schema_v10.Manifest;
 import no.difi.begrep.sdp.schema_v10.Mottaker;
 import no.difi.begrep.sdp.schema_v10.Organisasjon;
@@ -14,8 +13,8 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 
 import java.io.ByteArrayOutputStream;
-import java.util.List;
 
+import static no.difi.begrep.sdp.schema_v10.Iso6523Authority.ISO_6523_ACTORID_UPIS;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 
@@ -27,30 +26,29 @@ public class XmlManifestCreator {
 		Dokumentpakke dokumentpakke = forsendelse.getDokumentpakke();
 		DigitalPost digitalPostInfo = forsendelse.getDigital();
 
-		Organisasjon organisasjon = new Organisasjon()
-				.withAuthority(Iso6523Authority.ISO_6523_ACTORID_UPIS)
-				.withValue(asIso6523(NAV_ORGNUMMER));
+		Organisasjon organisasjon = new Organisasjon();
+		organisasjon.setAuthority(ISO_6523_ACTORID_UPIS);
+		organisasjon.setValue(asIso6523(NAV_ORGNUMMER));
 
-		Avsender avsender = new Avsender()
-				.withOrganisasjon(organisasjon);
+		Avsender avsender = new Avsender();
+		avsender.setOrganisasjon(organisasjon);
 
-		Person person = new Person()
-				.withPersonidentifikator(forsendelse.getPersonidentifikator())
-				.withPostkasseadresse(digitalPostInfo.getMottaker().getPostkasseadresse());
-		Mottaker mottaker = new Mottaker()
-				.withPerson(person);
+		Person person = new Person();
+		person.setPersonidentifikator(forsendelse.getPersonidentifikator());
+		person.setPostkasseadresse(digitalPostInfo.getMottaker().getPostkasseadresse());
+		Mottaker mottaker = new Mottaker();
+		mottaker.setPerson(person);
 
 		Dokument hoveddokument = mapDokument(dokumentpakke.getHoveddokument());
 
-		List<Dokument> vedlegg = dokumentpakke.getVedlegg().stream()
-				.map(this::mapDokument)
-				.toList();
+		Manifest manifest = new Manifest();
 
-		Manifest manifest = new Manifest()
-				.withAvsender(avsender)
-				.withMottaker(mottaker)
-				.withHoveddokument(hoveddokument)
-				.withVedlegg(vedlegg);
+		manifest.setAvsender(avsender);
+		manifest.setMottaker(mottaker);
+		manifest.setHoveddokument(hoveddokument);
+		dokumentpakke.getVedlegg().stream().forEach(dokument ->
+				manifest.getVedleggs().add(mapDokument(dokument))
+		);
 
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		MarshalManifest.marshal(manifest, os);
@@ -61,9 +59,11 @@ public class XmlManifestCreator {
 		Tittel tittel = new Tittel();
 		tittel.setLang(DOKUMENT_LANG);
 		tittel.setValue(dpiDokument.getTittel());
-		return new Dokument()
-				.withTittel(tittel)
-				.withMime(dpiDokument.getMimeType())
-				.withHref(dpiDokument.getFilnavn());
+		Dokument dokument = new Dokument();
+		dokument.setTittel(tittel);
+		dokument.setMime(dpiDokument.getMimeType());
+		dokument.setHref(dpiDokument.getFilnavn());
+
+		return dokument;
 	}
 }

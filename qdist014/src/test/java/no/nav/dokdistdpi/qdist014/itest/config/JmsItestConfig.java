@@ -1,20 +1,22 @@
 package no.nav.dokdistdpi.qdist014.itest.config;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.RedeliveryPolicy;
-import org.apache.activemq.broker.BrokerService;
-import org.apache.activemq.command.ActiveMQQueue;
+import jakarta.jms.ConnectionFactory;
+import org.apache.activemq.artemis.core.server.embedded.EmbeddedActiveMQ;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
+import org.messaginghub.pooled.jms.JmsPoolConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Queue;
+import jakarta.jms.Queue;
 
 @Configuration
 @Profile("itest")
 public class JmsItestConfig {
+
+	public static final String QDIST014_BQ = "qdist014Bq";
 
 	@Bean
 	public Queue qdist014(@Value("${dokdistdpi_qdist014_kvittering_fra_dpi.queuename}") String qdist014QueueName) {
@@ -43,22 +45,22 @@ public class JmsItestConfig {
 
 	@Bean
 	public Queue backoutQueue() {
-		return new ActiveMQQueue("ActiveMQ.DLQ");
+		return new ActiveMQQueue(QDIST014_BQ);
 	}
 
 	@Bean(initMethod = "start", destroyMethod = "stop")
-	public BrokerService broker() {
-		BrokerService service = new BrokerService();
-		service.setPersistent(false);
-		return service;
+	public EmbeddedActiveMQ activeMQServer() {
+		EmbeddedActiveMQ embeddedActiveMQ = new EmbeddedActiveMQ();
+		embeddedActiveMQ.setConfigResourcePath("artemis-server.xml");
+		return embeddedActiveMQ;
 	}
 
 	@Bean
-	public ConnectionFactory activemqConnectionFactory() {
-		ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://localhost?create=false");
-		RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-		redeliveryPolicy.setMaximumRedeliveries(0);
-		activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy);
-		return activeMQConnectionFactory;
+	public ConnectionFactory activemqConnectionFactory(EmbeddedActiveMQ embeddedActiveMQ) {
+		org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory("vm://0");
+		JmsPoolConnectionFactory pooledFactory = new JmsPoolConnectionFactory();
+		pooledFactory.setConnectionFactory(activeMQConnectionFactory);
+		pooledFactory.setMaxConnections(1);
+		return pooledFactory;
 	}
 }

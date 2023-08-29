@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.qdist011;
 
-import com.ibm.msg.client.jms.DetailedJMSException;
+import com.ibm.msg.client.jakarta.jms.DetailedJMSException;
 import no.nav.dokdistdpi.common.MDCHeaderProcessor;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.dpi.DpiMeldingsformidler;
@@ -15,8 +15,8 @@ import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.jms.Queue;
-import javax.xml.bind.JAXBContext;
+import jakarta.jms.Queue;
+import jakarta.xml.bind.JAXBContext;
 
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.OPPRETTET;
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.SENDT;

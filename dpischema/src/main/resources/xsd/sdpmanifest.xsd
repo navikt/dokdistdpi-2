@@ -4,7 +4,7 @@
 			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 			elementFormDefault="qualified">
 
-	<xsd:include schemaLocation="sdpfelles.xsd"/>
+	<xsd:include schemaLocation="../felles/sdpfelles.xsd"/>
 
 	<xsd:element name="manifest" type="Manifest"/>
 
@@ -50,8 +50,8 @@
 			</xsd:annotation>
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
-					<xsd:minLength value="4" />
-					<xsd:maxLength value="100" />
+					<xsd:minLength value="4"/>
+					<xsd:maxLength value="100"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
@@ -63,8 +63,8 @@
 			</xsd:annotation>
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
-					<xsd:minLength value="1" />
-					<xsd:maxLength value="100" />
+					<xsd:minLength value="1"/>
+					<xsd:maxLength value="100"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
@@ -81,7 +81,7 @@
 
 	<xsd:simpleType name="HttpLenke">
 		<xsd:restriction base="xsd:anyURI">
-			<xsd:pattern value="https?://.+" />
+			<xsd:pattern value="https?://.+"/>
 		</xsd:restriction>
 	</xsd:simpleType>
 
@@ -122,8 +122,8 @@
 			</xsd:annotation>
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
-					<xsd:minLength value="4" />
-					<xsd:maxLength value="100" />
+					<xsd:minLength value="4"/>
+					<xsd:maxLength value="100"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
@@ -135,8 +135,8 @@
 			</xsd:annotation>
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
-					<xsd:minLength value="1" />
-					<xsd:maxLength value="100" />
+					<xsd:minLength value="1"/>
+					<xsd:maxLength value="100"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>

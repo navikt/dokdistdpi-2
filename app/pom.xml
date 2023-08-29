@@ -33,15 +33,16 @@
 			<groupId>no.nav.dokdistdpi</groupId>
 			<artifactId>sdist005</artifactId>
 		</dependency>
+
 	</dependencies>
 
 	<build>
+		<finalName>app</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<finalName>app</finalName>
 					<excludes>
 						<exclude>
 							<groupId>org.springframework.boot</groupId>
