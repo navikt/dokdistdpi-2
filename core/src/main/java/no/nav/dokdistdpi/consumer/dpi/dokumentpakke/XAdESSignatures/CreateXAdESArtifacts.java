@@ -31,11 +31,14 @@ import static org.apache.commons.codec.digest.DigestUtils.sha1;
 @Component
 public class CreateXAdESArtifacts {
 
-	private static final DigestMethod sha1DigestMethod = new DigestMethod();
+	private final DigestMethod sha1DigestMethod;
+
+	public CreateXAdESArtifacts() {
+		sha1DigestMethod = new DigestMethod();
+		sha1DigestMethod.setAlgorithm(SHA1);
+	}
 
 	XAdESArtifacts createArtifactsToSign(List<AsicEVedlegg> files, AppCertificate appCertificate) {
-		sha1DigestMethod.setAlgorithm(SHA1);
-
 		try {
 			byte[] certificateDigestValue = sha1(appCertificate.getX509Certificate().getEncoded());
 			X509Certificate certificate = appCertificate.getX509Certificate();

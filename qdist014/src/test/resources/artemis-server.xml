@@ -15,16 +15,6 @@
 		</address-settings>
 
 		<addresses>
-			<address name="qdist011">
-				<anycast>
-					<queue name="qdist011"/>
-				</anycast>
-			</address>
-			<address name="qdist011FunkFeil">
-				<anycast>
-					<queue name="qdist011FunkFeil"/>
-				</anycast>
-			</address>
 			<address name="qdist014Bq">
 				<anycast>
 					<queue name="qdist014Bq"/>
