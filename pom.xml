@@ -28,7 +28,7 @@
 	<properties>
 		<java.version>17</java.version>
 
-		<google-cloud.version>26.17.0</google-cloud.version>
+		<google-cloud.version>26.22.0</google-cloud.version>
 		<tink.version>1.10.0</tink.version>
 		<tink-gcpkms.version>1.8.0</tink-gcpkms.version>
 		<bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
