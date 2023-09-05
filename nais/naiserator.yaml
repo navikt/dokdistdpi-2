@@ -102,11 +102,10 @@ spec:
     cpuThresholdPercentage: 50
   resources:
     limits:
-      cpu: 3000m
-      memory: 1536Mi
+      memory: 3096Mi
     requests:
-      cpu: 20m
-      memory: 1024Mi
+      cpu: 1024m
+      memory: 1512Mi
   maskinporten:
     enabled: true
     scopes:
