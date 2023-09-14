@@ -33,7 +33,7 @@
 		<tink-gcpkms.version>1.8.0</tink-gcpkms.version>
 		<bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
 		<camel.version>4.0.0</camel.version>
-		<commons-compress.version>1.23.0</commons-compress.version>
+		<commons-compress.version>1.24.0</commons-compress.version>
 		<commons-io.version>2.13.0</commons-io.version>
 		<ibm.mq.client.version>9.3.3.0</ibm.mq.client.version>
 		<logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
