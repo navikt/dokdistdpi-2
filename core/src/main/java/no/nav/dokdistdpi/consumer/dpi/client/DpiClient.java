@@ -93,7 +93,7 @@ public class DpiClient {
 				log.error(LOG_FEIL_MELDING, response.getStatusCode(), konversasjonId, response.getBody());
 				throw new KunneIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING, response.getStatusCode(), konversasjonId, response.getBody()));
 			}
-			log.info("Brev sendt til DPI hjørne-2 med konversasjonId={}, status={}", konversasjonId, response.getStatusCode());
+			log.info("Brev sendt til DPI hjørne2 med konversasjonId={}, status={}", konversasjonId, response.getStatusCode());
 
 			return hentForsendelseStatus(konversasjonId);
 		} catch (HttpClientErrorException e) {

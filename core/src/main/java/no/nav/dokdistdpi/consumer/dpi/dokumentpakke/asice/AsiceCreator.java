@@ -21,7 +21,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.String.format;
 import static no.nav.dokdistdpi.utils.CreateZip.zipEntries;
 
 
@@ -59,12 +58,14 @@ public class AsiceCreator {
 			XAdESSignatures signatures = createSignature.createSignature(appCertificate, asicEAttachables);
 			asicEAttachables.add(signatures);
 		} catch (XmlValideringException e) {
-			log.error(format("Klarte ikke å signere ASiC-E element, bestillingsId=%s.", forsendelse.getBestillingsId()));
+			log.error("Klarte ikke å signere ASiC-E element, bestillingsId={}.", forsendelse.getBestillingsId());
 			throw new XMLXAdESSignaturesException("Klarte ikke å signere ASiC-E element.", e);
 		}
 
 		// Zip filene
-		log.trace("Zipping ASiC-E files. Contains a total of " + asicEAttachables.size() + " files (including the generated manifest and signatures)");
+		if (log.isTraceEnabled()) {
+			log.trace("Zipping ASiC-E files. Contains a total of {} files (including the generated manifest and signatures)", asicEAttachables.size());
+		}
 		CreateZip.Archive archive = zipEntries(asicEAttachables);
 		asiceArchive.writeBytes(archive.getBytes());
 

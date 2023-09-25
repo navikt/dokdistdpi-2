@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.consumer.dpi;
 
-public class DigitalPostConstants {
+public final class DigitalPostConstants {
 	public static final String NAV_ORGNUMMER = "889640782";
 	public static final String HEADER_VERSION = "1.0";
 	public static final String TYPE_VERSION = "1.0";
@@ -11,7 +11,7 @@ public class DigitalPostConstants {
 	public static final String DIGITALPOST_FORRETNINGSMELDING = "digital";
 	public static final String KANAL = "kanal";
 	public static final String PAGE_SIZE = "page_size";
-	public static final String KANAL_NAVN = NAV_ORGNUMMER + "-dokdistdpi";
+
 	private DigitalPostConstants() {
 	}
 }

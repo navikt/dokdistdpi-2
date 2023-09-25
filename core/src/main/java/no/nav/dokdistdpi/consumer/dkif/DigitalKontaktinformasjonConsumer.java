@@ -19,7 +19,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.List;
 
 import static java.lang.String.format;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
@@ -61,8 +61,8 @@ public class DigitalKontaktinformasjonConsumer {
 		final String fnrTrimmed = personidentifikator.strip();
 
 		try {
-			PostPersonerRequest postPersonRequest = PostPersonerRequest.builder().personidenter(Arrays.asList(fnrTrimmed)).build();
-			HttpEntity<String> request = new HttpEntity(postPersonRequest, headers);
+			PostPersonerRequest postPersonRequest = PostPersonerRequest.builder().personidenter(List.of(fnrTrimmed)).build();
+			var request = new HttpEntity<>(postPersonRequest, headers);
 			DigitalKontaktInfoResponse response = restTemplate.postForEntity(dkiUrl + "/rest/v1/personer?inkluderSikkerDigitalPost=true", request, DigitalKontaktInfoResponse.class).getBody();
 
 			if (isValidRespons(response, fnrTrimmed)) {
