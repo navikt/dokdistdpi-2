@@ -24,7 +24,9 @@ public class CreateZip {
 			zipOutputStream.setEncoding(StandardCharsets.UTF_8.name());
 			zipOutputStream.setMethod(ZipArchiveOutputStream.DEFLATED);
 			for (AsicEVedlegg file : files) {
-				log.trace("Adding " + file.getFileName() + " to archive. Size in bytes before compression: " + file.getBytes().length);
+				if (log.isTraceEnabled()) {
+					log.trace("Adding {} to archive. Size in bytes before compression: {}", file.getFileName(), file.getBytes().length);
+				}
 				ZipArchiveEntry zipEntry = new ZipArchiveEntry(file.getFileName());
 				zipEntry.setSize(file.getBytes().length);
 

@@ -58,8 +58,10 @@ public class DpiMeldingsformidler {
 	public OppdaterForsendelseAndVarselRequest sendMelding(Forsendelse forsendelse) {
 		byte[] dokumentpakke = getKryptertDokumentpakke(forsendelse);
 
-		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse,
-				getDokumentpakkefingeravtrykk(dokumentpakke));
+		Dokumentpakkefingeravtrykk dokumentpakkefingeravtrykk = getDokumentpakkefingeravtrykk(dokumentpakke);
+		StandardBusinessDocument standardBusinessDocument = sbdMapper.mapDigitalPostEnvelope(forsendelse, dokumentpakkefingeravtrykk);
+		log.info("Forbereder sending av brev til hjørne2 med dokumentpakkeStørrelseBytes={}, dokumentpakkefingeravtrykk='{}', konversasjonId={}",
+				dokumentpakke.length, dokumentpakkefingeravtrykk.getDigestValue(), forsendelse.getKonversasjonId());
 
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
 		multipartBodyBuilder.part("forretningsmelding", generateStandardBusinessDocumentJWT(standardBusinessDocument));
