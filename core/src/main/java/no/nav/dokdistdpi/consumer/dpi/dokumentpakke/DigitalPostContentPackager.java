@@ -17,7 +17,6 @@ import java.io.OutputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import static java.lang.Math.pow;
 import static java.security.cert.CertificateFactory.getInstance;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
@@ -27,7 +26,6 @@ public class DigitalPostContentPackager {
 
 	private final AsiceCreator asiceCreator;
 	private final CreateCMSDocument createCMSDocument;
-	private static final int DOKUMENTPAKKE_SIZE_LIMIT_MB = 30;
 
 	@Autowired
 	public DigitalPostContentPackager(AsiceCreator asiceCreator, CreateCMSDocument createCMSDocument) {
@@ -39,18 +37,9 @@ public class DigitalPostContentPackager {
 		X509Certificate mottakerCertificate = fraBase64X509String(forsendelse.getMottakerSertifikat());
 		try (final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse, appCertificate)) {
 			log.info("Oppretter CMS dokument med bestillingsId={} og konversasjonId={}", forsendelse.getBestillingsId(), forsendelse.getKonversasjonId());
-			byte[] cmsByte = createCMSDocument.createCMSByte(((ByteArrayOutputStream) asiceStreamed).toByteArray(), mottakerCertificate);
-			validateDokumentpakkeSize(cmsByte);
-			return cmsByte;
+			return createCMSDocument.createCMSByte(((ByteArrayOutputStream) asiceStreamed).toByteArray(), mottakerCertificate);
 		} catch (IOException e) {
 			throw new DokumentpakkingException("Klarte ikke lage asic eller kryptere dokumentpakke.", e);
-		}
-	}
-
-	private void validateDokumentpakkeSize(byte[] cmsByte) {
-		int dokumentpakkeSize = cmsByte.length / (int) pow(1024, 2);
-		if (dokumentpakkeSize > DOKUMENTPAKKE_SIZE_LIMIT_MB) {
-			log.warn("Dokumentpakken er større enn 30Mb. Faktisk størrelse er {}Mb", dokumentpakkeSize);
 		}
 	}
 
