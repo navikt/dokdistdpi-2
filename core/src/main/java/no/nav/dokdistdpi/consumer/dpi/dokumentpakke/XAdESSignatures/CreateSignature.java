@@ -41,14 +41,12 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.Certificate;
-import java.time.Clock;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
 import static org.apache.commons.codec.digest.DigestUtils.sha256;
 import static org.springframework.xml.validation.XmlValidatorFactory.SCHEMA_W3C_XML;
 
@@ -58,7 +56,7 @@ public class CreateSignature {
 	private static final String C14V1 = CanonicalizationMethod.INCLUSIVE;
 	private static final String ASIC_NAMESPACE = "http://uri.etsi.org/2918/v1.2.1#";
 	private static final String SIGNED_PROPERTIES_TYPE = "http://uri.etsi.org/01903#SignedProperties";
-	public static final ClassPathResource ASICE_SCHEMA = new ClassPathResource("asic-e/ts_102918v010201.xsd");
+	private static final String ASICE_SCHEMA_LOCATION = "asic-e/ts_102918v010201.xsd";
 
 	private final DigestMethod sha256DigestMethod;
 	private final CanonicalizationMethod canonicalizationMethod;
@@ -69,10 +67,6 @@ public class CreateSignature {
 	private final Schema schema;
 
 	public CreateSignature() {
-		this(Clock.system(DEFAULT_ZONE_ID));
-	}
-
-	public CreateSignature(Clock clock) {
 		this(new CreateXAdESArtifacts());
 	}
 
@@ -93,7 +87,7 @@ public class CreateSignature {
 
 	private static Schema loadSchema() {
 		try {
-			return SchemaLoaderUtils.loadSchema(new Resource[]{ASICE_SCHEMA}, SCHEMA_W3C_XML);
+			return SchemaLoaderUtils.loadSchema(new Resource[]{new ClassPathResource(ASICE_SCHEMA_LOCATION)}, SCHEMA_W3C_XML);
 		} catch (IOException | SAXException e) {
 			throw new KonfigurasjonException("Kunne ikke laste schema for validering av signatures, " + e.getClass().getSimpleName() + ": '" + e.getMessage() + "'", e);
 		}
