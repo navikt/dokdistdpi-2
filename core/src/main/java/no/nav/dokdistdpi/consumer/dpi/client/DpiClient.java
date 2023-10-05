@@ -58,6 +58,7 @@ public class DpiClient {
 	// Siden hjørne2 ikke har et veldefinert felt som indikerer duplikate forsendelser så matches det på meldingen under.
 	// Ved feil her så sjekk med Digdir og om dette er endret hos hjørne2 leverandør.
 	private static final String HJORNE2_DUPLICATE_ERROR_MESSAGE = "ERROR: duplicate key value violates unique constraint";
+	public static final String HJORNE2_FINGERAVTRYKK_ERROR_MESSAGE = "Upload was not accepted, SHA-256 digest of dokumentpakke was";
 
 	private final RestTemplate restTemplate;
 	private final MaskinportenTokenConsumer maskinportenTokenConsumer;
@@ -74,7 +75,7 @@ public class DpiClient {
 				.build();
 	}
 
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public List<ForsendelseStatusResponse> sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
 
 		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl())
@@ -101,7 +102,11 @@ public class DpiClient {
 				log.info("Brev sendt til DPI hjørne2 tidligere, fortsetter behandling. Dette kallet ble avvist på duplikatkontroll hos hjørne2. konversasjonId={}, status={}, melding={}",
 						konversasjonId, e.getStatusCode(), e.getMessage());
 				return hentForsendelseStatus(konversasjonId);
+			} else if(e.getStatusCode() == BAD_REQUEST && e.getMessage().contains(HJORNE2_FINGERAVTRYKK_ERROR_MESSAGE)) {
+				// Trigger retry og legger på BQ i stedet
+				throw new SikkerDigitalPostException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage()), e);
 			}
+
 			log.error(LOG_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage());
 			throw new KunneIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
