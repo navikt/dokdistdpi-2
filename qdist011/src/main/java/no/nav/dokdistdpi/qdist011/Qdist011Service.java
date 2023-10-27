@@ -158,16 +158,14 @@ public class Qdist011Service {
 	}
 
 	Dokumentpakke getDocumentpakkeFromBucket(HentForsendelseResponse hentForsendelseResponse) {
-		final var bestillingsId = hentForsendelseResponse.getBestillingsId();
 		if (hentForsendelseResponse.getDokumenter().isEmpty()) {
 			throw new KunneIkkeFinneDokumentException(
-					format("Finnes ikke dokumenter med bestillingsId=%s", bestillingsId)
+					format("Finnes ikke dokumenter med bestillingsId=%s", hentForsendelseResponse.getBestillingsId())
 			);
 		}
 
-
-		DpiDokument hovedDokument = hentHovedDokument(hentForsendelseResponse, bestillingsId);
-		List<DpiDokument> vedleggList = hentVedleggListe(hentForsendelseResponse, bestillingsId);
+		DpiDokument hovedDokument = hentHovedDokument(hentForsendelseResponse);
+		List<DpiDokument> vedleggList = hentVedleggListe(hentForsendelseResponse);
 		nummererVedleggDersomDuplikateTittler(vedleggList);
 
 		return Dokumentpakke.builder()
@@ -176,26 +174,27 @@ public class Qdist011Service {
 				.build();
 	}
 
-	private DpiDokument hentHovedDokument(HentForsendelseResponse hentForsendelseResponse, String bestillingsId) {
+	private DpiDokument hentHovedDokument(HentForsendelseResponse hentForsendelseResponse) {
 		DpiDokument hovedDokument = hentForsendelseResponse.getDokumenter()
 				.stream()
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
 				.map(dokument ->
 						DpiDokument.fromHoveddokument(hentForsendelseResponse.getForsendelseTittel(),
-								getHoveddokumentFilnavn(hentForsendelseResponse), this.getDocumentFromBucket(dokument, bestillingsId).getPdf()
+								getHoveddokumentFilnavn(hentForsendelseResponse),
+								this.getDocumentFromBucket(dokument, hentForsendelseResponse.getBestillingsId()).getPdf()
 						))
 				.findFirst().orElseThrow(() -> new KunneIkkeFinneDokumentException("Kunne ikke finne hovedDokument"));
 		return hovedDokument;
 	}
 
-	private List<DpiDokument> hentVedleggListe(HentForsendelseResponse hentForsendelseResponse, String bestillingsId) {
+	private List<DpiDokument> hentVedleggListe(HentForsendelseResponse hentForsendelseResponse) {
 		JournalpostQdist011 journalpostQdist011 = getJournalpostQdist011(hentForsendelseResponse);
 		AtomicInteger vedleggIdx = new AtomicInteger(1);
 		List<DpiDokument> vedleggList = hentForsendelseResponse.getDokumenter()
 				.stream()
 				.filter(dokument -> VEDLEGG.equals(dokument.getTilknyttetSom()))
 				.map(dokument -> {
-					DokDistDokumentFraBucket dokDistDokumentFraBucket = this.getDocumentFromBucket(dokument, bestillingsId);
+					DokDistDokumentFraBucket dokDistDokumentFraBucket = this.getDocumentFromBucket(dokument, hentForsendelseResponse.getBestillingsId());
 
 					return DpiDokument.fromVedlegg(getVedleggTittel(
 									journalpostQdist011,
