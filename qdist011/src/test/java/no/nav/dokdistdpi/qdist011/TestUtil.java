@@ -9,6 +9,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokument;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
+import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -28,6 +29,7 @@ import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static net.logstash.logback.util.StringUtils.isEmpty;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_4;
+import static no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.ARKIV_SYSTEM_JOARK;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.EPOST;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.SMS;
@@ -128,6 +130,43 @@ public final class TestUtil {
 				.build();
 	}
 
+	public static HentForsendelseResponse buildHentForsendelseResponseWithArkivinformasjon(String distribusjonsTypeKode) {
+		return HentForsendelseResponse.builder()
+				.bestillingsId(BESTILLINGS_ID)
+				.konversasjonId(KONVERSASJON_ID)
+				.mottaker(createMottakerTo())
+				.forsendelseTittel(TITTEL)
+				.dokumenter(buildHovedDokumentWithVedlegg())
+				.arkivInformasjon(HentForsendelseResponse.ArkivInformasjon.builder()
+						.arkivSystem(ARKIV_SYSTEM_JOARK)
+						.arkivId("1")
+						.build())
+				.distribusjonstype(isEmpty(distribusjonsTypeKode) ? null : DistribusjonsTypeKode.valueOf(distribusjonsTypeKode))
+				.build();
+	}
+
+	public static JournalpostQdist011 createJournalpostQdist011() {
+		return JournalpostQdist011.builder()
+				.dokumenter(List.of(JournalpostQdist011.DokumentInfo.builder()
+								.dokumentInfoId("1")
+								.tittel("hoveddokument")
+								.build(),
+						JournalpostQdist011.DokumentInfo.builder()
+								.dokumentInfoId("2")
+								.tittel("Vedlegg")
+								.build(),
+						JournalpostQdist011.DokumentInfo.builder()
+								.dokumentInfoId("3")
+								.tittel("Vedlegg")
+								.build(),
+						JournalpostQdist011.DokumentInfo.builder()
+								.dokumentInfoId("4")
+								.tittel("Vedlegg")
+								.build()
+				))
+				.build();
+	}
+
 	public static HentForsendelseResponse buildHentForsendelseResponseWithDokument() {
 		return buildHentForsendelseResponseWithDokument(null);
 	}
@@ -162,6 +201,13 @@ public final class TestUtil {
 						.tilknyttetSom(VEDLEGG)
 						.arkivDokumentInfoId(VEDLEGG_2_DOKUMENT_INFO_ID)
 						.dokumentObjektReferanse(VEDLEGG_2_DOKUMENT_REF)
+						.build()
+		);
+		dokumenter.add(
+				Dokument.builder()
+						.tilknyttetSom(VEDLEGG)
+						.arkivDokumentInfoId(VEDLEGG_1_DOKUMENT_INFO_ID)
+						.dokumentObjektReferanse(VEDLEGG_1_DOKUMENT_REF)
 						.build()
 		);
 		return dokumenter;

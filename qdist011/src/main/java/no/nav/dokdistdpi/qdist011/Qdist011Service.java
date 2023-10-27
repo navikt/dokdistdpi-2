@@ -41,6 +41,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
@@ -115,6 +117,7 @@ public class Qdist011Service {
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfoTo);
 
 		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfoTo, sikkerDigitalKontaktInfo);
+		Dokumentpakke dokumentpakke = getDocumentpakkeFromBucket(hentForsendelseResponse);
 
 		return Forsendelse.builder()
 				.forsendelseId(forsendelseId)
@@ -142,7 +145,7 @@ public class Qdist011Service {
 						.spraak(SPRAAK)
 						.varsler(varsler)
 						.build())
-				.dokumentpakke(getDocumentpakkeFromBucket(hentForsendelseResponse))
+				.dokumentpakke(dokumentpakke)
 				.build();
 	}
 
@@ -162,7 +165,18 @@ public class Qdist011Service {
 			);
 		}
 
-		JournalpostQdist011 journalpostQdist011 = getJournalpostQdist011(hentForsendelseResponse);
+
+		DpiDokument hovedDokument = hentHovedDokument(hentForsendelseResponse, bestillingsId);
+		List<DpiDokument> vedleggList = hentVedleggListe(hentForsendelseResponse, bestillingsId);
+		nummererVedleggDersomDuplikateTittler(vedleggList);
+
+		return Dokumentpakke.builder()
+				.hoveddokument(hovedDokument)
+				.vedlegg(vedleggList)
+				.build();
+	}
+
+	private DpiDokument hentHovedDokument(HentForsendelseResponse hentForsendelseResponse, String bestillingsId) {
 		DpiDokument hovedDokument = hentForsendelseResponse.getDokumenter()
 				.stream()
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
@@ -171,7 +185,11 @@ public class Qdist011Service {
 								getHoveddokumentFilnavn(hentForsendelseResponse), this.getDocumentFromBucket(dokument, bestillingsId).getPdf()
 						))
 				.findFirst().orElseThrow(() -> new KunneIkkeFinneDokumentException("Kunne ikke finne hovedDokument"));
+		return hovedDokument;
+	}
 
+	private List<DpiDokument> hentVedleggListe(HentForsendelseResponse hentForsendelseResponse, String bestillingsId) {
+		JournalpostQdist011 journalpostQdist011 = getJournalpostQdist011(hentForsendelseResponse);
 		AtomicInteger vedleggIdx = new AtomicInteger(1);
 		List<DpiDokument> vedleggList = hentForsendelseResponse.getDokumenter()
 				.stream()
@@ -188,11 +206,16 @@ public class Qdist011Service {
 					);
 				})
 				.toList();
+		return vedleggList;
+	}
 
-		return Dokumentpakke.builder()
-				.hoveddokument(hovedDokument)
-				.vedlegg(vedleggList)
-				.build();
+	private void nummererVedleggDersomDuplikateTittler(List<DpiDokument> vedleggList) {
+		if (vedleggList.size() != vedleggList.stream().collect(Collectors.groupingBy(DpiDokument::getTittel)).size()) {
+			AtomicInteger vedleggNummer = new AtomicInteger(1);
+			vedleggList.forEach(vedlegg ->
+					vedlegg.setTittel(String.format("%s (%s)", vedlegg.getTittel(), vedleggNummer.getAndIncrement()))
+			);
+		}
 	}
 
 	private DokDistDokumentFraBucket getDocumentFromBucket(Dokument dokument, String bestillingsId) {
