@@ -38,11 +38,11 @@ import org.springframework.stereotype.Component;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
@@ -166,7 +166,6 @@ public class Qdist011Service {
 
 		DpiDokument hovedDokument = hentHovedDokument(hentForsendelseResponse);
 		List<DpiDokument> vedleggList = hentVedleggListe(hentForsendelseResponse);
-		nummererVedleggDersomDuplikateTittler(vedleggList);
 
 		return Dokumentpakke.builder()
 				.hoveddokument(hovedDokument)
@@ -175,7 +174,7 @@ public class Qdist011Service {
 	}
 
 	private DpiDokument hentHovedDokument(HentForsendelseResponse hentForsendelseResponse) {
-		DpiDokument hovedDokument = hentForsendelseResponse.getDokumenter()
+		return hentForsendelseResponse.getDokumenter()
 				.stream()
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
 				.map(dokument ->
@@ -184,20 +183,20 @@ public class Qdist011Service {
 								this.getDocumentFromBucket(dokument, hentForsendelseResponse.getBestillingsId()).getPdf()
 						))
 				.findFirst().orElseThrow(() -> new KunneIkkeFinneDokumentException("Kunne ikke finne hovedDokument"));
-		return hovedDokument;
 	}
 
 	private List<DpiDokument> hentVedleggListe(HentForsendelseResponse hentForsendelseResponse) {
 		JournalpostQdist011 journalpostQdist011 = getJournalpostQdist011(hentForsendelseResponse);
+		Map<String, String> dokumenttitler = mapDokumenttitler(journalpostQdist011);
 		AtomicInteger vedleggIdx = new AtomicInteger(1);
-		List<DpiDokument> vedleggList = hentForsendelseResponse.getDokumenter()
+		return hentForsendelseResponse.getDokumenter()
 				.stream()
 				.filter(dokument -> VEDLEGG.equals(dokument.getTilknyttetSom()))
 				.map(dokument -> {
 					DokDistDokumentFraBucket dokDistDokumentFraBucket = this.getDocumentFromBucket(dokument, hentForsendelseResponse.getBestillingsId());
 
 					return DpiDokument.fromVedlegg(getVedleggTittel(
-									journalpostQdist011,
+									dokumenttitler,
 									dokument,
 									vedleggIdx.getAndIncrement()
 							),
@@ -205,16 +204,34 @@ public class Qdist011Service {
 					);
 				})
 				.toList();
-		return vedleggList;
 	}
 
-	private void nummererVedleggDersomDuplikateTittler(List<DpiDokument> vedleggList) {
-		if (vedleggList.size() != vedleggList.stream().collect(Collectors.groupingBy(DpiDokument::getTittel)).size()) {
-			AtomicInteger vedleggNummer = new AtomicInteger(1);
-			vedleggList.forEach(vedlegg ->
-					vedlegg.setTittel(String.format("%s (%s)", vedlegg.getTittel(), vedleggNummer.getAndIncrement()))
-			);
+	Map<String, String> mapDokumenttitler(JournalpostQdist011 journalpostQdist011) {
+		if (journalpostQdist011 == null) {
+			return null;
 		}
+		List<JournalpostQdist011.DokumentInfo> dokumentInfoList = journalpostQdist011.getDokumenter();
+		Map<String, Integer> dokumentTittelForekomst = new HashMap<>();
+		Map<String, Integer> dokumentTittelNumerert = new HashMap<>();
+		Map<String, String> dokumentInfoIdDokumentTittel = new HashMap<>();
+
+		for (JournalpostQdist011.DokumentInfo dokInf : dokumentInfoList) {
+			if (dokumentTittelForekomst.containsKey(dokInf.getTittel())) {
+				dokumentTittelForekomst.put(dokInf.getTittel(), dokumentTittelForekomst.get(dokInf.getTittel()) + 1);
+			} else {
+				dokumentTittelForekomst.put(dokInf.getTittel(), 1);
+			}
+		}
+
+		for (JournalpostQdist011.DokumentInfo dokInf : dokumentInfoList) {
+			if (dokumentTittelForekomst.get(dokInf.getTittel()) == 1) {
+				dokumentInfoIdDokumentTittel.put(dokInf.getDokumentInfoId(), dokInf.getTittel());
+			} else {
+				dokumentTittelNumerert.merge(dokInf.getTittel(), 1, Integer::sum);
+				dokumentInfoIdDokumentTittel.put(dokInf.getDokumentInfoId(), String.format("%s (%s)", dokInf.getTittel(), dokumentTittelNumerert.get(dokInf.getTittel())));
+			}
+		}
+		return dokumentInfoIdDokumentTittel;
 	}
 
 	private DokDistDokumentFraBucket getDocumentFromBucket(Dokument dokument, String bestillingsId) {
@@ -236,20 +253,14 @@ public class Qdist011Service {
 				.concat(".pdf");
 	}
 
-	private String getVedleggTittel(JournalpostQdist011 journalpostQdist011,
+	private String getVedleggTittel(Map<String, String> dokumenttitler,
 									Dokument dokument,
 									int vedleggIdx) {
-		if (journalpostQdist011 == null) {
+		if (dokumenttitler == null || dokumenttitler.isEmpty()) {
 			return VEDLEGG_TITTEL_PREFIX + vedleggIdx;
 		}
 
-		String arkivDokumentInfoId = dokument.getArkivDokumentInfoId();
-		return journalpostQdist011.getDokumenter().stream()
-				.filter(dokumentInfo -> dokumentInfo.getDokumentInfoId().equals(arkivDokumentInfoId))
-				.findAny()
-				.orElseThrow(() -> new KunneIkkeFinneDokumentException(
-						format("DokumentInfoId=%s ikke funnet i journalpost", arkivDokumentInfoId)))
-				.getTittel();
+		return dokumenttitler.get(dokument.getArkivDokumentInfoId());
 	}
 
 	private void validateStatus(String forsendelseStatus, Long forsendelseId) {

@@ -46,6 +46,8 @@ public final class TestUtil {
 	public static final String VEDLEGG_2_DOKUMENT_INFO_ID = "3";
 	public static final String VEDLEGG_2_DOKUMENT_REF = "ref-3";
 
+	public static final String VEDLEGG_3_DOKUMENT_INFO_ID = "4";
+	public static final String VEDLEGG_3_DOKUMENT_REF = "ref-4";
 	public static final String TITTEL = "Tittel";
 
 	public static final String MASKINPORTEN_TOKEN = "aølkdsølkdsj==";
@@ -153,7 +155,7 @@ public final class TestUtil {
 								.build(),
 						JournalpostQdist011.DokumentInfo.builder()
 								.dokumentInfoId("2")
-								.tittel("Vedlegg")
+								.tittel("Vedlegget")
 								.build(),
 						JournalpostQdist011.DokumentInfo.builder()
 								.dokumentInfoId("3")
@@ -206,8 +208,8 @@ public final class TestUtil {
 		dokumenter.add(
 				Dokument.builder()
 						.tilknyttetSom(VEDLEGG)
-						.arkivDokumentInfoId(VEDLEGG_1_DOKUMENT_INFO_ID)
-						.dokumentObjektReferanse(VEDLEGG_1_DOKUMENT_REF)
+						.arkivDokumentInfoId(VEDLEGG_3_DOKUMENT_INFO_ID)
+						.dokumentObjektReferanse(VEDLEGG_3_DOKUMENT_REF)
 						.build()
 		);
 		return dokumenter;

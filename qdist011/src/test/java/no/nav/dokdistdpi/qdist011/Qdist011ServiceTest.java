@@ -49,7 +49,7 @@ import static no.nav.dokdistdpi.qdist011.TestUtil.createJournalpostQdist011;
 import static no.nav.dokdistdpi.qdist011.TestUtil.createOidcTokenResponse;
 import static no.nav.dokdistdpi.qdist011.TestUtil.createSikkerDigitalKontaktInfo;
 import static no.nav.dokdistdpi.qdist011.TestUtil.createVarselInfoTo;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.VEDLEGG;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -167,7 +167,7 @@ class Qdist011ServiceTest {
 	}
 
 	@Test
-	void skalNavngiVedleggMedTilleggsnummer() {
+	void shouldReturnNumberedVersionsOfskalNavngiVedleggMedTilleggsnummer() {
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithArkivinformasjon(ANNET.toString()));
 		when(safJournalpostQueryService.hentJournalpost(anyString())).thenReturn(createJournalpostQdist011());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
@@ -177,9 +177,18 @@ class Qdist011ServiceTest {
 		Forsendelse forsendelse = qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange);
 
 		List<String> test = forsendelse.getDokumentpakke().getVedlegg().stream().map(DpiDokument::getTittel).toList();
+		assertTrue(test.contains("Vedlegget"));
 		assertTrue(test.contains("Vedlegg (1)"));
 		assertTrue(test.contains("Vedlegg (2)"));
-		assertTrue(test.contains("Vedlegg (3)"));
+	}
+
+	@Test
+	void shouldReturnNumberedVersionsOfDuplicateDokumentTittel() {
+		var mapOfDokumenttitler = qdist011Service.mapDokumenttitler(createJournalpostQdist011());
+		assertThat(mapOfDokumenttitler.get("1")).isEqualTo("hoveddokument");
+		assertThat(mapOfDokumenttitler.get("2")).isEqualTo("Vedlegget");
+		assertThat(mapOfDokumenttitler.get("3")).isEqualTo("Vedlegg (1)");
+		assertThat(mapOfDokumenttitler.get("4")).isEqualTo("Vedlegg (2)");
 	}
 
 	private void assertDigitalMapping(DigitalPost digitalPost) {
