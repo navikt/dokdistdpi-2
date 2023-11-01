@@ -186,9 +186,10 @@ class Qdist011ServiceTest {
 	void shouldReturnNumberedVersionsOfDuplicateDokumentTittel() {
 		var mapOfDokumenttitler = qdist011Service.mapDokumenttitler(createJournalpostQdist011());
 		assertThat(mapOfDokumenttitler.get("1")).isEqualTo("hoveddokument");
-		assertThat(mapOfDokumenttitler.get("2")).isEqualTo("Vedlegget");
+		assertThat(mapOfDokumenttitler.get("2")).isEqualTo("Vedlegget (1)");
 		assertThat(mapOfDokumenttitler.get("3")).isEqualTo("Vedlegg (1)");
 		assertThat(mapOfDokumenttitler.get("4")).isEqualTo("Vedlegg (2)");
+		assertThat(mapOfDokumenttitler.get("2")).isEqualTo("Vedlegget (2)");
 	}
 
 	private void assertDigitalMapping(DigitalPost digitalPost) {

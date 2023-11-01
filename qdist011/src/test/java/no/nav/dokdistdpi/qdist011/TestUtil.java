@@ -164,6 +164,10 @@ public final class TestUtil {
 						JournalpostQdist011.DokumentInfo.builder()
 								.dokumentInfoId("4")
 								.tittel("Vedlegg")
+								.build(),
+						JournalpostQdist011.DokumentInfo.builder()
+								.dokumentInfoId("5")
+								.tittel("Vedlegget")
 								.build()
 				))
 				.build();
