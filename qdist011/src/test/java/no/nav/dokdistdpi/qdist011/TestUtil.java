@@ -48,6 +48,8 @@ public final class TestUtil {
 
 	public static final String VEDLEGG_3_DOKUMENT_INFO_ID = "4";
 	public static final String VEDLEGG_3_DOKUMENT_REF = "ref-4";
+	public static final String VEDLEGG_4_DOKUMENT_INFO_ID = "5";
+	public static final String VEDLEGG_4_DOKUMENT_REF = "ref-5";
 	public static final String TITTEL = "Tittel";
 
 	public static final String MASKINPORTEN_TOKEN = "aølkdsølkdsj==";
@@ -214,6 +216,13 @@ public final class TestUtil {
 						.tilknyttetSom(VEDLEGG)
 						.arkivDokumentInfoId(VEDLEGG_3_DOKUMENT_INFO_ID)
 						.dokumentObjektReferanse(VEDLEGG_3_DOKUMENT_REF)
+						.build()
+		);
+		dokumenter.add(
+				Dokument.builder()
+						.tilknyttetSom(VEDLEGG)
+						.arkivDokumentInfoId(VEDLEGG_4_DOKUMENT_INFO_ID)
+						.dokumentObjektReferanse(VEDLEGG_4_DOKUMENT_REF)
 						.build()
 		);
 		return dokumenter;

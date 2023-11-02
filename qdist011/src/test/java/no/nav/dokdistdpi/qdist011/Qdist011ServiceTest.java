@@ -176,10 +176,11 @@ class Qdist011ServiceTest {
 
 		Forsendelse forsendelse = qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange);
 
-		List<String> test = forsendelse.getDokumentpakke().getVedlegg().stream().map(DpiDokument::getTittel).toList();
-		assertTrue(test.contains("Vedlegget"));
-		assertTrue(test.contains("Vedlegg (1)"));
-		assertTrue(test.contains("Vedlegg (2)"));
+		List<String> vedleggListe = forsendelse.getDokumentpakke().getVedlegg().stream().map(DpiDokument::getTittel).toList();
+		assertTrue(vedleggListe.contains("Vedlegget (1)"));
+		assertTrue(vedleggListe.contains("Vedlegget (2)"));
+		assertTrue(vedleggListe.contains("Vedlegg (1)"));
+		assertTrue(vedleggListe.contains("Vedlegg (2)"));
 	}
 
 	@Test
@@ -189,7 +190,7 @@ class Qdist011ServiceTest {
 		assertThat(mapOfDokumenttitler.get("2")).isEqualTo("Vedlegget (1)");
 		assertThat(mapOfDokumenttitler.get("3")).isEqualTo("Vedlegg (1)");
 		assertThat(mapOfDokumenttitler.get("4")).isEqualTo("Vedlegg (2)");
-		assertThat(mapOfDokumenttitler.get("2")).isEqualTo("Vedlegget (2)");
+		assertThat(mapOfDokumenttitler.get("5")).isEqualTo("Vedlegget (2)");
 	}
 
 	private void assertDigitalMapping(DigitalPost digitalPost) {
