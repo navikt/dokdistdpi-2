@@ -208,7 +208,7 @@ public class Qdist011Service {
 
 	Map<String, String> mapDokumenttitler(JournalpostQdist011 journalpostQdist011) {
 		if (journalpostQdist011 == null) {
-			return null;
+			return Map.of();
 		}
 		List<JournalpostQdist011.DokumentInfo> dokumentInfoList = journalpostQdist011.getDokumenter();
 		Map<String, Integer> dokumentTittelForekomst = new HashMap<>();
