@@ -259,8 +259,11 @@ public class Qdist011Service {
 		if (dokumenttitler == null || dokumenttitler.isEmpty()) {
 			return VEDLEGG_TITTEL_PREFIX + vedleggIdx;
 		}
-
-		return dokumenttitler.get(dokument.getArkivDokumentInfoId());
+		String dokumentTittel = dokumenttitler.get(dokument.getArkivDokumentInfoId());
+		if (dokumentTittel == null) {
+			throw new KunneIkkeFinneDokumentException(format("DokumentInfoId=%s ikke funnet i journalpost", dokument.getArkivDokumentInfoId()));
+		}
+		return dokumentTittel;
 	}
 
 	private void validateStatus(String forsendelseStatus, Long forsendelseId) {
