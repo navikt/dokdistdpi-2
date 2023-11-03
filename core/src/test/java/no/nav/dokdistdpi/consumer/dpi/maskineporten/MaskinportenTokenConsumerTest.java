@@ -42,9 +42,9 @@ class MaskinportenTokenConsumerTest {
           maskinportenProperties.setUrl(new URL("https://maskinporten.no/token"));*/
 
 		// test
-		maskinportenProperties.setClientid("979bcb5d-d311-45b0-83b7-510d82c5a68d");
-		maskinportenProperties.setAudience("https://ver2.maskinporten.no/");
-		maskinportenProperties.setUrl(new URL("https://ver2.maskinporten.no/token"));
+		maskinportenProperties.setClientId("979bcb5d-d311-45b0-83b7-510d82c5a68d");
+		maskinportenProperties.setIssuer("https://ver2.maskinporten.no/");
+		maskinportenProperties.setTokenEndpoint("https://ver2.maskinporten.no/token");
 		keyStoreProperties.setType(System.getProperty("virksomhetssertifikat.type"));
 		keyStoreProperties.setAlias(System.getProperty("virksomhetssertifikat.alias"));
 		keyStoreProperties.setPassword(System.getProperty("virksomhetssertifikat.password"));
@@ -55,7 +55,7 @@ class MaskinportenTokenConsumerTest {
 
 	@Test
 	void shouldFetchTokenWhenSystemPropertiesSet() {
-		MaskinportenTokenConsumer oidcTokenClient = new MaskinportenTokenConsumer(new AppCertificate(keyStoreProperties), maskinportenProperties, new RestTemplateBuilder());
+		MaskinportenTokenConsumer oidcTokenClient = new MaskinportenTokenConsumer(maskinportenProperties, new RestTemplateBuilder());
 
 		final OidcTokenResponse oidcTokenResponse = oidcTokenClient.fetchToken();
 

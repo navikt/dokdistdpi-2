@@ -1,12 +1,18 @@
 package no.nav.dokdistdpi.consumer.dpi.maskineporten;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
-import no.nav.dokdistdpi.consumer.dpi.GenerateJwt;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.exception.technical.MaskinportenTechnicalException;
+import no.nav.dokdistdpi.exception.technical.SertifikatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,12 +28,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static com.nimbusds.jose.JOSEObjectType.JWT;
 import static java.time.Duration.ofSeconds;
 import static java.util.Date.from;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
@@ -41,19 +47,15 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 @Slf4j
 @Component
 public class MaskinportenTokenConsumer {
-	private static final String SCOPE_DPI = "digitalpostinnbygger:send";
 	public static final String FUNKSJONELL_FEIL_ERROR_MESSAGE = "Klarte ikke hente AccessToken fra maskinporten. Funksjonell feil: ";
 	public static final String TEKNISK_FEIL_ERROR_MESSAGE = "Klarte ikke hente AccessToken fra maskinporten. Teknisk feil: ";
 
-	private final AppCertificate appCertificate;
 	private final MaskinportenProperties maskinportenProperties;
 	private final RestTemplate restTemplate;
 
 	@Autowired
-	public MaskinportenTokenConsumer(AppCertificate appCertificate,
-									 MaskinportenProperties maskinportenProperties,
+	public MaskinportenTokenConsumer(MaskinportenProperties maskinportenProperties,
 									 RestTemplateBuilder restTemplateBuilder) {
-		this.appCertificate = appCertificate;
 		this.maskinportenProperties = maskinportenProperties;
 		this.restTemplate = restTemplateBuilder
 				.messageConverters(new FormHttpMessageConverter(),
@@ -66,16 +68,6 @@ public class MaskinportenTokenConsumer {
 
 	@Cacheable(MASKINPORTEN_CACHE)
 	public OidcTokenResponse fetchToken() {
-		URI accessTokenUri;
-		try {
-			accessTokenUri = maskinportenProperties.getUrl().toURI();
-		} catch (URISyntaxException e) {
-			log.error("Error converting property to URI", e);
-			throw new RuntimeException(e);
-		}
-
-		final String maskinportenUrl = maskinportenProperties.getUrl().toString();
-
 		LinkedMultiValueMap<String, String> attrMap = new LinkedMultiValueMap<>();
 		attrMap.add("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
 		attrMap.add("assertion", generateJWT());
@@ -85,9 +77,9 @@ public class MaskinportenTokenConsumer {
 		HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(attrMap, headers);
 
 		try {
-			log.info("Henter accessToken fra maskinporten på url={}", maskinportenUrl);
-			ResponseEntity<OidcTokenResponse> response = restTemplate.exchange(accessTokenUri, POST, httpEntity, OidcTokenResponse.class);
-			log.info("AccessToken hentet OK fra maskinporten på url={}", maskinportenUrl);
+			log.info("Henter accessToken fra maskinporten på url={}", maskinportenProperties.getTokenEndpoint());
+			ResponseEntity<OidcTokenResponse> response = restTemplate.exchange(maskinportenProperties.getTokenEndpoint(), POST, httpEntity, OidcTokenResponse.class);
+			log.info("AccessToken hentet OK fra maskinporten på url={}", maskinportenProperties.getTokenEndpoint());
 			return response.getBody();
 		} catch (HttpClientErrorException e) {
 			final String errorMessage = FUNKSJONELL_FEIL_ERROR_MESSAGE + e.getResponseBodyAsString();
@@ -103,8 +95,8 @@ public class MaskinportenTokenConsumer {
 	private String generateJWT() {
 
 		JWTClaimsSet claims = new JWTClaimsSet.Builder()
-				.audience(maskinportenProperties.getAudience())
-				.issuer(maskinportenProperties.getClientid())
+				.audience(maskinportenProperties.getIssuer())
+				.issuer(maskinportenProperties.getClientId())
 				.claim("scope", getCurrentScopes())
 				.claim("consumer", Consumer.builder()
 						.authority(ISO_6523_ACTORID_UPIS.getValue())
@@ -115,12 +107,30 @@ public class MaskinportenTokenConsumer {
 				.expirationTime(from(OffsetDateTime.now(DEFAULT_ZONE_ID).toInstant().plusSeconds(30)))
 				.build();
 
-		return GenerateJwt.generateJWT(claims, appCertificate);
+		return createSignedJWT(maskinportenProperties.getClientJwk(), claims)
+				.serialize();
 	}
 
 	private String getCurrentScopes() {
 		ArrayList<String> scopeList = new ArrayList<>();
-		scopeList.add(SCOPE_DPI);
+		scopeList.add(maskinportenProperties.getScopes());
 		return scopeList.stream().reduce((a, b) -> a + " " + b).orElse("");
+	}
+
+	private SignedJWT createSignedJWT(String rsaJwk, JWTClaimsSet claimsSet) {
+		try {
+			var rsaKey = RSAKey.parse(rsaJwk);
+			JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
+					.keyID(rsaKey.getKeyID())
+					.type(JWT)
+					.build();
+			SignedJWT signedJWT = new SignedJWT(header, claimsSet);
+			JWSSigner signer = new RSASSASigner(rsaKey);
+			signedJWT.sign(signer);
+
+			return signedJWT;
+		} catch (ParseException | JOSEException e) {
+			throw new SertifikatException("Klarte ikke å generere signert JWT", e);
+		}
 	}
 }

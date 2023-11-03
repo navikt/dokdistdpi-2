@@ -16,39 +16,13 @@ import java.security.KeyStore;
 @Validated
 @NoArgsConstructor
 public class KeyStoreProperties {
-
-	/**
-	 * Type of KeyStore
-	 * <p>
-	 * Examples: JKS, Windows-MY
-	 */
 	@NonNull
 	private String type = KeyStore.getDefaultType();
-
-	/**
-	 * Keystore alias for key.
-	 */
 	@NonNull
 	private String alias;
-
-	/**
-	 * Path of jks file.
-	 * <p>
-	 * May be empty if type = Windows-MY
-	 */
 	@NonNull
 	private Resource path;
-
-	/**
-	 * Password of keystore and entry.
-	 */
 	@NonNull
-	private String password = "";
-
-	/**
-	 * True if the application should only use the Provider from the
-	 * keyStore for crypto operations on the keys from the keystore.
-	 */
+	private String password;
 	private Boolean lockProvider = false;
-
 }
