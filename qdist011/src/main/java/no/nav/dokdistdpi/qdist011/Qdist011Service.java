@@ -38,7 +38,9 @@ import org.springframework.stereotype.Component;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -115,6 +117,7 @@ public class Qdist011Service {
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfoTo);
 
 		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfoTo, sikkerDigitalKontaktInfo);
+		Dokumentpakke dokumentpakke = getDocumentpakkeFromBucket(hentForsendelseResponse);
 
 		return Forsendelse.builder()
 				.forsendelseId(forsendelseId)
@@ -142,7 +145,7 @@ public class Qdist011Service {
 						.spraak(SPRAAK)
 						.varsler(varsler)
 						.build())
-				.dokumentpakke(getDocumentpakkeFromBucket(hentForsendelseResponse))
+				.dokumentpakke(dokumentpakke)
 				.build();
 	}
 
@@ -155,32 +158,45 @@ public class Qdist011Service {
 	}
 
 	Dokumentpakke getDocumentpakkeFromBucket(HentForsendelseResponse hentForsendelseResponse) {
-		final var bestillingsId = hentForsendelseResponse.getBestillingsId();
 		if (hentForsendelseResponse.getDokumenter().isEmpty()) {
 			throw new KunneIkkeFinneDokumentException(
-					format("Finnes ikke dokumenter med bestillingsId=%s", bestillingsId)
+					format("Finnes ikke dokumenter med bestillingsId=%s", hentForsendelseResponse.getBestillingsId())
 			);
 		}
 
-		JournalpostQdist011 journalpostQdist011 = getJournalpostQdist011(hentForsendelseResponse);
-		DpiDokument hovedDokument = hentForsendelseResponse.getDokumenter()
+		DpiDokument hovedDokument = hentHovedDokument(hentForsendelseResponse);
+		List<DpiDokument> vedleggList = hentVedleggListe(hentForsendelseResponse);
+
+		return Dokumentpakke.builder()
+				.hoveddokument(hovedDokument)
+				.vedlegg(vedleggList)
+				.build();
+	}
+
+	private DpiDokument hentHovedDokument(HentForsendelseResponse hentForsendelseResponse) {
+		return hentForsendelseResponse.getDokumenter()
 				.stream()
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
 				.map(dokument ->
 						DpiDokument.fromHoveddokument(hentForsendelseResponse.getForsendelseTittel(),
-								getHoveddokumentFilnavn(hentForsendelseResponse), this.getDocumentFromBucket(dokument, bestillingsId).getPdf()
+								getHoveddokumentFilnavn(hentForsendelseResponse),
+								this.getDocumentFromBucket(dokument, hentForsendelseResponse.getBestillingsId()).getPdf()
 						))
 				.findFirst().orElseThrow(() -> new KunneIkkeFinneDokumentException("Kunne ikke finne hovedDokument"));
+	}
 
+	private List<DpiDokument> hentVedleggListe(HentForsendelseResponse hentForsendelseResponse) {
+		JournalpostQdist011 journalpostQdist011 = getJournalpostQdist011(hentForsendelseResponse);
+		Map<String, String> dokumenttitler = mapDokumenttitler(journalpostQdist011);
 		AtomicInteger vedleggIdx = new AtomicInteger(1);
-		List<DpiDokument> vedleggList = hentForsendelseResponse.getDokumenter()
+		return hentForsendelseResponse.getDokumenter()
 				.stream()
 				.filter(dokument -> VEDLEGG.equals(dokument.getTilknyttetSom()))
 				.map(dokument -> {
-					DokDistDokumentFraBucket dokDistDokumentFraBucket = this.getDocumentFromBucket(dokument, bestillingsId);
+					DokDistDokumentFraBucket dokDistDokumentFraBucket = this.getDocumentFromBucket(dokument, hentForsendelseResponse.getBestillingsId());
 
 					return DpiDokument.fromVedlegg(getVedleggTittel(
-									journalpostQdist011,
+									dokumenttitler,
 									dokument,
 									vedleggIdx.getAndIncrement()
 							),
@@ -188,11 +204,34 @@ public class Qdist011Service {
 					);
 				})
 				.toList();
+	}
 
-		return Dokumentpakke.builder()
-				.hoveddokument(hovedDokument)
-				.vedlegg(vedleggList)
-				.build();
+	Map<String, String> mapDokumenttitler(JournalpostQdist011 journalpostQdist011) {
+		if (journalpostQdist011 == null) {
+			return Map.of();
+		}
+		List<JournalpostQdist011.DokumentInfo> dokumentInfoList = journalpostQdist011.getDokumenter();
+		Map<String, Integer> dokumentTittelForekomst = new HashMap<>();
+		Map<String, Integer> dokumentTittelNumerert = new HashMap<>();
+		Map<String, String> dokumentInfoIdDokumentTittel = new HashMap<>();
+
+		for (JournalpostQdist011.DokumentInfo dokInf : dokumentInfoList) {
+			if (dokumentTittelForekomst.containsKey(dokInf.getTittel())) {
+				dokumentTittelForekomst.put(dokInf.getTittel(), dokumentTittelForekomst.get(dokInf.getTittel()) + 1);
+			} else {
+				dokumentTittelForekomst.put(dokInf.getTittel(), 1);
+			}
+		}
+
+		for (JournalpostQdist011.DokumentInfo dokInf : dokumentInfoList) {
+			if (dokumentTittelForekomst.get(dokInf.getTittel()) == 1) {
+				dokumentInfoIdDokumentTittel.put(dokInf.getDokumentInfoId(), dokInf.getTittel());
+			} else {
+				dokumentTittelNumerert.merge(dokInf.getTittel(), 1, Integer::sum);
+				dokumentInfoIdDokumentTittel.put(dokInf.getDokumentInfoId(), String.format("%s (%s)", dokInf.getTittel(), dokumentTittelNumerert.get(dokInf.getTittel())));
+			}
+		}
+		return dokumentInfoIdDokumentTittel;
 	}
 
 	private DokDistDokumentFraBucket getDocumentFromBucket(Dokument dokument, String bestillingsId) {
@@ -214,20 +253,14 @@ public class Qdist011Service {
 				.concat(".pdf");
 	}
 
-	private String getVedleggTittel(JournalpostQdist011 journalpostQdist011,
+	private String getVedleggTittel(Map<String, String> dokumenttitler,
 									Dokument dokument,
 									int vedleggIdx) {
-		if (journalpostQdist011 == null) {
+		if (dokumenttitler == null || dokumenttitler.isEmpty()) {
 			return VEDLEGG_TITTEL_PREFIX + vedleggIdx;
 		}
 
-		String arkivDokumentInfoId = dokument.getArkivDokumentInfoId();
-		return journalpostQdist011.getDokumenter().stream()
-				.filter(dokumentInfo -> dokumentInfo.getDokumentInfoId().equals(arkivDokumentInfoId))
-				.findAny()
-				.orElseThrow(() -> new KunneIkkeFinneDokumentException(
-						format("DokumentInfoId=%s ikke funnet i journalpost", arkivDokumentInfoId)))
-				.getTittel();
+		return dokumenttitler.get(dokument.getArkivDokumentInfoId());
 	}
 
 	private void validateStatus(String forsendelseStatus, Long forsendelseId) {
