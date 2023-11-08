@@ -31,10 +31,6 @@ spec:
       value: {{ VARSELINFO_URL }}
     - name: DIGDIR_KRR_PROXY_URL
       value: {{ DIGDIR_KRR_PROXY_URL }}
-    - name: MASKINPORTEN_URL
-      value: {{ MASKINPORTEN_URL }}
-    - name: MASKINPORTEN_AUDIENCE
-      value: {{ MASKINPORTEN_AUDIENCE }}
     - name: SAF_GRAPHQL_URL
       value: {{ SAF_GRAPHQL_URL }}
     - name: JURIDISKLOGG_URL
