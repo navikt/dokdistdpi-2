@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
@@ -211,20 +212,19 @@ public class Qdist011Service {
 			return Map.of();
 		}
 		List<JournalpostQdist011.DokumentInfo> dokumentInfoList = journalpostQdist011.getDokumenter();
-		Map<String, Integer> dokumentTittelForekomst = new HashMap<>();
+
+		Map<String, Long> dokumentTittelGruppert = dokumentInfoList.stream()
+				.collect(Collectors.groupingBy(JournalpostQdist011.DokumentInfo::getTittel, Collectors.counting()));
+
+		return dokumentInfoDokumenttitlerNummerertDersomNodvendig(dokumentInfoList, dokumentTittelGruppert);
+	}
+
+	private Map<String, String> dokumentInfoDokumenttitlerNummerertDersomNodvendig(List<JournalpostQdist011.DokumentInfo> dokumentInfoList, Map<String, Long> dokumentTittelGruppert) {
 		Map<String, Integer> dokumentTittelNumerert = new HashMap<>();
 		Map<String, String> dokumentInfoIdDokumentTittel = new HashMap<>();
 
 		for (JournalpostQdist011.DokumentInfo dokInf : dokumentInfoList) {
-			if (dokumentTittelForekomst.containsKey(dokInf.getTittel())) {
-				dokumentTittelForekomst.put(dokInf.getTittel(), dokumentTittelForekomst.get(dokInf.getTittel()) + 1);
-			} else {
-				dokumentTittelForekomst.put(dokInf.getTittel(), 1);
-			}
-		}
-
-		for (JournalpostQdist011.DokumentInfo dokInf : dokumentInfoList) {
-			if (dokumentTittelForekomst.get(dokInf.getTittel()) == 1) {
+			if (dokumentTittelGruppert.get(dokInf.getTittel()) == 1) {
 				dokumentInfoIdDokumentTittel.put(dokInf.getDokumentInfoId(), dokInf.getTittel());
 			} else {
 				dokumentTittelNumerert.merge(dokInf.getTittel(), 1, Integer::sum);
