@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.core.JmsTemplate;
@@ -35,6 +34,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static no.nav.dokdistdpi.qdist011.TestUtil.classpathToString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -78,8 +78,6 @@ public class Qdist011IT {
 	@Lazy
 	private EncryptedBucketStorage encryptedBucketStorage;
 
-	@Autowired
-	private CacheManager cacheManager;
 	@Autowired
 	private JmsTemplate jmsTemplate;
 
@@ -198,6 +196,7 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
 		});
 	}
 
@@ -233,7 +232,7 @@ public class Qdist011IT {
 
 	@SneakyThrows
 	@Test
-	public void shouldThrowExceptionIfMaskineportenIsNull() {
+	public void shouldThrowExceptionIfMaskinportenIsNull() {
 		stubAzure();
 		stubGetDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
@@ -249,8 +248,8 @@ public class Qdist011IT {
 
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String response = receive(qdist011FunksjonellFeil);
+			assertThat(response).contains("<forsendelseId>33333</forsendelseId>");
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-
 		});
 
 		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
@@ -305,7 +304,7 @@ public class Qdist011IT {
 				.willReturn(aResponse()
 						.withStatus(CREATED.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(classpathToString("__files/dpi/dpi_out_status.json"))));
+						.withBodyFile("dpi/dpi_out_status.json")));
 	}
 
 	private void stubPostDPIDuplicate() {
@@ -313,7 +312,7 @@ public class Qdist011IT {
 				.willReturn(aResponse()
 						.withStatus(BAD_REQUEST.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(classpathToString("__files/dpi/dpi_out_duplicate.json"))));
+						.withBodyFile("dpi/dpi_out_duplicate.json")));
 	}
 
 	private void stubGetDPIStatus() {
@@ -337,7 +336,7 @@ public class Qdist011IT {
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(classpathToString("__files/maskinporten/maskinporten_happy_response.json"))));
+						.withBodyFile("maskinporten/maskinporten_happy_response.json")));
 	}
 
 	private void stubPostMaskinportenFeil(int status) {
@@ -345,7 +344,7 @@ public class Qdist011IT {
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(classpathToString("__files/maskinporten/maskinporten_feil.json"))));
+						.withBodyFile("maskinporten/maskinporten_feil.json")));
 
 	}
 
@@ -360,7 +359,7 @@ public class Qdist011IT {
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(classpathToString("__files/sts/stsResponse-happy.json"))));
+						.withBodyFile("sts/stsResponse-happy.json")));
 	}
 
 	private void stubPostSafJournalpost(String bodyFileName) {
@@ -399,7 +398,7 @@ public class Qdist011IT {
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(classpathToString("__files/digitalkontaktinformasjonv1/dki-happy.json"))));
+						.withBodyFile("digitalkontaktinformasjonv1/dki-happy.json")));
 	}
 
 	void stubAzure() {
