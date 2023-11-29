@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.4</version>
+		<version>3.1.6</version>
 	</parent>
 
 	<groupId>no.nav.dokdistdpi</groupId>
@@ -28,17 +28,16 @@
 	<properties>
 		<java.version>17</java.version>
 
-		<google-cloud.version>26.22.0</google-cloud.version>
-		<tink.version>1.10.0</tink.version>
-		<tink-gcpkms.version>1.8.0</tink-gcpkms.version>
-		<bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
-		<camel.version>4.0.0</camel.version>
-		<commons-compress.version>1.24.0</commons-compress.version>
-		<commons-io.version>2.13.0</commons-io.version>
-		<ibm.mq.client.version>9.3.3.0</ibm.mq.client.version>
+		<google-cloud.version>26.27.0</google-cloud.version>
+		<tink.version>1.11.0</tink.version>
+		<tink-gcpkms.version>1.9.0</tink-gcpkms.version>
+		<camel.version>4.2.0</camel.version>
+		<commons-compress.version>1.25.0</commons-compress.version>
+		<commons-io.version>2.15.0</commons-io.version>
+		<ibm.mq.client.version>9.3.4.0</ibm.mq.client.version>
 		<logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-		<nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
-		<resilience4j-spring-boot3.version>2.1.0</resilience4j-spring-boot3.version>
+		<nimbus-jose-jwt.version>9.37.1</nimbus-jose-jwt.version>
+		<resilience4j.version>2.1.0</resilience4j.version>
 		<httpclient.version>4.5.14</httpclient.version>
 
 		<jaxb-xew-plugin.version>2.1</jaxb-xew-plugin.version>
@@ -111,25 +110,15 @@
 				<artifactId>commons-io</artifactId>
 				<version>${commons-io.version}</version>
 			</dependency>
-
-			<!--IBM MQ -->
 			<dependency>
 				<groupId>com.ibm.mq</groupId>
 				<artifactId>com.ibm.mq.jakarta.client</artifactId>
 				<version>${ibm.mq.client.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>net.logstash.logback</groupId>
 				<artifactId>logstash-logback-encoder</artifactId>
 				<version>${logstash-logback-encoder.version}</version>
-			</dependency>
-
-			<!--Encryption-->
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
-				<version>${bcprov-jdk15on.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
@@ -164,13 +153,13 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-
 			<dependency>
 				<groupId>io.github.resilience4j</groupId>
-				<artifactId>resilience4j-spring-boot2</artifactId>
-				<version>${resilience4j-spring-boot3.version}</version>
+				<artifactId>resilience4j-bom</artifactId>
+				<version>${resilience4j.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
-			<!--Tjenester-->
 			<dependency>
 				<groupId>no.nav.meldinger.virksomhet</groupId>
 				<artifactId>melding-virksomhet-dokdistfordeling</artifactId>
