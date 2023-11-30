@@ -13,7 +13,6 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessD
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.regex.Matcher;
@@ -38,7 +37,7 @@ public class ForretningsKvitteringMapper {
 	private final ObjectMapper dpiObjectMapper;
 
 	public ForretningsKvitteringMapper(DpiKvitteringMapper dpiKvitteringMapper,
-									   @Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper) {
+									   ObjectMapper dpiObjectMapper) {
 		this.dpiObjectMapper = dpiObjectMapper;
 		this.dpiKvitteringMapper = dpiKvitteringMapper;
 	}

@@ -2,6 +2,7 @@ package no.nav.dokdistdpi.config.prop;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -23,7 +24,8 @@ public class DokdistdpiProperties {
 	@Validated
 	public static class Qdist014 {
 		private boolean autostartup;
-		private int concurrency = 4;
+		@Positive
+		private int concurrency;
 	}
 
 	@Data

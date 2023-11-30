@@ -9,7 +9,6 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringTy
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.LeveringsKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeiletKvittering;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
@@ -26,7 +25,7 @@ class DpiKvitteringMapper {
 														  "NAV benytter seg ikke utskriftstjenesten til DPI og kan ikke behandle denne";
 	private final ObjectMapper dpiObjectMapper;
 
-	public DpiKvitteringMapper(@Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper) {
+	public DpiKvitteringMapper(ObjectMapper dpiObjectMapper) {
 		this.dpiObjectMapper = dpiObjectMapper;
 	}
 

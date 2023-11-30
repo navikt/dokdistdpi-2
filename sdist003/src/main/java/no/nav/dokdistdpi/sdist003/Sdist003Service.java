@@ -18,7 +18,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
@@ -47,7 +46,7 @@ public class Sdist003Service {
 						   MeterRegistry meterRegistry,
 						   Queue qdist014,
 						   LagreJuridiskLoggService juridiskLoggService,
-						   @Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper) {
+						   ObjectMapper dpiObjectMapper) {
 		this.dpiClient = dpiClient;
 		this.producerTemplate = producerTemplate;
 		this.qdist014 = qdist014;
