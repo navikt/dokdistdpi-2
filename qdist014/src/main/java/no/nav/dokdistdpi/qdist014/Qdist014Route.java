@@ -70,7 +70,7 @@ public class Qdist014Route extends RouteBuilder {
 				.logExhaustedMessageBody(false)
 				.logStackTrace(true).loggingLevel(ERROR));
 
-		onException(AbstractDokdistdpiFunctionalException.class, ValidationException.class, IllegalArgumentException.class)
+		onException(AbstractDokdistdpiFunctionalException.class, ValidationException.class, IllegalArgumentException.class, UnsupportedOperationException.class)
 				.handled(true)
 				.useOriginalMessage().log(LoggingLevel.WARN, log, "${exception}; " + getIdsForLogging())
 				.to("jms:" + qdist014FunksjonellFeil.getQueueName());

@@ -48,8 +48,8 @@
           "value": "0192:889640782"
         }
       },
-      "tidspunkt": "2022-04-21T11:24:24.500+00:00",
-      "beskrivelse": "Smstil 88888888 feilet. Feilkode: The SMS failed to be delivered because no operator accepted the message or due to internal Gateway error",
+      "tidspunkt": "2021-04-11T15:29:58.753+02:00",
+      "beskrivelse": "Sms til 88888888 feilet. Feilkode: 7201: Delivery failed at Operator",
       "varslingskanal": "sms"
     }
   }

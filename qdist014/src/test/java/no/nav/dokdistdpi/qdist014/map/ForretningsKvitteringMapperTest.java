@@ -1,6 +1,8 @@
 package no.nav.dokdistdpi.qdist014.map;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.dokdistdpi.consumer.dpi.JacksonConfig;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.LeveringsKvittering;
@@ -31,7 +33,8 @@ class ForretningsKvitteringMapperTest {
 	void setUp() {
 		CamelContext camelContext = new DefaultCamelContext();
 		exchange = new DefaultExchange(camelContext);
-		mapper = new ForretningsKvitteringMapper();
+		ObjectMapper dpiObjectMapper = new JacksonConfig().dpiObjectMapper();
+		mapper = new ForretningsKvitteringMapper(new DpiKvitteringMapper(dpiObjectMapper), dpiObjectMapper);
 	}
 
 	@Test

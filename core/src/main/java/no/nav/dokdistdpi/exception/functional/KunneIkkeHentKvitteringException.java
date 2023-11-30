@@ -1,6 +1,6 @@
-package no.nav.dokdistdpi.exception.technical;
+package no.nav.dokdistdpi.exception.functional;
 
-public class KunneIkkeHentKvitteringException extends AbstractDokdistdpiTechnicalException {
+public class KunneIkkeHentKvitteringException extends AbstractDokdistdpiFunctionalException {
 	public KunneIkkeHentKvitteringException(String message) {
 		super(message);
 	}

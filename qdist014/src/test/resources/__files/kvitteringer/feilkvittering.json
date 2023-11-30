@@ -50,8 +50,9 @@
         },
         "motakeridentifikator": "889640782"
       },
+      "tidspunkt": "2021-04-11T15:29:58.753+02:00",
       "feiltype": "KLIENT",
-      "tidspunkt": "2021-04-11T15:29:58.753+02:00"
+      "detaljer": "Reason code: SBD:4069. Bad format in document package - System.FormatException: Unable to read ASIC signature at eboks."
     }
   }
 }

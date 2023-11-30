@@ -7,11 +7,12 @@ import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusIkkeFunnetException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
+import no.nav.dokdistdpi.exception.functional.KunneIkkeHentKvitteringException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
-import no.nav.dokdistdpi.exception.technical.KunneIkkeHentKvitteringException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -40,6 +41,7 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
@@ -102,7 +104,7 @@ public class DpiClient {
 				log.info("Brev sendt til DPI hjørne2 tidligere, fortsetter behandling. Dette kallet ble avvist på duplikatkontroll hos hjørne2. konversasjonId={}, status={}, melding={}",
 						konversasjonId, e.getStatusCode(), e.getMessage());
 				return hentForsendelseStatus(konversasjonId);
-			} else if(e.getStatusCode() == BAD_REQUEST && e.getMessage().contains(HJORNE2_FINGERAVTRYKK_ERROR_MESSAGE)) {
+			} else if (e.getStatusCode() == BAD_REQUEST && e.getMessage().contains(HJORNE2_FINGERAVTRYKK_ERROR_MESSAGE)) {
 				// Trigger retry og legger på BQ i stedet
 				throw new SikkerDigitalPostException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage()), e);
 			}
@@ -136,7 +138,7 @@ public class DpiClient {
 	}
 
 	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public ResponseEntity<HentKvitteringResponse[]> hentKvittering() {
+	public List<HentKvitteringResponse> hentKvitteringer() {
 
 		String uri = UriComponentsBuilder
 				.fromHttpUrl(clientProperties.getUrl())
@@ -146,7 +148,12 @@ public class DpiClient {
 				.toUriString();
 
 		try {
-			return restTemplate.exchange(uri, GET, new HttpEntity<>(jsonTypeHeaders()), HentKvitteringResponse[].class);
+			ResponseEntity<List<HentKvitteringResponse>> exchange = restTemplate.exchange(uri, GET, new HttpEntity<>(jsonTypeHeaders()), new ParameterizedTypeReference<>() {
+			});
+			if (NO_CONTENT == exchange.getStatusCode()) {
+				return List.of();
+			}
+			return exchange.getBody();
 		} catch (HttpClientErrorException e) {
 			throw new KunneIkkeHentKvitteringException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
 		} catch (HttpServerErrorException e) {

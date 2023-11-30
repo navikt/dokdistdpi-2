@@ -261,25 +261,8 @@ public class Qdist014IT {
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/non-kvittering.json"));
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
-			String response = receive(backoutQueue);
+			String response = receive(qdist014FunksjonellFeil);
 			assertNotNull(response);
-		});
-	}
-
-	@Test
-	void shouldThrowFunctionalExceptionWhenKvitteringenBodyErNull() throws IOException {
-		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID_VAR, OK.value());
-		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
-		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
-		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
-		stubPutFeilregistrerforsendelse(OK.value());
-
-		sendStringMessage(qdist014, null);
-
-		await().atMost(10, SECONDS).untilAsserted(() -> {
-			//TextMessage response = receiveTextMessage(qdist014FunksjonellFeil);
-			//assertNotNull(response);
 		});
 	}
 
