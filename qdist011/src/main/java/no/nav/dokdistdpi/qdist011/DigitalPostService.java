@@ -113,7 +113,7 @@ public class DigitalPostService {
 	}
 
 	private String getMottakerId(HentForsendelseResponse hentMottakerResponse) {
-		if (isNull(hentMottakerResponse) && isNull(hentMottakerResponse.getMottaker())) {
+		if (hentMottakerResponse == null) {
 			throw new AdminstrerForsendelseFunctionalException("Mottaker kan ikke være null");
 		}
 

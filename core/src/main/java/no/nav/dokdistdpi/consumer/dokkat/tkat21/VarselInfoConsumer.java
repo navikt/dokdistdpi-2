@@ -47,7 +47,7 @@ public class VarselInfoConsumer implements VarselInfo {
 	}
 
 	@Cacheable(VARSELINFO_CACHE)
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public VarselInfoTo getVarselInfo(String varselTypeId) {
 		try {
 			VarselInfoRestTo response = restTemplate.getForObject(this.varselInfoUrl + "/" + varselTypeId, VarselInfoRestTo.class);

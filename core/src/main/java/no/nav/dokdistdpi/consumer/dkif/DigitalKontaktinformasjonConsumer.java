@@ -55,7 +55,7 @@ public class DigitalKontaktinformasjonConsumer {
 				.build();
 	}
 
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public SikkerDigitalKontaktInfo hentSikkerDigitalPostadresse(final String personidentifikator) {
 		HttpHeaders headers = createHeaders();
 		final String fnrTrimmed = personidentifikator.strip();

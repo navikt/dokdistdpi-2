@@ -10,7 +10,6 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
-import no.nav.dokdistdpi.consumer.rdist001.domain.HentUekspederteForsendelserResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterVarselInfoRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
@@ -24,8 +23,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static java.lang.String.format;
-import static java.time.Duration.ofMinutes;
-import static java.util.Collections.emptyList;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -34,10 +31,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 @Component
 public class DokdistadminConsumer {
-
-	private final HentUekspederteForsendelserResponse EMPTY_UEKSPEDERTEFORSENDELSER = HentUekspederteForsendelserResponse.builder()
-			.uekspederteForsendelser(emptyList())
-			.build();
 
 	private final WebClient webClient;
 
@@ -53,7 +46,7 @@ public class DokdistadminConsumer {
 				.build();
 	}
 
-	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public String opprettForsendelse(final OpprettForsendelseRequestTo opprettForsendelseRequest) {
 		var bestillingsId = opprettForsendelseRequest.getBestillingsId();
 
@@ -72,7 +65,7 @@ public class DokdistadminConsumer {
 		return forsendelseId;
 	}
 
-	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
 
 		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
@@ -91,7 +84,7 @@ public class DokdistadminConsumer {
 		return response;
 	}
 
-	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public String finnForsendelse(final FinnForsendelseRequest finnForsendelseRequest) {
 		var oppslagsnoekkel = finnForsendelseRequest.getOppslagsnoekkel().noekkel;
 		var verdi = finnForsendelseRequest.getVerdi();
@@ -113,7 +106,7 @@ public class DokdistadminConsumer {
 		return response;
 	}
 
-	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public void oppdaterForsendelse(OppdaterForsendelseRequest oppdaterForsendelse) {
 		log.info("oppdaterForsendelse oppdaterer forsendelse med forsendelseId={}", oppdaterForsendelse.getForsendelseId());
 
@@ -128,7 +121,7 @@ public class DokdistadminConsumer {
 		log.info("oppdaterForsendelse har oppdatert forsendelse med forsendelseId={}", oppdaterForsendelse.getForsendelseId());
 	}
 
-	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public void feilregistrerForsendelse(FeilregistrerForsendelseRequest feilregistrerForsendelse) {
 		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 
@@ -143,26 +136,7 @@ public class DokdistadminConsumer {
 		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 	}
 
-	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public HentUekspederteForsendelserResponse hentForsendelserKvitteringIkkeMottatt(String distribusjonskanal, int antallTimer) {
-		log.info("hentForsendelserKvitteringIkkeMottatt henter uekspederte forsendelser med distribusjonskanal={}, antallTimer={}",
-				distribusjonskanal, antallTimer);
-
-		var response = webClient.get()
-				.uri("/hentuekspederteforsendelser/{distribusjonkanal}/{antallTimer}", distribusjonskanal, antallTimer)
-				.retrieve()
-				.bodyToMono(HentUekspederteForsendelserResponse.class)
-				.timeout(ofMinutes(10)) // potensielt tidkrevende kall
-				.defaultIfEmpty(EMPTY_UEKSPEDERTEFORSENDELSER) // Håndtering av HttpStatus NO_CONTENT (204)
-				.doOnError(this::handleError)
-				.block();
-		log.info("hentForsendelserKvitteringIkkeMottatt har hentet {} uekspederte forsendelser med distribusjonskanal={}, antallTimer={}",
-				response == null ? 0 : response.getUekspederteForsendelser().size(), distribusjonskanal, antallTimer);
-
-		return response;
-	}
-
-	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public void oppdaterVarselInfo(OppdaterVarselInfoRequest oppdaterVarselInfoRequest) {
 		log.info("oppdaterVarselInfo oppdaterer varselInfo med forsendelseId={}", oppdaterVarselInfoRequest.forsendelseId());
 		webClient.put()
@@ -187,7 +161,7 @@ public class DokdistadminConsumer {
 
 		String feilmelding = format("Kall mot rdist001 feilet %s med status=%s, feilmelding=%s, response=%s",
 				response.getStatusCode().is4xxClientError() ? "funksjonelt" : "teknisk",
-				response.getRawStatusCode(),
+				response.getStatusCode(),
 				response.getMessage(),
 				response.getResponseBodyAsString());
 

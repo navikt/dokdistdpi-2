@@ -58,7 +58,7 @@ public class DokumentkatalogConsumer implements Dokumentkatalog {
 
 	@Override
 	@Cacheable(CacheConfig.TKAT020_CACHE)
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public DokumenttypeInfoTo getDokumenttypeInfo(String dokumenttypeId) {
 		HttpHeaders headers = createHeaders();
 		try {
@@ -76,7 +76,7 @@ public class DokumentkatalogConsumer implements Dokumentkatalog {
 
 	private DokumenttypeInfoTo mapResponse(final DokumentTypeInfoToV4 response) {
 		if (isNull(response.getDokumentProduksjonsInfo()) &&
-				isNull(response.getDokumentProduksjonsInfo().getDistribusjonInfo())) {
+			isNull(response.getDokumentProduksjonsInfo().getDistribusjonInfo())) {
 			throw new Tkat020FunctionalException(format("DokumentProduksjonsInfo eller DokumentProduksjonsInfo.DistribusjonInfo er null for dokumenttypeId=%s. Ikke et utgående dokument? dokumentType=%s",
 					response.getDokumenttypeId(), response.getDokumentType()));
 		}

@@ -51,13 +51,13 @@ public class SafGraphqlConsumer {
 		this.stsConsumer = stsConsumer;
 	}
 
-	@Retryable(include = SafJournalpostQueryTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = SafJournalpostQueryTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public SafJournalpostResponse performQuery(GraphQLRequest graphQLRequest) {
 		try {
 			ResponseEntity<SafJsonJournalpost> responseEntity = restTemplate.exchange(graphQLurl, HttpMethod.POST, new HttpEntity<>(requestToJson(graphQLRequest), createAuthorizationHeader()), SafJsonJournalpost.class);
 
 			if (isNull(responseEntity.getBody()) && isNull(responseEntity.getBody().getData()) &&
-					isNull(responseEntity.getBody().getData().getJournalpost())) {
+				isNull(responseEntity.getBody().getData().getJournalpost())) {
 				// Forsøk på nytt. GraphQL endepunktet gir kun httpstatus 200. Verdikjeden forventer at man finner journalpost her.
 				// Hvis ikke er dette en teknisk feil, ikke funksjonell feil.
 				throw new SafJournalpostIkkeFunnetException("Ingen journalpost ble funnet i saf.");

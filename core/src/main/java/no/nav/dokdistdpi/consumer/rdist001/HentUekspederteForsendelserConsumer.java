@@ -43,7 +43,7 @@ public class HentUekspederteForsendelserConsumer {
 				.build();
 	}
 
-	@Retryable(include = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public HentUekspederteForsendelserResponse hentForsendelserKvitteringIkkeMottatt(String distribusjonskanal, int antallTimer) {
 		log.info("hentForsendelserKvitteringIkkeMottatt henter uekspederte forsendelser med distribusjonskanal={}, antallTimer={}",
 				distribusjonskanal, antallTimer);
@@ -72,7 +72,7 @@ public class HentUekspederteForsendelserConsumer {
 
 		String feilmelding = format("Kall mot rdist001 feilet %s med status=%s, feilmelding=%s, response=%s",
 				response.getStatusCode().is4xxClientError() ? "funksjonelt" : "teknisk",
-				response.getRawStatusCode(),
+				response.getStatusCode(),
 				response.getMessage(),
 				response.getResponseBodyAsString());
 
