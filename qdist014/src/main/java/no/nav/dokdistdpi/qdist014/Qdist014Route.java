@@ -75,7 +75,7 @@ public class Qdist014Route extends RouteBuilder {
 				.useOriginalMessage().log(LoggingLevel.WARN, log, "${exception}; " + getIdsForLogging())
 				.to("jms:" + qdist014FunksjonellFeil.getQueueName());
 
-		from("jms:" + qdist014.getQueueName() + "?transacted=true")
+		from("jms:" + qdist014.getQueueName() + "?transacted=true&concurrentConsumers={{dokdistdpi.qdist014.concurrency}}")
 				.autoStartup(qdist014Properties.isAutostartup())
 				.routeId(SERVICE_ID)
 				.setExchangePattern(ExchangePattern.InOnly)
