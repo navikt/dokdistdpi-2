@@ -77,9 +77,7 @@ public class MaskinportenTokenConsumer {
 		HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(attrMap, headers);
 
 		try {
-			log.info("Henter accessToken fra maskinporten på url={}", maskinportenProperties.getTokenEndpoint());
 			ResponseEntity<OidcTokenResponse> response = restTemplate.exchange(maskinportenProperties.getTokenEndpoint(), POST, httpEntity, OidcTokenResponse.class);
-			log.info("AccessToken hentet OK fra maskinporten på url={}", maskinportenProperties.getTokenEndpoint());
 			return response.getBody();
 		} catch (HttpClientErrorException e) {
 			final String errorMessage = FUNKSJONELL_FEIL_ERROR_MESSAGE + e.getResponseBodyAsString();

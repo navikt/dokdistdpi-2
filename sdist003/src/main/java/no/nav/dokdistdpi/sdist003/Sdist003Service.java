@@ -60,11 +60,12 @@ public class Sdist003Service {
 	public List<HentKvitteringResponse> hentKvitteringOgBekreft(Exchange exchange) {
 		List<HentKvitteringResponse> kvitteringer = dpiClient.hentKvitteringer();
 		if (kvitteringer.isEmpty()) {
+			log.info("Sdist003 hentet ingen kvitteringer fra DPI");
 			exchange.setProperty(Exchange.SCHEDULER_POLLED_MESSAGES, false);
 			return kvitteringer;
 		}
 
-		log.info("Sdist003 Hentet totalt={} kvitteringer fra DPI", kvitteringer.size());
+		log.info("Sdist003 hentet totalt={} kvitteringer fra DPI", kvitteringer.size());
 
 		kvitteringer.stream()
 				.map(this::getForretningsmeldingFromJwt)
@@ -72,14 +73,12 @@ public class Sdist003Service {
 					try {
 						SimpleStandardBusinessDocument simpleSbd = dpiObjectMapper.readValue(forretningsmeldingPayload, SimpleStandardBusinessDocument.class);
 						KvitteringType kvitteringType = getKvitteringType(simpleSbd);
+						countDpiKvittering(kvitteringType);
 						log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getConversationId(), kvitteringType);
 						producerTemplate.sendBody("jms:" + qdist014.getQueueName(), forretningsmeldingPayload);
 						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
 
 						juridiskLoggService.lagreJuridiskLogg(new JuridiskLoggMetadata(simpleSbd.getDokumentKonversasjonId(), simpleSbd.getSender(), simpleSbd.getReceiver()), forretningsmeldingPayload);
-
-						countDpiKvittering(kvitteringType);
-
 						dpiClient.bekreft(simpleSbd.getDokumentKonversasjonId());
 					} catch (JMSException e) {
 						throw new JmsTechnicalException("Kunne ikke skrive melding til qdist014", e);
