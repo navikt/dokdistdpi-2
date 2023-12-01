@@ -42,13 +42,11 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<!-- Feiler i CreateSignature konstruktør
+				https://github.com/spring-projects/spring-boot/issues/38581
+				-->
 				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.springframework.boot</groupId>
-							<artifactId>spring-boot-configuration-processor</artifactId>
-						</exclude>
-					</excludes>
+					<loaderImplementation>CLASSIC</loaderImplementation>
 				</configuration>
 			</plugin>
 		</plugins>
