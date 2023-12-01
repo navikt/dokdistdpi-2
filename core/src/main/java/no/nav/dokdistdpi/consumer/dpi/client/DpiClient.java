@@ -7,7 +7,7 @@ import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusIkkeFunnetException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
-import no.nav.dokdistdpi.exception.functional.KunneIkkeHentKvitteringException;
+import no.nav.dokdistdpi.exception.functional.KunneIkkeHenteKvitteringException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,7 +155,7 @@ public class DpiClient {
 			}
 			return exchange.getBody();
 		} catch (HttpClientErrorException e) {
-			throw new KunneIkkeHentKvitteringException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
+			throw new KunneIkkeHenteKvitteringException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
 			throw new SikkerDigitalPostException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
 		}
@@ -170,13 +170,13 @@ public class DpiClient {
 		try {
 			ResponseEntity<String> response = restTemplate.exchange(uri, POST, new HttpEntity<>(jsonTypeHeaders()), String.class);
 			if (!OK.equals(response.getStatusCode())) {
-				throw new KunneIkkeHentKvitteringException(format("Feilet til å markere kvitteringen med konversasjonId=%s og status=%s som mottatt", konversasjonId, response.getStatusCode()));
+				throw new KunneIkkeHenteKvitteringException(format("Feilet til å markere kvitteringen med konversasjonId=%s og status=%s som mottatt", konversasjonId, response.getStatusCode()));
 			}
 			log.info("Kvitteringen med konversasjonId={} og status={} bekreftet mottatt", konversasjonId, response.getStatusCode());
 			return response.getStatusCode();
 		} catch (HttpClientErrorException e) {
 			log.warn(format("Feilet til å markere kvitteringen med konversasjonId=%s og feilmelding=%s som mottatt", konversasjonId, e.getMessage()), e);
-			throw new KunneIkkeHentKvitteringException(format(KVITTERING_FEIL_MELDING, konversasjonId, e.getMessage()), e);
+			throw new KunneIkkeHenteKvitteringException(format(KVITTERING_FEIL_MELDING, konversasjonId, e.getMessage()), e);
 		} catch (HttpServerErrorException e) {
 			log.warn(format("Feilet til å markere kvitteringen med konversasjonId=%s som mottatt", konversasjonId), e);
 			throw new SikkerDigitalPostException(format(KVITTERING_FEIL_MELDING, konversasjonId, e.getMessage()), e);
