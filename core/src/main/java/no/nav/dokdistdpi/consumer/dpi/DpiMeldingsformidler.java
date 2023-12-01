@@ -18,7 +18,6 @@ import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +42,7 @@ public class DpiMeldingsformidler {
 	private final DpiClient dpiClient;
 
 	@Autowired
-	public DpiMeldingsformidler(@Qualifier("dpiObjectMapper") ObjectMapper dpiObjectMapper,
+	public DpiMeldingsformidler(ObjectMapper dpiObjectMapper,
 								StandardBusinessDocumentMapper sbdMapper,
 								DigitalPostContentPackager digitalPostContentPackager,
 								AppCertificate appCertificate, DpiClient dpiClient) {

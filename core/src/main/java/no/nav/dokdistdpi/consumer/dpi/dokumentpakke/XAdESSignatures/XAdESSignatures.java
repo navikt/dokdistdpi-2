@@ -12,6 +12,7 @@ public class XAdESSignatures implements AsicEVedlegg {
 		return "META-INF/signatures.xml";
 	}
 
+	@Override
 	public byte[] getBytes() {
 		return xmlBytes;
 	}

@@ -5,7 +5,6 @@ import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.RuntimeCamelException;
@@ -68,11 +67,7 @@ public class Sdist003Route extends RouteBuilder {
 					.when(method(lederElection, "isLeader").isEqualTo(true))
 						.setExchangePattern(ExchangePattern.InOnly)
 						.bean(sdist003Service)
-						.choice()
-							.when(simple("${body}").isEqualTo(null))
-								.log(LoggingLevel.INFO, log, "Sdist003 fant ingen kvitteringer fra DPI.")
-								.setProperty(Exchange.SCHEDULER_POLLED_MESSAGES, constant(false))
-						.endChoice()
+				.endChoice()
 				.end();
 	}
 }

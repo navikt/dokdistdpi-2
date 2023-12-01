@@ -43,7 +43,7 @@ public class JuridiskLoggConsumer {
 				.build();
 	}
 
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public LoggMeldingResponse lagreJuridiskLogg(final LoggMeldingRequest loggMeldingRequest) {
 		try {
 			HttpEntity<LoggMeldingRequest> meldingRequestHttpEntity = new HttpEntity<>(loggMeldingRequest, createHeaders());

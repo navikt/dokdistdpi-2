@@ -47,7 +47,7 @@ public class StsRestConsumer {
 	}
 
 	@Cacheable(STS_CACHE)
-	@Retryable(include = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public String getStsOidcToken() {
 		try {
 			StsResponseTo stsResponse = restTemplate.exchange(stsUrl + "?grant_type=client_credentials&scope=openid", POST, httpEntity(), StsResponseTo.class).getBody();

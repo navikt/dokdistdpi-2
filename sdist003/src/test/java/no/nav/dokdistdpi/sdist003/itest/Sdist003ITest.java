@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import jakarta.jms.Queue;
 import jakarta.xml.bind.JAXBElement;
 import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
-import no.nav.dokdistdpi.sdist003.TestUtil;
 import no.nav.dokdistdpi.sdist003.itest.config.ApplicationTestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cache.CacheManager;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
@@ -62,9 +60,6 @@ public class Sdist003ITest {
 	@Autowired
 	private LederElectionConsumer lederElection;
 
-	@Autowired
-	private CacheManager cacheManager;
-
 	@BeforeEach
 	void setUp() {
 		System.setProperty("ELECTOR_PATH", lederHost);
@@ -80,7 +75,7 @@ public class Sdist003ITest {
 		stubGetKvittering();
 		stubPostMottattKvittering();
 		stubPostMaskinporten();
-		stubPostJuridiskLogg(HttpStatus.OK, "__files/juridisklogg/juridiskloggresponse.json");
+		stubPostJuridiskLogg(HttpStatus.OK, "juridisklogg/juridiskloggresponse.json");
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String message = receive(qdist014);
 			assertNotNull(message);
@@ -90,12 +85,12 @@ public class Sdist003ITest {
 		verify(1, getRequestedFor(urlEqualTo("/message/in?kanal=dokdistdpi-t&page_size=10")));
 	}
 
-	private void stubPostJuridiskLogg(HttpStatus status, String filePath) {
+	private void stubPostJuridiskLogg(HttpStatus status, String filename) {
 		stubFor(post(urlEqualTo("/juridisklogg"))
 				.willReturn(aResponse()
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withStatus(status.value())
-						.withBody(TestUtil.classpathToString(filePath))));
+						.withBodyFile(filename)));
 	}
 
 	private void stubGetKvittering() {
@@ -103,7 +98,7 @@ public class Sdist003ITest {
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(TestUtil.classpathToString("__files/kvittering/feil_forretningsmelding.json"))));
+						.withBodyFile("kvittering/feil_forretningsmelding.json")));
 	}
 
 	private void stubPostMottattKvittering() {
@@ -117,7 +112,7 @@ public class Sdist003ITest {
 		stubFor(post(urlMatching("/maskinporten"))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(TestUtil.classpathToString("__files/maskinporten/maskinporten_happy_response.json"))));
+						.withBodyFile("maskinporten/maskinporten_happy_response.json")));
 
 	}
 

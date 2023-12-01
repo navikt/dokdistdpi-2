@@ -1,5 +1,7 @@
 package no.nav.dokdistdpi.sdist003;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEObject;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.jms.JMSException;
@@ -11,27 +13,19 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringTy
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
 import no.nav.dokdistdpi.exception.technical.JmsTechnicalException;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
-import no.nav.dokdistdpi.exception.technical.KunneIkkeHentKvitteringException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
-import static no.nav.dokdistdpi.utils.JsonObjectMapper.mapSimpleSbd;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Slf4j
 @Component
@@ -44,56 +38,54 @@ public class Sdist003Service {
 	private final Queue qdist014;
 	private final MeterRegistry meterRegistry;
 	private final LagreJuridiskLoggService juridiskLoggService;
+	private final ObjectMapper dpiObjectMapper;
 
 	@Autowired
-	public Sdist003Service(DpiClient dpiClient, ProducerTemplate producerTemplate,
-						   MeterRegistry meterRegistry, Queue qdist014, LagreJuridiskLoggService juridiskLoggService) {
+	public Sdist003Service(DpiClient dpiClient,
+						   ProducerTemplate producerTemplate,
+						   MeterRegistry meterRegistry,
+						   Queue qdist014,
+						   LagreJuridiskLoggService juridiskLoggService,
+						   ObjectMapper dpiObjectMapper) {
 		this.dpiClient = dpiClient;
 		this.producerTemplate = producerTemplate;
 		this.qdist014 = qdist014;
 		this.meterRegistry = meterRegistry;
 		this.juridiskLoggService = juridiskLoggService;
+		this.dpiObjectMapper = dpiObjectMapper;
 	}
 
 	@Handler
 	public List<HentKvitteringResponse> hentKvitteringOgBekreft(Exchange exchange) {
-
-		ResponseEntity<HentKvitteringResponse[]> kvitteringResponse = dpiClient.hentKvittering();
-
-		final HentKvitteringResponse[] kvitteringer = kvitteringResponse.getBody();
-		if (kvitteringer == null) {
-			return null;
+		List<HentKvitteringResponse> kvitteringer = dpiClient.hentKvitteringer();
+		if (kvitteringer.isEmpty()) {
+			log.info("Sdist003 hentet ingen kvitteringer fra DPI");
+			exchange.setProperty(Exchange.SCHEDULER_POLLED_MESSAGES, false);
+			return kvitteringer;
 		}
 
-		if (!OK.equals(kvitteringResponse.getStatusCode()) && !NO_CONTENT.equals(kvitteringResponse.getStatusCode())) {
-			throw new KunneIkkeHentKvitteringException("Kunne ikke hente kvitteringer fra Digdir. Status er ikke 200 OK eller 204 NO_CONTENT. httpstatus=" + kvitteringResponse.getStatusCode());
-		}
+		log.info("Sdist003 hentet totalt={} kvitteringer fra DPI", kvitteringer.size());
 
-		log.info("Sdist003 Hentet totalt={} kvitteringer fra DPI", kvitteringer.length);
-
-		if (OK.equals(kvitteringResponse.getStatusCode()) && !isEmpty(kvitteringer)) {
-			Arrays.stream(kvitteringer)
-					.map(this::getForretningsmeldingFromJwt)
-					.forEach(payload -> {
-						SimpleStandardBusinessDocument simpleSbd = mapSimpleSbd(payload);
+		kvitteringer.stream()
+				.map(this::getForretningsmeldingFromJwt)
+				.forEach(forretningsmeldingPayload -> {
+					try {
+						SimpleStandardBusinessDocument simpleSbd = dpiObjectMapper.readValue(forretningsmeldingPayload, SimpleStandardBusinessDocument.class);
 						KvitteringType kvitteringType = getKvitteringType(simpleSbd);
+						countDpiKvittering(kvitteringType);
 						log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getConversationId(), kvitteringType);
-						try {
-							producerTemplate.sendBody("jms:" + qdist014.getQueueName(), payload);
-						} catch (JMSException e) {
-							throw new JmsTechnicalException("Kunne ikke skrive melding til qdist014", e);
-						}
+						producerTemplate.sendBody("jms:" + qdist014.getQueueName(), forretningsmeldingPayload);
 						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
 
-						juridiskLoggService.lagreJuridiskLogg(payload);
-
-						countDpiKvittering(kvitteringType);
-
+						juridiskLoggService.lagreJuridiskLogg(new JuridiskLoggMetadata(simpleSbd.getDokumentKonversasjonId(), simpleSbd.getSender(), simpleSbd.getReceiver()), forretningsmeldingPayload);
 						dpiClient.bekreft(simpleSbd.getDokumentKonversasjonId());
-					});
-		}
-
-		return isEmpty(kvitteringer) ? null : Arrays.stream(kvitteringer).collect(Collectors.toList());
+					} catch (JMSException e) {
+						throw new JmsTechnicalException("Kunne ikke skrive melding til qdist014", e);
+					} catch (JsonProcessingException e) {
+						throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
+					}
+				});
+		return kvitteringer;
 	}
 
 	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {
@@ -105,7 +97,6 @@ public class Sdist003Service {
 	}
 
 	private KvitteringType getKvitteringType(SimpleStandardBusinessDocument simpleSbd) {
-
 		if (LEVERING.getValue().equals(simpleSbd.getType())) {
 			return LEVERING;
 		} else if (VARSLINGFEILET.getValue().equals(simpleSbd.getType())) {
