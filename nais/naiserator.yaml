@@ -21,6 +21,8 @@ spec:
       value: {{ DPI_URL }}
     - name: DPI_MPCKANAL
       value: {{ DPI_MPCKANAL }}
+    - name : DOKDISTDPI_ENDPOINTS_JURIDISKLOGG
+      value: {{ DOKDISTDPI_ENDPOINTS_JURIDISKLOGG }}
     - name : DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_SCOPE
       value: {{ DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_SCOPE }}
     - name : DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_URL
@@ -33,8 +35,6 @@ spec:
       value: {{ DIGDIR_KRR_PROXY_URL }}
     - name: SAF_GRAPHQL_URL
       value: {{ SAF_GRAPHQL_URL }}
-    - name: JURIDISKLOGG_URL
-      value: {{ JURIDISKLOGG_URL }}
     - name: SECURITY_TOKEN_SERVICE_URL
       value: {{ SECURITY_TOKEN_SERVICE_URL }}
     - name: MQGATEWAY01_CHANNEL_NAME
