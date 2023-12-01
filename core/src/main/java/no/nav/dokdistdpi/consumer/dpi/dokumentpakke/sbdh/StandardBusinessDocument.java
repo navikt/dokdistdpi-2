@@ -18,7 +18,7 @@ public class StandardBusinessDocument {
 	@JsonProperty
 	private StandardBusinessDocumentHeader standardBusinessDocumentHeader;
 
-	@JsonAlias({"digital", "varslingfeiletkvittering", "leveringskvittering", "kvittering", "feil"})
+	@JsonAlias({"digital", "varslingfeiletkvittering", "leveringskvittering", "kvittering", "feil", "mottakskvittering", "aapningskvittering"})
 	@NonNull
 	private Object any;
 

@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -22,16 +21,16 @@ import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static no.nav.dokdistdpi.sdist003.TestUtil.classpathFilesToString;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -47,6 +46,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class Sdist003ITest {
 
 	private static final String BESTILLING_ID = "ff88849c-e281-4809-8555-7cd54952b916";
+	static final String DPI_BEKREFT_URL = "/message/in/" + BESTILLING_ID + "/read";
+	static final String MASKINPORTEN_URL = "/maskinporten";
+	static final String DPI_KVITTERINGER_URL = "/message/in?kanal=dokdistdpi-t&page_size=10";
 
 	@Value("${leder.host}")
 	private String lederHost;
@@ -75,26 +77,17 @@ public class Sdist003ITest {
 		stubGetKvittering();
 		stubPostMottattKvittering();
 		stubPostMaskinporten();
-		stubPostJuridiskLogg(HttpStatus.OK, "juridisklogg/juridiskloggresponse.json");
+
+		String expectedMessage = classpathFilesToString("kvittering/feil_kvittering_sbd.json");
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			String message = receive(qdist014);
-			assertNotNull(message);
+			assertThat(message).isEqualToIgnoringWhitespace(expectedMessage);
+			verify(1, postRequestedFor(urlEqualTo(DPI_BEKREFT_URL)));
 		});
-
-		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
-		verify(1, getRequestedFor(urlEqualTo("/message/in?kanal=dokdistdpi-t&page_size=10")));
-	}
-
-	private void stubPostJuridiskLogg(HttpStatus status, String filename) {
-		stubFor(post(urlEqualTo("/juridisklogg"))
-				.willReturn(aResponse()
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withStatus(status.value())
-						.withBodyFile(filename)));
 	}
 
 	private void stubGetKvittering() {
-		stubFor(get(urlEqualTo("/message/in?kanal=dokdistdpi-t&page_size=10"))
+		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -102,14 +95,14 @@ public class Sdist003ITest {
 	}
 
 	private void stubPostMottattKvittering() {
-		stubFor(post(urlMatching("/message/in/" + BESTILLING_ID + "/read"))
+		stubFor(post(urlMatching(DPI_BEKREFT_URL))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
 	}
 
 	private void stubPostMaskinporten() {
-		stubFor(post(urlMatching("/maskinporten"))
+		stubFor(post(urlMatching(MASKINPORTEN_URL))
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("maskinporten/maskinporten_happy_response.json")));

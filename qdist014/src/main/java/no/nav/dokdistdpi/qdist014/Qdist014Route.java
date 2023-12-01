@@ -3,7 +3,6 @@ package no.nav.dokdistdpi.qdist014;
 import jakarta.jms.Queue;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
-import no.nav.dokdistdpi.qdist014.map.ForretningsKvitteringMapper;
 import no.nav.dokdistdpi.qdist014.metrics.Qdist014HeaderProcessor;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.CamelContext;
@@ -40,31 +39,34 @@ public class Qdist014Route extends RouteBuilder {
 	private final Queue qdist014;
 	private final Queue qdist009;
 	private final Queue qdist014FunksjonellFeil;
-	private final ForretningsKvitteringMapper forretningsKvitteringMapper;
 	private final OppdaterForsendelseStatus oppdaterForsendelseStatus;
+	private final BehandleForretningskvitteringService behandleForretningskvitteringService;
 	private final DpiKvitteringService dpiKvitteringService;
 
 	@Autowired
-	public Qdist014Route(CamelContext context, Qdist014Service qdist014Service,
-						 Queue qdist014, Queue qdist009, Queue qdist014FunksjonellFeil,
-						 ForretningsKvitteringMapper forretningsKvitteringMapper,
+	public Qdist014Route(CamelContext context,
+						 Qdist014Service qdist014Service,
+						 Queue qdist014,
+						 Queue qdist009,
+						 Queue qdist014FunksjonellFeil,
 						 OppdaterForsendelseStatus oppdaterForsendelseStatus,
-						 DpiKvitteringService dpiKvitteringService, DokdistdpiProperties dokdistDpiProperties) {
+						 DpiKvitteringService dpiKvitteringService,
+						 DokdistdpiProperties dokdistDpiProperties,
+						 BehandleForretningskvitteringService behandleForretningskvitteringService) {
 		super(context);
 		this.qdist014Service = qdist014Service;
 		this.qdist014 = qdist014;
 		this.qdist009 = qdist009;
 		this.qdist014FunksjonellFeil = qdist014FunksjonellFeil;
-		this.forretningsKvitteringMapper = forretningsKvitteringMapper;
 		this.oppdaterForsendelseStatus = oppdaterForsendelseStatus;
 		this.dpiKvitteringService = dpiKvitteringService;
 		this.qdist014Properties = dokdistDpiProperties.getQdist014();
+		this.behandleForretningskvitteringService = behandleForretningskvitteringService;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void configure() throws Exception {
-
 		errorHandler(defaultErrorHandler()
 				.maximumRedeliveries(0).log(log)
 				.logExhaustedMessageBody(false)
@@ -75,13 +77,14 @@ public class Qdist014Route extends RouteBuilder {
 				.useOriginalMessage().log(LoggingLevel.WARN, log, "${exception}; " + getIdsForLogging())
 				.to("jms:" + qdist014FunksjonellFeil.getQueueName());
 
+		//@formatter:off
 		from("jms:" + qdist014.getQueueName() + "?transacted=true&concurrentConsumers={{dokdistdpi.qdist014.concurrency}}")
 				.autoStartup(qdist014Properties.isAutostartup())
 				.routeId(SERVICE_ID)
 				.setExchangePattern(ExchangePattern.InOnly)
 				.process(new Qdist014HeaderProcessor())
 				.log(INFO, log, "qdist014 har mottatt kvittering fra sdist003")
-				.bean(forretningsKvitteringMapper)
+				.bean(behandleForretningskvitteringService)
 				.choice()
 					.when(simple("${body}").isNull())
 						.log(INFO, log, BEHANDLINGEN_AVSLUTTES)
@@ -101,11 +104,12 @@ public class Qdist014Route extends RouteBuilder {
 						.endChoice()
 				.endChoice()
 				.end();
+		//@formatter:on
 	}
 
 	private static String getIdsForLogging() {
 		return "bestillingsId=${exchangeProperty." + PROPERTY_BESTILLINGS_ID + "}, " +
-				"forsendelseId=${exchangeProperty." + PROPERTY_FORSENDELSE_ID + "} og " +
-				"konversasjonsId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "}";
+			   "forsendelseId=${exchangeProperty." + PROPERTY_FORSENDELSE_ID + "} og " +
+			   "konversasjonsId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "}";
 	}
 }

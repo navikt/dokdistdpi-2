@@ -83,6 +83,8 @@ public class DokdistdpiProperties {
 	@Data
 	@Validated
 	public static class Endpoints {
+		@NotEmpty
+		String juridisklogg;
 		/**
 		 * URL til dokdistadmin journalpost api.
 		 */

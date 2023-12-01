@@ -7,10 +7,6 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvitt
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.LeveringsKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeiletKvittering;
-import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
-import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.support.DefaultExchange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,13 +22,10 @@ class ForretningsKvitteringMapperTest {
 	private static final String BESTILLINGS_ID = "ff88849c-e281-4809-8555-7cd54952b916";
 	private static final String CONVERSATION_ID = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
 
-	private Exchange exchange;
 	private ForretningsKvitteringMapper mapper;
 
 	@BeforeEach
 	void setUp() {
-		CamelContext camelContext = new DefaultCamelContext();
-		exchange = new DefaultExchange(camelContext);
 		ObjectMapper dpiObjectMapper = new JacksonConfig().dpiObjectMapper();
 		mapper = new ForretningsKvitteringMapper(new DpiKvitteringMapper(dpiObjectMapper), dpiObjectMapper);
 	}
@@ -41,7 +34,7 @@ class ForretningsKvitteringMapperTest {
 	void shouldMapLeveringskvittering() {
 		String sbd = Testutil.classpathToString("__files/kvitteringer/leveringskvittering.json");
 
-		LeveringsKvittering leveringsKvittering = (LeveringsKvittering) mapper.mapForretningsKvittering(sbd, exchange);
+		LeveringsKvittering leveringsKvittering = (LeveringsKvittering) mapper.mapForretningsKvittering(sbd);
 
 		assertEquals(CONVERSATION_ID, leveringsKvittering.getKonversasjonsId());
 		assertEquals(LEVERING, leveringsKvittering.getKvitteringType());
@@ -51,7 +44,7 @@ class ForretningsKvitteringMapperTest {
 	void shouldMapFeilKvittering() {
 		String sbd = Testutil.classpathToString("__files/kvitteringer/feilkvittering.json");
 
-		DpiFeilKvittering feilKvittering = (DpiFeilKvittering) mapper.mapForretningsKvittering(sbd, exchange);
+		DpiFeilKvittering feilKvittering = (DpiFeilKvittering) mapper.mapForretningsKvittering(sbd);
 		assertEquals(CONVERSATION_ID, feilKvittering.getKonversasjonsId());
 		assertEquals(BESTILLINGS_ID, feilKvittering.getDocumentIdentification());
 		assertEquals(KLIENT, feilKvittering.getFeiltype());

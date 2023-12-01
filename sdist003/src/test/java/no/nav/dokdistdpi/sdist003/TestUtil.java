@@ -13,7 +13,6 @@ import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKa
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +23,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Sikkerhetsnivaa.NIVAA_4;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.ARKIV_SYSTEM_JOARK;
@@ -217,14 +215,18 @@ public final class TestUtil {
 	}
 
 	@SneakyThrows
+	public static String classpathFilesToString(String classpathResource) {
+		InputStream inputStream = new ClassPathResource("__files/" + classpathResource).getInputStream();
+		String message = IOUtils.toString(inputStream, UTF_8);
+		IOUtils.closeQuietly(inputStream);
+		return message;
+	}
+
+	@SneakyThrows
 	public static String classpathToString(String classpathResource) {
-		try {
-			InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
-			String message = IOUtils.toString(inputStream, UTF_8);
-			IOUtils.closeQuietly(inputStream);
-			return message;
-		} catch (IOException e) {
-			throw new IOException(format("Kunne ikke åpne classpath-ressurs %s", classpathResource), e);
-		}
+		InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
+		String message = IOUtils.toString(inputStream, UTF_8);
+		IOUtils.closeQuietly(inputStream);
+		return message;
 	}
 }

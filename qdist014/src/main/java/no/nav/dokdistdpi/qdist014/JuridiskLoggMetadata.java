@@ -1,4 +1,4 @@
-package no.nav.dokdistdpi.sdist003;
+package no.nav.dokdistdpi.qdist014;
 
 public record JuridiskLoggMetadata(
 		String meldingsId,
