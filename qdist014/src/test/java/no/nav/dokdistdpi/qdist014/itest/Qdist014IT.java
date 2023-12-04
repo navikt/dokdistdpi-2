@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -51,7 +52,6 @@ public class Qdist014IT {
 
 	private static final String FORSENDELSE_ID = "1720847";
 	private static final String KONVERSASJON_ID = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
-	private static final String KONVERSASJON_ID_VAR = "2049057a-9b53-41bb-9cc3-d10f55fa0f87";
 	private static final String OPPSLAGSNOEKKEL_KONVERSASJONSID = "konversasjonsId";
 	private static String CALL_ID;
 
@@ -59,6 +59,7 @@ public class Qdist014IT {
 	private static final String FINNFORSENDELSE_URL = "/rest/v1/administrerforsendelse/finnforsendelse/%s/%s";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 	private static final String FEILREGISTRERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
+	private static final String JURIDISK_LOGG_URL = "/juridisklogg/api/rest/logg";
 
 	@Autowired
 	private JmsTemplate jmsTemplate;
@@ -82,6 +83,7 @@ public class Qdist014IT {
 		WireMock.resetAllRequests();
 		WireMock.removeAllMappings();
 		stubAzure();
+		stubPostJuridiskLogg();
 	}
 
 	@Test
@@ -94,6 +96,7 @@ public class Qdist014IT {
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/leveringskvittering.json"));
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 			verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
 			verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
@@ -114,6 +117,7 @@ public class Qdist014IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 		});
 	}
 
@@ -131,6 +135,7 @@ public class Qdist014IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 		});
 	}
 
@@ -185,6 +190,7 @@ public class Qdist014IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(qdist014FunksjonellFeil);
 			assertNotNull(response);
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 		});
 
 		verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
@@ -204,6 +210,7 @@ public class Qdist014IT {
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 			verify(1, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
 			verify(1, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 		});
@@ -223,7 +230,7 @@ public class Qdist014IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(qdist014FunksjonellFeil);
 			assertNotNull(response);
-
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 		});
 
 		verify(1, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
@@ -243,6 +250,7 @@ public class Qdist014IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(backoutQueue);
 			assertNotNull(response);
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 		});
 
 		verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
@@ -263,6 +271,7 @@ public class Qdist014IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(qdist014FunksjonellFeil);
 			assertNotNull(response);
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 		});
 	}
 
@@ -277,10 +286,23 @@ public class Qdist014IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String response = receive(qdist014FunksjonellFeil);
 			assertNotNull(response);
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
+		});
+	}
+
+	@Test
+	void shouldThrowFunctionalExceptionWhenMottakskvittering() throws IOException {
+		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/mottakskvittering.json"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			String response = receive(qdist014FunksjonellFeil);
+			assertNotNull(response);
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 		});
 	}
 
 	private void verifyAndCountDpiForsendelse(int count, String konversasjonsId) {
+		verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 		verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, konversasjonsId))));
 		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 		verify(count, postRequestedFor(urlMatching("/rest/v1/administrerforsendelse")));
@@ -330,6 +352,14 @@ public class Qdist014IT {
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("azure/token_response.json")));
+	}
+
+	private void stubPostJuridiskLogg() {
+		stubFor(post(urlEqualTo(JURIDISK_LOGG_URL))
+				.willReturn(aResponse()
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withStatus(HttpStatus.OK.value())
+						.withBodyFile("juridisklogg/juridiskloggresponse.json")));
 	}
 
 	private static String classpathToString(String classpathResource) throws IOException {

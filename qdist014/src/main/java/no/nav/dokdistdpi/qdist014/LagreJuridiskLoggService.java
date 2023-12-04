@@ -1,8 +1,9 @@
-package no.nav.dokdistdpi.sdist003;
+package no.nav.dokdistdpi.qdist014;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.juridisklogg.JuridiskLoggConsumer;
 import no.nav.dokdistdpi.consumer.juridisklogg.LoggMeldingRequest;
+import no.nav.dokdistdpi.consumer.juridisklogg.LoggMeldingResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,8 +22,9 @@ public class LagreJuridiskLoggService {
 	}
 
 	public void lagreJuridiskLogg(JuridiskLoggMetadata juridiskLoggMetadata, String payload) {
-		juridiskLoggConsumer.lagreJuridiskLogg(map(juridiskLoggMetadata, payload));
-		log.info("Hendelse med konversasjonsId={} logget til juridisk arkiv.", juridiskLoggMetadata.meldingsId());
+		LoggMeldingResponse loggMeldingResponse = juridiskLoggConsumer.lagreJuridiskLogg(map(juridiskLoggMetadata, payload));
+		log.info("Hendelse med konversasjonsId={} logget til juridisk logg med id={}.",
+				juridiskLoggMetadata.meldingsId(), loggMeldingResponse.id());
 	}
 
 	LoggMeldingRequest map(JuridiskLoggMetadata juridiskLoggMetadata, String payload) {

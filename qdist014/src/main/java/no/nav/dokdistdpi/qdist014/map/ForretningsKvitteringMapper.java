@@ -11,8 +11,6 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.LeveringsKvi
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeiletKvittering;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
-import org.apache.camel.Exchange;
-import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
 import java.util.regex.Matcher;
@@ -24,7 +22,6 @@ import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.Kvitt
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.getByValue;
 import static no.nav.dokdistdpi.qdist014.map.DpiKvitteringMapper.AAPNINGSKVITTERING_ERROR_MESSAGE;
 import static no.nav.dokdistdpi.qdist014.map.DpiKvitteringMapper.MOTTAKSKVITTERING_ERROR_MESSAGE;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
 
 @Slf4j
 @Component
@@ -42,52 +39,52 @@ public class ForretningsKvitteringMapper {
 		this.dpiKvitteringMapper = dpiKvitteringMapper;
 	}
 
-	@Handler
-	public DpiMelding mapForretningsKvittering(String sbdJsonString, Exchange exchange) {
+	DpiMelding mapForretningsKvittering(String sbdJsonString) {
 		try {
-			SimpleStandardBusinessDocument simpleSbd = dpiObjectMapper.readValue(sbdJsonString, SimpleStandardBusinessDocument.class);
-
-			KvitteringType kvitteringType = getByValue(simpleSbd.getType());
-			DpiKvittering dpiKvittering = dpiKvitteringMapper.mapKvittering(kvitteringType, sbdJsonString);
-			exchange.setProperty(PROPERTY_CONVERSATION_ID, simpleSbd.getConversationId());
-
-			return switch (kvitteringType) {
-				case AAPNING -> throw new UnsupportedOperationException(AAPNINGSKVITTERING_ERROR_MESSAGE);
-				case VARSLINGFEILET -> {
-					VarslingFeiletKvittering varslingFeilet = dpiKvittering.getVarslingfeiletkvittering();
-					log.info("Kvittering varslingfeilet(kanal={}): {}", varslingFeilet.getVarslingskanal(), maskerBeskrivelse(varslingFeilet));
-					yield VarslingFeiletKvittering.builder()
-							.konversasjonsId(simpleSbd.getConversationId())
-							.documentIdentification(simpleSbd.getDokumentKonversasjonId())
-							.kvitteringType(VARSLINGFEILET)
-							.tidspunkt(varslingFeilet.getTidspunkt())
-							.varslingskanal(varslingFeilet.getVarslingskanal())
-							.beskrivelse(varslingFeilet.getBeskrivelse())
-							.build();
-				}
-				case LEVERING -> LeveringsKvittering.builder()
-						.konversasjonsId(simpleSbd.getConversationId())
-						.documentIdentification(simpleSbd.getDokumentKonversasjonId())
-						.kvitteringType(LEVERING)
-						.tidspunkt(dpiKvittering.getLeveringskvittering().getTidspunkt())
-						.build();
-				case MOTTAK -> throw new UnsupportedOperationException(MOTTAKSKVITTERING_ERROR_MESSAGE);
-				case FEILET -> {
-					DpiFeilKvittering dpiFeilKvittering = dpiKvittering.getFeil();
-					log.warn("Kvittering feilet: {}", dpiFeilKvittering.getDetaljer());
-					yield DpiFeilKvittering.builder()
-							.konversasjonsId(simpleSbd.getConversationId())
-							.documentIdentification(simpleSbd.getDokumentKonversasjonId())
-							.kvitteringType(FEILET)
-							.tidspunkt(dpiFeilKvittering.getTidspunkt())
-							.feiltype(dpiFeilKvittering.getFeiltype())
-							.detaljer(dpiFeilKvittering.getDetaljer())
-							.build();
-				}
-			};
+			return mapForretningsKvittering(dpiObjectMapper.readValue(sbdJsonString, SimpleStandardBusinessDocument.class), sbdJsonString);
 		} catch (JsonProcessingException e) {
 			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 		}
+	}
+
+	public DpiMelding mapForretningsKvittering(SimpleStandardBusinessDocument simpleSbd, String sbdJsonString) {
+		KvitteringType kvitteringType = getByValue(simpleSbd.getType());
+		DpiKvittering dpiKvittering = dpiKvitteringMapper.mapKvittering(kvitteringType, sbdJsonString);
+
+		return switch (kvitteringType) {
+			case AAPNING -> throw new UnsupportedOperationException(AAPNINGSKVITTERING_ERROR_MESSAGE);
+			case VARSLINGFEILET -> {
+				VarslingFeiletKvittering varslingFeilet = dpiKvittering.getVarslingfeiletkvittering();
+				log.info("Kvittering varslingfeilet(kanal={}): {}", varslingFeilet.getVarslingskanal(), maskerBeskrivelse(varslingFeilet));
+				yield VarslingFeiletKvittering.builder()
+						.konversasjonsId(simpleSbd.getConversationId())
+						.documentIdentification(simpleSbd.getDokumentKonversasjonId())
+						.kvitteringType(VARSLINGFEILET)
+						.tidspunkt(varslingFeilet.getTidspunkt())
+						.varslingskanal(varslingFeilet.getVarslingskanal())
+						.beskrivelse(varslingFeilet.getBeskrivelse())
+						.build();
+			}
+			case LEVERING -> LeveringsKvittering.builder()
+					.konversasjonsId(simpleSbd.getConversationId())
+					.documentIdentification(simpleSbd.getDokumentKonversasjonId())
+					.kvitteringType(LEVERING)
+					.tidspunkt(dpiKvittering.getLeveringskvittering().getTidspunkt())
+					.build();
+			case MOTTAK -> throw new UnsupportedOperationException(MOTTAKSKVITTERING_ERROR_MESSAGE);
+			case FEILET -> {
+				DpiFeilKvittering dpiFeilKvittering = dpiKvittering.getFeil();
+				log.warn("Kvittering feilet: {}", dpiFeilKvittering.getDetaljer());
+				yield DpiFeilKvittering.builder()
+						.konversasjonsId(simpleSbd.getConversationId())
+						.documentIdentification(simpleSbd.getDokumentKonversasjonId())
+						.kvitteringType(FEILET)
+						.tidspunkt(dpiFeilKvittering.getTidspunkt())
+						.feiltype(dpiFeilKvittering.getFeiltype())
+						.detaljer(dpiFeilKvittering.getDetaljer())
+						.build();
+			}
+		};
 	}
 
 	String maskerBeskrivelse(VarslingFeiletKvittering varslingFeiletKvittering) {

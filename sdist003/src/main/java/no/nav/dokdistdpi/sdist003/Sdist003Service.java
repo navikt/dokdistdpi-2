@@ -37,7 +37,6 @@ public class Sdist003Service {
 	private final ProducerTemplate producerTemplate;
 	private final Queue qdist014;
 	private final MeterRegistry meterRegistry;
-	private final LagreJuridiskLoggService juridiskLoggService;
 	private final ObjectMapper dpiObjectMapper;
 
 	@Autowired
@@ -45,13 +44,11 @@ public class Sdist003Service {
 						   ProducerTemplate producerTemplate,
 						   MeterRegistry meterRegistry,
 						   Queue qdist014,
-						   LagreJuridiskLoggService juridiskLoggService,
 						   ObjectMapper dpiObjectMapper) {
 		this.dpiClient = dpiClient;
 		this.producerTemplate = producerTemplate;
 		this.qdist014 = qdist014;
 		this.meterRegistry = meterRegistry;
-		this.juridiskLoggService = juridiskLoggService;
 		this.dpiObjectMapper = dpiObjectMapper;
 	}
 
@@ -77,7 +74,6 @@ public class Sdist003Service {
 						producerTemplate.sendBody("jms:" + qdist014.getQueueName(), forretningsmeldingPayload);
 						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
 
-						juridiskLoggService.lagreJuridiskLogg(new JuridiskLoggMetadata(simpleSbd.getDokumentKonversasjonId(), simpleSbd.getSender(), simpleSbd.getReceiver()), forretningsmeldingPayload);
 						dpiClient.bekreft(simpleSbd.getDokumentKonversasjonId());
 					} catch (JMSException e) {
 						throw new JmsTechnicalException("Kunne ikke skrive melding til qdist014", e);
