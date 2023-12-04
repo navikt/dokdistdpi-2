@@ -6,7 +6,6 @@ import jakarta.jms.TextMessage;
 import jakarta.xml.bind.JAXBElement;
 import no.nav.dokdistdpi.qdist014.itest.config.ApplicationTestConfig;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -358,11 +357,10 @@ public class Qdist014IT {
 	private void stubPostJuridiskLogg() {
 		stubFor(post(urlEqualTo(JURIDISK_LOGG_URL))
 				.willReturn(aResponse()
-						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withStatus(HttpStatus.OK.value())
 						.withBodyFile("juridisklogg/juridiskloggresponse.json")));
 	}
-
 
 	private static String classpathToString(String classpathResource) throws IOException {
 		InputStream inputStream = new ClassPathResource(classpathResource).getInputStream();
