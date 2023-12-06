@@ -1,6 +1,7 @@
 package no.nav.dokdistdpi.utils;
 
 import java.time.ZoneId;
+import java.util.Set;
 import java.util.TimeZone;
 
 public class DokdistdpiConstant {
@@ -35,6 +36,8 @@ public class DokdistdpiConstant {
 	public static final String HOVEDDOKUMENT = "HOVEDDOKUMENT";
 	public static final String VEDLEGG = "VEDLEGG";
 	public static final String VEDLEGG_TITTEL_PREFIX = "Vedlegg ";
+
+	public static final Set<String> ALL_MDC_KEYS = Set.of(CALL_ID);
 
 	private DokdistdpiConstant() {
 		//no-op

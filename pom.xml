@@ -39,6 +39,7 @@
 		<nimbus-jose-jwt.version>9.37.1</nimbus-jose-jwt.version>
 		<resilience4j.version>2.1.0</resilience4j.version>
 		<httpclient.version>4.5.14</httpclient.version>
+		<context-propagation.version>1.1.0</context-propagation.version>
 
 		<jaxb-xew-plugin.version>2.1</jaxb-xew-plugin.version>
 		<!-- plugins -->
@@ -159,6 +160,11 @@
 				<version>${resilience4j.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>context-propagation</artifactId>
+				<version>${context-propagation.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>no.nav.meldinger.virksomhet</groupId>

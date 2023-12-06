@@ -1,11 +1,8 @@
 package no.nav.dokdistdpi.consumer.dpi.maskineporten;
 
-import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.certificate.KeyStoreProperties;
 import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
-import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
-import no.nav.dokdistdpi.consumer.dpi.client.ForsendelseStatusResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -13,8 +10,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.io.FileSystemResource;
 
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
 
 @Disabled
 class MaskinportenTokenConsumerTest {
@@ -56,12 +51,6 @@ class MaskinportenTokenConsumerTest {
 	@Test
 	void shouldFetchTokenWhenSystemPropertiesSet() {
 		MaskinportenTokenConsumer oidcTokenClient = new MaskinportenTokenConsumer(maskinportenProperties, new RestTemplateBuilder());
-
 		final OidcTokenResponse oidcTokenResponse = oidcTokenClient.fetchToken();
-
-		DpiClient dpiClient = new DpiClient(new RestTemplateBuilder(), oidcTokenClient, dpiClientProperties);
-		List<ForsendelseStatusResponse> hentKvitteringResponseList = dpiClient.hentForsendelseStatus("bb0ce2c0-0b29-4005-bf35-3deb27365acb");
-
-		System.out.println(oidcTokenResponse.getAccessToken());
 	}
 }

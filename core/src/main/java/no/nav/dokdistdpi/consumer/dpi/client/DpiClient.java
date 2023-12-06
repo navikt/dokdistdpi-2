@@ -1,10 +1,14 @@
 package no.nav.dokdistdpi.consumer.dpi.client;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
+import io.github.resilience4j.reactor.retry.RetryOperator;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryRegistry;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
-import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
-import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusIkkeFunnetException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeHenteKvitteringException;
@@ -15,7 +19,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -25,56 +28,70 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.function.Consumer;
 
 import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
-import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.KANAL;
-import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.PAGE_SIZE;
+import static no.nav.dokdistdpi.config.OAuthEnabledWebClientConfig.MASKINPORTEN_CLIENT_REGISTRATION;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
+/**
+ * Implementasjon av https://docs.digdir.no/dpi_nyinfrastruktur.html#rest-api-mellom-avsender-og-hj%C3%B8rne-2
+ */
 @Slf4j
 @Component
 public class DpiClient {
 
 	private static final String LOG_FEIL_MELDING = "Kunne ikke sende til DPI hjørne-2 med status={}, konversasjonId={} og feilmelding={}";
 	private static final String EXCEPTION_FEIL_MELDING = "Kunne ikke sende til DPI hjørne-2 med status=%s, konversasjonId=%s og feilmelding=%s";
-	private static final String KVITTERING_FEIL_MELDING = "Feilet å markere kvitteringen med konversasjonId=%s som mottatt, feilmelding=%s";
 	private static final String SEND_PATH = "/out";
-	private static final String HENT_PATH = "/in";
-	private static final String READ = "/read";
-	private static final String STATUSES = "/statuses";
+	private static final String MESSAGES_PATH_IN = "in";
+	private static final String MESSAGES_PATH_OUT = "out";
+	private static final String MESSAGES_PATH_IN_READ = "read";
+	private static final String MESSAGES_PATH_OUT_STATUSES = "statuses";
+	private static final String QUERY_PARAM_KANAL = "kanal";
+	private static final String QUERY_PARAM_PAGESIZE = "page_size";
 	// Siden hjørne2 ikke har et veldefinert felt som indikerer duplikate forsendelser så matches det på meldingen under.
 	// Ved feil her så sjekk med Digdir og om dette er endret hos hjørne2 leverandør.
 	private static final String HJORNE2_DUPLICATE_ERROR_MESSAGE = "ERROR: duplicate key value violates unique constraint";
 	public static final String HJORNE2_FINGERAVTRYKK_ERROR_MESSAGE = "Upload was not accepted, SHA-256 digest of dokumentpakke was";
+	private static final String RESILIENCE4J_INSTANCE = "dpi";
 
 	private final RestTemplate restTemplate;
-	private final MaskinportenTokenConsumer maskinportenTokenConsumer;
+	private final WebClient oauth2WebClient;
+	private final Retry retry;
+	private final CircuitBreaker circuitBreaker;
 	private final DpiClientProperties clientProperties;
 
 	@Autowired
-	public DpiClient(RestTemplateBuilder restTemplateBuilder,
-					 MaskinportenTokenConsumer maskinportenTokenConsumer, DpiClientProperties clientProperties) {
-		this.maskinportenTokenConsumer = maskinportenTokenConsumer;
+	public DpiClient(WebClient oauth2WebClient,
+					 RestTemplateBuilder restTemplateBuilder,
+					 DpiClientProperties clientProperties,
+					 CircuitBreakerRegistry circuitBreakerRegistry,
+					 RetryRegistry retryRegistry) {
 		this.clientProperties = clientProperties;
 		this.restTemplate = restTemplateBuilder
 				.setConnectTimeout(ofSeconds(15))
 				.setReadTimeout(ofSeconds(30))
 				.build();
+		this.oauth2WebClient = oauth2WebClient.mutate()
+				.baseUrl(clientProperties.getUrl())
+				.build();
+		this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(RESILIENCE4J_INSTANCE);
+		this.retry = retryRegistry.retry(RESILIENCE4J_INSTANCE);
 	}
 
 	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
@@ -82,7 +99,7 @@ public class DpiClient {
 
 		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl())
 				.path(SEND_PATH)
-				.queryParam(KANAL, clientProperties.getMpckanal())
+				.queryParam(QUERY_PARAM_KANAL, clientProperties.getMpckanal())
 				.toUriString();
 
 		String konversasjonId = forsendelse.getKonversasjonId();
@@ -117,81 +134,101 @@ public class DpiClient {
 		}
 	}
 
-	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public List<ForsendelseStatusResponse> hentForsendelseStatus(String konversasjonId) {
-
-		String uri = UriComponentsBuilder
-				.fromHttpUrl(clientProperties.getUrl())
-				.path(SEND_PATH + "/")
-				.path(konversasjonId).path(STATUSES).toUriString();
-		try {
-			ResponseEntity<ForsendelseStatusResponse[]> forsendelseStatues = restTemplate.exchange(uri, GET, new HttpEntity<>(jsonTypeHeaders()), ForsendelseStatusResponse[].class);
-
-			List<ForsendelseStatusResponse> forsendelseStatusResponses = mapForsendelseStatus(forsendelseStatues.getBody());
-			log.info("Hentet status på forsendelse med konversasjonId={} og status={} hos hjørne2", konversasjonId, forsendelseStatusResponses);
-			return forsendelseStatusResponses;
-		} catch (HttpClientErrorException e) {
-			throw new ForsendelseStatusIkkeFunnetException(format("Finner ikke forsendelse status med konversasjonId=%s hos hjørne2. Feilmelding=%s", konversasjonId, e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			throw new SikkerDigitalPostException("Hente forsendelse status feilet mot hjørne2.", e);
-		}
+		return oauth2WebClient.get()
+				.uri(uriBuilder -> uriBuilder
+						.pathSegment(MESSAGES_PATH_OUT, "{konversasjonId}", MESSAGES_PATH_OUT_STATUSES)
+						.build(konversasjonId))
+				.accept(APPLICATION_JSON, APPLICATION_PROBLEM_JSON)
+				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
+				.retrieve()
+				.bodyToMono(new ParameterizedTypeReference<List<ForsendelseStatusResponse>>() {
+				})
+				.doOnError(handleForsendelseStatuserErrors(konversasjonId))
+				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+				.transformDeferred(RetryOperator.of(retry))
+				.block();
 	}
 
-	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	private Consumer<Throwable> handleForsendelseStatuserErrors(String konversasjonId) {
+		return error -> {
+			if (error instanceof WebClientResponseException webException) {
+				if (webException.getStatusCode().is4xxClientError()) {
+					throw new ForsendelseStatusIkkeFunnetException(format("Finner ikke forsendelse status med konversasjonId=%s hos hjørne2. feilmelding=%s",
+							konversasjonId, webException.getMessage()), webException);
+				} else {
+					throw new SikkerDigitalPostException(format("Feilet å hente forsendelse status med konversasjonId=%s hos hjørne2. status=%s, feilmelding=%s",
+							konversasjonId, webException.getStatusCode(), webException.getMessage()), webException);
+				}
+			} else {
+				throw new SikkerDigitalPostException(format("Feilet å hente forsendelse status. Ukjent teknisk feil. feilmelding=%s",
+						error.getMessage()), error);
+			}
+		};
+	}
+
 	public List<HentKvitteringResponse> hentKvitteringer() {
+		return oauth2WebClient.get()
+				.uri(uriBuilder -> uriBuilder
+						.pathSegment(MESSAGES_PATH_IN)
+						.queryParam(QUERY_PARAM_KANAL, clientProperties.getMpckanal())
+						.queryParam(QUERY_PARAM_PAGESIZE, clientProperties.getPagesize())
+						.build())
+				.accept(APPLICATION_JSON, APPLICATION_PROBLEM_JSON)
+				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
+				.retrieve()
+				.bodyToFlux(HentKvitteringResponse.class)
+				.doOnError(handleHentKvitteringerErrors())
+				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+				.transformDeferred(RetryOperator.of(retry))
+				.collectList()
+				.block();
+	}
 
-		String uri = UriComponentsBuilder
-				.fromHttpUrl(clientProperties.getUrl())
-				.path(HENT_PATH)
-				.queryParam(KANAL, clientProperties.getMpckanal())
-				.queryParam(PAGE_SIZE, clientProperties.getPagesize())
-				.toUriString();
-
-		try {
-			ResponseEntity<List<HentKvitteringResponse>> exchange = restTemplate.exchange(uri, GET, new HttpEntity<>(jsonTypeHeaders()), new ParameterizedTypeReference<>() {
-			});
-			if (NO_CONTENT == exchange.getStatusCode()) {
-				return List.of();
+	private Consumer<Throwable> handleHentKvitteringerErrors() {
+		return error -> {
+			if (error instanceof WebClientResponseException webException) {
+				if (webException.getStatusCode().is4xxClientError()) {
+					throw new KunneIkkeHenteKvitteringException(format("Feilet å hente kvitteringer med feilmelding=%s",
+							webException.getMessage()), webException);
+				} else {
+					throw new SikkerDigitalPostException(format("Feilet å hente kvitteringer med status=%s, feilmelding=%s, body=%s",
+							webException.getStatusCode(), webException.getMessage(), webException.getResponseBodyAsString()), webException);
+				}
+			} else {
+				throw new SikkerDigitalPostException(format("Feilet å hente kvitteringer. Ukjent teknisk feil. feilmelding=%s",
+						error.getMessage()), error);
 			}
-			return exchange.getBody();
-		} catch (HttpClientErrorException e) {
-			throw new KunneIkkeHenteKvitteringException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			throw new SikkerDigitalPostException(format("Feilet til å hente kvitteringer med feilmelding=%s", e.getMessage()), e);
-		}
+		};
 	}
 
-	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public HttpStatusCode bekreft(String konversasjonId) {
+	public void markerKvitteringMottatt(String konversasjonId) {
+		oauth2WebClient.post()
+				.uri(uriBuilder -> uriBuilder.pathSegment(MESSAGES_PATH_IN, "{konversasjonId}", MESSAGES_PATH_IN_READ).build(konversasjonId))
+				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
+				.retrieve()
+				.bodyToMono(Void.class)
+				.doOnError(handleMarkerKvitteringMottattErrors(konversasjonId))
+				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+				.transformDeferred(RetryOperator.of(retry))
+				.block();
+	}
 
-		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl())
-				.path(HENT_PATH + "/")
-				.path(konversasjonId).path(READ).toUriString();
-		try {
-			ResponseEntity<String> response = restTemplate.exchange(uri, POST, new HttpEntity<>(jsonTypeHeaders()), String.class);
-			if (!OK.equals(response.getStatusCode())) {
-				throw new KunneIkkeHenteKvitteringException(format("Feilet til å markere kvitteringen med konversasjonId=%s og status=%s som mottatt", konversasjonId, response.getStatusCode()));
+	private Consumer<Throwable> handleMarkerKvitteringMottattErrors(String konversasjonId) {
+		return error -> {
+			if (error instanceof WebClientResponseException webException) {
+				if (webException.getStatusCode().is4xxClientError()) {
+					throw new KunneIkkeHenteKvitteringException(format("Feilet å markere kvitteringen med konversasjonId=%s som mottatt, feilmelding=%s",
+							konversasjonId, webException.getMessage()), webException);
+				} else {
+					throw new SikkerDigitalPostException(format("Feilet å markere kvitteringen med konversasjonId=%s som mottatt, status=%s, feilmelding=%s",
+							konversasjonId, webException.getStatusCode(), webException.getMessage()), webException);
+				}
+			} else {
+				throw new SikkerDigitalPostException(format("Ukjent teknisk feil. Feilet å markere kvitteringen med konversasjonId=%s som mottatt, feilmelding=%s",
+						konversasjonId, error.getMessage()), error);
 			}
-			log.info("Kvitteringen med konversasjonId={} og status={} bekreftet mottatt", konversasjonId, response.getStatusCode());
-			return response.getStatusCode();
-		} catch (HttpClientErrorException e) {
-			log.warn(format("Feilet til å markere kvitteringen med konversasjonId=%s og feilmelding=%s som mottatt", konversasjonId, e.getMessage()), e);
-			throw new KunneIkkeHenteKvitteringException(format(KVITTERING_FEIL_MELDING, konversasjonId, e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			log.warn(format("Feilet til å markere kvitteringen med konversasjonId=%s som mottatt", konversasjonId), e);
-			throw new SikkerDigitalPostException(format(KVITTERING_FEIL_MELDING, konversasjonId, e.getMessage()), e);
-		}
-	}
-
-	private List<ForsendelseStatusResponse> mapForsendelseStatus(ForsendelseStatusResponse[] statusResponses) {
-		return Arrays.stream(statusResponses)
-				.filter(Objects::nonNull)
-				.toList();
-	}
-
-	private HttpHeaders jsonTypeHeaders() {
-		OidcTokenResponse oidcTokenResponse = maskinportenTokenConsumer.fetchToken();
-		return headers(oidcTokenResponse.getAccessToken(), APPLICATION_JSON);
+		};
 	}
 
 	private HttpHeaders headers(final String maskinportentoken, MediaType mediaType) {
