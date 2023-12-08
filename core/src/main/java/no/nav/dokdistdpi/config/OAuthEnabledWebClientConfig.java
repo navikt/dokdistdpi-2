@@ -54,7 +54,8 @@ public class OAuthEnabledWebClientConfig {
 		var oAuth2AuthorizedClientExchangeFilterFunction = new ServerOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
 
 		var nettyHttpClient = HttpClient.create()
-				.responseTimeout(Duration.of(20, SECONDS));
+				.responseTimeout(Duration.of(20, SECONDS))
+				.proxyWithSystemProperties();
 		var clientHttpConnector = new ReactorClientHttpConnector(nettyHttpClient);
 
 		return WebClient.builder()
