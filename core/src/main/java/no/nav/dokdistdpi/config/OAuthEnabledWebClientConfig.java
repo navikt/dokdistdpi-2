@@ -50,14 +50,9 @@ public class OAuthEnabledWebClientConfig {
 	public static final String MASKINPORTEN_CLIENT_REGISTRATION = "maskinporten";
 
 	@Bean
-	WebClient oauth2WebClient(ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager) {
+	WebClient oauth2WebClient(ReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, HttpClient nettyProxyHttpClient) {
 		var oAuth2AuthorizedClientExchangeFilterFunction = new ServerOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
-
-		var nettyHttpClient = HttpClient.create()
-				.responseTimeout(Duration.of(20, SECONDS))
-				.proxyWithSystemProperties();
-		var clientHttpConnector = new ReactorClientHttpConnector(nettyHttpClient);
-
+		var clientHttpConnector = new ReactorClientHttpConnector(nettyProxyHttpClient);
 		return WebClient.builder()
 				.clientConnector(clientHttpConnector)
 				.filter(oAuth2AuthorizedClientExchangeFilterFunction)
@@ -76,8 +71,8 @@ public class OAuthEnabledWebClientConfig {
 	}
 
 	@Bean
-	ReactiveOAuth2AuthorizedClientProvider reactiveOAuth2AuthorizedClientProvider(MaskinportenProperties maskinportenProperties) throws ParseException {
-		WebClient reactiveProxyTokenWebClient = createReactiveProxyTokenWebClient();
+	ReactiveOAuth2AuthorizedClientProvider reactiveOAuth2AuthorizedClientProvider(MaskinportenProperties maskinportenProperties, HttpClient nettyProxyHttpClient) throws ParseException {
+		WebClient reactiveProxyTokenWebClient = createReactiveProxyTokenWebClient(nettyProxyHttpClient);
 		return new DelegatingReactiveOAuth2AuthorizedClientProvider(createMaskinportenJwtBearerReactiveOAuth2AuthorizedClientProvider(reactiveProxyTokenWebClient, maskinportenProperties));
 	}
 
@@ -99,6 +94,7 @@ public class OAuthEnabledWebClientConfig {
 	private static Mono<Jwt> resolveJwtAssertion(OAuth2AuthorizationContext context, JWKSource<SecurityContext> maskinportenClientJwkSource) {
 		ClientRegistration clientRegistration = context.getClientRegistration();
 		if (MASKINPORTEN_CLIENT_REGISTRATION.equals(clientRegistration.getRegistrationId())) {
+			// Implementasjon av https://docs.digdir.no/docs/Maskinporten/maskinporten_protocol_jwtgrant
 			JwsHeader.Builder headersBuilder = JwsHeader.with(RS256);
 
 			Instant issuedAt = Instant.now();
@@ -122,11 +118,8 @@ public class OAuthEnabledWebClientConfig {
 	/**
 	 * @return WebClient med webproxy støtte
 	 */
-	private static WebClient createReactiveProxyTokenWebClient() {
-		var nettyHttpClient = HttpClient.create()
-				.proxyWithSystemProperties()
-				.responseTimeout(Duration.of(20, SECONDS));
-		var clientHttpConnector = new ReactorClientHttpConnector(nettyHttpClient);
+	private static WebClient createReactiveProxyTokenWebClient(HttpClient nettyProxyHttpClient) {
+		var clientHttpConnector = new ReactorClientHttpConnector(nettyProxyHttpClient);
 		return WebClient.builder()
 				.clientConnector(clientHttpConnector)
 				.build();
@@ -155,5 +148,16 @@ public class OAuthEnabledWebClientConfig {
 						.scope(maskinportenProperties.getScopes())
 						.build()
 		);
+	}
+
+	/**
+	 *
+	 * @return Singleton netty HttpClient med støtte for webproxy
+	 */
+	@Bean
+	HttpClient nettyProxyHttpClient() {
+		return HttpClient.create()
+				.proxyWithSystemProperties()
+				.responseTimeout(Duration.of(20, SECONDS));
 	}
 }
