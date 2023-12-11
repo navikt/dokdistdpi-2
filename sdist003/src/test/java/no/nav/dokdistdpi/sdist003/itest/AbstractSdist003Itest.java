@@ -1,0 +1,98 @@
+package no.nav.dokdistdpi.sdist003.itest;
+
+import com.github.tomakehurst.wiremock.client.WireMock;
+import jakarta.jms.Queue;
+import jakarta.xml.bind.JAXBElement;
+import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
+import no.nav.dokdistdpi.sdist003.itest.config.ApplicationTestConfig;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.test.context.ActiveProfiles;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.mockito.Mockito.mock;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
+@EnableAutoConfiguration
+@SpringBootTest(classes = {ApplicationTestConfig.class},
+		webEnvironment = RANDOM_PORT)
+@AutoConfigureWireMock(port = 0)
+@ActiveProfiles("itest")
+public abstract class AbstractSdist003Itest {
+
+	static final String MASKINPORTEN_URL = "/maskinporten";
+	static final String DPI_BEKREFT_URL = "/message/in/ff88849c-e281-4809-8555-7cd54952b916/read";
+	static final String DPI_KVITTERINGER_URL = "/message/in?kanal=dokdistdpi-t&page_size=10";
+
+	@Value("${leder.host}")
+	protected String lederHost;
+
+	@Autowired
+	protected JmsTemplate jmsTemplate;
+
+	@Autowired
+	protected Queue qdist014;
+
+	@Autowired
+	protected LederElectionConsumer lederElection;
+
+	@BeforeEach
+	void setUp() {
+		System.setProperty("ELECTOR_PATH", lederHost);
+		lederElection = mock(LederElectionConsumer.class);
+		WireMock.reset();
+		WireMock.resetAllRequests();
+		WireMock.removeAllMappings();
+	}
+
+	protected static void stubGetKvittering() {
+		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("kvittering/feil_forretningsmelding.json")));
+	}
+
+	protected static void stubGetKvittering(HttpStatusCode status) {
+		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL))
+				.willReturn(aResponse()
+						.withStatus(status.value())));
+	}
+
+	protected static void stubPostMottattKvittering() {
+		stubFor(post(urlEqualTo(DPI_BEKREFT_URL))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
+	}
+
+	protected static void stubPostMaskinporten() {
+		stubFor(post(urlMatching(MASKINPORTEN_URL))
+				.willReturn(aResponse().withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("maskinporten/maskinporten_happy_response.json")));
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <T> T receive(Queue queue) {
+		Object response = jmsTemplate.receiveAndConvert(queue);
+		if (response instanceof JAXBElement) {
+			response = ((JAXBElement) response).getValue();
+		}
+		return (T) response;
+	}
+}

@@ -26,6 +26,7 @@ import java.util.List;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.VARSLINGFEILET;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 
 @Slf4j
 @Component
@@ -70,11 +71,13 @@ public class Sdist003Service {
 						SimpleStandardBusinessDocument simpleSbd = dpiObjectMapper.readValue(forretningsmeldingPayload, SimpleStandardBusinessDocument.class);
 						KvitteringType kvitteringType = getKvitteringType(simpleSbd);
 						countDpiKvittering(kvitteringType);
-						log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt med konversasjonId={} og status={}", simpleSbd.getConversationId(), kvitteringType);
-						producerTemplate.sendBody("jms:" + qdist014.getQueueName(), forretningsmeldingPayload);
-						log.info("Sdist003 har skrevet melding på qdist014 med konversasjonId={}", simpleSbd.getConversationId());
-
-						dpiClient.bekreft(simpleSbd.getDokumentKonversasjonId());
+						String konversasjonId = simpleSbd.getConversationId();
+						String messageId = simpleSbd.getDokumentKonversasjonId();
+						log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt. konversasjonId={} og type={}", konversasjonId, kvitteringType);
+						producerTemplate.sendBodyAndHeader("jms:" + qdist014.getQueueName(), forretningsmeldingPayload, CALL_ID, konversasjonId);
+						log.info("Sdist003 har skrevet melding på qdist014. konversasjonId={}", konversasjonId);
+						dpiClient.markerKvitteringMottatt(messageId);
+						log.info("Sdist003 har markert innkommende forsendelse som mottatt av avsender. konversasjonId={}, messageId={}", konversasjonId, messageId);
 					} catch (JMSException e) {
 						throw new JmsTechnicalException("Kunne ikke skrive melding til qdist014", e);
 					} catch (JsonProcessingException e) {
