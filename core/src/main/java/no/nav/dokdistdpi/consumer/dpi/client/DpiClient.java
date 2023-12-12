@@ -31,6 +31,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -63,6 +65,7 @@ public class DpiClient {
 	private static final String MESSAGES_PATH_IN_READ = "read";
 	private static final String MESSAGES_PATH_OUT_STATUSES = "statuses";
 	private static final String QUERY_PARAM_KANAL = "kanal";
+	private static final String QUERY_PARAM_PAGE = "page";
 	private static final String QUERY_PARAM_PAGESIZE = "page_size";
 	// Siden hjørne2 ikke har et veldefinert felt som indikerer duplikate forsendelser så matches det på meldingen under.
 	// Ved feil her så sjekk med Digdir og om dette er endret hos hjørne2 leverandør.
@@ -167,12 +170,13 @@ public class DpiClient {
 		};
 	}
 
-	public List<HentKvitteringResponse> hentKvitteringer() {
+	public Flux<HentKvitteringResponse> hentKvitteringerAsync(final int page) {
 		return oauth2WebClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.pathSegment(MESSAGES_PATH_IN)
 						.queryParam(QUERY_PARAM_KANAL, clientProperties.getMpckanal())
 						.queryParam(QUERY_PARAM_PAGESIZE, clientProperties.getPagesize())
+						.queryParam(QUERY_PARAM_PAGE, page)
 						.build())
 				.accept(APPLICATION_JSON, APPLICATION_PROBLEM_JSON)
 				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
@@ -180,9 +184,7 @@ public class DpiClient {
 				.bodyToFlux(HentKvitteringResponse.class)
 				.doOnError(handleHentKvitteringerErrors())
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-				.transformDeferred(RetryOperator.of(retry))
-				.collectList()
-				.block();
+				.transformDeferred(RetryOperator.of(retry));
 	}
 
 	private Consumer<Throwable> handleHentKvitteringerErrors() {
@@ -202,16 +204,15 @@ public class DpiClient {
 		};
 	}
 
-	public void markerKvitteringMottatt(String konversasjonId) {
-		oauth2WebClient.post()
+	public Mono<Void> markerKvitteringMottattAsync(String konversasjonId) {
+		return oauth2WebClient.post()
 				.uri(uriBuilder -> uriBuilder.pathSegment(MESSAGES_PATH_IN, "{konversasjonId}", MESSAGES_PATH_IN_READ).build(konversasjonId))
 				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
 				.retrieve()
 				.bodyToMono(Void.class)
 				.doOnError(handleMarkerKvitteringMottattErrors(konversasjonId))
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-				.transformDeferred(RetryOperator.of(retry))
-				.block();
+				.transformDeferred(RetryOperator.of(retry));
 	}
 
 	private Consumer<Throwable> handleMarkerKvitteringMottattErrors(String konversasjonId) {

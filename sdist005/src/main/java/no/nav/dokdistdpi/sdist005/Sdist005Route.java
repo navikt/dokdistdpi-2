@@ -1,7 +1,8 @@
 package no.nav.dokdistdpi.sdist005;
 
+import jakarta.jms.Queue;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
-import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
+import no.nav.dokdistdpi.consumer.lederelection.LeaderElectionConsumer;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
@@ -11,11 +12,10 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.springframework.stereotype.Component;
 
-import jakarta.jms.Queue;
 import java.io.IOException;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static jakarta.xml.bind.JAXBContext.newInstance;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
 import static org.apache.camel.ExchangePattern.InOnly;
 import static org.apache.camel.LoggingLevel.ERROR;
@@ -30,18 +30,18 @@ public class Sdist005Route extends RouteBuilder {
 	private static final String TECHNICAL_ERROR_HANDLER = "TECHNICAL_ERROR_HANDLER";
 	private static final String UNKNOWN_ERROR_HANDLER = "UNKNOWN_ERROR_HANDLER";
 
-	private final LederElectionConsumer lederElection;
+	private final LeaderElectionConsumer leaderElectionConsumer;
 	private final Sdist005Service sdist005Service;
 	private final Queue qdist009;
 	private final DokdistdpiProperties.Sdist005 sdist005Properties;
 
 	public Sdist005Route(CamelContext context,
-						 LederElectionConsumer lederElection,
+						 LeaderElectionConsumer leaderElectionConsumer,
 						 Sdist005Service sdist005Service,
 						 Queue qdist009,
 						 DokdistdpiProperties dokdistDpiProperties) {
 		super(context);
-		this.lederElection = lederElection;
+		this.leaderElectionConsumer = leaderElectionConsumer;
 		this.sdist005Service = sdist005Service;
 		this.qdist009 = qdist009;
 		this.sdist005Properties = dokdistDpiProperties.getSdist005();
@@ -74,7 +74,7 @@ public class Sdist005Route extends RouteBuilder {
 				.process(new Sdist005HeaderProcessor())
 				.setExchangePattern(InOnly)
 				.choice()
-					.when(method(lederElection, "isLeader").isEqualTo(true))
+					.when(method(leaderElectionConsumer, "isLeader").isEqualTo(true))
 						.setExchangePattern(InOnly)
 						.bean(sdist005Service)
 						.choice()

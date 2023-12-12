@@ -10,5 +10,10 @@
 	<logger name="no.nav.dokdistdpi" level="INFO" additivity="false">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
-
+<!--	<logger name="reactor" level="DEBUG" additivity="false">-->
+<!--		<appender-ref ref="CONSOLE"/>-->
+<!--	</logger>-->
+<!--	<logger name="io.github.resilience4j" level="DEBUG" additivity="false">-->
+<!--		<appender-ref ref="CONSOLE"/>-->
+<!--	</logger>-->
 </configuration>

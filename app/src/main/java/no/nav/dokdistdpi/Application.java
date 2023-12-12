@@ -16,7 +16,6 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 import static java.lang.System.getenv;
 import static java.lang.System.setProperty;
@@ -36,7 +35,6 @@ import static java.lang.System.setProperty;
 		OAuthEnabledWebClientConfig.class
 })
 @EnableRetry
-@EnableScheduling
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 public class Application {
 	public static void main(String[] args) {
