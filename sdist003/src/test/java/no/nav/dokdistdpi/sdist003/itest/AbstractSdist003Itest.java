@@ -14,6 +14,9 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.util.Loggers;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -21,6 +24,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -80,6 +84,20 @@ public abstract class AbstractSdist003Itest {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("maskinporten/maskinporten_happy_response.json")));
+	}
+
+	protected static void stubLeaderElection() {
+		try {
+			stubFor(get("/leaderelection")
+					.willReturn(aResponse()
+							.withStatus(OK.value())
+							.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+							.withBody("""
+									{"name":"%s","last_update":"2023-12-13T09:46:08Z"}
+									""".formatted(InetAddress.getLocalHost().getHostName()))));
+		} catch (UnknownHostException e) {
+			fail(e);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
