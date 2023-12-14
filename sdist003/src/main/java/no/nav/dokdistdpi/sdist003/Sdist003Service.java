@@ -29,6 +29,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 @Component
 public class Sdist003Service {
 
+	private static final int MAX_PAGES = 200;
 	private final DpiClientProperties dpiClientProperties;
 	private final DpiClient dpiClient;
 	private final ProducerTemplate producerTemplate;
@@ -62,8 +63,12 @@ public class Sdist003Service {
 		AtomicInteger page = new AtomicInteger(0);
 		return Flux.defer(() -> dpiClient.hentKvitteringerAsync(page.getAndIncrement()))
 				.repeatWhen(kvitteringer -> kvitteringer
-						.doOnNext(antallKvitteringer -> log.info("Sdist003 hentet antallKvitteringer={} fra DPI, page={}", antallKvitteringer, page.get()))
-						.takeWhile(antallKvitteringer -> antallKvitteringer == dpiClientProperties.getPagesize()));
+						.doOnNext(antallKvitteringer -> log.info("Sdist003 hentet antallKvitteringer={} fra DPI, page={}", antallKvitteringer, page.get() - 1))
+						.takeWhile(antallKvitteringer -> scheduleNewPagePredicate(antallKvitteringer, page)));
+	}
+
+	private boolean scheduleNewPagePredicate(Long antallKvitteringer, AtomicInteger page) {
+		return antallKvitteringer == dpiClientProperties.getPagesize() && page.get() < MAX_PAGES;
 	}
 
 	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {
