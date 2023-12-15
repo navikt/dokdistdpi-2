@@ -29,7 +29,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 @Component
 public class Sdist003Service {
 
-	private static final int MAX_PAGES = 200;
+	private static final int MAX_PAGES = 100;
 	private final DpiClientProperties dpiClientProperties;
 	private final DpiClient dpiClient;
 	private final ProducerTemplate producerTemplate;

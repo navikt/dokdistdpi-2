@@ -14,12 +14,14 @@ import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseExc
 import no.nav.dokdistdpi.exception.functional.KunneIkkeHenteKvitteringException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
+import no.nav.dokdistdpi.exception.technical.UkjentTekniskFeilException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.retry.annotation.Backoff;
@@ -97,6 +99,7 @@ public class DpiClient {
 		this.retry = retryRegistry.retry(RESILIENCE4J_INSTANCE);
 	}
 
+	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1in/get
 	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public List<ForsendelseStatusResponse> sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
 
@@ -137,6 +140,7 @@ public class DpiClient {
 		}
 	}
 
+	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1out~1{id}~1statuses/get
 	public List<ForsendelseStatusResponse> hentForsendelseStatus(String konversasjonId) {
 		return oauth2WebClient.get()
 				.uri(uriBuilder -> uriBuilder
@@ -170,6 +174,7 @@ public class DpiClient {
 		};
 	}
 
+	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1in/get
 	public Flux<HentKvitteringResponse> hentKvitteringerAsync(final int page) {
 		return oauth2WebClient.get()
 				.uri(uriBuilder -> uriBuilder
@@ -184,26 +189,31 @@ public class DpiClient {
 				.bodyToFlux(HentKvitteringResponse.class)
 				.doOnError(handleHentKvitteringerErrors())
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-				.transformDeferred(RetryOperator.of(retry));
+				.transformDeferred(RetryOperator.of(retry))
+				.onErrorResume(throwable -> {
+					log.error(throwable.getMessage(), throwable);
+					return Flux.empty();
+				});
 	}
 
 	private Consumer<Throwable> handleHentKvitteringerErrors() {
 		return error -> {
 			if (error instanceof WebClientResponseException webException) {
-				if (webException.getStatusCode().is4xxClientError()) {
-					throw new KunneIkkeHenteKvitteringException(format("Feilet å hente kvitteringer med feilmelding=%s",
-							webException.getMessage()), webException);
+				ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
+				if (webException instanceof WebClientResponseException.BadRequest ||
+					webException instanceof WebClientResponseException.Unauthorized) {
+					throw new KunneIkkeHenteKvitteringException("Klarte ikke hente kvitteringer. problem=" + problemDetail);
 				} else {
-					throw new SikkerDigitalPostException(format("Feilet å hente kvitteringer med status=%s, feilmelding=%s, body=%s",
-							webException.getStatusCode(), webException.getMessage(), webException.getResponseBodyAsString()), webException);
+					// Retry hvis NotFound
+					throw new SikkerDigitalPostException("Klarte ikke hente kvitteringer. problem=" + problemDetail);
 				}
 			} else {
-				throw new SikkerDigitalPostException(format("Feilet å hente kvitteringer. Ukjent teknisk feil. feilmelding=%s",
-						error.getMessage()), error);
+				throw new UkjentTekniskFeilException("Henting av kvitteringer feilet med ukjent teknisk feil. Se stacktrace", error);
 			}
 		};
 	}
 
+	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1in~1{id}~1read/post
 	public Mono<Void> markerKvitteringMottattAsync(String konversasjonId) {
 		return oauth2WebClient.post()
 				.uri(uriBuilder -> uriBuilder.pathSegment(MESSAGES_PATH_IN, "{konversasjonId}", MESSAGES_PATH_IN_READ).build(konversasjonId))
@@ -212,22 +222,26 @@ public class DpiClient {
 				.bodyToMono(Void.class)
 				.doOnError(handleMarkerKvitteringMottattErrors(konversasjonId))
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-				.transformDeferred(RetryOperator.of(retry));
+				.transformDeferred(RetryOperator.of(retry))
+				.onErrorResume(throwable -> {
+					log.error(throwable.getMessage(), throwable);
+					return Mono.empty();
+				});
 	}
 
 	private Consumer<Throwable> handleMarkerKvitteringMottattErrors(String konversasjonId) {
 		return error -> {
 			if (error instanceof WebClientResponseException webException) {
-				if (webException.getStatusCode().is4xxClientError()) {
-					throw new KunneIkkeHenteKvitteringException(format("Feilet å markere kvitteringen med konversasjonId=%s som mottatt, feilmelding=%s",
-							konversasjonId, webException.getMessage()), webException);
+				ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
+				if (webException instanceof WebClientResponseException.BadRequest ||
+					webException instanceof WebClientResponseException.Unauthorized) {
+					throw new KunneIkkeHenteKvitteringException("Klarte ikke markere kvittering med konversasjonId=" + konversasjonId + " som mottatt. problem=" + problemDetail);
 				} else {
-					throw new SikkerDigitalPostException(format("Feilet å markere kvitteringen med konversasjonId=%s som mottatt, status=%s, feilmelding=%s",
-							konversasjonId, webException.getStatusCode(), webException.getMessage()), webException);
+					// Retry hvis NotFound
+					throw new SikkerDigitalPostException("Klarte ikke markere kvittering med konversasjonId=" + konversasjonId + " som mottatt. problem=" + problemDetail);
 				}
 			} else {
-				throw new SikkerDigitalPostException(format("Ukjent teknisk feil. Feilet å markere kvitteringen med konversasjonId=%s som mottatt, feilmelding=%s",
-						konversasjonId, error.getMessage()), error);
+				throw new UkjentTekniskFeilException("Ukjent teknisk feil. Klarte ikke å markere kvitteringen med konversasjonId=%s som mottatt. Se stacktrace", error);
 			}
 		};
 	}

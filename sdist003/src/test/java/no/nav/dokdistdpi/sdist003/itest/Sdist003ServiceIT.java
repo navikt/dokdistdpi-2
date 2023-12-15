@@ -14,6 +14,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 /**
@@ -23,18 +24,6 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 
 	@Autowired
 	private Sdist003Service sdist003Service;
-
-	@Test
-	void shouldDoNoProcessingWhenDpiKvitteringReturnsNoContent() {
-		stubPostMaskinporten();
-		stubDpiKvitteringStatus(NO_CONTENT);
-
-		ParallelFlux<Void> kvitteringer = sdist003Service.behandleKvitteringer();
-		kvitteringer.subscribe();
-
-		await().during(2, TimeUnit.SECONDS).untilAsserted(() ->
-				verify(0, postRequestedFor(urlEqualTo(DPI_BEKREFT_URL))));
-	}
 
 	@Test
 	void shouldSubscribeToSdist003AndRepeatOnce() {
@@ -78,5 +67,28 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 			}
 			assertThat(atomicInteger.get()).isEqualTo(25);
 		});
+	}
+
+	@Test
+	void shouldDoNoProcessingWhenDpiKvitteringReturnsNoContent() {
+		stubPostMaskinporten();
+		stubDpiKvitteringStatus(NO_CONTENT);
+
+		ParallelFlux<Void> kvitteringer = sdist003Service.behandleKvitteringer();
+		kvitteringer.subscribe();
+
+		await().during(2, TimeUnit.SECONDS).untilAsserted(() ->
+				verify(0, postRequestedFor(urlEqualTo(DPI_BEKREFT_URL))));
+	}
+
+	@Test
+	void shouldDoNoProcessingWhenKvitteringPage0ReturnsProblem() {
+		stubPostMaskinporten();
+		stubDpiKvitteringProblemPage0(INTERNAL_SERVER_ERROR);
+
+		ParallelFlux<Void> kvitteringer = sdist003Service.behandleKvitteringer();
+		kvitteringer.subscribe();
+		await().during(2, TimeUnit.SECONDS).untilAsserted(() ->
+				verify(0, postRequestedFor(urlEqualTo(DPI_BEKREFT_URL))));
 	}
 }

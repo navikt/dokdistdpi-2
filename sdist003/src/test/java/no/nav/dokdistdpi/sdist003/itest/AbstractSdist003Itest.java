@@ -9,13 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.util.Loggers;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -24,10 +22,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
 @EnableAutoConfiguration
 @SpringBootTest(classes = {ApplicationTestConfig.class},
@@ -66,6 +64,22 @@ public abstract class AbstractSdist003Itest {
 						.withBodyFile("kvittering/" + filename)));
 	}
 
+	protected static void stubDpiKvitteringProblemPage0(HttpStatus httpStatus) {
+		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL + "&page=0"))
+				.willReturn(aResponse()
+						.withStatus(httpStatus.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_PROBLEM_JSON_VALUE)
+						.withBody("""
+								{
+								  "type": "about:blank",
+								  "title": "Teknisk feil",
+								  "status": %d,
+								  "detail": "Noe feilet",
+								  "instance": "https://docs.digdir.no/"
+								}
+								""".formatted(httpStatus.value()))));
+	}
+
 	protected static void stubDpiKvitteringStatus(HttpStatusCode status) {
 		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL))
 				.willReturn(aResponse()
@@ -84,20 +98,6 @@ public abstract class AbstractSdist003Itest {
 				.willReturn(aResponse().withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("maskinporten/maskinporten_happy_response.json")));
-	}
-
-	protected static void stubLeaderElection() {
-		try {
-			stubFor(get("/leaderelection")
-					.willReturn(aResponse()
-							.withStatus(OK.value())
-							.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-							.withBody("""
-									{"name":"%s","last_update":"2023-12-13T09:46:08Z"}
-									""".formatted(InetAddress.getLocalHost().getHostName()))));
-		} catch (UnknownHostException e) {
-			fail(e);
-		}
 	}
 
 	@SuppressWarnings("unchecked")
