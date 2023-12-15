@@ -103,7 +103,7 @@ public class Sdist003Service {
 
 	private Mono<Void> markerKvitteringMottatt(Kvittering kvittering) {
 		return dpiClient.markerKvitteringMottattAsync(kvittering.simpleSbd().getDokumentKonversasjonId())
-				.doOnSuccess(unused -> log.info("Sdist003 har markert innkommende forsendelse som mottatt av avsender. konversasjonId={}, messageId={}",
+				.doOnNext(unused -> log.info("Sdist003 har markert innkommende forsendelse som mottatt av avsender. konversasjonId={}, messageId={}",
 						kvittering.simpleSbd().getConversationId(), kvittering.simpleSbd().getDokumentKonversasjonId()));
 	}
 
