@@ -7,11 +7,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import reactor.util.context.Context;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 
@@ -23,6 +22,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 @Component
 public class Sdist003Scheduled {
 
+	static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 	private final LeaderElectionConsumer leaderElectionConsumer;
 	private final Sdist003Service sdist003Service;
 
@@ -37,6 +37,9 @@ public class Sdist003Scheduled {
 		return Flux.just("sdist003")
 				.filterWhen(p -> leaderElectionConsumer.isLeaderAsync())
 				.flatMap(s -> sdist003Service.behandleKvitteringer())
-				.contextWrite(Context.of(CALL_ID, "sdist003-poll-" + LocalDateTime.now().format(ISO_LOCAL_DATE_TIME)));
+				.contextWrite(context -> {
+					context.put(CALL_ID, "sdist003-poll-" + LocalDateTime.now().format(DATE_TIME_FORMATTER));
+					return context;
+				});
 	}
 }
