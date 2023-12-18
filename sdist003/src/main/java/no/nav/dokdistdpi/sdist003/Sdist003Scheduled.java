@@ -37,9 +37,6 @@ public class Sdist003Scheduled {
 		return Flux.just("sdist003")
 				.filterWhen(p -> leaderElectionConsumer.isLeaderAsync())
 				.flatMap(s -> sdist003Service.behandleKvitteringer())
-				.contextWrite(context -> {
-					context.put(CALL_ID, "sdist003-poll-" + LocalDateTime.now().format(DATE_TIME_FORMATTER));
-					return context;
-				});
+				.contextWrite(ctx -> ctx.put(CALL_ID, "sdist003-poll-" + LocalDateTime.now().format(DATE_TIME_FORMATTER)));
 	}
 }
