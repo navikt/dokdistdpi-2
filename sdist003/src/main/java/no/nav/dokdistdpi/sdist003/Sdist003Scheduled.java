@@ -7,8 +7,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import reactor.util.context.Context;
 
+import java.time.LocalDateTime;
+
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 
 @ConditionalOnProperty(
 		value = "dokdistdpi.sdist003.autostartup",
@@ -31,6 +36,7 @@ public class Sdist003Scheduled {
 	public Publisher<Void> sdist003Publisher() {
 		return Flux.just("sdist003")
 				.filterWhen(p -> leaderElectionConsumer.isLeaderAsync())
-				.flatMap(s -> sdist003Service.behandleKvitteringer());
+				.flatMap(s -> sdist003Service.behandleKvitteringer())
+				.contextWrite(Context.of(CALL_ID, "sdist003-poll-" + LocalDateTime.now().format(ISO_LOCAL_DATE_TIME)));
 	}
 }
