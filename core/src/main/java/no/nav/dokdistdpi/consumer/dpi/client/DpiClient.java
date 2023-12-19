@@ -51,6 +51,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
+import static org.springframework.web.reactive.function.client.WebClientResponseException.BadRequest;
+import static org.springframework.web.reactive.function.client.WebClientResponseException.Unauthorized;
 
 /**
  * Implementasjon av https://docs.digdir.no/dpi_nyinfrastruktur.html#rest-api-mellom-avsender-og-hj%C3%B8rne-2
@@ -99,7 +101,7 @@ public class DpiClient {
 		this.retry = retryRegistry.retry(RESILIENCE4J_INSTANCE);
 	}
 
-	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1in/get
+	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1out/post
 	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public List<ForsendelseStatusResponse> sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
 
@@ -200,8 +202,7 @@ public class DpiClient {
 		return error -> {
 			if (error instanceof WebClientResponseException webException) {
 				ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
-				if (webException instanceof WebClientResponseException.BadRequest ||
-					webException instanceof WebClientResponseException.Unauthorized) {
+				if (webException instanceof BadRequest || webException instanceof Unauthorized) {
 					throw new KunneIkkeHenteKvitteringException("Klarte ikke hente kvitteringer. problem=" + problemDetail);
 				} else {
 					// Retry hvis NotFound
@@ -233,8 +234,7 @@ public class DpiClient {
 		return error -> {
 			if (error instanceof WebClientResponseException webException) {
 				ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
-				if (webException instanceof WebClientResponseException.BadRequest ||
-					webException instanceof WebClientResponseException.Unauthorized) {
+				if (webException instanceof BadRequest || webException instanceof Unauthorized) {
 					throw new KunneIkkeHenteKvitteringException("Klarte ikke markere kvittering med konversasjonId=" + konversasjonId + " som mottatt. problem=" + problemDetail);
 				} else {
 					// Retry hvis NotFound

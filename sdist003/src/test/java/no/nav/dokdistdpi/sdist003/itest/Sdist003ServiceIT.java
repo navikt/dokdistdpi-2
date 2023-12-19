@@ -26,7 +26,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 	private Sdist003Service sdist003Service;
 
 	@Test
-	void shouldSubscribeToSdist003AndRepeatOnce() {
+	void shouldProcessPage0With8LeveringskvitteringAnd1Feil() {
 		stubPostMaskinporten();
 		stubDpiKvitteringPage0("8_leveringskvittering_1_feil.json");
 		stubPostMottattKvitteringMultiple();
@@ -47,7 +47,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 	}
 
 	@Test
-	void shouldSubscribeToSdist003AndRepeatUntilDpiKvitteringerDeliversLessThanPageSize() {
+	void shouldProcess3PagesWithLeveringskvittering() {
 		stubPostMaskinporten();
 		stubDpiKvitteringPage(0, "0_10_leveringskvittering.json");
 		stubDpiKvitteringPage(1, "1_10_leveringskvittering.json");
