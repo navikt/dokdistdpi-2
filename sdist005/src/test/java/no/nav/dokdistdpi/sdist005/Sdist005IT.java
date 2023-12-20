@@ -3,17 +3,17 @@ package no.nav.dokdistdpi.sdist005;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import jakarta.jms.Queue;
 import jakarta.xml.bind.JAXBElement;
-import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -30,8 +30,6 @@ import static java.lang.String.format;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -52,27 +50,21 @@ public class Sdist005IT {
 	private static final String HENTUEKSPEDERTEFORSENDELSER_URL = "/rest/v1/administrerforsendelse/hentuekspederteforsendelser/%s/%s";
 	private static final String FEILREGISTRERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/feilregistrerforsendelse";
 
-	@Value("${leder.host}")
-	private String lederHost;
 	@Autowired
 	private JmsTemplate jmsTemplate;
 	@Autowired
 	private Queue qdist009;
-	@Autowired
-	private LederElectionConsumer lederElection;
 
 	@BeforeEach
 	void setUp() {
-		System.setProperty("ELECTOR_PATH", lederHost);
-		lederElection = mock(LederElectionConsumer.class);
 		WireMock.reset();
 		WireMock.resetAllRequests();
 		WireMock.removeAllMappings();
 	}
 
 	@Test
-	public void shouldGetKvitteringFromDpiAccessPoint() {
-		when(lederElection.isLeader()).thenReturn(true);
+	public void shouldGetKvitteringFromDpiAccessPoint() throws UnknownHostException {
+		stubLeaderElection();
 		stubAzure();
 		stubPostMaskinporten();
 		stubHentUekspederteForsendelser();
@@ -143,12 +135,22 @@ public class Sdist005IT {
 						.withStatus(OK.value())));
 	}
 
-	void stubAzure() {
+	private void stubAzure() {
 		stubFor(post("/azure_token")
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("azure/token_response.json")));
+	}
+
+	private void stubLeaderElection() throws UnknownHostException {
+		stubFor(get("/leaderelection")
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody("""
+								{"name":"%s","last_update":"2023-12-13T09:46:08Z"}
+								""".formatted(InetAddress.getLocalHost().getHostName()))));
 	}
 
 	@SuppressWarnings("unchecked")

@@ -43,19 +43,6 @@ public class DokdistdpiProperties {
 		 */
 		@NotNull
 		private Duration polldelay;
-
-		/**
-		 * https://camel.apache.org/components/3.16.x/scheduler-component.html
-		 *
-		 * @return camel URI som konfigurerer sdist003
-		 */
-		public String camelUri() {
-			return "scheduler://sdist003?timeUnit=SECONDS" +
-					"&initialDelay=5" +
-					"&delay=" + polldelay.toSeconds() +
-					"&backoffMultiplier=2" +
-					"&backoffIdleThreshold=2";
-		}
 	}
 
 	@Data

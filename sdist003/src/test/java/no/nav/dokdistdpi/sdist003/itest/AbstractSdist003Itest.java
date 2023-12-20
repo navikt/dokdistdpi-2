@@ -3,17 +3,17 @@ package no.nav.dokdistdpi.sdist003.itest;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import jakarta.jms.Queue;
 import jakarta.xml.bind.JAXBElement;
-import no.nav.dokdistdpi.consumer.lederelection.LederElectionConsumer;
 import no.nav.dokdistdpi.sdist003.itest.config.ApplicationTestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import reactor.util.Loggers;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -22,10 +22,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
-import static org.mockito.Mockito.mock;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 
 @EnableAutoConfiguration
 @SpringBootTest(classes = {ApplicationTestConfig.class},
@@ -38,43 +38,56 @@ public abstract class AbstractSdist003Itest {
 	static final String DPI_BEKREFT_URL = "/message/in/ff88849c-e281-4809-8555-7cd54952b916/read";
 	static final String DPI_KVITTERINGER_URL = "/message/in?kanal=dokdistdpi-t&page_size=10";
 
-	@Value("${leder.host}")
-	protected String lederHost;
-
 	@Autowired
 	protected JmsTemplate jmsTemplate;
 
 	@Autowired
 	protected Queue qdist014;
 
-	@Autowired
-	protected LederElectionConsumer lederElection;
-
 	@BeforeEach
 	void setUp() {
-		System.setProperty("ELECTOR_PATH", lederHost);
-		lederElection = mock(LederElectionConsumer.class);
+		Loggers.useSl4jLoggers();
 		WireMock.reset();
 		WireMock.resetAllRequests();
 		WireMock.removeAllMappings();
 	}
 
-	protected static void stubGetKvittering() {
-		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL))
+	protected static void stubDpiKvitteringPage0(String filename) {
+		stubDpiKvitteringPage(0, filename);
+	}
+
+	protected static void stubDpiKvitteringPage(int page, String filename) {
+		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL + "&page=" + page))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("kvittering/feil_forretningsmelding.json")));
+						.withBodyFile("kvittering/" + filename)));
 	}
 
-	protected static void stubGetKvittering(HttpStatusCode status) {
+	protected static void stubDpiKvitteringProblemPage0(HttpStatus httpStatus) {
+		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL + "&page=0"))
+				.willReturn(aResponse()
+						.withStatus(httpStatus.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_PROBLEM_JSON_VALUE)
+						.withBody("""
+								{
+								  "type": "about:blank",
+								  "title": "Teknisk feil",
+								  "status": %d,
+								  "detail": "Noe feilet",
+								  "instance": "https://docs.digdir.no/"
+								}
+								""".formatted(httpStatus.value()))));
+	}
+
+	protected static void stubDpiKvitteringStatus(HttpStatusCode status) {
 		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL))
 				.willReturn(aResponse()
 						.withStatus(status.value())));
 	}
 
-	protected static void stubPostMottattKvittering() {
-		stubFor(post(urlEqualTo(DPI_BEKREFT_URL))
+	protected static void stubPostMottattKvitteringMultiple() {
+		stubFor(post(urlMatching("/message/in/.*/read"))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
