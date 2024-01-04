@@ -21,7 +21,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokume
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.kodeverk.DistribusjonstidspunktKode;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
-import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
+import no.nav.dokdistdpi.exception.functional.ForsendelseStatusEkspedertKanIkkeDistribueresException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDeserialisereBucketPayloadException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeFinneDokumentException;
@@ -269,9 +269,9 @@ public class Qdist011Service {
 
 	private void validateStatus(String forsendelseStatus, Long forsendelseId) {
 		if (FORSENDELSE_STATUS_EKSPEDERT.equals(forsendelseStatus)) {
-			log.info("Forsendelse med forsendelseId={}, status={} er ekspdert og behandlingen avsluttes",
+			log.info("Forsendelse med forsendelseId={}, status={} er ekspedert og behandlingen avsluttes",
 					forsendelseId, forsendelseStatus);
-			throw new ForsendelseStatusExpedertKanIkkeDistribuereException(format("Forsendelse med forsendelseId=%s, status=%s er ekspdert og behandlingen avsluttes",
+			throw new ForsendelseStatusEkspedertKanIkkeDistribueresException(format("Forsendelse med forsendelseId=%s, status=%s er ekspedert og behandlingen avsluttes",
 					forsendelseId, forsendelseStatus));
 		} else if (FORSENDELSE_STATUS_OPPRETTET.equals(forsendelseStatus)) {
 			throw new KunneIkkeDistribuereForsendelseException(format("Kunne ikke distribuere forsendelse med forsendelseId=%s, status=%s", forsendelseId, forsendelseStatus));
