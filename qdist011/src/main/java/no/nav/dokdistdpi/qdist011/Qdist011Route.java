@@ -1,12 +1,14 @@
 package no.nav.dokdistdpi.qdist011;
 
 import com.ibm.msg.client.jakarta.jms.DetailedJMSException;
+import jakarta.jms.Queue;
+import jakarta.xml.bind.JAXBContext;
 import no.nav.dokdistdpi.common.MDCHeaderProcessor;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.dpi.DpiMeldingsformidler;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistAdministrerForsendelseUpdater;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
-import no.nav.dokdistdpi.exception.functional.ForsendelseStatusExpedertKanIkkeDistribuereException;
+import no.nav.dokdistdpi.exception.functional.ForsendelseStatusEkspedertKanIkkeDistribueresException;
 import no.nav.dokdistdpi.exception.functional.UtenforKjernetidFunctionalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.ValidationException;
@@ -14,9 +16,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import jakarta.jms.Queue;
-import jakarta.xml.bind.JAXBContext;
 
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.OPPRETTET;
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.SENDT;
@@ -40,7 +39,6 @@ public class Qdist011Route extends RouteBuilder {
 	private final Qdist011Service qdist011Service;
 	private final DpiMeldingsformidler dpiMeldingsformidler;
 	private final DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater;
-
 
 	@Autowired
 	public Qdist011Route(DokdistdpiProperties dokdistDpiProperties,
@@ -69,9 +67,9 @@ public class Qdist011Route extends RouteBuilder {
 				.logStackTrace(true)
 				.loggingLevel(ERROR));
 
-		onException(ForsendelseStatusExpedertKanIkkeDistribuereException.class)
+		onException(ForsendelseStatusEkspedertKanIkkeDistribueresException.class)
 				.handled(true).logExhaustedMessageBody(false)
-				.log(INFO, log, "${exception}" + logForsendelseId());
+				.log(INFO, log, "${exception} " + logForsendelseId());
 
 		onException(UtenforKjernetidFunctionalException.class)
 				.handled(true)

@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.0</version>
+		<version>3.2.1</version>
 	</parent>
 
 	<groupId>no.nav.dokdistdpi</groupId>
@@ -31,13 +31,13 @@
 		<google-cloud.version>26.27.0</google-cloud.version>
 		<tink.version>1.11.0</tink.version>
 		<tink-gcpkms.version>1.9.0</tink-gcpkms.version>
-		<camel.version>4.2.0</camel.version>
+		<camel.version>4.3.0</camel.version>
 		<commons-compress.version>1.25.0</commons-compress.version>
-		<commons-io.version>2.15.0</commons-io.version>
-		<ibm.mq.client.version>9.3.4.0</ibm.mq.client.version>
+		<commons-io.version>2.15.1</commons-io.version>
+		<ibm.mq.client.version>9.3.4.1</ibm.mq.client.version>
 		<logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
 		<nimbus-jose-jwt.version>9.37.1</nimbus-jose-jwt.version>
-		<resilience4j.version>2.1.0</resilience4j.version>
+		<resilience4j.version>2.2.0</resilience4j.version>
 		<httpclient.version>4.5.14</httpclient.version>
 		<context-propagation.version>1.1.0</context-propagation.version>
 
