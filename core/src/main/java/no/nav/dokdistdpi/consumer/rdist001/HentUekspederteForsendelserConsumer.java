@@ -13,8 +13,10 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.netty.http.client.HttpClientRequest;
 
 import static java.lang.String.format;
+import static java.time.Duration.ofSeconds;
 import static java.util.Collections.emptyList;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
@@ -50,11 +52,16 @@ public class HentUekspederteForsendelserConsumer {
 
 		var response = webClient.get()
 				.uri("/hentuekspederteforsendelser/{distribusjonkanal}/{antallTimer}", distribusjonskanal, antallTimer)
+				.httpRequest(httpRequest -> {
+					HttpClientRequest reactorRequest = httpRequest.getNativeRequest();
+					reactorRequest.responseTimeout(ofSeconds(180));
+				})
 				.retrieve()
 				.bodyToMono(HentUekspederteForsendelserResponse.class)
 				.defaultIfEmpty(EMPTY_UEKSPEDERTEFORSENDELSER) // Håndtering av HttpStatus NO_CONTENT (204)
 				.doOnError(this::handleError)
 				.block();
+
 		log.info("hentForsendelserKvitteringIkkeMottatt har hentet {} uekspederte forsendelser med distribusjonskanal={}, antallTimer={}",
 				response == null ? 0 : response.getUekspederteForsendelser().size(), distribusjonskanal, antallTimer);
 
