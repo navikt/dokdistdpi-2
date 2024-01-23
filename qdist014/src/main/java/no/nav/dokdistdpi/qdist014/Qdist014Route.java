@@ -89,7 +89,7 @@ public class Qdist014Route extends RouteBuilder {
 					.when(simple("${body}").isNull())
 						.log(INFO, log, BEHANDLINGEN_AVSLUTTES)
 					.when(method(dpiKvitteringService, "erStatusEkspedertOrReturOrFeilet").isEqualTo(true))
-						.log(INFO, log, BEHANDLINGEN_AVSLUTTES + "forsendelseStatus=${exchangeProperty." + PROPERTY_FORSENDELSE_STATUS + "}")
+						.log(INFO, log, "Behandling av kvitteringen for " + loggKonversasjonsIdOgStatus())
 					.otherwise()
 						.choice()
 							.when(simple("${body.kvitteringType}").isEqualTo(LEVERING))
@@ -111,5 +111,10 @@ public class Qdist014Route extends RouteBuilder {
 		return "bestillingsId=${exchangeProperty." + PROPERTY_BESTILLINGS_ID + "}, " +
 			   "forsendelseId=${exchangeProperty." + PROPERTY_FORSENDELSE_ID + "} og " +
 			   "konversasjonsId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "}";
+	}
+
+	private static String loggKonversasjonsIdOgStatus() {
+		return "konversasjonsId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} " +
+				"med forsendelseStatus=${exchangeProperty." + PROPERTY_FORSENDELSE_STATUS + "} avsluttes.";
 	}
 }
