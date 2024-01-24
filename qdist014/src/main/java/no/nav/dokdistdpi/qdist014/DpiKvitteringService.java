@@ -30,7 +30,6 @@ import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.OVERSENDT;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.RETURPOSTBEHANDLET;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.Oppslagsnoekkel.KONVERSASJONSID;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_CONVERSATION_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_STATUS;
 
@@ -49,7 +48,6 @@ public class DpiKvitteringService {
 		HentForsendelseResponse hentForsendelseResponse = hentForsendelse(forsendelseId);
 		assertNotNull("HentForsendelseResponseTo", hentForsendelseResponse);
 
-		exchange.setProperty(PROPERTY_CONVERSATION_ID, dpiMelding.getKonversasjonsId());
 		exchange.setProperty(PROPERTY_FORSENDELSE_ID, forsendelseId);
 		exchange.setProperty(PROPERTY_FORSENDELSE_STATUS, hentForsendelseResponse.getForsendelseStatus());
 
