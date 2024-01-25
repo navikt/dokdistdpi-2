@@ -32,8 +32,6 @@ import static org.apache.camel.support.builder.PredicateBuilder.or;
 public class Qdist014Route extends RouteBuilder {
 
 	private static final String SERVICE_ID = "qdist014";
-	private static final String BEHANDLINGEN_AVSLUTTES = "Behandling av kvitteringen avsluttes, ";
-
 	private final DokdistdpiProperties.Qdist014 qdist014Properties;
 	private final Qdist014Service qdist014Service;
 	private final Queue qdist014;
@@ -87,9 +85,9 @@ public class Qdist014Route extends RouteBuilder {
 				.bean(behandleForretningskvitteringService)
 				.choice()
 					.when(simple("${body}").isNull())
-						.log(INFO, log, BEHANDLINGEN_AVSLUTTES)
+						.log(INFO, log, loggKonversasjonsIdOgStatus())
 					.when(method(dpiKvitteringService, "erStatusEkspedertOrReturOrFeilet").isEqualTo(true))
-						.log(INFO, log, BEHANDLINGEN_AVSLUTTES + "forsendelseStatus=${exchangeProperty." + PROPERTY_FORSENDELSE_STATUS + "}")
+						.log(INFO, log, loggKonversasjonsIdOgStatus())
 					.otherwise()
 						.choice()
 							.when(simple("${body.kvitteringType}").isEqualTo(LEVERING))
@@ -109,7 +107,12 @@ public class Qdist014Route extends RouteBuilder {
 
 	private static String getIdsForLogging() {
 		return "bestillingsId=${exchangeProperty." + PROPERTY_BESTILLINGS_ID + "}, " +
-			   "forsendelseId=${exchangeProperty." + PROPERTY_FORSENDELSE_ID + "} og " +
-			   "konversasjonsId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "}";
+				"forsendelseId=${exchangeProperty." + PROPERTY_FORSENDELSE_ID + "} og " +
+				"konversasjonsId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "}";
+	}
+
+	private static String loggKonversasjonsIdOgStatus() {
+		return "Behandling av kvittering med konversasjonsId=${exchangeProperty." + PROPERTY_CONVERSATION_ID + "} " +
+				"og forsendelseStatus=${exchangeProperty." + PROPERTY_FORSENDELSE_STATUS + "} avsluttes.";
 	}
 }
