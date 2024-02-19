@@ -10,7 +10,7 @@
   "DPI_MPCKANAL": "dokdistdpi-q",
   "DOKDISTDPI_ENDPOINTS_JURIDISKLOGG": "https://app-q1.adeo.no/juridisklogg",
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://dev-fss.teamdokumenthandtering.dokdistadmin/.default",
-  "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_URL": "https://dokdistadmin.dev.intern.nav.no/rest/v1/administrerforsendelse",
+  "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_URL": "http://dokdistadmin.teamdokumenthandtering.svc.nais.local/rest/v1/administrerforsendelse",
   "DOKUMENTTYPEINFO_V4_URL": "https://dokmet.dev.intern.nav.no/rest/dokumenttypeinfo",
   "VARSELINFO_URL": "https://dokmet.dev.intern.nav.no/rest/varselinfo",
   "DIGDIR_KRR_PROXY_URL": "https://digdir-krr-proxy.intern.dev.nav.no",
