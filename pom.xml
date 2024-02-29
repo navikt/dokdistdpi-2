@@ -32,7 +32,7 @@
 		<tink.version>1.11.0</tink.version>
 		<tink-gcpkms.version>1.9.0</tink-gcpkms.version>
 		<camel.version>4.3.0</camel.version>
-		<commons-compress.version>1.25.0</commons-compress.version>
+		<commons-compress.version>1.26.0</commons-compress.version>
 		<commons-io.version>2.15.1</commons-io.version>
 		<ibm.mq.client.version>9.3.4.1</ibm.mq.client.version>
 		<logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
