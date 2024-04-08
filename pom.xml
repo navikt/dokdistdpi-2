@@ -36,7 +36,7 @@
 		<commons-io.version>2.15.1</commons-io.version>
 		<ibm.mq.client.version>9.3.4.1</ibm.mq.client.version>
 		<logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-		<nimbus-jose-jwt.version>9.37.1</nimbus-jose-jwt.version>
+		<nimbus-jose-jwt.version>9.37.2</nimbus-jose-jwt.version>
 		<resilience4j.version>2.2.0</resilience4j.version>
 		<httpclient.version>4.5.14</httpclient.version>
 		<context-propagation.version>1.1.0</context-propagation.version>
