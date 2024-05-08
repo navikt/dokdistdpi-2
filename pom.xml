@@ -43,7 +43,7 @@
 
 		<!-- plugins -->
 		<jaxb-xew-plugin.version>2.1</jaxb-xew-plugin.version>
-		<hisrc-jaxb.version>2.2.1</hisrc-jaxb.version>
+		<hisrc-jaxb.version>2.1.1</hisrc-jaxb.version>
 
 		<!-- NAV -->
 		<dokmet.api.version>2024.04.19-11.00-f9cf0b7</dokmet.api.version>
