@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/baseimages/temurin:17-appdynamics
+FROM ghcr.io/navikt/baseimages/temurin:21-appdynamics
 ENV APPD_ENABLED=true
 
 COPY app/target/app.jar app.jar

@@ -23,15 +23,8 @@
 		<plugins>
 			<plugin>
 				<groupId>org.patrodyne.jvnet</groupId>
-				<artifactId>hisrc-higherjaxb30-maven-plugin</artifactId>
+				<artifactId>hisrc-higherjaxb40-maven-plugin</artifactId>
 				<version>${hisrc-jaxb.version}</version>
-				<dependencies>
-					<dependency>
-						<groupId>com.sun.xml.bind</groupId>
-						<artifactId>jaxb-impl</artifactId>
-						<version>${glassfish-jaxb.version}</version>
-					</dependency>
-				</dependencies>
 				<executions>
 					<execution>
 						<id>generate-jaxb-sdp</id>
