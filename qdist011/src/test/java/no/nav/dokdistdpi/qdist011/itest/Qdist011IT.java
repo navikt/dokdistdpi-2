@@ -109,7 +109,7 @@ public class Qdist011IT {
 	@Test
 	public void shouldProcessForsendelseOgSendTilDigitalPost() {
 		stubAzure();
-		stubGetDigitalKontaktInformasjon(OK.value());
+		stubGetDigipostDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
 		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
@@ -140,7 +140,7 @@ public class Qdist011IT {
 	@Test
 	public void shouldProcessForsendelseWhenVarselIsNull() {
 		stubAzure();
-		stubGetDigitalKontaktInformasjon(OK.value());
+		stubGetEBoksDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
 		stubGetVarselInfo("varselinfov1/tkat021-null.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
@@ -170,7 +170,7 @@ public class Qdist011IT {
 	@Test
 	void shouldHandleForsendelseOversendtWhenDuplikatForsendelse() {
 		stubAzure();
-		stubGetDigitalKontaktInformasjon(OK.value());
+		stubGetDigipostDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
 		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
@@ -201,7 +201,7 @@ public class Qdist011IT {
 	@Test
 	public void shouldThrowValideringsfeilException() {
 		stubAzure();
-		stubGetDigitalKontaktInformasjon(OK.value());
+		stubGetDigipostDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
 		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
@@ -230,7 +230,7 @@ public class Qdist011IT {
 	@Test
 	public void shouldThrowExceptionIfMaskinportenIsNull() {
 		stubAzure();
-		stubGetDigitalKontaktInformasjon(OK.value());
+		stubGetDigipostDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
 		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
@@ -266,7 +266,7 @@ public class Qdist011IT {
 	@Test
 	public void shouldThrowTechnicalExceptionWhenDigitalKontaktInfoIsNotAccessable() {
 		stubAzure();
-		stubGetDigitalKontaktInformasjon(INTERNAL_SERVER_ERROR.value());
+		stubGetDigipostDigitalKontaktInformasjon(INTERNAL_SERVER_ERROR.value());
 		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
 		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
@@ -385,14 +385,21 @@ public class Qdist011IT {
 						.withBodyFile(bodyFileName)));
 	}
 
-	private void stubGetDigitalKontaktInformasjon(int status) {
+	private void stubGetDigipostDigitalKontaktInformasjon(int status) {
 		stubFor(post("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("digitalkontaktinformasjonv1/dki-happy.json")));
+						.withBodyFile("digitalkontaktinformasjonv1/dki-digipost-happy.json")));
 	}
 
+	private void stubGetEBoksDigitalKontaktInformasjon(int status) {
+		stubFor(post("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")
+				.willReturn(aResponse()
+						.withStatus(status)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("digitalkontaktinformasjonv1/dki-eboks.json")));
+	}
 	void stubAzure() {
 		stubFor(post("/azure_token")
 				.willReturn(aResponse()

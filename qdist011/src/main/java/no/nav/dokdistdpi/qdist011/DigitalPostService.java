@@ -81,7 +81,7 @@ public class DigitalPostService {
 			return null;
 		}
 
-		String varslingstekst = determineVarslingstekst(distribusjonsType);
+		String varslingstekst = determineVarslingstekst(distribusjonsType, digitalKontaktInfo.getLeverandoerAdresse());
 		return Varsler.builder()
 				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
 				.smsvarsel(mapSMSVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
