@@ -8,14 +8,15 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum LeverandoerAdresse {
-	DIGIPOST("984661185"),
-	EBOKS("922020175");
+	DIGIPOST("984661185", "Digipost"),
+	EBOKS("922020175", "eBoks");
 
-	private String value;
+	private final String organisasjonsnummer;
+	private final String navn;
 
-	public static LeverandoerAdresse getByValue(String value) {
+	public static LeverandoerAdresse findByOrganisasjonsnummer(String organisasjonsnummer) {
 		return Arrays.stream(LeverandoerAdresse.values())
-				.filter(kvitteringType -> kvitteringType.getValue().equals(value))
+				.filter(leverandoerAdresse -> leverandoerAdresse.getOrganisasjonsnummer().equals(organisasjonsnummer))
 				.findFirst().orElse(null);
 	}
 }
