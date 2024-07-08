@@ -74,7 +74,7 @@ public final class TestUtil {
 	public static final String MOTTAKER_FNR = "04036125433";
 	private static final String MOTTAKER_TYPE = "Person";
 	public static final String POSTKASSEADRESSE = "ove.jonsen#6K5A";
-	public static final String MOTTAKER_ORGNO = "988015814";
+	public static final String MOTTAKER_ORGNO = "984661185";
 	public static final String KONVERSASJON_ID = UUID.randomUUID().toString();
 
 	public static OidcTokenResponse createOidcTokenResponse(String accessToken) {
