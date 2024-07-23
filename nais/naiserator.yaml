@@ -9,8 +9,6 @@ spec:
   env:
     - name: AZURE_APP_TOKEN_URL
       value: {{AZURE_APP_TOKEN_URL}}
-    - name: DOKMET_SCOPE
-      value: {{DOKMET_SCOPE}}
     - name: DIGDIR_KRR_PROXY_SCOPE
       value: {{DIGDIR_KRR_PROXY_SCOPE}}
     - name: DOKDISTDPI_PROXY_HOST
@@ -27,10 +25,8 @@ spec:
       value: {{ DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_SCOPE }}
     - name : DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_URL
       value: {{ DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_URL }}
-    - name: DOKUMENTTYPEINFO_V4_URL
-      value: {{ DOKUMENTTYPEINFO_V4_URL }}
-    - name: VARSELINFO_URL
-      value: {{ VARSELINFO_URL }}
+    - name: DOKDISTDPI_ENDPOINTS_DOKMET_URL
+      value: {{ DOKDISTDPI_ENDPOINTS_DOKMET_URL }}
     - name: DIGDIR_KRR_PROXY_URL
       value: {{ DIGDIR_KRR_PROXY_URL }}
     - name: SAF_GRAPHQL_URL

@@ -4,10 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
-import no.nav.dokdistdpi.consumer.dokkat.tkat20.Dokumentkatalog;
-import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
-import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfo;
-import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat20.Tkat020Consumer;
+import no.nav.dokdistdpi.consumer.dokmet.tkat20.DokumenttypeInfo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat21.Tkat021Consumer;
+import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
@@ -18,7 +18,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
-import no.nav.dokdistdpi.exception.functional.Tkat020FunctionalException;
+import no.nav.dokdistdpi.consumer.dokmet.DokmetFunctionalException;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -37,25 +37,25 @@ public class DigitalPostService {
 
 	private final MaskinportenTokenConsumer maskinportenTokenConsumer;
 	private final DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer;
-	private final VarselInfo varselInfo;
+	private final Tkat021Consumer varselInfoConsumer;
 	private final DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator;
-	private final Dokumentkatalog dokumentkatalog;
+	private final Tkat020Consumer hentDokumenttypeInfoConsumer;
 
 	public DigitalPostService(MaskinportenTokenConsumer maskinportenTokenConsumer, DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator,
-							  DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer, VarselInfo varselInfo,
-							  Dokumentkatalog dokumentkatalog) {
+							  DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer, Tkat021Consumer varselInfoConsumer,
+							  Tkat020Consumer hentDokumenttypeInfoConsumer) {
 		this.maskinportenTokenConsumer = maskinportenTokenConsumer;
 		this.digitalKontaktInformasjonValidator = digitalKontaktInformasjonValidator;
 		this.digitalKontaktinformasjonConsumer = digitalKontaktinformasjonConsumer;
-		this.varselInfo = varselInfo;
-		this.dokumentkatalog = dokumentkatalog;
+		this.varselInfoConsumer = varselInfoConsumer;
+		this.hentDokumenttypeInfoConsumer = hentDokumenttypeInfoConsumer;
 	}
 
-	public SikkerDigitalKontaktInfo hentDigitalKontaktInfo(HentForsendelseResponse hentForsendelseResponse, VarselInfoTo varselInfoTo) {
+	public SikkerDigitalKontaktInfo hentDigitalKontaktInfo(HentForsendelseResponse hentForsendelseResponse, VarselInfo varselInfo) {
 		String mottakerId = getMottakerId(hentForsendelseResponse);
 		assertNotBlank("mottakerId", mottakerId);
 		SikkerDigitalKontaktInfo digitalKontaktInfo = digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(mottakerId);
-		digitalKontaktInformasjonValidator.validateKontaktinfo(digitalKontaktInfo, varselInfoTo);
+		digitalKontaktInformasjonValidator.validateKontaktinfo(digitalKontaktInfo, varselInfo);
 		return digitalKontaktInfo;
 	}
 
@@ -65,30 +65,30 @@ public class DigitalPostService {
 				.orElseThrow(() -> new MaskinportenFunctionalException("MaskinportenToken kan ikke være null"));
 	}
 
-	public VarselInfoTo getVarselInfo(DokumenttypeInfoTo dokumenttypeInfo) {
-		return isNull(dokumenttypeInfo) ? null : varselInfo.getVarselInfo(dokumenttypeInfo.getVarselTypeId());
+	public VarselInfo getVarselInfo(DokumenttypeInfo dokumenttypeInfo) {
+		return isNull(dokumenttypeInfo) ? null : varselInfoConsumer.getVarselInfo(dokumenttypeInfo.getVarselTypeId());
 	}
 
-	public DokumenttypeInfoTo getDokumenttypeInfo(HentForsendelseResponse forsendelseResponse) {
+	public DokumenttypeInfo hentDokumenttypeInfo(HentForsendelseResponse forsendelseResponse) {
 		return forsendelseResponse.getDokumenter().stream()
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
-				.map(dokument -> dokumentkatalog.getDokumenttypeInfo(dokument.getDokumenttypeId())).findAny()
-				.orElseThrow(() -> new Tkat020FunctionalException("DokumenttypeInfo kan ikke være null"));
+				.map(dokument -> hentDokumenttypeInfoConsumer.hentDokumenttypeInfo(dokument.getDokumenttypeId())).findAny()
+				.orElseThrow(() -> new DokmetFunctionalException("DokumenttypeInfo kan ikke være null"));
 	}
 
-	public Varsler mapVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, DistribusjonsTypeKode distribusjonsType) {
-		if (Objects.isNull(varselInfoTo)) {
+	public Varsler mapVarsler(VarselInfo varselInfo, SikkerDigitalKontaktInfo digitalKontaktInfo, DistribusjonsTypeKode distribusjonsType) {
+		if (Objects.isNull(varselInfo)) {
 			return null;
 		}
 
 		String varslingstekst = determineVarslingstekst(distribusjonsType, digitalKontaktInfo.getLeverandoerAdresse());
 		return Varsler.builder()
-				.epostvarsel(mapEpostVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
-				.smsvarsel(mapSMSVarsler(varselInfoTo, digitalKontaktInfo, varslingstekst))
+				.epostvarsel(mapEpostVarsler(varselInfo, digitalKontaktInfo, varslingstekst))
+				.smsvarsel(mapSMSVarsler(varselInfo, digitalKontaktInfo, varslingstekst))
 				.build();
 	}
 
-	private SmsVarsel mapSMSVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, String varslingstekst) {
+	private SmsVarsel mapSMSVarsler(VarselInfo varselInfo, SikkerDigitalKontaktInfo digitalKontaktInfo, String varslingstekst) {
 		if (isBlank(digitalKontaktInfo.getMobiltelefonnummer())) {
 			return null;
 		}
@@ -96,11 +96,11 @@ public class DigitalPostService {
 		return SmsVarsel.builder()
 				.mobiltelefonnummer(digitalKontaktInfo.getMobiltelefonnummer())
 				.varslingstekst(varslingstekst)
-				.repetisjoner(varselInfoTo.getAntallDagerListe())
+				.repetisjoner(varselInfo.getAntallDagerListe())
 				.build();
 	}
 
-	private EpostVarsel mapEpostVarsler(VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo digitalKontaktInfo, String varslingstekst) {
+	private EpostVarsel mapEpostVarsler(VarselInfo varselInfo, SikkerDigitalKontaktInfo digitalKontaktInfo, String varslingstekst) {
 		if (isBlank(digitalKontaktInfo.getEpostadresse())) {
 			return null;
 		}
@@ -108,7 +108,7 @@ public class DigitalPostService {
 		return EpostVarsel.builder()
 				.epostadresse(digitalKontaktInfo.getEpostadresse())
 				.varslingstekst(varslingstekst)
-				.repetisjoner(varselInfoTo.getAntallDagerListe())
+				.repetisjoner(varselInfo.getAntallDagerListe())
 				.build();
 	}
 
