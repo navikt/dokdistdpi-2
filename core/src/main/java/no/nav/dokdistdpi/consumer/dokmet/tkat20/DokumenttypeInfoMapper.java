@@ -10,7 +10,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DISTRIBUSJONS_SDP_KANAL
 
 public class DokumenttypeInfoMapper {
 
-	public static DokumenttypeInfo mapDokumenttypeInfoTo(DokumenttypeInfoTo response) {
+	public static DistribusjonInfo mapDokumenttypeInfoTo(DokumenttypeInfoTo response) {
 		if (isNull(response.getDokumentProduksjonsInfo()) &&
 				isNull(response.getDokumentProduksjonsInfo().getDistribusjonInfo())) {
 			throw new DokmetFunctionalException(format("DokumentProduksjonsInfo eller DokumentProduksjonsInfo.DistribusjonInfo er null for dokumenttypeId=%s. Ikke et utgående dokument? dokumentType=%s",
@@ -24,7 +24,7 @@ public class DokumenttypeInfoMapper {
 				.orElseThrow(() -> new DokmetFunctionalException(format("Fant ingen distribusjonVarsel med varselForDistribusjonKanal=%s for dokumenttypeId=%s",
 						DISTRIBUSJONS_SDP_KANAL, response.getDokumenttypeId())));
 
-		return DokumenttypeInfo.builder()
+		return DistribusjonInfo.builder()
 				.varselTypeId(distribusjonVarsel.getVarseltypeId())
 				.sikkerhetsnivaa(response.getDokumentProduksjonsInfo().getDistribusjonInfo().getSikkerhetsnivaa())
 				.build();

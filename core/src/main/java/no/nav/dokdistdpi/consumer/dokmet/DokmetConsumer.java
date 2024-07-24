@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.consumer.dokmet;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
-import no.nav.dokdistdpi.consumer.dokmet.tkat20.DokumenttypeInfo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat20.DokumenttypeInfoMapper;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfoMapper;
@@ -51,7 +51,7 @@ public class DokmetConsumer {
 
 	@Cacheable(value = TKAT020_CACHE)
 	@Retryable(retryFor = DokmetTechnicalException.class, maxAttempts = 5, backoff = @Backoff(delay = 200))
-	public DokumenttypeInfo hentDokumenttypeInfo(final String dokumenttypeId) {
+	public DistribusjonInfo hentDokumenttypeInfo(final String dokumenttypeId) {
 
 		return webClient.get()
 				.uri(DOKUMENTTYPE_INFO_URL, dokumenttypeId)

@@ -2,7 +2,7 @@ package no.nav.dokdistdpi.sdist003;
 
 import lombok.SneakyThrows;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
-import no.nav.dokdistdpi.consumer.dokmet.tkat20.DokumenttypeInfo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
@@ -110,8 +110,8 @@ public final class TestUtil {
 				.build();
 	}
 
-	public static DokumenttypeInfo createDokumenttypeInfoTo() {
-		return DokumenttypeInfo.builder()
+	public static DistribusjonInfo createDokumenttypeInfoTo() {
+		return DistribusjonInfo.builder()
 				.sikkerhetsnivaa(NIVAA_4.getValue())
 				.varselTypeId(VARSEL_TYPE_ID)
 				.build();

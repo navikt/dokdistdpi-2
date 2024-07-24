@@ -5,7 +5,7 @@ import no.nav.dokdistdpi.cloudstorage.DokDistDokumentFraBucket;
 import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.cloudstorage.JsonSerializer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
-import no.nav.dokdistdpi.consumer.dokmet.tkat20.DokumenttypeInfo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Avsender;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
@@ -111,9 +111,9 @@ public class Qdist011Service {
 
 		String maskinportenToken = digitalPostService.getMaskinportenToken();
 
-		DokumenttypeInfo dokumenttypeInfo = digitalPostService.hentDokumenttypeInfo(hentForsendelseResponse);
+		DistribusjonInfo distribusjonInfo = digitalPostService.hentDokumenttypeInfo(hentForsendelseResponse);
 
-		VarselInfo varselInfo = digitalPostService.getVarselInfo(dokumenttypeInfo);
+		VarselInfo varselInfo = digitalPostService.getVarselInfo(distribusjonInfo);
 
 		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfo);
 
@@ -139,7 +139,7 @@ public class Qdist011Service {
 								.postkasseadresse(sikkerDigitalKontaktInfo.getBrukerAdresse())
 								.build())
 						.maskinportentoken(maskinportenToken)
-						.sikkerhetsnivaa(dokumenttypeInfo.getSikkerhetsnivaa())
+						.sikkerhetsnivaa(distribusjonInfo.getSikkerhetsnivaa())
 						.virkningsdato(LocalDate.now())
 						.aapningskvittering(false)
 						.ikkesensitivtittel(hentForsendelseResponse.getForsendelseTittel())

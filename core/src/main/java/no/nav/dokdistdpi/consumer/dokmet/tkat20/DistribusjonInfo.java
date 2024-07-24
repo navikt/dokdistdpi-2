@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class DokumenttypeInfo {
+public class DistribusjonInfo {
 	private final String varselTypeId;
 	private int sikkerhetsnivaa;
 }

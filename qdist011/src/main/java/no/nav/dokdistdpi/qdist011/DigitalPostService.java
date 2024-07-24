@@ -5,7 +5,8 @@ import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dokmet.DokmetConsumer;
-import no.nav.dokdistdpi.consumer.dokmet.tkat20.DokumenttypeInfo;
+import no.nav.dokdistdpi.consumer.dokmet.DokmetFunctionalException;
+import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
@@ -17,7 +18,6 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
-import no.nav.dokdistdpi.consumer.dokmet.DokmetFunctionalException;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -39,8 +39,10 @@ public class DigitalPostService {
 	private final DokmetConsumer dokmetConsumer;
 	private final DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator;
 
-	public DigitalPostService(MaskinportenTokenConsumer maskinportenTokenConsumer, DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator,
-							  DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer, DokmetConsumer dokmetConsumer) {
+	public DigitalPostService(MaskinportenTokenConsumer maskinportenTokenConsumer,
+							  DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator,
+							  DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer,
+							  DokmetConsumer dokmetConsumer) {
 		this.maskinportenTokenConsumer = maskinportenTokenConsumer;
 		this.digitalKontaktInformasjonValidator = digitalKontaktInformasjonValidator;
 		this.digitalKontaktinformasjonConsumer = digitalKontaktinformasjonConsumer;
@@ -61,11 +63,11 @@ public class DigitalPostService {
 				.orElseThrow(() -> new MaskinportenFunctionalException("MaskinportenToken kan ikke være null"));
 	}
 
-	public VarselInfo getVarselInfo(DokumenttypeInfo dokumenttypeInfo) {
-		return isNull(dokumenttypeInfo) ? null : dokmetConsumer.getVarselInfo(dokumenttypeInfo.getVarselTypeId());
+	public VarselInfo getVarselInfo(DistribusjonInfo distribusjonInfo) {
+		return isNull(distribusjonInfo) ? null : dokmetConsumer.getVarselInfo(distribusjonInfo.getVarselTypeId());
 	}
 
-	public DokumenttypeInfo hentDokumenttypeInfo(HentForsendelseResponse forsendelseResponse) {
+	public DistribusjonInfo hentDokumenttypeInfo(HentForsendelseResponse forsendelseResponse) {
 		return forsendelseResponse.getDokumenter().stream()
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
 				.map(dokument -> dokmetConsumer.hentDokumenttypeInfo(dokument.getDokumenttypeId())).findAny()
