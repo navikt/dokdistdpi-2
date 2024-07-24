@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.consumer.dkif;
 
-import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import org.springframework.stereotype.Component;
 
@@ -10,14 +10,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Component
 public class DigitalKontaktInformasjonValidator {
 
-	public void validateKontaktinfo(SikkerDigitalKontaktInfo digitalKontaktInfo, VarselInfoTo varselInfoTo) {
+	public void validateKontaktinfo(SikkerDigitalKontaktInfo digitalKontaktInfo, VarselInfo varselInfo) {
 		if (digitalKontaktInfo != null && digitalKontaktInfo.isReservasjon()) {
 			throw new IllegalKontaktInformasjonFunctionalException("Bruker er reservert mot digital kommunikasjon");
 		}
 		if (!hasValidSertifikatAndAdresses(digitalKontaktInfo)) {
 			throw new IllegalKontaktInformasjonFunctionalException("Manglende sertifikat, leverandoerAdresse eller brukerAdresse");
 		}
-		if (varselInfoTo != null) {
+		if (varselInfo != null) {
 			verifyEmailAndPhone(digitalKontaktInfo);
 		}
 	}

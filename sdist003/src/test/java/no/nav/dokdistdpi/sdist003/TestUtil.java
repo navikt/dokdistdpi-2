@@ -2,8 +2,8 @@ package no.nav.dokdistdpi.sdist003;
 
 import lombok.SneakyThrows;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
-import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
-import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.ArkivInformasjon;
@@ -100,8 +100,8 @@ public final class TestUtil {
 				.build();
 	}
 
-	public static VarselInfoTo createVarselInfoTo() {
-		return VarselInfoTo.builder()
+	public static VarselInfo createVarselInfoTo() {
+		return VarselInfo.builder()
 				.varselTypeId(VARSEL_TYPE_ID)
 				.stoppRepeterendeVarsel(STOPP_REPETERENDE_VARSEL)
 				.varslingsTekst(varslingsTekster(EPOST_VARSLINGS_TEKST, SMS_VARSLINGS_TEKST))
@@ -110,8 +110,8 @@ public final class TestUtil {
 				.build();
 	}
 
-	public static DokumenttypeInfoTo createDokumenttypeInfoTo() {
-		return DokumenttypeInfoTo.builder()
+	public static DistribusjonInfo createDokumenttypeInfoTo() {
+		return DistribusjonInfo.builder()
 				.sikkerhetsnivaa(NIVAA_4.getValue())
 				.varselTypeId(VARSEL_TYPE_ID)
 				.build();

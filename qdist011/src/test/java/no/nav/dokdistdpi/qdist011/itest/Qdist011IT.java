@@ -73,6 +73,8 @@ public class Qdist011IT {
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/" + FORSENDELSE_ID;
 	private static final String OPPDATERVARSELINFO_URL = "/rest/v1/administrerforsendelse/oppdatervarselinfo";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
+	private static final String TKAT020_URL = "/rest/dokumenttypeinfo/";
+	private static final String TKAT021_URL = "/rest/varselinfo/";
 
 	@Autowired
 	@Lazy
@@ -110,8 +112,8 @@ public class Qdist011IT {
 	public void shouldProcessForsendelseOgSendTilDigitalPost() {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(OK.value());
-		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
+		stubGetDokumentTypeInfo("tkat020-happy.json");
+		stubGetVarselInfo("tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
@@ -125,8 +127,8 @@ public class Qdist011IT {
 
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
-			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
+			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
+			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
@@ -141,8 +143,8 @@ public class Qdist011IT {
 	public void shouldProcessForsendelseWhenVarselIsNull() {
 		stubAzure();
 		stubGetEBoksDigitalKontaktInformasjon(OK.value());
-		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo("varselinfov1/tkat021-null.json");
+		stubGetDokumentTypeInfo("tkat020-happy.json");
+		stubGetVarselInfo("tkat021-null.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
@@ -156,8 +158,8 @@ public class Qdist011IT {
 
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
-			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
+			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
+			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
@@ -171,8 +173,8 @@ public class Qdist011IT {
 	void shouldHandleForsendelseOversendtWhenDuplikatForsendelse() {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(OK.value());
-		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
+		stubGetDokumentTypeInfo("tkat020-happy.json");
+		stubGetVarselInfo("tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
@@ -186,8 +188,8 @@ public class Qdist011IT {
 
 		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-			verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
-			verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
+			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
+			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
@@ -202,8 +204,8 @@ public class Qdist011IT {
 	public void shouldThrowValideringsfeilException() {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(OK.value());
-		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
+		stubGetDokumentTypeInfo("tkat020-happy.json");
+		stubGetVarselInfo("tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
@@ -219,8 +221,8 @@ public class Qdist011IT {
 		});
 
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
-		verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
+		verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
+		verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
 		verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 		verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
 		verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
@@ -231,8 +233,8 @@ public class Qdist011IT {
 	public void shouldThrowExceptionIfMaskinportenIsNull() {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(OK.value());
-		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
+		stubGetDokumentTypeInfo("tkat020-happy.json");
+		stubGetVarselInfo("tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
@@ -267,8 +269,8 @@ public class Qdist011IT {
 	public void shouldThrowTechnicalExceptionWhenDigitalKontaktInfoIsNotAccessable() {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(INTERNAL_SERVER_ERROR.value());
-		stubGetDokumentTypeInfo("dokumentinfov4/tkat020-happy.json");
-		stubGetVarselInfo("varselinfov1/tkat021-happy.json");
+		stubGetDokumentTypeInfo("tkat020-happy.json");
+		stubGetVarselInfo("tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
@@ -285,8 +287,8 @@ public class Qdist011IT {
 		});
 
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(1, getRequestedFor(urlEqualTo("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK)));
-		verify(1, getRequestedFor(urlEqualTo("/varselinfo/" + VARSEL_TYPE_ID)));
+		verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
+		verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
 		verify(3, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 		verify(0, postRequestedFor(urlEqualTo("/safgraphql")));
 		verify(0, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
@@ -363,11 +365,11 @@ public class Qdist011IT {
 	}
 
 	private void stubGetVarselInfo(String path) {
-		stubFor(get(urlMatching("/varselinfo/" + VARSEL_TYPE_ID))
+		stubFor(get(urlMatching(TKAT021_URL + VARSEL_TYPE_ID))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile(path)));
+						.withBodyFile("dokmet/" + path)));
 	}
 
 	private void stubPutVarselInfo() {
@@ -378,11 +380,11 @@ public class Qdist011IT {
 	}
 
 	private void stubGetDokumentTypeInfo(String bodyFileName) {
-		stubFor(get(urlMatching("/dokumenttypeinfo/" + DOKUMENTTYPE_ID_HOVEDDOK))
+		stubFor(get(urlMatching(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile(bodyFileName)));
+						.withBodyFile("dokmet/" + bodyFileName)));
 	}
 
 	private void stubGetDigipostDigitalKontaktInformasjon(int status) {
@@ -400,6 +402,7 @@ public class Qdist011IT {
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("digitalkontaktinformasjonv1/dki-eboks.json")));
 	}
+
 	void stubAzure() {
 		stubFor(post("/azure_token")
 				.willReturn(aResponse()

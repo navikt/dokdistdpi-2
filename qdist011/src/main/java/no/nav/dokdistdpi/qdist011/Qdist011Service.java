@@ -5,8 +5,8 @@ import no.nav.dokdistdpi.cloudstorage.DokDistDokumentFraBucket;
 import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.cloudstorage.JsonSerializer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
-import no.nav.dokdistdpi.consumer.dokkat.tkat20.DokumenttypeInfoTo;
-import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Avsender;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
@@ -111,13 +111,13 @@ public class Qdist011Service {
 
 		String maskinportenToken = digitalPostService.getMaskinportenToken();
 
-		DokumenttypeInfoTo dokumenttypeInfo = digitalPostService.getDokumenttypeInfo(hentForsendelseResponse);
+		DistribusjonInfo distribusjonInfo = digitalPostService.hentDokumenttypeInfo(hentForsendelseResponse);
 
-		VarselInfoTo varselInfoTo = digitalPostService.getVarselInfo(dokumenttypeInfo);
+		VarselInfo varselInfo = digitalPostService.getVarselInfo(distribusjonInfo);
 
-		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfoTo);
+		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfo);
 
-		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfoTo, sikkerDigitalKontaktInfo);
+		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfo, sikkerDigitalKontaktInfo);
 		Dokumentpakke dokumentpakke = getDocumentpakkeFromBucket(hentForsendelseResponse);
 
 		return Forsendelse.builder()
@@ -139,7 +139,7 @@ public class Qdist011Service {
 								.postkasseadresse(sikkerDigitalKontaktInfo.getBrukerAdresse())
 								.build())
 						.maskinportentoken(maskinportenToken)
-						.sikkerhetsnivaa(dokumenttypeInfo.getSikkerhetsnivaa())
+						.sikkerhetsnivaa(distribusjonInfo.getSikkerhetsnivaa())
 						.virkningsdato(LocalDate.now())
 						.aapningskvittering(false)
 						.ikkesensitivtittel(hentForsendelseResponse.getForsendelseTittel())
@@ -327,9 +327,9 @@ public class Qdist011Service {
 		return konversasjonsId;
 	}
 
-	private Varsler mapVarslerHvisRiktigDistribusjonstype(HentForsendelseResponse hentForsendelseResponse, VarselInfoTo varselInfoTo, SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo) {
+	private Varsler mapVarslerHvisRiktigDistribusjonstype(HentForsendelseResponse hentForsendelseResponse, VarselInfo varselInfo, SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo) {
 		if (skalgiAvsenderstyrtVarsel(hentForsendelseResponse.getDistribusjonstype())) {
-			return digitalPostService.mapVarsler(varselInfoTo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
+			return digitalPostService.mapVarsler(varselInfo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
 		} else {
 			return null;
 		}

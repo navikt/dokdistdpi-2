@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.consumer.dkif;
 
-import no.nav.dokdistdpi.consumer.dokkat.tkat21.VarselInfoTo;
+import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import org.junit.jupiter.api.Test;
 
@@ -59,11 +59,10 @@ class DigitalKontaktInformasjonValidatorTest {
 				.epostadresse(null)
 				.mobiltelefonnummer(null);
 
-		VarselInfoTo varselInfoTo = createVarselInfoToBuilder().build();
-		assertNotNull(varselInfoTo);
+		VarselInfo varselInfo = createVarselInfoToBuilder().build();
 
 		IllegalKontaktInformasjonFunctionalException exception = assertThrows(IllegalKontaktInformasjonFunctionalException.class,
-				() -> digitalKontaktInformasjonValidator.validateKontaktinfo(SikkerDigitalKontaktInfoBuilder.build(), varselInfoTo));
+				() -> digitalKontaktInformasjonValidator.validateKontaktinfo(SikkerDigitalKontaktInfoBuilder.build(), varselInfo));
 		assertEquals(exception.getMessage(), "Både epostadresse og mobiltelefonnummer kan ikke være null");
 	}
 
@@ -78,11 +77,11 @@ class DigitalKontaktInformasjonValidatorTest {
 				.epostadresse(null)
 				.mobiltelefonnummer(null);
 
-		VarselInfoTo varselInfoTo = createVarselInfoToBuilder().build();
-		assertNotNull(varselInfoTo);
+		VarselInfo varselInfo = createVarselInfoToBuilder().build();
+		assertNotNull(varselInfo);
 
 		IllegalKontaktInformasjonFunctionalException exception = assertThrows(IllegalKontaktInformasjonFunctionalException.class,
-				() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktInformasjonToBuilder.build(), varselInfoTo));
+				() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktInformasjonToBuilder.build(), varselInfo));
 		assertEquals(exception.getMessage(), "Manglende sertifikat, leverandoerAdresse eller brukerAdresse");
 	}
 
@@ -157,8 +156,8 @@ class DigitalKontaktInformasjonValidatorTest {
 				.sertifikat(HAS_SERTIFIKAT);
 	}
 
-	private VarselInfoTo.VarselInfoToBuilder createVarselInfoToBuilder() {
-		return VarselInfoTo.builder()
+	private VarselInfo.VarselInfoBuilder createVarselInfoToBuilder() {
+		return VarselInfo.builder()
 				.varselTypeId(VARSEL_TYPE_ID)
 				.stoppRepeterendeVarsel(STOPP_REPETERENDE_VARSEL)
 				.varslingsTekst(varslingsTekster(EPOST_VARSLINGS_TEKST, SMS_VARSLINGS_TEKST))
