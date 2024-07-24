@@ -4,9 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
-import no.nav.dokdistdpi.consumer.dokmet.tkat20.Tkat020Consumer;
+import no.nav.dokdistdpi.consumer.dokmet.DokmetConsumer;
 import no.nav.dokdistdpi.consumer.dokmet.tkat20.DokumenttypeInfo;
-import no.nav.dokdistdpi.consumer.dokmet.tkat21.Tkat021Consumer;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
@@ -37,18 +36,15 @@ public class DigitalPostService {
 
 	private final MaskinportenTokenConsumer maskinportenTokenConsumer;
 	private final DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer;
-	private final Tkat021Consumer varselInfoConsumer;
+	private final DokmetConsumer dokmetConsumer;
 	private final DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator;
-	private final Tkat020Consumer hentDokumenttypeInfoConsumer;
 
 	public DigitalPostService(MaskinportenTokenConsumer maskinportenTokenConsumer, DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator,
-							  DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer, Tkat021Consumer varselInfoConsumer,
-							  Tkat020Consumer hentDokumenttypeInfoConsumer) {
+							  DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer, DokmetConsumer dokmetConsumer) {
 		this.maskinportenTokenConsumer = maskinportenTokenConsumer;
 		this.digitalKontaktInformasjonValidator = digitalKontaktInformasjonValidator;
 		this.digitalKontaktinformasjonConsumer = digitalKontaktinformasjonConsumer;
-		this.varselInfoConsumer = varselInfoConsumer;
-		this.hentDokumenttypeInfoConsumer = hentDokumenttypeInfoConsumer;
+		this.dokmetConsumer = dokmetConsumer;
 	}
 
 	public SikkerDigitalKontaktInfo hentDigitalKontaktInfo(HentForsendelseResponse hentForsendelseResponse, VarselInfo varselInfo) {
@@ -66,13 +62,13 @@ public class DigitalPostService {
 	}
 
 	public VarselInfo getVarselInfo(DokumenttypeInfo dokumenttypeInfo) {
-		return isNull(dokumenttypeInfo) ? null : varselInfoConsumer.getVarselInfo(dokumenttypeInfo.getVarselTypeId());
+		return isNull(dokumenttypeInfo) ? null : dokmetConsumer.getVarselInfo(dokumenttypeInfo.getVarselTypeId());
 	}
 
 	public DokumenttypeInfo hentDokumenttypeInfo(HentForsendelseResponse forsendelseResponse) {
 		return forsendelseResponse.getDokumenter().stream()
 				.filter(dokument -> HOVEDDOKUMENT.equals(dokument.getTilknyttetSom()))
-				.map(dokument -> hentDokumenttypeInfoConsumer.hentDokumenttypeInfo(dokument.getDokumenttypeId())).findAny()
+				.map(dokument -> dokmetConsumer.hentDokumenttypeInfo(dokument.getDokumenttypeId())).findAny()
 				.orElseThrow(() -> new DokmetFunctionalException("DokumenttypeInfo kan ikke være null"));
 	}
 

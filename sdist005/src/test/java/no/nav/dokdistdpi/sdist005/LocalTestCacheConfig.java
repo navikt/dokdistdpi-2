@@ -18,7 +18,7 @@ import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.SAF_JOURNALPOST_QDIST011_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.VARSELINFO_CACHE;
+import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
 
 @Configuration
 public class LocalTestCacheConfig {
@@ -29,7 +29,7 @@ public class LocalTestCacheConfig {
 		manager.setCaches(Arrays.asList(
 				new CaffeineCache(TKAT020_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(0, DAYS).build()),
-				new CaffeineCache(VARSELINFO_CACHE, Caffeine.newBuilder()
+				new CaffeineCache(TKAT021_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(0, DAYS).build()),
 				new CaffeineCache(STS_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(0, MINUTES).build()),

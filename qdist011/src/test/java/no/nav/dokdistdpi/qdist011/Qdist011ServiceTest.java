@@ -4,8 +4,7 @@ import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
-import no.nav.dokdistdpi.consumer.dokmet.tkat20.Tkat020Consumer;
-import no.nav.dokdistdpi.consumer.dokmet.tkat21.Tkat021Consumer;
+import no.nav.dokdistdpi.consumer.dokmet.DokmetConsumer;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
@@ -69,8 +68,7 @@ class Qdist011ServiceTest {
 
 	private MaskinportenTokenConsumer maskinportenTokenConsumer;
 	private DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer;
-	private Tkat021Consumer varselInfo;
-	private Tkat020Consumer dokumenttypeInfoConsumer;
+	private DokmetConsumer dokmetConsumer;
 	private Exchange exchange;
 
 	@BeforeEach
@@ -79,14 +77,13 @@ class Qdist011ServiceTest {
 		safJournalpostQueryService = mock(SafJournalpostQueryServiceImplQdist011.class);
 		maskinportenTokenConsumer = mock(MaskinportenTokenConsumer.class);
 		digitalKontaktinformasjonConsumer = mock(DigitalKontaktinformasjonConsumer.class);
-		varselInfo = mock(Tkat021Consumer.class);
-		dokumenttypeInfoConsumer = mock(Tkat020Consumer.class);
+		dokmetConsumer = mock(DokmetConsumer.class);
 		exchange = mock(Exchange.class);
 		EncryptedBucketStorage encryptedBucketStorage = mock(EncryptedBucketStorage.class);
 
 		DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator = new DigitalKontaktInformasjonValidator();
 		DigitalPostService digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
-				digitalKontaktinformasjonConsumer, varselInfo, dokumenttypeInfoConsumer);
+				digitalKontaktinformasjonConsumer, dokmetConsumer);
 
 		qdist011Service = new Qdist011Service(encryptedBucketStorage, dokdistadminConsumer, digitalPostService, safJournalpostQueryService, "07:00:00", "23:00:00");
 
@@ -101,8 +98,8 @@ class Qdist011ServiceTest {
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(distribusjonstypecode));
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
-		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
-		when(dokumenttypeInfoConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
+		when(dokmetConsumer.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
+		when(dokmetConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
 
 		Forsendelse forsendelse = qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange);
 
@@ -122,8 +119,8 @@ class Qdist011ServiceTest {
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(ANNET.toString()));
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
-		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
-		when(dokumenttypeInfoConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
+		when(dokmetConsumer.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
+		when(dokmetConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
 
 		Forsendelse forsendelse = qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange);
 
@@ -157,8 +154,8 @@ class Qdist011ServiceTest {
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(sikkerDigitalKontaktInfo);
-		when(varselInfo.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
-		when(dokumenttypeInfoConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
+		when(dokmetConsumer.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
+		when(dokmetConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
 
 		IllegalKontaktInformasjonFunctionalException e = assertThrows(IllegalKontaktInformasjonFunctionalException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
 
@@ -171,7 +168,7 @@ class Qdist011ServiceTest {
 		when(safJournalpostQueryService.hentJournalpost(anyString())).thenReturn(createJournalpostQdist011());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
-		when(dokumenttypeInfoConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
+		when(dokmetConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
 
 		Forsendelse forsendelse = qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange);
 

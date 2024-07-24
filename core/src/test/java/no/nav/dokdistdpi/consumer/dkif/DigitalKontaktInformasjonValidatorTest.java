@@ -60,7 +60,6 @@ class DigitalKontaktInformasjonValidatorTest {
 				.mobiltelefonnummer(null);
 
 		VarselInfo varselInfo = createVarselInfoToBuilder().build();
-		assertNotNull(varselInfo);
 
 		IllegalKontaktInformasjonFunctionalException exception = assertThrows(IllegalKontaktInformasjonFunctionalException.class,
 				() -> digitalKontaktInformasjonValidator.validateKontaktinfo(SikkerDigitalKontaktInfoBuilder.build(), varselInfo));
