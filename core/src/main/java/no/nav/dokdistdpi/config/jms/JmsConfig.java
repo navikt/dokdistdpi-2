@@ -77,14 +77,10 @@ public class JmsConfig {
 		mqConnectionFactory.setIntProperty(JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA);
 		mqConnectionFactory.setStringProperty(USERID, serviceuserProperties.getUsername());
 
-		if (mqGatewayProperties.getChannel().isEnabletls()) {
-			mqConnectionFactory.setSSLCipherSuite(ANY_TLS13_OR_HIGHER);
-			SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-			mqConnectionFactory.setSSLSocketFactory(factory);
-			mqConnectionFactory.setChannel(mqGatewayProperties.getChannel().getSecurename());
-		} else {
-			mqConnectionFactory.setChannel(mqGatewayProperties.getChannel().getName());
-		}
+		mqConnectionFactory.setSSLCipherSuite(ANY_TLS13_OR_HIGHER);
+		SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+		mqConnectionFactory.setSSLSocketFactory(factory);
+		mqConnectionFactory.setChannel(mqGatewayProperties.getChannel().getSecurename());
 
 		UserCredentialsConnectionFactoryAdapter adapter = new UserCredentialsConnectionFactoryAdapter();
 		adapter.setTargetConnectionFactory(mqConnectionFactory);
