@@ -17,9 +17,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Import;
 import org.springframework.retry.annotation.EnableRetry;
 
-import static java.lang.System.getenv;
-import static java.lang.System.setProperty;
-
 @EnableConfigurationProperties({
 		ServiceuserProperties.class,
 		MaskinportenProperties.class,
@@ -38,7 +35,6 @@ import static java.lang.System.setProperty;
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 public class Application {
 	public static void main(String[] args) {
-		setProperty("javax.net.ssl.keyStorePassword", getenv("DOKDISTDPICERT_KEYSTORE_PASSWORD"));
 		SpringApplication.run(Application.class, args);
 	}
 }

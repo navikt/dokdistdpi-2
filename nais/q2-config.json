@@ -1,6 +1,6 @@
 {
-  "APPD_NAME": "dokdistdpi-2",
   "APP_NAME": "dokdistdpi-2",
+  "APPD_NAME": "dokdistdpi-2",
   "MIN_REPLICAS": "1",
   "MAX_REPLICAS": "2",
   "INGRESSES": [
@@ -15,9 +15,7 @@
   "DIGDIR_KRR_PROXY_URL": "https://digdir-krr-proxy.intern.dev.nav.no",
   "SAF_GRAPHQL_URL": "https://saf.dev.intern.nav.no/graphql",
   "SECURITY_TOKEN_SERVICE_URL": "https://security-token-service.dev.adeo.no/rest/v1/sts/token",
-  "MQGATEWAY01_CHANNEL_NAME": "Q2_DOKDISTDPI",
   "MQGATEWAY01_CHANNEL_SECURENAME":"Q2_DOKDISTDPI_SECURE",
-  "MQGATEWAY01_CHANNEL_ENABLETLS": "true",
   "MQGATEWAY01_HOSTNAME": "mqls01.preprod.local",
   "MQGATEWAY01_PORT": "1413",
   "MQGATEWAY01_NAME": "MQLS01",
@@ -29,7 +27,6 @@
   "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.Q1_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
   "SRVDOKDISTDPI2": "/serviceuser/data/dev/srvdokdistdpi-2",
   "DOKDISTDPI_VAULT": "/kv/preprod/fss/dokdistdpi-2/teamdokumenthandtering",
-  "DOKDISTDPI_CERT": "/kv/preprod/fss/dokdistdpi-2/certificate",
   "VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/preprod/shared",
   "APPDYNAMICS": "/apikey/appdynamics/dev",
   "DIGDIR_KRR_PROXY_SCOPE": "api://dev-gcp.team-rocket.digdir-krr-proxy/.default",

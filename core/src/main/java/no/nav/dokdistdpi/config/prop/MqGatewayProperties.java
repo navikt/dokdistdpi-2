@@ -1,12 +1,11 @@
 package no.nav.dokdistdpi.config.prop;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 @Data
 @ConfigurationProperties("mqgateway01")
@@ -23,10 +22,7 @@ public class MqGatewayProperties {
 	@Data
 	@Validated
 	public static class MqChannel {
-		@NotEmpty
-		private String name;
 		@NotBlank
 		private String securename;
-		private boolean enabletls;
 	}
 }
