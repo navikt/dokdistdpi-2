@@ -61,6 +61,8 @@ spec:
       value: {{ DOKDISTMELLOMLAGER_KEYRING }}
     - name: DOKDISTMELLOMLAGER_KEYID
       value: {{ DOKDISTMELLOMLAGER_KEYID }}
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: "deployment.environment.name={{ ENVIRONMENT }}"
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -105,6 +107,12 @@ spec:
         mountPath: "/var/run/secrets/nais.io/vault"
       - kvPath: {{ VIRKSOMHETSSERTIFIKAT_VAULT }}
         mountPath: "/secrets/virksomhetssertifikat/sdp"
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+      destinations:
+        - id: "elastic-apm"
   azure:
     application:
       enabled: true

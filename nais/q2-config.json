@@ -1,5 +1,6 @@
 {
   "APP_NAME": "dokdistdpi-2",
+  "ENVIRONMENT": "q2",
   "MIN_REPLICAS": "1",
   "MAX_REPLICAS": "2",
   "INGRESSES": [
