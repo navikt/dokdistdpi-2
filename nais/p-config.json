@@ -1,6 +1,6 @@
 {
   "APP_NAME": "dokdistdpi-2",
-  "APPD_NAME": "dokdistdpi-2",
+  "ENVIRONMENT": "p",
   "MIN_REPLICAS": "4",
   "MAX_REPLICAS": "8",
   "INGRESSES": [
@@ -28,7 +28,6 @@
   "SRVDOKDISTDPI2": "/serviceuser/data/prod/srvdokdistdpi-2",
   "DOKDISTDPI_VAULT": "/kv/prod/fss/dokdistdpi-2/teamdokumenthandtering",
   "VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/prod/sdp",
-  "APPDYNAMICS": "/apikey/appdynamics/prod",
   "DIGDIR_KRR_PROXY_SCOPE": "api://prod-gcp.team-rocket.digdir-krr-proxy/.default",
   "DOKDISTMELLOMLAGER_PROJECTID": "teamdokumenthandteri-prod-a63b",
   "DOKDISTMELLOMLAGER_BUCKET": "dokdistmellomlager-prod",

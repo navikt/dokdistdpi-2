@@ -53,8 +53,6 @@ spec:
       value: {{ DOKDISTDPI_QDIST011_DIST_TIL_DPI_KBQ_QUEUENAME }}
     - name: DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME
       value: {{ DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME }}
-    - name: APPD_NAME
-      value: {{ APPD_NAME }}
     - name: DOKDISTMELLOMLAGER_PROJECTID
       value: {{ DOKDISTMELLOMLAGER_PROJECTID }}
     - name: DOKDISTMELLOMLAGER_BUCKET
@@ -63,6 +61,8 @@ spec:
       value: {{ DOKDISTMELLOMLAGER_KEYRING }}
     - name: DOKDISTMELLOMLAGER_KEYID
       value: {{ DOKDISTMELLOMLAGER_KEYID }}
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: "deployment.environment.name={{ ENVIRONMENT }}"
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -107,8 +107,12 @@ spec:
         mountPath: "/var/run/secrets/nais.io/vault"
       - kvPath: {{ VIRKSOMHETSSERTIFIKAT_VAULT }}
         mountPath: "/secrets/virksomhetssertifikat/sdp"
-      - kvPath: {{ APPDYNAMICS }}
-        mountPath: /var/run/secrets/nais.io/appdynamics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+      destinations:
+        - id: "elastic-apm"
   azure:
     application:
       enabled: true
