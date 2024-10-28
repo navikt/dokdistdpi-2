@@ -1,11 +1,11 @@
 package no.nav.dokdistdpi.certificate;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.NonNull;
 import org.springframework.validation.annotation.Validated;
 
 import java.security.KeyStore;
@@ -16,13 +16,13 @@ import java.security.KeyStore;
 @Validated
 @NoArgsConstructor
 public class KeyStoreProperties {
-	@NonNull
+	@NotNull
 	private String type = KeyStore.getDefaultType();
-	@NonNull
+	@NotNull
 	private String alias;
-	@NonNull
+	@NotNull
 	private Resource path;
-	@NonNull
+	@NotNull
 	private String password;
 	private Boolean lockProvider = false;
 }

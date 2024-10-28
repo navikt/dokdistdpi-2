@@ -11,33 +11,20 @@ then
     export  serviceuser_password=$(cat /secrets/serviceuser/srvdokdistdpi-2/password)
 fi
 
-export prod_credentials_2023_path=/secrets/virksomhetssertifikat/sdp/credentials_2023.json
-export test_credentials_2024_path=/secrets/virksomhetssertifikat/sdp/credentials_2024-03.json
-
-if test -f $prod_credentials_2023_path
+if test -f "$NAV_VIRKSOMHETSSERTIFIKAT_CREDENTIALS"
 then
     echo "Setting virksomhetssertifikat_alias"
-    export virksomhetssertifikat_alias="$(cat $prod_credentials_2023_path | jq -r '.alias')"
+    export virksomhetssertifikat_alias="$(cat $NAV_VIRKSOMHETSSERTIFIKAT_CREDENTIALS | jq -r '.alias')"
     echo "Setting virksomhetssertifikat_password"
-    export virksomhetssertifikat_password="$(cat $prod_credentials_2023_path | jq -r '.password')"
+    export virksomhetssertifikat_password="$(cat $NAV_VIRKSOMHETSSERTIFIKAT_CREDENTIALS | jq -r '.password')"
     echo "Setting virksomhetssertifikat_type"
-    export virksomhetssertifikat_type="$(cat $prod_credentials_2023_path | jq -r '.type')"
-else
-    echo "Setting virksomhetssertifikat_alias"
-    export virksomhetssertifikat_alias="$(cat $test_credentials_2024_path | jq -r '.alias')"
-    echo "Setting virksomhetssertifikat_password"
-    export virksomhetssertifikat_password="$(cat $test_credentials_2024_path | jq -r '.password')"
-    echo "Setting virksomhetssertifikat_type"
-    export virksomhetssertifikat_type="$(cat $test_credentials_2024_path | jq -r '.type')"
+    export virksomhetssertifikat_type="$(cat $NAV_VIRKSOMHETSSERTIFIKAT_CREDENTIALS | jq -r '.type')"
 fi
 
-if test -f /secrets/virksomhetssertifikat/sdp/274258896775237957919470-2023-10-11.p12.b64
+if test -f "$NAV_VIRKSOMHETSSERTIFIKAT_KEY"
 then
     echo "Setting virksomhetssertifikat_path"
-    export virksomhetssertifikat_path="file:///secrets/virksomhetssertifikat/sdp/274258896775237957919470-2023-10-11.p12.b64"
-else
-    echo "Setting virksomhetssertifikat_path"
-    export virksomhetssertifikat_path="file:///secrets/virksomhetssertifikat/sdp/1956923288254923191157769-2024-03-19.p12.b64"
+    export virksomhetssertifikat_path="file://$NAV_VIRKSOMHETSSERTIFIKAT_KEY"
 fi
 
 if test -f /var/run/secrets/nais.io/vault/gcloud_serviceaccount

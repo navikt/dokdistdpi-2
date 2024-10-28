@@ -53,6 +53,10 @@ spec:
       value: {{ DOKDISTDPI_QDIST011_DIST_TIL_DPI_KBQ_QUEUENAME }}
     - name: DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME
       value: {{ DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME }}
+    - name: NAV_VIRKSOMHETSSERTIFIKAT_CREDENTIALS
+      value: {{ NAV_VIRKSOMHETSSERTIFIKAT_CREDENTIALS }}
+    - name: NAV_VIRKSOMHETSSERTIFIKAT_KEY
+      value: {{ NAV_VIRKSOMHETSSERTIFIKAT_KEY }}
     - name: DOKDISTMELLOMLAGER_PROJECTID
       value: {{ DOKDISTMELLOMLAGER_PROJECTID }}
     - name: DOKDISTMELLOMLAGER_BUCKET
@@ -105,8 +109,8 @@ spec:
         mountPath: "/secrets/serviceuser/srvdokdistdpi-2"
       - kvPath: {{ DOKDISTDPI_VAULT }}
         mountPath: "/var/run/secrets/nais.io/vault"
-      - kvPath: {{ VIRKSOMHETSSERTIFIKAT_VAULT }}
-        mountPath: "/secrets/virksomhetssertifikat/sdp"
+      - kvPath: {{ NAV_VIRKSOMHETSSERTIFIKAT_VAULT }}
+        mountPath: "/secrets/virksomhetssertifikat"
   observability:
     autoInstrumentation:
       enabled: true
