@@ -12,9 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VarslingstekstUtilTest {
 
-	private static final String VEDTAK_DIGIPOST = "Du har fått et vedtak fra NAV. Les det i din digitale postkasse (Digipost).";
-	private static final String VIKTIG_DIGIPOST = "Du har fått et viktig brev fra NAV. Les det i din digitale postkasse (Digipost).";
-	private static final String DEFAULT_EBOKS = "Du har fått et brev fra NAV. Les det i din digitale postkasse (eBoks).";
+	private static final String VEDTAK_DIGIPOST = "Du har fått et vedtak fra Nav. Les det i din digitale postkasse (Digipost).";
+	private static final String VIKTIG_DIGIPOST = "Du har fått et viktig brev fra Nav. Les det i din digitale postkasse (Digipost).";
+	private static final String DEFAULT_EBOKS = "Du har fått et brev fra Nav. Les det i din digitale postkasse (eBoks).";
 
 	@Test
 	public void shouldTestNullInput() {
