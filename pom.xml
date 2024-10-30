@@ -45,7 +45,7 @@
 		<!-- plugins -->
 		<hisrc-jaxb.version>2.1.0</hisrc-jaxb.version>
 
-		<!-- NAV -->
+		<!-- Nav -->
 		<dokmet.api.version>13-5459a4f</dokmet.api.version>
 		<melding-virksomhet-dokdistfordeling.version>6-4049b35</melding-virksomhet-dokdistfordeling.version>
 

@@ -39,7 +39,7 @@ public class ForsendelseData {
 	public static final String MOTTAKER_ORGNO = "988015814";
 	public static final String CONVERSATION_ID = UUID.randomUUID().toString();
 	private static final String TITTEL = "Ikke-sensitiv tittel for forsendelsen";
-	public static final String VEDTAK_TEKST = "Du har fått et vedtak fra NAV. Les det i din digitale postkasse.";
+	public static final String VEDTAK_TEKST = "Du har fått et vedtak fra Nav. Les det i din digitale postkasse.";
 	public static final String MOBILNUMMER = "11111111";
 	public static final Long FORSENDELSE_ID = 11L;
 
