@@ -8,9 +8,9 @@ import static no.nav.dokdistdpi.qdist011.Utils.LeverandoerAdresse.findByOrganisa
 public class VarslingstekstUtil {
 
 	//Pass på encoding her; Disse må inneholde "å".
-	public static String VEDTAK_TEKST = "Du har fått et vedtak fra NAV. Les det i din digitale postkasse (%s).";
-	public static String VIKTIG_TEKST = "Du har fått et viktig brev fra NAV. Les det i din digitale postkasse (%s).";
-	public static String DEFAULT_TEKST = "Du har fått et brev fra NAV. Les det i din digitale postkasse (%s).";
+	public static String VEDTAK_TEKST = "Du har fått et vedtak fra Nav. Les det i din digitale postkasse (%s).";
+	public static String VIKTIG_TEKST = "Du har fått et viktig brev fra Nav. Les det i din digitale postkasse (%s).";
+	public static String DEFAULT_TEKST = "Du har fått et brev fra Nav. Les det i din digitale postkasse (%s).";
 
 	public static String determineVarslingstekst(DistribusjonsTypeKode distribusjonstype, String leverandoerAdresse) {
 

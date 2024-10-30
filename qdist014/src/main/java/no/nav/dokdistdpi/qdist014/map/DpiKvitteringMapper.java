@@ -20,9 +20,9 @@ class DpiKvitteringMapper {
 
 	private static final String SBD = "standardBusinessDocument";
 	static final String AAPNINGSKVITTERING_ERROR_MESSAGE = "Åpningskvitteringer blir bare sendt dersom dette er bestilt av Avsender i digital meldingen ved å spesifisere dette med propertien aapningskvittering. " +
-														   "NAV setter ikke aapningskvittering og kan ikke behandle denne";
+														   "Nav setter ikke aapningskvittering og kan ikke behandle denne";
 	static final String MOTTAKSKVITTERING_ERROR_MESSAGE = "Denne kvitteringen leveres tilbake så fort utskrift og forsendelsestjenesten har mottatt forsendelsen og validert at den kan skrives ut. " +
-														  "NAV benytter seg ikke utskriftstjenesten til DPI og kan ikke behandle denne";
+														  "Nav benytter seg ikke utskriftstjenesten til DPI og kan ikke behandle denne";
 	private final ObjectMapper dpiObjectMapper;
 
 	public DpiKvitteringMapper(ObjectMapper dpiObjectMapper) {

@@ -45,7 +45,7 @@
 		<jaxb-xew-plugin.version>2.1</jaxb-xew-plugin.version>
 		<hisrc-jaxb.version>2.1.1</hisrc-jaxb.version>
 
-		<!-- NAV -->
+		<!-- Nav -->
 		<dokmet.api.version>2024.10.15-11.15-78b0e4a</dokmet.api.version>
 		<melding-virksomhet-dokdistfordeling.version>7-18c61bf</melding-virksomhet-dokdistfordeling.version>
 
