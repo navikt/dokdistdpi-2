@@ -96,7 +96,7 @@ spec:
     limits:
       memory: 4Gi
     requests:
-      memory: 1.5Gi
+      memory: 1500Mi
   maskinporten:
     enabled: true
     scopes:
