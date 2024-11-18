@@ -46,7 +46,7 @@
 		<hisrc-jaxb.version>2.1.1</hisrc-jaxb.version>
 
 		<!-- Nav -->
-		<dokmet.api.version>2024.10.15-11.15-78b0e4a</dokmet.api.version>
+		<dokmet-api.version>2024.11.18-12.31-2a6bf20</dokmet-api.version>
 		<melding-virksomhet-dokdistfordeling.version>7-18c61bf</melding-virksomhet-dokdistfordeling.version>
 
 		<!-- Test -->
@@ -174,7 +174,7 @@
 			<dependency>
 				<groupId>no.nav.dokmet</groupId>
 				<artifactId>api</artifactId>
-				<version>${dokmet.api.version}</version>
+				<version>${dokmet-api.version}</version>
 			</dependency>
 
 			<!-- test -->
