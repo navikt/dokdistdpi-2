@@ -30,6 +30,7 @@ import java.util.List;
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.OPPRETTET;
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.SENDT;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 @Slf4j
 @Component
@@ -63,7 +64,7 @@ public class DpiMeldingsformidler {
 				dokumentpakke.length, dokumentpakkefingeravtrykk.getDigestValue(), forsendelse.getKonversasjonId());
 
 		MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
-		multipartBodyBuilder.part("forretningsmelding", generateStandardBusinessDocumentJWT(standardBusinessDocument));
+		multipartBodyBuilder.part("forretningsmelding", generateStandardBusinessDocumentJWT(standardBusinessDocument), TEXT_PLAIN);
 		multipartBodyBuilder.part("dokumentpakke", dokumentpakke, APPLICATION_OCTET_STREAM);
 
 		List<ForsendelseStatusResponse> forsendelseStatusResponses = dpiClient.sendDpiForsendelse(multipartBodyBuilder, forsendelse);
