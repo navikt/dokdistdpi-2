@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -132,7 +133,9 @@ public class Qdist011IT {
 			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
 			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
-			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
+			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
+					.withRequestBody(containing("Content-Type: application/octet-stream")
+							.and(containing("Content-Type: text/plain"))));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
 		});
