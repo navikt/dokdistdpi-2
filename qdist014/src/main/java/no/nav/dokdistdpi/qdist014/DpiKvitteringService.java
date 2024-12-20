@@ -11,7 +11,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.Oppslagsnoekkel;
+import no.nav.dokdistdpi.exception.functional.InvalidKvitteringTypeException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.commons.lang3.StringUtils;
@@ -56,18 +56,15 @@ public class DpiKvitteringService {
 
 	DistribuerTilKanal persistAndCreateNewForsendelse(DpiMelding dpiMelding,
 													  OpprettForsendelseRequestTo request, String forsendelseId) {
-		DistribuerTilKanal distribuerTilKanal = new DistribuerTilKanal();
-		if (dpiMelding instanceof VarslingFeiletKvittering varslingFeiletKvittering) {
-			if (VARSLINGFEILET.equals(varslingFeiletKvittering.getKvitteringType())) {
-				createAndUpdateFeilForsendelse(dpiMelding, request, forsendelseId, distribuerTilKanal);
-			}
-		} else if (dpiMelding instanceof DpiFeilKvittering) {
-			createAndUpdateFeilForsendelse(dpiMelding, request, forsendelseId, distribuerTilKanal);
+		if ((dpiMelding instanceof VarslingFeiletKvittering varslingFeiletKvittering && VARSLINGFEILET.equals(varslingFeiletKvittering.getKvitteringType())) ||
+				(dpiMelding instanceof DpiFeilKvittering)) {
+			return createAndUpdateFeilForsendelse(dpiMelding, request, forsendelseId);
 		}
-		return distribuerTilKanal;
+		throw new InvalidKvitteringTypeException("Kvittering for forsendelse med forsendelseId=%s var av uventet type %s"
+				.formatted(forsendelseId, dpiMelding.getClass().getSimpleName()));
 	}
 
-	private void createAndUpdateFeilForsendelse(DpiMelding dpiMelding, OpprettForsendelseRequestTo request, String forsendelseId, DistribuerTilKanal distribuerTilKanal) {
+	private DistribuerTilKanal createAndUpdateFeilForsendelse(DpiMelding dpiMelding, OpprettForsendelseRequestTo request, String forsendelseId) {
 
 		String nyForsendelseId = dokdistadminConsumer.opprettForsendelse(request);
 
@@ -80,7 +77,7 @@ public class DpiKvitteringService {
 				.forsendelseStatus(KLAR_FOR_DIST.name())
 				.build());
 
-		distribuerTilKanal.setForsendelseId(nyForsendelseId);
+		return new DistribuerTilKanal().useForsendelseId(forsendelseId);
 	}
 
 	private void createFeilRegistrerForsendelseKvittering(String forsendelseId, DpiMelding dpiMelding,

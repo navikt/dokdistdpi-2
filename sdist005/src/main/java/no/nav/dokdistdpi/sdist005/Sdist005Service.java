@@ -70,9 +70,7 @@ public class Sdist005Service {
 				.map(feiletForsendelse -> {
 					final String nyForsendelseId = behandleFeiletForsendelse(feiletForsendelse);
 
-					DistribuerTilKanal distribuerTilKanal = new DistribuerTilKanal();
-					distribuerTilKanal.setForsendelseId(nyForsendelseId);
-					return distribuerTilKanal;
+					return new DistribuerTilKanal().useForsendelseId(nyForsendelseId);
 				}).collect(Collectors.toList());
 	}
 

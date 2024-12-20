@@ -1,7 +1,6 @@
 package no.nav.dokdistdpi.qdist014;
 
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
-import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.BEKREFTET;
-import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_FOR_DIST;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.OVERSENDT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_FORSENDELSE_ID;
@@ -33,8 +31,6 @@ public class Qdist014Service {
 
 	@Handler
 	public DistribuerTilKanal handleKvitteringFraDpi(DpiMelding dpiMelding, Exchange exchange) {
-		DistribuerTilKanal distribuerTilKanal = new DistribuerTilKanal();
-
 		String konversasjonsId = dpiMelding.getKonversasjonsId();
 		final String bestillingId = UUID.randomUUID().toString();
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingId);
@@ -43,22 +39,15 @@ public class Qdist014Service {
 		OpprettForsendelseRequestTo opprettForsendelseRequestTo = mapper.map(hentForsendelseResponse, bestillingId);
 		ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 
-		validateForsendelseStatusErKlarForDist(forsendelseStatus);
-
 		if (isOversendtOrBekreftet(forsendelseStatus)) {
-			distribuerTilKanal = dpiKvitteringService.persistAndCreateNewForsendelse(dpiMelding, opprettForsendelseRequestTo, forsendelseId);
+			DistribuerTilKanal distribuerTilKanal = dpiKvitteringService.persistAndCreateNewForsendelse(dpiMelding, opprettForsendelseRequestTo, forsendelseId);
 			exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
+			return distribuerTilKanal;
 		}
-		return distribuerTilKanal;
+		throw new InvalidForsendelseStatusException(String.format("Ugyldig forsendelse med forsendelseStatus=%s", forsendelseStatus));
 	}
 
 	private boolean isOversendtOrBekreftet(ForsendelseStatus status) {
 		return OVERSENDT.equals(status) || BEKREFTET.equals(status);
-	}
-
-	private void validateForsendelseStatusErKlarForDist(ForsendelseStatus forsendelseStatus) {
-		if (KLAR_FOR_DIST.equals(forsendelseStatus)) {
-			throw new InvalidForsendelseStatusException(String.format("Ugyldig forsendelse med forsendelseStatus=%s", forsendelseStatus));
-		}
 	}
 }

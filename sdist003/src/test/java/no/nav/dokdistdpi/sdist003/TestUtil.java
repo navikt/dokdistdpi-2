@@ -9,7 +9,6 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.ArkivInformasjon;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokument;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
-import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 
@@ -116,13 +115,6 @@ public final class TestUtil {
 				.varselTypeId(VARSEL_TYPE_ID)
 				.build();
 	}
-
-	public static DistribuerTilKanal createDistribuerTilKanal() {
-		DistribuerTilKanal distribuerTilKanal = new DistribuerTilKanal();
-		distribuerTilKanal.setForsendelseId("1");
-		return distribuerTilKanal;
-	}
-
 
 	public static HentForsendelseResponse buildHentForsendelseResponseWithDokumentAndArkivSystemAsJoark() {
 		return buildHentForsendelseResponse(buildHovedDokumentWithVedlegg(), ARKIV_SYSTEM_JOARK);
