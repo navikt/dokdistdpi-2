@@ -217,6 +217,24 @@ public class Qdist014IT {
 	}
 
 	@Test
+	void shouldEndAndLogWhenForsendelseStatusErOpprettet() throws IOException {
+		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
+		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-ugyldig-status.json", FORSENDELSE_ID, OK.value());
+		//Oversendt og bekreftet er gyldig status.
+		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
+		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
+		stubPutFeilregistrerforsendelse(OK.value());
+
+		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/varslingfeiletkvittering.json"));
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
+			verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
+			verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
+		});
+	}
+
+	@Test
 	void shouldThrowFunctionalExceptionWhenFinnForsendelseReturnsNull() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-feil.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", null, OK.value());

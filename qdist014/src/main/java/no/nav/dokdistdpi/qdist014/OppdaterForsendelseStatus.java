@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.LeveringsKvittering;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.domain.FinnForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
@@ -17,6 +16,7 @@ import static java.lang.Long.valueOf;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.EKSPEDERT;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_FOR_DIST;
+import static no.nav.dokdistdpi.qdist014.DpiKvitteringService.isOversendtOrBekreftet;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 
 @Slf4j
@@ -41,7 +41,7 @@ public class OppdaterForsendelseStatus {
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
 
 		validateKlarForDistStatus(forsendelseStatus);
-		if (dpiKvitteringService.isOversendtOrBekreftet(forsendelseStatus)) {
+		if (isOversendtOrBekreftet(forsendelseStatus)) {
 			oppdaterForsendelseStatus(dpiMelding, forsendelseId);
 		}
 	}
