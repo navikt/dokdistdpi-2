@@ -77,7 +77,7 @@ public class Qdist014Service {
 
 		createFeilRegistrerForsendelseKvittering(forsendelseId, dpiMelding, request);
 
-		log.info("Forsendelsen med forsendelseId={} er feilregistrert i dokdist databasen. Bestiller fallback forsendelse med forsendelseId={}", forsendelseId, nyForsendelseId);
+		log.info("Forsendelsen med forsendelseId={} er feilregistrert i dokdist databasen. Bestiller ny forsendelse til sentral print med forsendelseId={}", forsendelseId, nyForsendelseId);
 
 		dokdistadminConsumer.oppdaterForsendelse(OppdaterForsendelseRequest.builder()
 				.forsendelseId(Long.valueOf(nyForsendelseId))
