@@ -53,25 +53,25 @@ public class Qdist014Service {
 		ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 
 		if (isOversendtOrBekreftet(forsendelseStatus)) {
-			DistribuerTilKanal distribuerTilKanal = persistAndCreateNewForsendelse(dpiMelding, opprettForsendelseRequestTo, forsendelseId);
+			DistribuerTilKanal distribuerTilKanal = validateReceiptAndCreateFallback(dpiMelding, opprettForsendelseRequestTo, forsendelseId);
 			exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
 			return distribuerTilKanal;
 		}
 		throw new InvalidForsendelseStatusException(String.format("Ugyldig forsendelse med forsendelseStatus=%s", forsendelseStatus));
 	}
 
-	private DistribuerTilKanal persistAndCreateNewForsendelse(DpiMelding dpiMelding,
-															  OpprettForsendelseRequestTo request, String forsendelseId) {
+	private DistribuerTilKanal validateReceiptAndCreateFallback(DpiMelding dpiMelding,
+																OpprettForsendelseRequestTo request, String forsendelseId) {
 		boolean isVarslingFeilet = dpiMelding instanceof VarslingFeiletKvittering varslingFeiletKvittering && VARSLINGFEILET.equals(varslingFeiletKvittering.getKvitteringType());
 		boolean isDpiFeilKvittering = dpiMelding instanceof DpiFeilKvittering;
 		if (isVarslingFeilet || isDpiFeilKvittering) {
-			return createAndUpdateFeilForsendelse(dpiMelding, request, forsendelseId);
+			return markDpiForsendelseAsFailedAndCreateFallback(dpiMelding, request, forsendelseId);
 		}
 		throw new InvalidKvitteringTypeException("Kvittering for forsendelse med forsendelseId=%s var av uventet type %s"
 				.formatted(forsendelseId, dpiMelding.getClass().getSimpleName()));
 	}
 
-	private DistribuerTilKanal createAndUpdateFeilForsendelse(DpiMelding dpiMelding, OpprettForsendelseRequestTo request, String forsendelseId) {
+	private DistribuerTilKanal markDpiForsendelseAsFailedAndCreateFallback(DpiMelding dpiMelding, OpprettForsendelseRequestTo request, String forsendelseId) {
 
 		String nyForsendelseId = dokdistadminConsumer.opprettForsendelse(request);
 
