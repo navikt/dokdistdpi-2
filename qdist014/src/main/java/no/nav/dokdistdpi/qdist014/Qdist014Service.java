@@ -77,14 +77,14 @@ public class Qdist014Service {
 
 		createFeilRegistrerForsendelseKvittering(forsendelseId, dpiMelding, request);
 
-		log.info("Forsendelsen med forsendelseId={} er feilregistrert i dokdist databasen.", forsendelseId);
+		log.info("Forsendelsen med forsendelseId={} er feilregistrert i dokdist databasen. Bestiller fallback forsendelse med forsendelseId={}", forsendelseId, nyForsendelseId);
 
 		dokdistadminConsumer.oppdaterForsendelse(OppdaterForsendelseRequest.builder()
 				.forsendelseId(Long.valueOf(nyForsendelseId))
 				.forsendelseStatus(KLAR_FOR_DIST.name())
 				.build());
 
-		return new DistribuerTilKanal().useForsendelseId(forsendelseId);
+		return new DistribuerTilKanal().useForsendelseId(nyForsendelseId);
 	}
 
 	private void createFeilRegistrerForsendelseKvittering(String forsendelseId, DpiMelding dpiMelding,
