@@ -35,6 +35,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -53,6 +54,7 @@ public class Qdist014IT {
 	private static final String FORSENDELSE_ID = "1720847";
 	private static final String KONVERSASJON_ID = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
 	private static final String OPPSLAGSNOEKKEL_KONVERSASJONSID = "konversasjonsId";
+	private static final String NY_FORSENDELSE_ID = "33333";
 	private static String CALL_ID;
 
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/%s";
@@ -117,6 +119,7 @@ public class Qdist014IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
+			assertThat(message).contains(NY_FORSENDELSE_ID);
 			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
 		});
 	}
