@@ -53,38 +53,38 @@ public class Qdist014Service {
 		ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 
 		if (isOversendtOrBekreftet(forsendelseStatus)) {
-			DistribuerTilKanal distribuerTilKanal = persistAndCreateNewForsendelse(dpiMelding, opprettForsendelseRequestTo, forsendelseId);
+			DistribuerTilKanal distribuerTilKanal = validateReceiptAndCreateFallback(dpiMelding, opprettForsendelseRequestTo, forsendelseId);
 			exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
 			return distribuerTilKanal;
 		}
 		throw new InvalidForsendelseStatusException(String.format("Ugyldig forsendelse med forsendelseStatus=%s", forsendelseStatus));
 	}
 
-	private DistribuerTilKanal persistAndCreateNewForsendelse(DpiMelding dpiMelding,
-															  OpprettForsendelseRequestTo request, String forsendelseId) {
+	private DistribuerTilKanal validateReceiptAndCreateFallback(DpiMelding dpiMelding,
+																OpprettForsendelseRequestTo request, String forsendelseId) {
 		boolean isVarslingFeilet = dpiMelding instanceof VarslingFeiletKvittering varslingFeiletKvittering && VARSLINGFEILET.equals(varslingFeiletKvittering.getKvitteringType());
 		boolean isDpiFeilKvittering = dpiMelding instanceof DpiFeilKvittering;
 		if (isVarslingFeilet || isDpiFeilKvittering) {
-			return createAndUpdateFeilForsendelse(dpiMelding, request, forsendelseId);
+			return markDpiForsendelseAsFailedAndCreateFallback(dpiMelding, request, forsendelseId);
 		}
 		throw new InvalidKvitteringTypeException("Kvittering for forsendelse med forsendelseId=%s var av uventet type %s"
 				.formatted(forsendelseId, dpiMelding.getClass().getSimpleName()));
 	}
 
-	private DistribuerTilKanal createAndUpdateFeilForsendelse(DpiMelding dpiMelding, OpprettForsendelseRequestTo request, String forsendelseId) {
+	private DistribuerTilKanal markDpiForsendelseAsFailedAndCreateFallback(DpiMelding dpiMelding, OpprettForsendelseRequestTo request, String forsendelseId) {
 
 		String nyForsendelseId = dokdistadminConsumer.opprettForsendelse(request);
 
 		createFeilRegistrerForsendelseKvittering(forsendelseId, dpiMelding, request);
 
-		log.info("Forsendelsen med forsendelseId={} er feilregistrert i dokdist databasen.", forsendelseId);
+		log.info("Forsendelsen med forsendelseId={} er feilregistrert i dokdist databasen. Bestiller ny forsendelse til sentral print med forsendelseId={}", forsendelseId, nyForsendelseId);
 
 		dokdistadminConsumer.oppdaterForsendelse(OppdaterForsendelseRequest.builder()
 				.forsendelseId(Long.valueOf(nyForsendelseId))
 				.forsendelseStatus(KLAR_FOR_DIST.name())
 				.build());
 
-		return new DistribuerTilKanal().useForsendelseId(forsendelseId);
+		return new DistribuerTilKanal().useForsendelseId(nyForsendelseId);
 	}
 
 	private void createFeilRegistrerForsendelseKvittering(String forsendelseId, DpiMelding dpiMelding,
