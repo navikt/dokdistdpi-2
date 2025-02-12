@@ -15,7 +15,6 @@ import no.nav.dokdistdpi.exception.functional.KunneIkkeHenteKvitteringException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import no.nav.dokdistdpi.exception.technical.UkjentTekniskFeilException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -83,7 +82,6 @@ public class DpiClient {
 	private final CircuitBreaker circuitBreaker;
 	private final DpiClientProperties clientProperties;
 
-	@Autowired
 	public DpiClient(WebClient oauth2WebClient,
 					 RestTemplateBuilder restTemplateBuilder,
 					 DpiClientProperties clientProperties,
@@ -91,8 +89,8 @@ public class DpiClient {
 					 RetryRegistry retryRegistry) {
 		this.clientProperties = clientProperties;
 		this.restTemplate = restTemplateBuilder
-				.setConnectTimeout(ofSeconds(15))
-				.setReadTimeout(ofSeconds(30))
+				.connectTimeout(ofSeconds(15))
+				.readTimeout(ofSeconds(30))
 				.build();
 		this.oauth2WebClient = oauth2WebClient.mutate()
 				.baseUrl(clientProperties.getUrl())

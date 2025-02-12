@@ -6,7 +6,6 @@ import no.nav.dokdistdpi.exception.functional.DigitalKontaktinformasjonFunctiona
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.DigitalKontaktinformasjonTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -40,7 +39,6 @@ public class DigitalKontaktinformasjonConsumer {
 	private final String dkiUrl;
 	private final String dkiScope;
 
-	@Autowired
 	public DigitalKontaktinformasjonConsumer(@Value("${digdir_krr_proxy_url}") String dkiUrl,
 											 @Value("${digdir_krr_proxy_scope}") String dkiScope,
 											 TokenConsumer tokenConsumer,
@@ -50,8 +48,8 @@ public class DigitalKontaktinformasjonConsumer {
 		this.dkiUrl = dkiUrl;
 		this.dkiScope = dkiScope;
 		this.restTemplate = restTemplateBuilder
-				.setConnectTimeout(Duration.ofSeconds(5))
-				.setReadTimeout(Duration.ofSeconds(20))
+				.connectTimeout(Duration.ofSeconds(5))
+				.readTimeout(Duration.ofSeconds(20))
 				.build();
 	}
 

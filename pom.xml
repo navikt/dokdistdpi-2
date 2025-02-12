@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.4</version>
+		<version>3.4.2</version>
 	</parent>
 
 	<groupId>no.nav.dokdistdpi</groupId>
@@ -28,16 +28,16 @@
 	<properties>
 		<java.version>21</java.version>
 
-		<google-cloud.version>26.49.0</google-cloud.version>
-		<tink.version>1.15.0</tink.version>
+		<google-cloud.version>26.54.0</google-cloud.version>
+		<tink.version>1.16.0</tink.version>
 		<tink-gcpkms.version>1.10.0</tink-gcpkms.version>
-		<camel.version>4.8.0</camel.version>
+		<camel.version>4.9.0</camel.version>
 		<commons-compress.version>1.27.1</commons-compress.version>
-		<commons-io.version>2.17.0</commons-io.version>
-		<ibm.mq.client.version>9.4.0.5</ibm.mq.client.version>
+		<commons-io.version>2.18.0</commons-io.version>
+		<ibm.mq.client.version>9.4.1.1</ibm.mq.client.version>
 		<logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
-		<nimbus-jose-jwt.version>9.41.2</nimbus-jose-jwt.version>
-		<resilience4j.version>2.2.0</resilience4j.version>
+		<nimbus-jose-jwt.version>10.0.1</nimbus-jose-jwt.version>
+		<resilience4j.version>2.3.0</resilience4j.version>
 		<httpclient.version>4.5.14</httpclient.version>
 		<context-propagation.version>1.1.2</context-propagation.version>
 
@@ -46,11 +46,11 @@
 		<hisrc-jaxb.version>2.1.1</hisrc-jaxb.version>
 
 		<!-- Nav -->
-		<dokmet-api.version>2024.11.18-12.31-2a6bf20</dokmet-api.version>
+		<dokmet-api.version>2025.01.03-14.56-fd64327</dokmet-api.version>
 		<melding-virksomhet-dokdistfordeling.version>7-18c61bf</melding-virksomhet-dokdistfordeling.version>
 
 		<!-- Test -->
-		<spring-cloud-contract-wiremock.version>4.1.4</spring-cloud-contract-wiremock.version>
+		<spring-cloud-contract-wiremock.version>4.2.0</spring-cloud-contract-wiremock.version>
 
 		<!-- Plugins -->
 		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
