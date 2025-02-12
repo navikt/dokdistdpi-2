@@ -1,7 +1,6 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;

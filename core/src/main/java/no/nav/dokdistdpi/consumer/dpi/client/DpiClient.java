@@ -103,7 +103,7 @@ public class DpiClient {
 	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public List<ForsendelseStatusResponse> sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
 
-		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl())
+		String uri = UriComponentsBuilder.fromUriString(clientProperties.getUrl())
 				.path(SEND_PATH)
 				.queryParam(QUERY_PARAM_KANAL, clientProperties.getMpckanal())
 				.toUriString();

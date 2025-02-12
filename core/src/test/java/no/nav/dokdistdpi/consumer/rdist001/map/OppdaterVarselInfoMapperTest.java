@@ -28,8 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class OppdaterVarselInfoMapperTest {
 
-	public OppdaterVarselInfoMapper mapper = new OppdaterVarselInfoMapper();
-
+	public final OppdaterVarselInfoMapper mapper = new OppdaterVarselInfoMapper();
 
 	@Test
 	public void shouldMapEpostVarsel() {

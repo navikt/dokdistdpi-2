@@ -1,12 +1,14 @@
 package no.nav.dokdistdpi.cloudstorage;
 
 import com.google.api.client.http.apache.v2.ApacheHttpTransport;
+import com.google.cloud.storage.HttpStorageOptions;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import com.google.crypto.tink.Aead;
 import com.google.crypto.tink.KeyTemplate;
 import com.google.crypto.tink.KeyTemplates;
 import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.RegistryConfiguration;
 import com.google.crypto.tink.aead.AeadConfig;
 import com.google.crypto.tink.aead.KmsEnvelopeAeadKeyManager;
 import com.google.crypto.tink.integration.gcpkms.GcpKmsClient;
@@ -30,25 +32,25 @@ public class GoogleCloudStorageConfiguration {
 
 	@Bean
 	@Lazy
-	public EncryptedBucketStorage storage(
-			DokdistmellomlagerProperties dokdistmellomlagerProperties
-	) throws Exception {
+	public EncryptedBucketStorage storage(DokdistmellomlagerProperties dokdistmellomlagerProperties) throws Exception {
 		final String kekUri = dokdistmellomlagerProperties.gcpKekUri();
 
 		AeadConfig.register();
 		GcpKmsClient.register(Optional.of(kekUri), Optional.empty());
 		KeyTemplate keyTemplate = KmsEnvelopeAeadKeyManager.createKeyTemplate(kekUri, KeyTemplates.get(KEYTEMPLATE));
 		KeysetHandle handle = KeysetHandle.generateNew(keyTemplate);
-		Aead aead = handle.getPrimitive(Aead.class);
-		log.info("dokdistdpi-2 oppstart. Henter aead kryptering nøkkel. primaryKeyId={}", handle.getKeysetInfo().getPrimaryKeyId());
+		Aead aead = handle.getPrimitive(RegistryConfiguration.get(), Aead.class);
+
 		Storage storage = StorageOptions.newBuilder()
 				.setProjectId(dokdistmellomlagerProperties.getProjectid())
-				.setTransportOptions(StorageOptions.getDefaultHttpTransportOptions().toBuilder()
+				.setTransportOptions(HttpStorageOptions.defaults().getDefaultTransportOptions().toBuilder()
 						.setConnectTimeout((int) SECONDS.toMillis(5))
 						.setReadTimeout((int) SECONDS.toMillis(20))
 						.setHttpTransportFactory(ApacheHttpTransport::new)
 						.build())
 				.build().getService();
+
 		return new GoogleCloudEncryptedBucketStorage(storage, dokdistmellomlagerProperties.getBucket(), aead);
 	}
+
 }
