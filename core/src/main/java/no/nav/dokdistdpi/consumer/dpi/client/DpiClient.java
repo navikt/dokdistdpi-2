@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
-import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.config.OAuthEnabledWebClientConfig.MASKINPORTEN_CLIENT_REGISTRATION;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
@@ -88,10 +87,7 @@ public class DpiClient {
 					 CircuitBreakerRegistry circuitBreakerRegistry,
 					 RetryRegistry retryRegistry) {
 		this.clientProperties = clientProperties;
-		this.restTemplate = restTemplateBuilder
-				.connectTimeout(ofSeconds(15))
-				.readTimeout(ofSeconds(30))
-				.build();
+		this.restTemplate = restTemplateBuilder.build();
 		this.oauth2WebClient = oauth2WebClient.mutate()
 				.baseUrl(clientProperties.getUrl())
 				.build();

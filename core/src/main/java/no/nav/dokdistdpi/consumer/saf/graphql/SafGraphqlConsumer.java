@@ -23,8 +23,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
-
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
@@ -42,10 +40,7 @@ public class SafGraphqlConsumer {
 	public SafGraphqlConsumer(RestTemplateBuilder restTemplateBuilder,
 							  @Value("${saf.graphql.url}") String graphQLurl,
 							  StsRestConsumer stsConsumer) {
-		this.restTemplate = restTemplateBuilder
-				.readTimeout(Duration.ofSeconds(20))
-				.connectTimeout(Duration.ofSeconds(5))
-				.build();
+		this.restTemplate = restTemplateBuilder.build();
 		this.graphQLurl = graphQLurl;
 		this.stsConsumer = stsConsumer;
 	}

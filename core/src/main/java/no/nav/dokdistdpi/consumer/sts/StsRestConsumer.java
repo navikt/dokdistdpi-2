@@ -15,8 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
-
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
@@ -38,8 +36,6 @@ public class StsRestConsumer {
 						   RestTemplateBuilder restTemplateBuilder) {
 		this.restTemplate = restTemplateBuilder
 				.basicAuthentication(serviceuserProperties.getUsername(), serviceuserProperties.getPassword())
-				.readTimeout(Duration.ofSeconds(20))
-				.connectTimeout(Duration.ofSeconds(5))
 				.build();
 		this.stsUrl = stsUrl;
 	}

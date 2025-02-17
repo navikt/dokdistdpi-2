@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static com.nimbusds.jose.JOSEObjectType.JWT;
-import static java.time.Duration.ofSeconds;
 import static java.util.Date.from;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
@@ -57,11 +56,10 @@ public class MaskinportenTokenConsumer {
 									 RestTemplateBuilder restTemplateBuilder) {
 		this.maskinportenProperties = maskinportenProperties;
 		this.restTemplate = restTemplateBuilder
-				.messageConverters(new FormHttpMessageConverter(),
+				.messageConverters(
+						new FormHttpMessageConverter(),
 						new MappingJackson2HttpMessageConverter())
 				.errorHandler(new OidcErrorHandler())
-				.readTimeout(ofSeconds(30))
-				.connectTimeout(ofSeconds(5))
 				.build();
 	}
 
@@ -90,7 +88,6 @@ public class MaskinportenTokenConsumer {
 	}
 
 	private String generateJWT() {
-
 		JWTClaimsSet claims = new JWTClaimsSet.Builder()
 				.audience(maskinportenProperties.getIssuer())
 				.issuer(maskinportenProperties.getClientId())

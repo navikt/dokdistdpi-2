@@ -17,7 +17,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -47,10 +46,7 @@ public class DigitalKontaktinformasjonConsumer {
 		this.tokenConsumer = tokenConsumer;
 		this.dkiUrl = dkiUrl;
 		this.dkiScope = dkiScope;
-		this.restTemplate = restTemplateBuilder
-				.connectTimeout(Duration.ofSeconds(5))
-				.readTimeout(Duration.ofSeconds(20))
-				.build();
+		this.restTemplate = restTemplateBuilder.build();
 	}
 
 	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
