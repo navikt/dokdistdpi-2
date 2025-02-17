@@ -18,7 +18,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizationContext;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.endpoint.WebClientReactiveMaskinportenJwtBearerTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.WebClientReactiveJwtBearerTokenResponseClient;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.InMemoryReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
@@ -84,7 +84,7 @@ public class OAuthEnabledWebClientConfig {
 		JWKSource<SecurityContext> maskinportenClientJwkSource = new ImmutableJWKSet<>(new JWKSet(maskinportenClientJwk));
 
 		var jwtBearerReactiveOAuth2AuthorizedClientProvider = new JwtBearerReactiveOAuth2AuthorizedClientProvider();
-		var webClientReactiveJwtBearerTokenResponseClient = new WebClientReactiveMaskinportenJwtBearerTokenResponseClient();
+		var webClientReactiveJwtBearerTokenResponseClient = new WebClientReactiveJwtBearerTokenResponseClient();
 		webClientReactiveJwtBearerTokenResponseClient.setWebClient(reactiveProxyTokenWebClient);
 		jwtBearerReactiveOAuth2AuthorizedClientProvider.setJwtAssertionResolver(oAuth2AuthorizationContext -> resolveJwtAssertion(oAuth2AuthorizationContext, maskinportenClientJwkSource));
 		jwtBearerReactiveOAuth2AuthorizedClientProvider.setAccessTokenResponseClient(webClientReactiveJwtBearerTokenResponseClient);

@@ -6,7 +6,6 @@ import no.nav.dokdistdpi.exception.functional.DigitalKontaktinformasjonFunctiona
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.DigitalKontaktinformasjonTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -18,7 +17,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -40,7 +38,6 @@ public class DigitalKontaktinformasjonConsumer {
 	private final String dkiUrl;
 	private final String dkiScope;
 
-	@Autowired
 	public DigitalKontaktinformasjonConsumer(@Value("${digdir_krr_proxy_url}") String dkiUrl,
 											 @Value("${digdir_krr_proxy_scope}") String dkiScope,
 											 TokenConsumer tokenConsumer,
@@ -49,10 +46,7 @@ public class DigitalKontaktinformasjonConsumer {
 		this.tokenConsumer = tokenConsumer;
 		this.dkiUrl = dkiUrl;
 		this.dkiScope = dkiScope;
-		this.restTemplate = restTemplateBuilder
-				.setConnectTimeout(Duration.ofSeconds(5))
-				.setReadTimeout(Duration.ofSeconds(20))
-				.build();
+		this.restTemplate = restTemplateBuilder.build();
 	}
 
 	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))

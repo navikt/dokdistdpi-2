@@ -2,8 +2,6 @@ package no.nav.dokdistdpi.consumer.rdist001.domain;
 
 import lombok.Value;
 
-import static java.lang.String.valueOf;
-
 @Value
 public class Forsendelse {
 

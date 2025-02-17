@@ -11,5 +11,5 @@ public enum ScopeType {
 	SENDER_REF("SenderRef"),
 	RECEIVER_REF("ReceiverRef");
 
-	private String fullname;
+	private final String fullname;
 }

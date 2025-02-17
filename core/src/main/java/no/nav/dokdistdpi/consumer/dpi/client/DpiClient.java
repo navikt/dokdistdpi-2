@@ -15,7 +15,6 @@ import no.nav.dokdistdpi.exception.functional.KunneIkkeHenteKvitteringException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import no.nav.dokdistdpi.exception.technical.UkjentTekniskFeilException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -40,7 +39,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
-import static java.time.Duration.ofSeconds;
 import static no.nav.dokdistdpi.config.OAuthEnabledWebClientConfig.MASKINPORTEN_CLIENT_REGISTRATION;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
@@ -83,17 +81,13 @@ public class DpiClient {
 	private final CircuitBreaker circuitBreaker;
 	private final DpiClientProperties clientProperties;
 
-	@Autowired
 	public DpiClient(WebClient oauth2WebClient,
 					 RestTemplateBuilder restTemplateBuilder,
 					 DpiClientProperties clientProperties,
 					 CircuitBreakerRegistry circuitBreakerRegistry,
 					 RetryRegistry retryRegistry) {
 		this.clientProperties = clientProperties;
-		this.restTemplate = restTemplateBuilder
-				.setConnectTimeout(ofSeconds(15))
-				.setReadTimeout(ofSeconds(30))
-				.build();
+		this.restTemplate = restTemplateBuilder.build();
 		this.oauth2WebClient = oauth2WebClient.mutate()
 				.baseUrl(clientProperties.getUrl())
 				.build();
@@ -105,7 +99,7 @@ public class DpiClient {
 	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public List<ForsendelseStatusResponse> sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
 
-		String uri = UriComponentsBuilder.fromHttpUrl(clientProperties.getUrl())
+		String uri = UriComponentsBuilder.fromUriString(clientProperties.getUrl())
 				.path(SEND_PATH)
 				.queryParam(QUERY_PARAM_KANAL, clientProperties.getMpckanal())
 				.toUriString();

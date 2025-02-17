@@ -8,5 +8,6 @@ import lombok.Getter;
 public enum Sikkerhetsnivaa {
 	NIVAA_3(3),
 	NIVAA_4(4);
-	private int value;
+
+	private final int value;
 }

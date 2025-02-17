@@ -6,14 +6,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 
-import java.net.MalformedURLException;
-
 @Disabled
 class MaskinportenTokenConsumerTest {
 	private final MaskinportenProperties maskinportenProperties = new MaskinportenProperties();
 
 	@BeforeEach
-	public void setup() throws MalformedURLException {
+	public void setup() {
 		// test
 		maskinportenProperties.setClientId(System.getProperty("maskinporten.client-id"));
 		maskinportenProperties.setIssuer("https://test.maskinporten.no/");

@@ -35,7 +35,6 @@ import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.validation.Schema;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -44,6 +43,7 @@ import java.security.cert.Certificate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -165,15 +165,12 @@ public class CreateSignature {
 
 	private List<Reference> references(final XMLSignatureFactory xmlSignatureFactory, final List<AsicEVedlegg> files) {
 		AtomicInteger count = new AtomicInteger(0);
-		return files.stream().map(file -> {
-			try {
-				String signatureElementId = "ID_" + count.getAndIncrement();
-				String uri = URLEncoder.encode(file.getFileName(), "UTF-8");
-				return xmlSignatureFactory.newReference(uri, sha256DigestMethod, null, null, signatureElementId, sha256(file.getBytes()));
-			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
-			}
-		}).collect(toList());
+		return files.stream()
+				.map(file -> {
+					String signatureElementId = "ID_" + count.getAndIncrement();
+					String uri = URLEncoder.encode(file.getFileName(), UTF_8);
+					return xmlSignatureFactory.newReference(uri, sha256DigestMethod, null, null, signatureElementId, sha256(file.getBytes()));
+				}).collect(toList());
 	}
 
 	private static KeyInfo keyInfo(final XMLSignatureFactory xmlSignatureFactory, final Certificate[] sertifikater) {

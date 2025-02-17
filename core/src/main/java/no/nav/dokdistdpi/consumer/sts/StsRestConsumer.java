@@ -4,7 +4,6 @@ import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.StsTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,8 +14,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-
-import java.time.Duration;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -34,14 +31,11 @@ public class StsRestConsumer {
 	private final RestTemplate restTemplate;
 	private final String stsUrl;
 
-	@Autowired
 	public StsRestConsumer(@Value("${security-token-service.url}") String stsUrl,
 						   final ServiceuserProperties serviceuserProperties,
 						   RestTemplateBuilder restTemplateBuilder) {
 		this.restTemplate = restTemplateBuilder
 				.basicAuthentication(serviceuserProperties.getUsername(), serviceuserProperties.getPassword())
-				.setReadTimeout(Duration.ofSeconds(20))
-				.setConnectTimeout(Duration.ofSeconds(5))
 				.build();
 		this.stsUrl = stsUrl;
 	}

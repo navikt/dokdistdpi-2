@@ -13,7 +13,6 @@ import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.exception.technical.MaskinportenTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SertifikatException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static com.nimbusds.jose.JOSEObjectType.JWT;
-import static java.time.Duration.ofSeconds;
 import static java.util.Date.from;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
@@ -47,22 +45,21 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 @Slf4j
 @Component
 public class MaskinportenTokenConsumer {
+
 	public static final String FUNKSJONELL_FEIL_ERROR_MESSAGE = "Klarte ikke hente AccessToken fra maskinporten. Funksjonell feil: ";
 	public static final String TEKNISK_FEIL_ERROR_MESSAGE = "Klarte ikke hente AccessToken fra maskinporten. Teknisk feil: ";
 
 	private final MaskinportenProperties maskinportenProperties;
 	private final RestTemplate restTemplate;
 
-	@Autowired
 	public MaskinportenTokenConsumer(MaskinportenProperties maskinportenProperties,
 									 RestTemplateBuilder restTemplateBuilder) {
 		this.maskinportenProperties = maskinportenProperties;
 		this.restTemplate = restTemplateBuilder
-				.messageConverters(new FormHttpMessageConverter(),
+				.messageConverters(
+						new FormHttpMessageConverter(),
 						new MappingJackson2HttpMessageConverter())
 				.errorHandler(new OidcErrorHandler())
-				.setReadTimeout(ofSeconds(30))
-				.setConnectTimeout(ofSeconds(5))
 				.build();
 	}
 
@@ -91,7 +88,6 @@ public class MaskinportenTokenConsumer {
 	}
 
 	private String generateJWT() {
-
 		JWTClaimsSet claims = new JWTClaimsSet.Builder()
 				.audience(maskinportenProperties.getIssuer())
 				.issuer(maskinportenProperties.getClientId())

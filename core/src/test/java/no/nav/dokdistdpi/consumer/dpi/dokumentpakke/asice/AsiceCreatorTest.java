@@ -1,6 +1,5 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.asice;
 
-
 import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
@@ -8,7 +7,6 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures.CreateSignat
 import no.nav.dokdistdpi.utils.CertificateUtils;
 import no.nav.dokdistdpi.utils.TestUtils.ZipFile;
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -36,10 +34,10 @@ class AsiceCreatorTest {
 	private static final String DOKUMENT_2_NAME = "test2.pdf";
 	private static final String DOKUMENT_2_CONTENTS = "test2pdf";
 
-	CreateSignature createSignature = new CreateSignature();
-	AsiceCreator asiceCreator = new AsiceCreator(createSignature);
-	CreateCMSDocument createCMSDocument = new CreateCMSDocument();
-	DigitalPostContentPackager digitalPostContentPackage = new DigitalPostContentPackager(asiceCreator, createCMSDocument);
+	final CreateSignature createSignature = new CreateSignature();
+	final AsiceCreator asiceCreator = new AsiceCreator(createSignature);
+	final CreateCMSDocument createCMSDocument = new CreateCMSDocument();
+	final DigitalPostContentPackager digitalPostContentPackage = new DigitalPostContentPackager(asiceCreator, createCMSDocument);
 
 	@Test
 	void shouldCreateAndSignAsice() throws Exception {

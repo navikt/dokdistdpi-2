@@ -10,7 +10,6 @@ import no.nav.dokdistdpi.exception.functional.SafJournalpostIkkeFunnetException;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SafJournalpostQueryTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SafJournalpostQueryUnauthorizedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -24,8 +23,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
-
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
@@ -35,18 +32,15 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Slf4j
 @Component
 public class SafGraphqlConsumer {
+
 	private final RestTemplate restTemplate;
 	private final String graphQLurl;
 	private final StsRestConsumer stsConsumer;
 
-	@Autowired
 	public SafGraphqlConsumer(RestTemplateBuilder restTemplateBuilder,
 							  @Value("${saf.graphql.url}") String graphQLurl,
 							  StsRestConsumer stsConsumer) {
-		this.restTemplate = restTemplateBuilder
-				.setReadTimeout(Duration.ofSeconds(20))
-				.setConnectTimeout(Duration.ofSeconds(5))
-				.build();
+		this.restTemplate = restTemplateBuilder.build();
 		this.graphQLurl = graphQLurl;
 		this.stsConsumer = stsConsumer;
 	}
