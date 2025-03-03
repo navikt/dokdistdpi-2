@@ -6,6 +6,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,8 +35,9 @@ public class Sdist003Scheduled {
 	@Scheduled(initialDelay = 1, timeUnit = SECONDS, fixedDelayString = "#{@'dokdistdpi-no.nav.dokdistdpi.config.prop.DokdistdpiProperties'.getSdist003().getPolldelay().toSeconds()}")
 	public Publisher<String> sdist003Publisher() {
 		return leaderElectionConsumer.isLeaderAsync()
-				.filter(aBoolean -> aBoolean)
-				.flatMapMany(aBoolean -> sdist003Service.behandleKvitteringer())
+				.flatMapMany(isLeader -> isLeader ?
+						sdist003Service.behandleKvitteringer() :
+						Flux.empty())
 				.contextWrite(ctx -> ctx.put(CALL_ID, "sdist003-poll-" + LocalDateTime.now().format(DATE_TIME_FORMATTER)));
 	}
 }
