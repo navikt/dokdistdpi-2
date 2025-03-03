@@ -36,7 +36,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import static java.lang.String.format;
 import static no.nav.dokdistdpi.config.OAuthEnabledWebClientConfig.MASKINPORTEN_CLIENT_REGISTRATION;
@@ -147,27 +146,25 @@ public class DpiClient {
 				.retrieve()
 				.bodyToMono(new ParameterizedTypeReference<List<ForsendelseStatusResponse>>() {
 				})
-				.doOnError(handleForsendelseStatuserErrors(konversasjonId))
+				.onErrorMap(error -> handleForsendelseStatuserErrors(error, konversasjonId))
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
 				.transformDeferred(RetryOperator.of(retry))
 				.block();
 	}
 
-	private Consumer<Throwable> handleForsendelseStatuserErrors(String konversasjonId) {
-		return error -> {
-			if (error instanceof WebClientResponseException webException) {
-				if (webException.getStatusCode().is4xxClientError()) {
-					throw new ForsendelseStatusIkkeFunnetException(format("Finner ikke forsendelse status med konversasjonId=%s hos hjørne2. feilmelding=%s",
-							konversasjonId, webException.getMessage()), webException);
-				} else {
-					throw new SikkerDigitalPostException(format("Feilet å hente forsendelse status med konversasjonId=%s hos hjørne2. status=%s, feilmelding=%s",
-							konversasjonId, webException.getStatusCode(), webException.getMessage()), webException);
-				}
+	private Throwable handleForsendelseStatuserErrors(Throwable error, String konversasjonId) {
+		if (error instanceof WebClientResponseException webException) {
+			if (webException.getStatusCode().is4xxClientError()) {
+				return new ForsendelseStatusIkkeFunnetException(format("Finner ikke forsendelse status med konversasjonId=%s hos hjørne2. feilmelding=%s",
+						konversasjonId, webException.getMessage()), webException);
 			} else {
-				throw new SikkerDigitalPostException(format("Feilet å hente forsendelse status. Ukjent teknisk feil. feilmelding=%s",
-						error.getMessage()), error);
+				return new SikkerDigitalPostException(format("Feilet å hente forsendelse status med konversasjonId=%s hos hjørne2. status=%s, feilmelding=%s",
+						konversasjonId, webException.getStatusCode(), webException.getMessage()), webException);
 			}
-		};
+		} else {
+			return new SikkerDigitalPostException(format("Feilet å hente forsendelse status. Ukjent teknisk feil. feilmelding=%s",
+					error.getMessage()), error);
+		}
 	}
 
 	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1in/get
@@ -183,7 +180,7 @@ public class DpiClient {
 				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
 				.retrieve()
 				.bodyToFlux(HentKvitteringResponse.class)
-				.doOnError(handleHentKvitteringerErrors())
+				.onErrorMap(this::handleHentKvitteringerErrors)
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
 				.transformDeferred(RetryOperator.of(retry))
 				.onErrorResume(throwable -> {
@@ -192,52 +189,49 @@ public class DpiClient {
 				});
 	}
 
-	private Consumer<Throwable> handleHentKvitteringerErrors() {
-		return error -> {
-			if (error instanceof WebClientResponseException webException) {
-				ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
-				if (webException instanceof BadRequest || webException instanceof Unauthorized) {
-					throw new KunneIkkeHenteKvitteringException("Klarte ikke hente kvitteringer. problem=" + problemDetail);
-				} else {
-					// Retry hvis NotFound
-					throw new SikkerDigitalPostException("Klarte ikke hente kvitteringer. problem=" + problemDetail);
-				}
+	private Throwable handleHentKvitteringerErrors(Throwable error) {
+		if (error instanceof WebClientResponseException webException) {
+			ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
+			if (webException instanceof BadRequest || webException instanceof Unauthorized) {
+				return new KunneIkkeHenteKvitteringException("Klarte ikke hente kvitteringer. problem=" + problemDetail);
 			} else {
-				throw new UkjentTekniskFeilException("Henting av kvitteringer feilet med ukjent teknisk feil. Se stacktrace", error);
+				// Retry hvis NotFound
+				return new SikkerDigitalPostException("Klarte ikke hente kvitteringer. problem=" + problemDetail);
 			}
-		};
+		} else {
+			return new UkjentTekniskFeilException("Henting av kvitteringer feilet med ukjent teknisk feil. Se stacktrace", error);
+		}
 	}
 
 	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1in~1{id}~1read/post
-	public Mono<Void> markerKvitteringMottattAsync(String konversasjonId) {
+	public Mono<String> markerKvitteringMottattAsync(String konversasjonId) {
 		return oauth2WebClient.post()
 				.uri(uriBuilder -> uriBuilder.pathSegment(MESSAGES_PATH_IN, "{konversasjonId}", MESSAGES_PATH_IN_READ).build(konversasjonId))
 				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
 				.retrieve()
 				.bodyToMono(Void.class)
-				.doOnError(handleMarkerKvitteringMottattErrors(konversasjonId))
+				.onErrorMap(error -> handleMarkerKvitteringMottattErrors(error, konversasjonId))
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
 				.transformDeferred(RetryOperator.of(retry))
 				.onErrorResume(throwable -> {
 					log.error(throwable.getMessage(), throwable);
 					return Mono.empty();
-				});
+				})
+				.thenReturn(konversasjonId);
 	}
 
-	private Consumer<Throwable> handleMarkerKvitteringMottattErrors(String konversasjonId) {
-		return error -> {
-			if (error instanceof WebClientResponseException webException) {
-				ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
-				if (webException instanceof BadRequest || webException instanceof Unauthorized) {
-					throw new KunneIkkeHenteKvitteringException("Klarte ikke markere kvittering med konversasjonId=" + konversasjonId + " som mottatt. problem=" + problemDetail);
-				} else {
-					// Retry hvis NotFound
-					throw new SikkerDigitalPostException("Klarte ikke markere kvittering med konversasjonId=" + konversasjonId + " som mottatt. problem=" + problemDetail);
-				}
+	private Throwable handleMarkerKvitteringMottattErrors(Throwable error, String konversasjonId) {
+		if (error instanceof WebClientResponseException webException) {
+			ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
+			if (webException instanceof BadRequest || webException instanceof Unauthorized) {
+				return new KunneIkkeHenteKvitteringException("Klarte ikke markere kvittering med konversasjonId=" + konversasjonId + " som mottatt. problem=" + problemDetail);
 			} else {
-				throw new UkjentTekniskFeilException("Ukjent teknisk feil. Klarte ikke å markere kvitteringen med konversasjonId=%s som mottatt. Se stacktrace", error);
+				// Retry hvis NotFound
+				return new SikkerDigitalPostException("Klarte ikke markere kvittering med konversasjonId=" + konversasjonId + " som mottatt. problem=" + problemDetail);
 			}
-		};
+		} else {
+			return new UkjentTekniskFeilException("Ukjent teknisk feil. Klarte ikke å markere kvitteringen med konversasjonId=%s som mottatt. Se stacktrace", error);
+		}
 	}
 
 	private HttpHeaders headers(final String maskinportentoken, MediaType mediaType) {

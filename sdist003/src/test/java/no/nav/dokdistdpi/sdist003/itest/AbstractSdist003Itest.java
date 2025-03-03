@@ -81,7 +81,7 @@ public abstract class AbstractSdist003Itest {
 	}
 
 	protected static void stubDpiKvitteringStatus(HttpStatusCode status) {
-		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL))
+		stubFor(get(urlEqualTo(DPI_KVITTERINGER_URL + "&page=0"))
 				.willReturn(aResponse()
 						.withStatus(status.value())));
 	}

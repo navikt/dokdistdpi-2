@@ -17,10 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
 import java.text.ParseException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
@@ -49,13 +49,11 @@ public class Sdist003Service {
 		this.dpiObjectMapper = dpiObjectMapper;
 	}
 
-	public ParallelFlux<Void> behandleKvitteringer() {
+	public Flux<String> behandleKvitteringer() {
 		return hentKvitteringer()
-				.parallel()
-				.runOn(Schedulers.parallel())
 				.map(this::getForretningsmeldingFromJwt)
 				.map(this::mapPayloadToSimpleSbd)
-				.doOnNext(this::sendQdist014Melding)
+				.flatMap(kvittering -> wrapBlocking(() -> sendQdist014Melding(kvittering)))
 				.flatMap(this::markerKvitteringMottatt);
 	}
 
@@ -91,19 +89,26 @@ public class Sdist003Service {
 		}
 	}
 
-	private void sendQdist014Melding(Kvittering kvittering) {
+	private Kvittering sendQdist014Melding(Kvittering kvittering) {
 		try {
 			String konversasjonId = kvittering.simpleSbd().getConversationId();
 			producerTemplate.sendBodyAndHeader("jms:" + qdist014.getQueueName(), kvittering.forretningsmelding(), CALL_ID, konversasjonId);
 			log.info("Sdist003 har skrevet melding på qdist014. konversasjonId={}", konversasjonId);
+			return kvittering;
 		} catch (JMSException e) {
 			throw new JmsTechnicalException("Kunne ikke skrive melding til qdist014", e);
 		}
 	}
 
-	private Mono<Void> markerKvitteringMottatt(Kvittering kvittering) {
+	// https://projectreactor.io/docs/core/snapshot/reference/faq.html#faq.wrap-blocking
+	private static <T> Mono<T> wrapBlocking(Callable<T> callable) {
+		return Mono.fromCallable(callable)
+				.subscribeOn(Schedulers.boundedElastic());
+	}
+
+	private Mono<String> markerKvitteringMottatt(Kvittering kvittering) {
 		return dpiClient.markerKvitteringMottattAsync(kvittering.simpleSbd().getDokumentKonversasjonId())
-				.doOnNext(unused -> log.info("Sdist003 har markert innkommende forsendelse som mottatt av avsender. konversasjonId={}, messageId={}",
+				.doOnSuccess(unused -> log.info("Sdist003 har markert innkommende forsendelse som mottatt av avsender. konversasjonId={}, messageId={}",
 						kvittering.simpleSbd().getConversationId(), kvittering.simpleSbd().getDokumentKonversasjonId()));
 	}
 
