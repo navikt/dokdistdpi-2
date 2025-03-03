@@ -146,13 +146,13 @@ public class DpiClient {
 				.retrieve()
 				.bodyToMono(new ParameterizedTypeReference<List<ForsendelseStatusResponse>>() {
 				})
-				.onErrorMap(error -> handleForsendelseStatuserErrors(error, konversasjonId))
+				.onErrorMap(error -> mapForsendelseStatuserErrors(error, konversasjonId))
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
 				.transformDeferred(RetryOperator.of(retry))
 				.block();
 	}
 
-	private Throwable handleForsendelseStatuserErrors(Throwable error, String konversasjonId) {
+	private Throwable mapForsendelseStatuserErrors(Throwable error, String konversasjonId) {
 		if (error instanceof WebClientResponseException webException) {
 			if (webException.getStatusCode().is4xxClientError()) {
 				return new ForsendelseStatusIkkeFunnetException(format("Finner ikke forsendelse status med konversasjonId=%s hos hjørne2. feilmelding=%s",
@@ -180,7 +180,7 @@ public class DpiClient {
 				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
 				.retrieve()
 				.bodyToFlux(HentKvitteringResponse.class)
-				.onErrorMap(this::handleHentKvitteringerErrors)
+				.onErrorMap(this::mapHentKvitteringerErrors)
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
 				.transformDeferred(RetryOperator.of(retry))
 				.onErrorResume(throwable -> {
@@ -189,7 +189,7 @@ public class DpiClient {
 				});
 	}
 
-	private Throwable handleHentKvitteringerErrors(Throwable error) {
+	private Throwable mapHentKvitteringerErrors(Throwable error) {
 		if (error instanceof WebClientResponseException webException) {
 			ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
 			if (webException instanceof BadRequest || webException instanceof Unauthorized) {
@@ -210,7 +210,7 @@ public class DpiClient {
 				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
 				.retrieve()
 				.bodyToMono(Void.class)
-				.onErrorMap(error -> handleMarkerKvitteringMottattErrors(error, konversasjonId))
+				.onErrorMap(error -> mapMarkerKvitteringMottattErrors(error, konversasjonId))
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
 				.transformDeferred(RetryOperator.of(retry))
 				.onErrorResume(throwable -> {
@@ -220,7 +220,7 @@ public class DpiClient {
 				.thenReturn(konversasjonId);
 	}
 
-	private Throwable handleMarkerKvitteringMottattErrors(Throwable error, String konversasjonId) {
+	private Throwable mapMarkerKvitteringMottattErrors(Throwable error, String konversasjonId) {
 		if (error instanceof WebClientResponseException webException) {
 			ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
 			if (webException instanceof BadRequest || webException instanceof Unauthorized) {
