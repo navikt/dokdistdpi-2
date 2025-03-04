@@ -32,11 +32,12 @@ public class Sdist003Scheduled {
 		this.sdist003Service = sdist003Service;
 	}
 
-	@Scheduled(initialDelay = 1, fixedDelayString = "#{@'dokdistdpi-no.nav.dokdistdpi.config.prop.DokdistdpiProperties'.getSdist003().getPolldelay().toSeconds()}", timeUnit = SECONDS)
-	public Publisher<Void> sdist003Publisher() {
-		return Flux.just("sdist003")
-				.filterWhen(p -> leaderElectionConsumer.isLeaderAsync())
-				.flatMap(s -> sdist003Service.behandleKvitteringer())
+	@Scheduled(initialDelay = 1, timeUnit = SECONDS, fixedDelayString = "#{@'dokdistdpi-no.nav.dokdistdpi.config.prop.DokdistdpiProperties'.getSdist003().getPolldelay().toSeconds()}")
+	public Publisher<String> sdist003Publisher() {
+		return leaderElectionConsumer.isLeaderAsync()
+				.flatMapMany(isLeader -> isLeader ?
+						sdist003Service.behandleKvitteringer() :
+						Flux.empty())
 				.contextWrite(ctx -> ctx.put(CALL_ID, "sdist003-poll-" + LocalDateTime.now().format(DATE_TIME_FORMATTER)));
 	}
 }

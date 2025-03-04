@@ -3,7 +3,7 @@ package no.nav.dokdistdpi.sdist003.itest;
 import no.nav.dokdistdpi.sdist003.Sdist003Service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import reactor.core.publisher.ParallelFlux;
+import reactor.core.publisher.Flux;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,7 +31,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 		stubDpiKvitteringPage0("8_leveringskvittering_1_feil.json");
 		stubPostMottattKvitteringMultiple();
 
-		ParallelFlux<Void> kvitteringer = sdist003Service.behandleKvitteringer();
+		Flux<String> kvitteringer = sdist003Service.behandleKvitteringer();
 		kvitteringer.subscribe();
 
 		AtomicInteger atomicInteger = new AtomicInteger(0);
@@ -54,7 +54,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 		stubDpiKvitteringPage(2, "2_5_leveringskvittering.json");
 		stubPostMottattKvitteringMultiple();
 
-		ParallelFlux<Void> kvitteringer = sdist003Service.behandleKvitteringer();
+		Flux<String> kvitteringer = sdist003Service.behandleKvitteringer();
 		kvitteringer.subscribe();
 
 		AtomicInteger atomicInteger = new AtomicInteger(0);
@@ -74,7 +74,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 		stubPostMaskinporten();
 		stubDpiKvitteringStatus(NO_CONTENT);
 
-		ParallelFlux<Void> kvitteringer = sdist003Service.behandleKvitteringer();
+		Flux<String> kvitteringer = sdist003Service.behandleKvitteringer();
 		kvitteringer.subscribe();
 
 		await().during(2, TimeUnit.SECONDS).untilAsserted(() ->
@@ -86,7 +86,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 		stubPostMaskinporten();
 		stubDpiKvitteringProblemPage0(INTERNAL_SERVER_ERROR);
 
-		ParallelFlux<Void> kvitteringer = sdist003Service.behandleKvitteringer();
+		Flux<String> kvitteringer = sdist003Service.behandleKvitteringer();
 		kvitteringer.subscribe();
 		await().during(2, TimeUnit.SECONDS).untilAsserted(() ->
 				verify(0, postRequestedFor(urlEqualTo(DPI_BEKREFT_URL))));
