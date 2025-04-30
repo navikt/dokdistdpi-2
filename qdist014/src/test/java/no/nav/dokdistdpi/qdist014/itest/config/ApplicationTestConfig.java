@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 		JmsItestConfig.class
 })
 @ComponentScan(basePackages = "no.nav.dokdistdpi")
-public abstract class ApplicationTestConfig {
+public class ApplicationTestConfig {
 
 	@Bean
 	public EncryptedBucketStorage bucketStorage() {
