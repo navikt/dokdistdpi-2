@@ -32,6 +32,6 @@ import org.springframework.retry.annotation.EnableRetry;
 		JmsItestConfig.class
 })
 @ComponentScan(basePackages = "no.nav.dokdistdpi")
-public abstract class ApplicationTestConfig {
+public class ApplicationTestConfig {
 
 }
