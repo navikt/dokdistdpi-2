@@ -117,6 +117,9 @@ spec:
       runtime: java
       destinations:
         - id: "elastic-apm"
+    logging:
+      destinations:
+        - id: elastic
   azure:
     application:
       enabled: true
