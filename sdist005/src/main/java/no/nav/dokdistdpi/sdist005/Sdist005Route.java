@@ -59,25 +59,27 @@ public class Sdist005Route extends RouteBuilder {
 		onException(AbstractDokdistdpiFunctionalException.class, RuntimeCamelException.class)
 				.id(FUNCTIONAL_ERROR_HANDLER)
 				.handled(true)
-				.setBody(simple("Sdist005 feilet funksjonelt med feilmelding=${exception}."))
+				.log(ERROR, log, "Sdist005 feilet funksjonelt med feilmelding=${exception}.")
+				.setBody(simple("Sdist005 feilet funksjonelt med exception=${exception.getClass().getName()}."))
 				.to(LOGG_OG_SEND_SLACKMELDING_RUTE);
 
 		onException(AbstractDokdistdpiTechnicalException.class, IOException.class)
 				.id(TECHNICAL_ERROR_HANDLER)
 				.handled(true)
 				.logStackTrace(true)
-				.setBody(simple("Sdist005 feilet teknisk med feilmelding=${exception}."))
+				.log(ERROR, log, "Sdist005 feilet teknisk med feilmelding=${exception}.")
+				.setBody(simple("Sdist005 feilet teknisk med exception=${exception.getClass().getName()}."))
 				.to(LOGG_OG_SEND_SLACKMELDING_RUTE);
 
 		onException(Exception.class)
 				.id(UNKNOWN_ERROR_HANDLER)
 				.handled(true)
 				.logStackTrace(true)
-				.setBody(simple("Sdist005 feilet med ukjent feil og feilmelding=${exception}."))
+				.log(ERROR, log, "Sdist005 feilet med ukjent feil og feilmelding=${exception}.")
+				.setBody(simple("Sdist005 feilet med ukjent feil og exception=${exception.getClass().getName()}."))
 				.to(LOGG_OG_SEND_SLACKMELDING_RUTE);
 
 		from(LOGG_OG_SEND_SLACKMELDING_RUTE)
-				.log(ERROR, log, "${body}")
 				.bean(slackService, "sendMelding(${body})");
 
 		from(sdist005Properties.camelUri())

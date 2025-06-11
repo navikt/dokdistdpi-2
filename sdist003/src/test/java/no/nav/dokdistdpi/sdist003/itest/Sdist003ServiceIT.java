@@ -102,7 +102,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 		await().during(2, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(0, postRequestedFor(urlEqualTo(DPI_BEKREFT_URL)));
 			Mockito.verify(slackServiceMock, Mockito.times(1))
-					.sendMelding("Sdist003 feilet under behandling av kvitteringer med feilmelding=Klarte ikke hente kvitteringer. problem=ProblemDetail[type='about:blank', title='Teknisk feil', status=500, detail='Noe feilet', instance='https://docs.digdir.no/', properties='null']");
+					.sendMelding("Sdist003 feilet under behandling av kvitteringer med exception=no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException");
 		});
 	}
 }

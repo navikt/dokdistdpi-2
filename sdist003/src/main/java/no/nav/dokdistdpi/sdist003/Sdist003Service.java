@@ -60,7 +60,7 @@ public class Sdist003Service {
 				.onErrorResume(e -> {
 					var feilmelding = "Sdist003 feilet under behandling av kvitteringer med feilmelding=%s".formatted(e.getMessage());
 					log.error(feilmelding, e);
-					slackService.sendMelding(feilmelding);
+					slackService.sendMelding("Sdist003 feilet under behandling av kvitteringer med exception=%s".formatted(e.getClass().getName()));
 					return Mono.empty();
 				});
 	}

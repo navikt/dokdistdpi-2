@@ -45,7 +45,7 @@ public class  SlackService {
 	private ChatPostMessageRequest jobbFeiletMelding(String feilmelding) {
 		String headerText = ":rotating_light: Skedulert jobb feilet!";
 		String bodyText = """
-                 *Applikasjon:* dokdistavstemming
+                 *Applikasjon:* dokdistdpi-2
                  *Feilmelding:* %s
                  """.formatted(feilmelding).stripIndent();
 
