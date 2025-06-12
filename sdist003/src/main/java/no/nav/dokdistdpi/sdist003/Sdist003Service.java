@@ -12,8 +12,8 @@ import no.nav.dokdistdpi.consumer.dpi.client.HentKvitteringResponse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
 import no.nav.dokdistdpi.exception.technical.JmsTechnicalException;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
+import no.nav.dokdistdpi.slack.SlackService;
 import org.apache.camel.ProducerTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,18 +35,20 @@ public class Sdist003Service {
 	private final ProducerTemplate producerTemplate;
 	private final Queue qdist014;
 	private final ObjectMapper dpiObjectMapper;
+	private final SlackService slackService;
 
-	@Autowired
 	public Sdist003Service(DpiClientProperties dpiClientProperties,
 						   DpiClient dpiClient,
 						   ProducerTemplate producerTemplate,
 						   Queue qdist014,
-						   ObjectMapper dpiObjectMapper) {
+						   ObjectMapper dpiObjectMapper,
+						   SlackService slackService) {
 		this.dpiClientProperties = dpiClientProperties;
 		this.dpiClient = dpiClient;
 		this.producerTemplate = producerTemplate;
 		this.qdist014 = qdist014;
 		this.dpiObjectMapper = dpiObjectMapper;
+		this.slackService = slackService;
 	}
 
 	public Flux<String> behandleKvitteringer() {
@@ -54,7 +56,13 @@ public class Sdist003Service {
 				.map(this::getForretningsmeldingFromJwt)
 				.map(this::mapPayloadToSimpleSbd)
 				.flatMap(kvittering -> wrapBlocking(() -> sendQdist014Melding(kvittering)))
-				.flatMap(this::markerKvitteringMottatt);
+				.flatMap(this::markerKvitteringMottatt)
+				.onErrorResume(e -> {
+					var feilmelding = "Sdist003 feilet under behandling av kvitteringer med feilmelding=%s".formatted(e.getMessage());
+					log.error(feilmelding, e);
+					slackService.sendMelding("Sdist003 feilet under behandling av kvitteringer med exception=%s".formatted(e.getClass().getName()));
+					return Mono.empty();
+				});
 	}
 
 	public Flux<HentKvitteringResponse> hentKvitteringer() {

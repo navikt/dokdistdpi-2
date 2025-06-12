@@ -1,8 +1,11 @@
 package no.nav.dokdistdpi.sdist003.itest;
 
 import no.nav.dokdistdpi.sdist003.Sdist003Service;
+import no.nav.dokdistdpi.slack.SlackService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import reactor.core.publisher.Flux;
 
 import java.util.concurrent.TimeUnit;
@@ -14,6 +17,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
@@ -24,6 +28,9 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 
 	@Autowired
 	private Sdist003Service sdist003Service;
+
+	@MockitoBean
+	private SlackService slackServiceMock;
 
 	@Test
 	void shouldProcessPage0With8LeveringskvitteringAnd1Feil() {
@@ -43,6 +50,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 				atomicInteger.incrementAndGet();
 			}
 			assertThat(atomicInteger.get()).isEqualTo(9);
+			verifyNoInteractions(slackServiceMock);
 		});
 	}
 
@@ -66,6 +74,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 				atomicInteger.incrementAndGet();
 			}
 			assertThat(atomicInteger.get()).isEqualTo(25);
+			verifyNoInteractions(slackServiceMock);
 		});
 	}
 
@@ -77,8 +86,10 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 		Flux<String> kvitteringer = sdist003Service.behandleKvitteringer();
 		kvitteringer.subscribe();
 
-		await().during(2, TimeUnit.SECONDS).untilAsserted(() ->
-				verify(0, postRequestedFor(urlEqualTo(DPI_BEKREFT_URL))));
+		await().during(2, TimeUnit.SECONDS).untilAsserted(() -> {
+			verify(0, postRequestedFor(urlEqualTo(DPI_BEKREFT_URL)));
+			verifyNoInteractions(slackServiceMock);
+		});
 	}
 
 	@Test
@@ -88,7 +99,10 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 
 		Flux<String> kvitteringer = sdist003Service.behandleKvitteringer();
 		kvitteringer.subscribe();
-		await().during(2, TimeUnit.SECONDS).untilAsserted(() ->
-				verify(0, postRequestedFor(urlEqualTo(DPI_BEKREFT_URL))));
+		await().during(2, TimeUnit.SECONDS).untilAsserted(() -> {
+			verify(0, postRequestedFor(urlEqualTo(DPI_BEKREFT_URL)));
+			Mockito.verify(slackServiceMock, Mockito.times(1))
+					.sendMelding("Sdist003 feilet under behandling av kvitteringer med exception=no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException");
+		});
 	}
 }

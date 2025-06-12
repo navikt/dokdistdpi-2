@@ -182,11 +182,7 @@ public class DpiClient {
 				.bodyToFlux(HentKvitteringResponse.class)
 				.onErrorMap(this::mapHentKvitteringerErrors)
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-				.transformDeferred(RetryOperator.of(retry))
-				.onErrorResume(throwable -> {
-					log.error(throwable.getMessage(), throwable);
-					return Flux.empty();
-				});
+				.transformDeferred(RetryOperator.of(retry));
 	}
 
 	private Throwable mapHentKvitteringerErrors(Throwable error) {
@@ -213,10 +209,6 @@ public class DpiClient {
 				.onErrorMap(error -> mapMarkerKvitteringMottattErrors(error, konversasjonId))
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
 				.transformDeferred(RetryOperator.of(retry))
-				.onErrorResume(throwable -> {
-					log.error(throwable.getMessage(), throwable);
-					return Mono.empty();
-				})
 				.thenReturn(konversasjonId);
 	}
 

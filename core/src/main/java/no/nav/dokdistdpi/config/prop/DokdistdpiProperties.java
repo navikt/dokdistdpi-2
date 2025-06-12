@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -18,6 +19,7 @@ public class DokdistdpiProperties {
 	private final Qdist014 qdist014 = new Qdist014();
 	private final Sdist003 sdist003 = new Sdist003();
 	private final Sdist005 sdist005 = new Sdist005();
+	private final SlackProperties slack = new SlackProperties();
 	private final Endpoints endpoints = new Endpoints();
 
 	@Data
@@ -97,4 +99,16 @@ public class DokdistdpiProperties {
 		@NotEmpty
 		private String scope;
 	}
+
+	@Data
+	@Validated
+	public static class SlackProperties {
+		@NotEmpty
+		@ToString.Exclude
+		private String token;
+		@NotEmpty
+		private String channel;
+		private boolean enabled;
+	}
+
 }
