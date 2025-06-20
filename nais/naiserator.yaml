@@ -97,6 +97,7 @@ spec:
       memory: 4Gi
     requests:
       memory: 1500Mi
+      cpu: 20m
   maskinporten:
     enabled: true
     scopes:
