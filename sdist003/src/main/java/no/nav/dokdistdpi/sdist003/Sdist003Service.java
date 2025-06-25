@@ -3,6 +3,7 @@ package no.nav.dokdistdpi.sdist003;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEObject;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.jms.JMSException;
 import jakarta.jms.Queue;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,12 @@ public class Sdist003Service {
 				.onErrorResume(e -> {
 					var feilmelding = "Sdist003 feilet under behandling av kvitteringer med feilmelding=%s".formatted(e.getMessage());
 					log.error(feilmelding, e);
-					slackService.sendMelding("Sdist003 feilet under behandling av kvitteringer med exception=%s".formatted(e.getClass().getName()));
+
+					// Unngå å sende Slack-melding for feil som fikser seg selv
+					if (e.getClass() != CallNotPermittedException.class) {
+						slackService.sendMelding("Sdist003 feilet under behandling av kvitteringer med exception=%s".formatted(e.getClass().getName()));
+					}
+
 					return Mono.empty();
 				});
 	}
