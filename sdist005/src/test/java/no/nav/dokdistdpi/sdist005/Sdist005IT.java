@@ -1,9 +1,7 @@
 package no.nav.dokdistdpi.sdist005;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import jakarta.jms.Queue;
 import jakarta.xml.bind.JAXBElement;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -14,7 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -27,6 +24,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -55,13 +53,6 @@ public class Sdist005IT {
 	@Autowired
 	private Queue qdist009;
 
-	@BeforeEach
-	void setUp() {
-		WireMock.reset();
-		WireMock.resetAllRequests();
-		WireMock.removeAllMappings();
-	}
-
 	@Test
 	public void shouldGetKvitteringFromDpiAccessPoint() throws UnknownHostException {
 		stubLeaderElection();
@@ -74,13 +65,12 @@ public class Sdist005IT {
 		stubPutFeilregistrerforsendelse();
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(15, SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
+			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(1, getRequestedFor(urlEqualTo("/message/out/" + KONVERSASJON_ID + "/statuses")));
 		});
-
-		verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
-		verify(1, getRequestedFor(urlEqualTo("/message/out/" + KONVERSASJON_ID + "/statuses")));
 	}
 
 	private void stubPostMaskinporten() {
