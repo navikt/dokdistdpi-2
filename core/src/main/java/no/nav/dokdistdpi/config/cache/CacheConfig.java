@@ -35,20 +35,34 @@ public class CacheConfig {
 		SimpleCacheManager manager = new SimpleCacheManager();
 		manager.setCaches(Arrays.asList(
 				new CaffeineCache(TKAT020_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(1, DAYS).build()),
+						.expireAfterWrite(1, DAYS)
+						.recordStats()
+						.build()),
 				new CaffeineCache(TKAT021_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(1, DAYS).build()),
+						.expireAfterWrite(1, DAYS)
+						.recordStats()
+						.build()),
 				new CaffeineCache(STS_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(55, MINUTES).build()),
+						.expireAfterWrite(55, MINUTES)
+						.recordStats()
+						.build()),
 				new CaffeineCache(LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(30, SECONDS).build()),
+						.expireAfterWrite(30, SECONDS)
+						.recordStats()
+						.build()),
 				new CaffeineCache(SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(30, SECONDS).build()),
+						.expireAfterWrite(30, SECONDS)
+						.recordStats()
+						.build()),
 				new CaffeineCache(MASKINPORTEN_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(120, SECONDS).build()),
+						.expireAfterWrite(120, SECONDS)
+						.recordStats()
+						.build()),
 				new CaffeineCache(AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(50, MINUTES)
-						.maximumSize(2).build())
+						.maximumSize(2)
+						.recordStats()
+						.build())
 		));
 		return manager;
 	}
