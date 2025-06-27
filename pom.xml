@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.4</version>
+		<version>3.5.3</version>
 	</parent>
 
 	<groupId>no.nav.dokdistdpi</groupId>
@@ -28,17 +28,17 @@
 	<properties>
 		<java.version>21</java.version>
 
-		<google-cloud.version>26.59.0</google-cloud.version>
-		<tink.version>1.17.0</tink.version>
+		<camel-spring-boot-bom.version>4.12.0</camel-spring-boot-bom.version>
+		<libraries-bom.version>26.62.0</libraries-bom.version>
+		<tink.version>1.18.0</tink.version>
 		<tink-gcpkms.version>1.10.0</tink-gcpkms.version>
-		<camel.version>4.11.0</camel.version>
 		<commons-compress.version>1.27.1</commons-compress.version>
-		<commons-io.version>2.18.0</commons-io.version>
-		<com.ibm.mq.jakarta.client.version>9.4.2.0</com.ibm.mq.jakarta.client.version>
+		<commons-io.version>2.19.0</commons-io.version>
+		<com.ibm.mq.jakarta.client.version>9.4.3.0</com.ibm.mq.jakarta.client.version>
 		<logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
-		<nimbus-jose-jwt.version>10.2</nimbus-jose-jwt.version>
-		<resilience4j.version>2.3.0</resilience4j.version>
-		<context-propagation.version>1.1.2</context-propagation.version>
+		<nimbus-jose-jwt.version>10.3</nimbus-jose-jwt.version>
+		<resilience4j-bom.version>2.3.0</resilience4j-bom.version>
+		<context-propagation.version>1.1.3</context-propagation.version>
 		<slack-api-client.version>1.45.3</slack-api-client.version>
 
 		<!-- plugins -->
@@ -46,11 +46,11 @@
 		<hisrc-jaxb.version>2.1.1</hisrc-jaxb.version>
 
 		<!-- Nav -->
-		<dokmet-api.version>2025.02.25-12.54-204a61e</dokmet-api.version>
-		<melding-virksomhet-dokdistfordeling.version>7-18c61bf</melding-virksomhet-dokdistfordeling.version>
+		<dokmet-api.version>2025.04.29-15.21-2c96c87</dokmet-api.version>
+		<dok-legacy-tjenestespesifikasjoner.version>39-71e82ec</dok-legacy-tjenestespesifikasjoner.version>
 
 		<!-- Test -->
-		<spring-cloud-contract-wiremock.version>4.2.1</spring-cloud-contract-wiremock.version>
+		<spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
 
 		<!-- Plugins -->
 		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
@@ -96,8 +96,8 @@
 
 			<dependency>
 				<groupId>no.nav.meldinger.virksomhet</groupId>
-				<artifactId>melding-virksomhet-dokdistfordeling</artifactId>
-				<version>${melding-virksomhet-dokdistfordeling.version}</version>
+				<artifactId>dok-melding-virksomhet-dokdistfordeling</artifactId>
+				<version>${dok-legacy-tjenestespesifikasjoner.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>no.nav.dokmet</groupId>
@@ -113,7 +113,7 @@
 			<dependency>
 				<groupId>org.apache.camel.springboot</groupId>
 				<artifactId>camel-spring-boot-bom</artifactId>
-				<version>${camel.version}</version>
+				<version>${camel-spring-boot-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -140,7 +140,7 @@
 			<dependency>
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
-				<version>${google-cloud.version}</version>
+				<version>${libraries-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -157,7 +157,7 @@
 			<dependency>
 				<groupId>io.github.resilience4j</groupId>
 				<artifactId>resilience4j-bom</artifactId>
-				<version>${resilience4j.version}</version>
+				<version>${resilience4j-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
