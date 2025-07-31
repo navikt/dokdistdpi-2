@@ -8,6 +8,7 @@ import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.config.prop.MqGatewayProperties;
+import no.nav.dokdistdpi.config.prop.NaisProperties;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +30,8 @@ import static org.mockito.Mockito.mock;
 		DpiClientProperties.class,
 		KeyStoreProperties.class,
 		DokdistdpiProperties.class,
-		AzureProperties.class
+		AzureProperties.class,
+		NaisProperties.class
 })
 @Import({CacheConfig.class,
 		LocalTestCacheConfig.class,

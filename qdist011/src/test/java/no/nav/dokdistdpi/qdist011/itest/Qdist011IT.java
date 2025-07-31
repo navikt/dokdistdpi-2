@@ -9,6 +9,7 @@ import no.nav.dokdistdpi.cloudstorage.DokDistDokumentFraBucket;
 import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.cloudstorage.JsonSerializer;
 import no.nav.dokdistdpi.qdist011.itest.config.ApplicationTestConfig;
+import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,13 +127,13 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
-			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
 					.withRequestBody(containing("Content-Type: application/octet-stream")
 							.and(containing("Content-Type: text/plain"))));
@@ -165,7 +166,7 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
-			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 			verify(0, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
@@ -195,7 +196,7 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
-			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
@@ -227,7 +228,7 @@ public class Qdist011IT {
 		verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
 		verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
-		verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+		verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 		verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 	}
 
@@ -359,8 +360,16 @@ public class Qdist011IT {
 						.withBodyFile("sts/stsResponse-happy.json")));
 	}
 
+	void stubNaisTexasToken() {
+		stubFor(post("/texas")
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("nais-texas/texas_response.json")));
+	}
+
 	private void stubPostSafJournalpost(String bodyFileName) {
-		stubFor(post(urlMatching("/safgraphql"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)

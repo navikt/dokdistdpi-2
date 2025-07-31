@@ -82,6 +82,9 @@ public class DokdistdpiProperties {
 		@NotNull
 		private AppEndpoint dokdistadmin;
 
+		@NotNull
+		private AppEndpoint saf;
+
 	}
 
 	@Data
