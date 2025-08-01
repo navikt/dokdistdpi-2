@@ -30,13 +30,13 @@ public class NaisTexasConsumer {
 		if (isBlank(targetScope) || !TARGET_PATTERN.matcher(targetScope).matches()) {
 			throw new IllegalArgumentException("Ugyldig targetScope. Må være på format api://<cluster>.<namespace>.<other-api-app-name>/.default");
 		}
-		MultiValueMap<String, String> fromData = new LinkedMultiValueMap<>();
-		fromData.add("identity_provider", "azuread");
-		fromData.add("target", targetScope);
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("identity_provider", "azuread");
+		formData.add("target", targetScope);
 
 		return Objects.requireNonNull(restClient.post()
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.body(fromData)
+				.body(formData)
 				.retrieve()
 				.body(NaisTexasToken.class)
 				.accessToken());
