@@ -22,7 +22,6 @@ public class CacheConfig {
 
 	public static final String TKAT020_CACHE = "dokumenttypeInfoCache";
 	public static final String TKAT021_CACHE = "varselinfoCache";
-	public static final String STS_CACHE = "stsCache";
 	public static final String MASKINPORTEN_CACHE = "maskinportenCache";
 	public static final String LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE = "LightweightSafJournalpostQdist011Cache";
 	public static final String SAF_JOURNALPOST_QDIST011_CACHE = "SafJournalpostQueryServiceImplQdist011Cache";
@@ -40,10 +39,6 @@ public class CacheConfig {
 						.build()),
 				new CaffeineCache(TKAT021_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(1, DAYS)
-						.recordStats()
-						.build()),
-				new CaffeineCache(STS_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(55, MINUTES)
 						.recordStats()
 						.build()),
 				new CaffeineCache(LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()

@@ -1,5 +1,6 @@
 package no.nav.dokdistdpi.config.prop;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -15,15 +16,20 @@ import java.time.Duration;
 @Validated
 public class DokdistdpiProperties {
 
+	@Valid
 	private final Qdist011 qdist011 = new Qdist011();
+	@Valid
 	private final Qdist014 qdist014 = new Qdist014();
+	@Valid
 	private final Sdist003 sdist003 = new Sdist003();
+	@Valid
 	private final Sdist005 sdist005 = new Sdist005();
+	@Valid
 	private final SlackProperties slack = new SlackProperties();
+	@Valid
 	private final Endpoints endpoints = new Endpoints();
 
 	@Data
-	@Validated
 	public static class Qdist014 {
 		private boolean autostartup;
 		@Positive
@@ -31,13 +37,11 @@ public class DokdistdpiProperties {
 	}
 
 	@Data
-	@Validated
 	public static class Qdist011 {
 		private boolean autostartup;
 	}
 
 	@Data
-	@Validated
 	public static class Sdist003 {
 		private boolean autostartup;
 		/**
@@ -48,7 +52,6 @@ public class DokdistdpiProperties {
 	}
 
 	@Data
-	@Validated
 	public static class Sdist005 {
 		private boolean autostartup;
 		/**
@@ -70,14 +73,13 @@ public class DokdistdpiProperties {
 	}
 
 	@Data
-	@Validated
 	public static class Endpoints {
 		@NotEmpty
 		String dokmetUrl;
 		@NotEmpty
 		String juridisklogg;
 		/**
-		 * URL til dokdistadmin journalpost api.
+		 * URL til dokdistadmin api.
 		 */
 		@NotNull
 		private AppEndpoint dokdistadmin;
@@ -85,10 +87,12 @@ public class DokdistdpiProperties {
 		@NotNull
 		private AppEndpoint saf;
 
+		@NotNull
+		private AppEndpoint digdir;
+
 	}
 
 	@Data
-	@Validated
 	public static class AppEndpoint {
 		/**
 		 * Url til tjeneste som har azure autorisasjon
@@ -104,7 +108,6 @@ public class DokdistdpiProperties {
 	}
 
 	@Data
-	@Validated
 	public static class SlackProperties {
 		@NotEmpty
 		@ToString.Exclude

@@ -1,19 +1,32 @@
 package no.nav.dokdistdpi.consumer.saf.journalpost;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
+import java.io.Serializable;
+import java.util.List;
+
+@Data
 public class SafJsonJournalpost implements Serializable {
 	private DataJournalpost data;
 
-	public DataJournalpost getData() {
-		return data;
+	private List<Error> errors;
+
+	@Data
+	public static class DataJournalpost {
+		private SafJournalpostResponse journalpost;
 	}
 
-	public void setData(DataJournalpost data) {
-		this.data = data;
+	@Data
+	@JsonIgnoreProperties({"locations", "path"})
+	public static class Error {
+		private String message;
+		private Extension extensions;
 	}
 
-	public SafJournalpostResponse getJournalpost() {
-		return data.getJournalpost();
+	@Data
+	public static class Extension {
+		private String code;
+		private String classification;
 	}
 }

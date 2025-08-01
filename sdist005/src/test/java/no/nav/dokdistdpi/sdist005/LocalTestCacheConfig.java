@@ -16,7 +16,6 @@ import static no.nav.dokdistdpi.config.cache.CacheConfig.AZURE_CLIENT_CREDENTIAL
 import static no.nav.dokdistdpi.config.cache.CacheConfig.LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.MASKINPORTEN_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.SAF_JOURNALPOST_QDIST011_CACHE;
-import static no.nav.dokdistdpi.config.cache.CacheConfig.STS_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
 
@@ -31,8 +30,6 @@ public class LocalTestCacheConfig {
 						.expireAfterWrite(0, DAYS).build()),
 				new CaffeineCache(TKAT021_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(0, DAYS).build()),
-				new CaffeineCache(STS_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(0, MINUTES).build()),
 				new CaffeineCache(LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(0, SECONDS).build()),
 				new CaffeineCache(SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()
