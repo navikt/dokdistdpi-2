@@ -62,7 +62,7 @@ public class SafGraphqlConsumer {
 		if (nonNull(response) && !isEmpty(response.getErrors())) {
 			SafJsonJournalpost.Error safError = response.getErrors().getFirst();
 			if (safError.getExtensions().getClassification().contains(CLASSIFICATION_VALIDATIONERROR)) {
-				throw new SafJournalpostQueryTechnicalException("Feil i saf query: " + safError.getMessage());
+				throw new SafJournalpostQueryTechnicalException("Feil i SAF query: " + safError.getMessage());
 			}
 			String safErrorCode = safError.getExtensions().getCode();
 
@@ -72,7 +72,7 @@ public class SafGraphqlConsumer {
 				case FORBIDDEN ->
 						throw new SafJournalpostQueryUnauthorizedException("Saksbehandler har ikke tilgang til journalposten. Feilmelding fra SAF: " + safError.getMessage());
 				case SERVER_ERROR -> {
-					log.warn("Teknisk feil mot SAF. Feilmelding: " + safError.getMessage());
+					log.warn("Teknisk feil mot SAF. Feilmelding: {}", safError.getMessage());
 					throw new SafJournalpostQueryTechnicalException(safError.getMessage());
 				}
 				case BAD_REQUEST ->
