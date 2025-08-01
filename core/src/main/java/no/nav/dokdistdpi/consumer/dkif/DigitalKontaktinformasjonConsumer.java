@@ -2,11 +2,11 @@ package no.nav.dokdistdpi.consumer.dkif;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.azure.TokenConsumer;
+import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.exception.functional.DigitalKontaktinformasjonFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.DigitalKontaktinformasjonTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -35,17 +35,14 @@ public class DigitalKontaktinformasjonConsumer {
 	private final DigitalKontaktinfoMapper digitalPostKontaktinfoMapper;
 	private final TokenConsumer tokenConsumer;
 	private final RestTemplate restTemplate;
-	private final String dkiUrl;
-	private final String dkiScope;
+	private final DokdistdpiProperties.AppEndpoint digdirEndpoint;
 
-	public DigitalKontaktinformasjonConsumer(@Value("${digdir_krr_proxy_url}") String dkiUrl,
-											 @Value("${digdir_krr_proxy_scope}") String dkiScope,
+	public DigitalKontaktinformasjonConsumer(DokdistdpiProperties dokdistdpiProperties,
 											 TokenConsumer tokenConsumer,
 											 RestTemplateBuilder restTemplateBuilder) {
 		this.digitalPostKontaktinfoMapper = new DigitalKontaktinfoMapper();
+		this.digdirEndpoint = dokdistdpiProperties.getEndpoints().getDigdir();
 		this.tokenConsumer = tokenConsumer;
-		this.dkiUrl = dkiUrl;
-		this.dkiScope = dkiScope;
 		this.restTemplate = restTemplateBuilder.build();
 	}
 
@@ -57,7 +54,7 @@ public class DigitalKontaktinformasjonConsumer {
 		try {
 			PostPersonerRequest postPersonRequest = PostPersonerRequest.builder().personidenter(List.of(fnrTrimmed)).build();
 			var request = new HttpEntity<>(postPersonRequest, headers);
-			DigitalKontaktInfoResponse response = restTemplate.postForEntity(dkiUrl + "/rest/v1/personer?inkluderSikkerDigitalPost=true", request, DigitalKontaktInfoResponse.class).getBody();
+			DigitalKontaktInfoResponse response = restTemplate.postForEntity(digdirEndpoint.getUrl() + "/rest/v1/personer?inkluderSikkerDigitalPost=true", request, DigitalKontaktInfoResponse.class).getBody();
 
 			if (isValidRespons(response, fnrTrimmed)) {
 				return digitalPostKontaktinfoMapper.mapDigitalKontaktinfo(response.getPersoner().get(fnrTrimmed), personidentifikator);
@@ -88,7 +85,7 @@ public class DigitalKontaktinformasjonConsumer {
 	}
 
 	private HttpHeaders createHeaders() {
-		String clientCredentialToken = tokenConsumer.getClientCredentialToken(dkiScope);
+		String clientCredentialToken = tokenConsumer.getClientCredentialToken(digdirEndpoint.getScope());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(APPLICATION_JSON);
 		headers.setBearerAuth(clientCredentialToken);

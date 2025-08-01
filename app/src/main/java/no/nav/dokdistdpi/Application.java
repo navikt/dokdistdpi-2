@@ -9,6 +9,7 @@ import no.nav.dokdistdpi.config.prop.DokdistmellomlagerProperties;
 import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.config.prop.MqGatewayProperties;
+import no.nav.dokdistdpi.config.prop.NaisProperties;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,6 +27,7 @@ import org.springframework.retry.annotation.EnableRetry;
 		DokdistmellomlagerProperties.class,
 		DokdistdpiProperties.class,
 		AzureProperties.class,
+		NaisProperties.class
 })
 @Import({CoreConfig.class,
 		WebClientConfig.class,

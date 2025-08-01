@@ -1,6 +1,7 @@
 {
   "data": {
     "journalpost": {
+      "journalpostId": "1234567890",
       "dokumenter": [
         {
           "dokumentInfoId": "arkivDokumentInfoIdHoveddok",

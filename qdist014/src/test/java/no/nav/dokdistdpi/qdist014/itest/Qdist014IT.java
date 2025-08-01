@@ -6,6 +6,7 @@ import jakarta.jms.TextMessage;
 import jakarta.xml.bind.JAXBElement;
 import no.nav.dokdistdpi.qdist014.itest.config.ApplicationTestConfig;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +81,7 @@ public class Qdist014IT {
 	@BeforeEach
 	public void setupBefore() {
 		CALL_ID = UUID.randomUUID().toString();
-
+		stubNaisTexasToken();
 		WireMock.reset();
 		WireMock.resetAllRequests();
 		WireMock.removeAllMappings();
@@ -365,6 +366,14 @@ public class Qdist014IT {
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withStatus(httpStatusValue)
 						.withBodyFile(responseBody)));
+	}
+
+	void stubNaisTexasToken() {
+		stubFor(post("/texas-token")
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("nais-texas/texas_response.json")));
 	}
 
 	void stubAzure() {

@@ -1,82 +1,98 @@
 package no.nav.dokdistdpi.consumer.saf.graphql;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.saf.journalpost.SafJournalpostResponse;
 import no.nav.dokdistdpi.consumer.saf.journalpost.SafJsonJournalpost;
-import no.nav.dokdistdpi.consumer.sts.StsRestConsumer;
-import no.nav.dokdistdpi.exception.functional.SafJournalpostIkkeFunnetException;
-import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
+import no.nav.dokdistdpi.exception.functional.SafJournalpostFunctionalException;
 import no.nav.dokdistdpi.exception.technical.SafJournalpostQueryTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SafJournalpostQueryUnauthorizedException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.retry.annotation.Backoff;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
+
+import java.io.IOException;
 
 import static java.lang.String.format;
-import static java.util.Objects.isNull;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static java.util.Objects.nonNull;
+import static no.nav.dokdistdpi.consumer.naistoken.NaisTexasRequestInterceptor.TARGET_SCOPE;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Slf4j
 @Component
 public class SafGraphqlConsumer {
 
-	private final RestTemplate restTemplate;
-	private final String graphQLurl;
-	private final StsRestConsumer stsConsumer;
+	private static final String NOT_FOUND = "not_found";
+	private static final String FORBIDDEN = "forbidden";
+	private static final String SERVER_ERROR = "server_error";
+	private static final String BAD_REQUEST = "bad_request";
+	private static final String CLASSIFICATION_VALIDATIONERROR = "ValidationError";
 
-	public SafGraphqlConsumer(RestTemplateBuilder restTemplateBuilder,
-							  @Value("${saf.graphql.url}") String graphQLurl,
-							  StsRestConsumer stsConsumer) {
-		this.restTemplate = restTemplateBuilder.build();
-		this.graphQLurl = graphQLurl;
-		this.stsConsumer = stsConsumer;
+	private final RestClient restClientTexas;
+	private final ObjectMapper objectMapper;
+	private final DokdistdpiProperties.AppEndpoint safEndpoint;
+
+	public SafGraphqlConsumer(RestClient restClientTexas,
+							  ObjectMapper objectMapper,
+							  DokdistdpiProperties dokdistdpiProperties) {
+		this.safEndpoint = dokdistdpiProperties.getEndpoints().getSaf();
+		this.objectMapper = objectMapper;
+		this.restClientTexas = restClientTexas.mutate()
+				.baseUrl(safEndpoint.getUrl())
+				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+				.build();
 	}
 
-	@Retryable(retryFor = SafJournalpostQueryTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = SafJournalpostQueryTechnicalException.class)
 	public SafJournalpostResponse performQuery(GraphQLRequest graphQLRequest) {
-		try {
-			ResponseEntity<SafJsonJournalpost> responseEntity = restTemplate.exchange(graphQLurl, HttpMethod.POST, new HttpEntity<>(requestToJson(graphQLRequest), createAuthorizationHeader()), SafJsonJournalpost.class);
+		SafJsonJournalpost response = restClientTexas.post()
+				.uri("/graphql")
+				.attribute(TARGET_SCOPE, safEndpoint.getScope())
+				.body(graphQLRequest)
+				.retrieve()
+				.onStatus(HttpStatusCode::isError, (req, res) -> handleError(res))
+				.body(SafJsonJournalpost.class);
 
-			if (isNull(responseEntity.getBody()) && isNull(responseEntity.getBody().getData()) &&
-				isNull(responseEntity.getBody().getData().getJournalpost())) {
-				// Forsøk på nytt. GraphQL endepunktet gir kun httpstatus 200. Verdikjeden forventer at man finner journalpost her.
-				// Hvis ikke er dette en teknisk feil, ikke funksjonell feil.
-				throw new SafJournalpostIkkeFunnetException("Ingen journalpost ble funnet i saf.");
+		if (nonNull(response) && !isEmpty(response.getErrors())) {
+			SafJsonJournalpost.Error safError = response.getErrors().getFirst();
+			if (safError.getExtensions().getClassification().contains(CLASSIFICATION_VALIDATIONERROR)) {
+				throw new SafJournalpostQueryTechnicalException("Feil i SAF query: " + safError.getMessage());
 			}
-			return responseEntity.getBody().getJournalpost();
-		} catch (HttpClientErrorException e) {
-			throw new SafJournalpostQueryUnauthorizedException(format("Henting av journalpost feilet med status: %s, feilmelding: %s", e
-					.getStatusCode(), e.getMessage()), e);
-		} catch (HttpServerErrorException e) {
-			throw new SafJournalpostQueryTechnicalException(format("Tjenesten SAF (graphQL) feilet med status: %s, feilmelding: %s", e.getStatusCode(), e.getMessage()), e);
+			String safErrorCode = safError.getExtensions().getCode();
+
+			switch (safErrorCode) {
+				case NOT_FOUND ->
+						throw new SafJournalpostQueryTechnicalException("Fant ikke journalposten i fagarkivet");
+				case FORBIDDEN ->
+						throw new SafJournalpostQueryUnauthorizedException("Saksbehandler har ikke tilgang til journalposten. Feilmelding fra SAF: " + safError.getMessage());
+				case SERVER_ERROR -> {
+					log.warn("Teknisk feil mot SAF. Feilmelding: {}", safError.getMessage());
+					throw new SafJournalpostQueryTechnicalException(safError.getMessage());
+				}
+				case BAD_REQUEST ->
+						throw new SafJournalpostFunctionalException("Bad request mot SAF: " + safError.getMessage());
+				default ->
+						throw new SafJournalpostFunctionalException("Ukjent error code fra SAF. Håndtering av ny feilkode må legges inn her. Feilmelding: " + safError.getMessage());
+			}
 		}
+
+		return response.getData().getJournalpost();
 	}
 
-	private HttpHeaders createAuthorizationHeader() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(APPLICATION_JSON);
-		headers.setBearerAuth(stsConsumer.getStsOidcToken());
-		return headers;
-	}
-
-	private String requestToJson(GraphQLRequest graphQLRequest) {
-		try {
-			return new ObjectMapper().writeValueAsString(graphQLRequest);
-		} catch (JsonProcessingException e) {
-			throw new JsonParserTechnicalException(format("Kunne ikke konvertere graphQlRequest til json, feilmelding=%s", e.getMessage()), e);
+	private void handleError(ClientHttpResponse res) throws IOException {
+		ProblemDetail problemDetail = objectMapper.readValue(res.getBody(), ProblemDetail.class);
+		if (res.getStatusCode().is5xxServerError()) {
+			throw new SafJournalpostQueryTechnicalException(format("Tjenesten SAF (graphQL) feilet med status: %s, feilmelding: %s", problemDetail.getStatus(), problemDetail.getDetail()));
 		}
+		throw new SafJournalpostQueryUnauthorizedException(format("Kunne ikke hente journalpost med status: %s. Dette skyldes sannsynligvis at appen som utførte kallet mangler tilgang til SAF. " +
+						"For å få tilgang må appen som kaller dokdistdpi legges til i SAF sin <env-config.json>. Feilmelding: %s",
+				problemDetail.getStatus(), problemDetail.getDetail()));
 	}
 }
+

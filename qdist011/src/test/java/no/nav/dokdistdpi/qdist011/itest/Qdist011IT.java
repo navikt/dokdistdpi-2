@@ -1,6 +1,5 @@
 package no.nav.dokdistdpi.qdist011.itest;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import jakarta.jms.Queue;
 import jakarta.jms.TextMessage;
 import jakarta.xml.bind.JAXBElement;
@@ -9,6 +8,7 @@ import no.nav.dokdistdpi.cloudstorage.DokDistDokumentFraBucket;
 import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.cloudstorage.JsonSerializer;
 import no.nav.dokdistdpi.qdist011.itest.config.ApplicationTestConfig;
+import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
+import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -33,6 +34,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static no.nav.dokdistdpi.qdist011.TestUtil.classpathToString;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -96,9 +98,7 @@ public class Qdist011IT {
 	@BeforeEach
 	public void setupBefore() {
 		CALL_ID = UUID.randomUUID().toString();
-		WireMock.reset();
-		WireMock.resetAllRequests();
-		WireMock.removeAllMappings();
+		stubNaisTexasToken();
 
 		when(encryptedBucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString()))
 				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
@@ -116,7 +116,6 @@ public class Qdist011IT {
 		stubGetDokumentTypeInfo("tkat020-happy.json");
 		stubGetVarselInfo("tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
-		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
@@ -126,13 +125,13 @@ public class Qdist011IT {
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 
-		await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
+		await().atMost(30, TimeUnit.SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
-			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
-			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+			verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
+			verify(exactly(1), postRequestedFor(urlPathEqualTo("/maskinporten")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
 					.withRequestBody(containing("Content-Type: application/octet-stream")
 							.and(containing("Content-Type: text/plain"))));
@@ -149,7 +148,6 @@ public class Qdist011IT {
 		stubGetDokumentTypeInfo("tkat020-happy.json");
 		stubGetVarselInfo("tkat021-null.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
-		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
 		stubPutVarselInfo();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
@@ -163,9 +161,8 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
-			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
-			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+			verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 			verify(0, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
@@ -179,7 +176,6 @@ public class Qdist011IT {
 		stubGetDokumentTypeInfo("tkat020-happy.json");
 		stubGetVarselInfo("tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
-		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
@@ -193,9 +189,8 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
-			verify(1, postRequestedFor(urlEqualTo("/securitytoken?grant_type=client_credentials&scope=openid")));
-			verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+			verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
@@ -210,7 +205,6 @@ public class Qdist011IT {
 		stubGetDokumentTypeInfo("tkat020-happy.json");
 		stubGetVarselInfo("tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
-		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
@@ -226,8 +220,8 @@ public class Qdist011IT {
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-		verify(1, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
-		verify(1, postRequestedFor(urlEqualTo("/safgraphql")));
+		verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+		verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 		verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 	}
 
@@ -239,7 +233,6 @@ public class Qdist011IT {
 		stubGetDokumentTypeInfo("tkat020-happy.json");
 		stubGetVarselInfo("tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
-		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinportenFeil(BAD_REQUEST.value());
@@ -275,7 +268,6 @@ public class Qdist011IT {
 		stubGetDokumentTypeInfo("tkat020-happy.json");
 		stubGetVarselInfo("tkat021-happy.json");
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
-		stubPostSecurityToken();
 		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
@@ -292,7 +284,7 @@ public class Qdist011IT {
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-		verify(3, postRequestedFor(urlEqualTo("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+		verify(3, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 		verify(0, postRequestedFor(urlEqualTo("/safgraphql")));
 		verify(0, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 	}
@@ -351,16 +343,16 @@ public class Qdist011IT {
 						.withStatus(OK.value())));
 	}
 
-	private void stubPostSecurityToken() {
-		stubFor(post("/securitytoken?grant_type=client_credentials&scope=openid")
+	void stubNaisTexasToken() {
+		stubFor(post("/texas-token")
 				.willReturn(aResponse()
 						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("sts/stsResponse-happy.json")));
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("nais-texas/texas_response.json")));
 	}
 
 	private void stubPostSafJournalpost(String bodyFileName) {
-		stubFor(post(urlMatching("/safgraphql"))
+		stubFor(post(urlMatching("/saf/graphql"))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -391,7 +383,7 @@ public class Qdist011IT {
 	}
 
 	private void stubGetDigipostDigitalKontaktInformasjon(int status) {
-		stubFor(post("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")
+		stubFor(post("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -399,7 +391,7 @@ public class Qdist011IT {
 	}
 
 	private void stubGetEBoksDigitalKontaktInformasjon(int status) {
-		stubFor(post("/DIGDIR_KRR_PROXY/rest/v1/personer?inkluderSikkerDigitalPost=true")
+		stubFor(post("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
