@@ -11,7 +11,6 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.ValidationException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -41,7 +40,6 @@ public class Qdist014Route extends RouteBuilder {
 	private final BehandleForretningskvitteringService behandleForretningskvitteringService;
 	private final DpiKvitteringService dpiKvitteringService;
 
-	@Autowired
 	public Qdist014Route(CamelContext context,
 						 Qdist014Service qdist014Service,
 						 Queue qdist014,

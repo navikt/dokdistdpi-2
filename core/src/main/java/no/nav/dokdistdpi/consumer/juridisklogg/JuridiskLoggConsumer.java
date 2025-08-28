@@ -4,13 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.exception.functional.LagreJuridiskLoggFunctionalException;
-import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.LagreJuridiskLoggTechnicalException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import static java.lang.String.format;
@@ -21,6 +21,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Slf4j
 @Component
 public class JuridiskLoggConsumer {
+
 	private final RestClient restClient;
 
 	public JuridiskLoggConsumer(DokdistdpiProperties dokdistdpiProperties,
@@ -33,7 +34,7 @@ public class JuridiskLoggConsumer {
 				.build();
 	}
 
-	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(retryFor = LagreJuridiskLoggTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public LoggMeldingResponse lagreJuridiskLogg(final LoggMeldingRequest loggMeldingRequest) {
 		try {
 			return restClient.post()
@@ -46,8 +47,13 @@ public class JuridiskLoggConsumer {
 			throw new LagreJuridiskLoggFunctionalException(format("lagreJuridiskLogg feilet funksjonelt med status=%s. Feilmelding=%s",
 					e.getStatusCode(), e.getResponseBodyAsString()), e);
 		} catch (HttpServerErrorException e) {
-			throw new LagreJuridiskLoggTechnicalException(format("lagreJuridiskLogg feilet teknisk med status=%s. Feilmelding=%s", e
-					.getStatusCode(), e.getResponseBodyAsString()), e);
+			throw new LagreJuridiskLoggTechnicalException(format("lagreJuridiskLogg feilet teknisk med status=%s. Feilmelding=%s",
+					e.getStatusCode(), e.getResponseBodyAsString()), e);
+		} catch (ResourceAccessException e) {
+			// For å få retry ved følgende feil:
+			// org.springframework.web.client.ResourceAccessException: I/O error on POST request for "https://app.adeo.no/juridisklogg/api/rest/logg": Connection reset
+			throw new LagreJuridiskLoggTechnicalException(format("lagreJuridiskLogg feilet teknisk. Feilmelding=%s",
+					e.getMessage()), e);
 		}
 	}
 }

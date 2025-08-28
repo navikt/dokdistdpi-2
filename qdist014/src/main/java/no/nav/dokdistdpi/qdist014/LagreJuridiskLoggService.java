@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.juridisklogg.JuridiskLoggConsumer;
 import no.nav.dokdistdpi.consumer.juridisklogg.LoggMeldingRequest;
 import no.nav.dokdistdpi.consumer.juridisklogg.LoggMeldingResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
@@ -16,7 +15,6 @@ public class LagreJuridiskLoggService {
 	static final Integer ANTALL_AAR_LAGRES = 10;
 	private final JuridiskLoggConsumer juridiskLoggConsumer;
 
-	@Autowired
 	public LagreJuridiskLoggService(JuridiskLoggConsumer juridiskLoggConsumer) {
 		this.juridiskLoggConsumer = juridiskLoggConsumer;
 	}
