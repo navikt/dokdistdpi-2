@@ -110,7 +110,7 @@ public class Qdist011Route extends RouteBuilder {
 						.bean(administrerForsendelseUpdater, "updateStatusDigitalpostkasseInfoAndVarselInfo")
 						.log(INFO, log, "qdist011 har oppdatert varselInfo, forsendelseStatus=OVERSENDT og avslutter behandling av forsendelse med " + getIdsForLogging())
 					.otherwise()
-						.log(WARN, log, "qdist011 kan ikke oppdatere status til OVERSENDT for forsendelse med statustype=${body.status} fra DPI med " + getIdsForLogging())
+						.log(WARN, log, "qdist011 kan ikke oppdatere status til OVERSENDT for forsendelse fra DPI med " + getIdsForLogging())
 				.end();
 		//@formatter:on
 	}

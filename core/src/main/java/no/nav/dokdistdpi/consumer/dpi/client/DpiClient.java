@@ -39,6 +39,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static no.nav.dokdistdpi.config.OAuthEnabledWebClientConfig.MASKINPORTEN_CLIENT_REGISTRATION;
+import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.FEILET;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static org.springframework.http.HttpMethod.POST;
@@ -137,7 +138,9 @@ public class DpiClient {
 
 	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1out~1{id}~1statuses/get
 	public List<ForsendelseStatusResponse> hentForsendelseStatus(String konversasjonId) {
-		return oauth2WebClient.get()
+		log.info("Skal hente forsendelsestatus for konversasjonId={}", konversasjonId);
+
+		List<ForsendelseStatusResponse> response = oauth2WebClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.pathSegment(MESSAGES_PATH_OUT, "{konversasjonId}", MESSAGES_PATH_OUT_STATUSES)
 						.build(konversasjonId))
@@ -150,6 +153,17 @@ public class DpiClient {
 				.transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
 				.transformDeferred(RetryOperator.of(retry))
 				.block();
+
+		log.info("Har hentet forsendelsestatus for konversasjonId={}", konversasjonId);
+		if (response == null) {
+			log.warn("Respons var null for forsendelsestatus med konversasjonId={}", konversasjonId);
+		} else if (response.isEmpty()) {
+			log.warn("Respons var en tom liste for forsendelsestatus med konversasjonId={}", konversasjonId);
+		} else if (response.stream().allMatch(el -> el.getStatus() == FEILET)) {
+			log.warn("Respons inneholdt {} forsendelsestatuser med konversasjonId={}. Alle har status FEILET.", response.size(), konversasjonId);
+		}
+
+		return response;
 	}
 
 	private Throwable mapForsendelseStatuserErrors(Throwable error, String konversasjonId) {
