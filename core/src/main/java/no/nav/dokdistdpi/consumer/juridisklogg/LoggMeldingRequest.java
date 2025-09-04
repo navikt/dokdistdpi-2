@@ -6,10 +6,10 @@ import lombok.Value;
 @Value
 @Builder
 public class LoggMeldingRequest {
-	private String meldingsId;
-	private String avsender;
-	private String mottaker;
-	private String joarkRef;
-	private byte[] meldingsInnhold;
-	private Integer antallAarLagres;
+	String meldingsId;
+	String avsender;
+	String mottaker;
+	String joarkRef;
+	byte[] meldingsInnhold;
+	Integer antallAarLagres;
 }
