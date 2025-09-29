@@ -33,7 +33,7 @@
 		<tink.version>1.18.0</tink.version>
 		<tink-gcpkms.version>1.10.0</tink-gcpkms.version>
 		<commons-compress.version>1.28.0</commons-compress.version>
-		<commons-io.version>2.19.0</commons-io.version>
+		<commons-io.version>2.20.0</commons-io.version>
 		<com.ibm.mq.jakarta.client.version>9.4.3.1</com.ibm.mq.jakarta.client.version>
 		<logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
 		<nimbus-jose-jwt.version>10.5</nimbus-jose-jwt.version>
