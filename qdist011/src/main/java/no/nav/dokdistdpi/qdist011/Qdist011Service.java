@@ -26,7 +26,9 @@ import no.nav.dokdistdpi.exception.functional.KunneIkkeDeserialisereBucketPayloa
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeFinneDokumentException;
 import no.nav.dokdistdpi.exception.functional.UtenforKjernetidFunctionalException;
+import no.nav.dokdistdpi.map.VarselMapper;
 import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
+import no.nav.dokdistdpi.service.DigitalPostService;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
 import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
@@ -50,6 +52,7 @@ import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
+import static no.nav.dokdistdpi.map.VarselMapper.mapVarsler;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_EKSPEDERT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_OPPRETTET;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
@@ -329,7 +332,7 @@ public class Qdist011Service {
 
 	private Varsler mapVarslerHvisRiktigDistribusjonstype(HentForsendelseResponse hentForsendelseResponse, VarselInfo varselInfo, SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo) {
 		if (skalgiAvsenderstyrtVarsel(hentForsendelseResponse.getDistribusjonstype())) {
-			return digitalPostService.mapVarsler(varselInfo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
+			return mapVarsler(varselInfo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
 		} else {
 			return null;
 		}

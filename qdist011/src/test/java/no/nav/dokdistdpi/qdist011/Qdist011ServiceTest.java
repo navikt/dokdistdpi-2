@@ -15,6 +15,7 @@ import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctiona
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.dokdistdpi.qdist011.saf.SafJournalpostQueryServiceImplQdist011;
+import no.nav.dokdistdpi.service.DigitalPostService;
 import org.apache.camel.Exchange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

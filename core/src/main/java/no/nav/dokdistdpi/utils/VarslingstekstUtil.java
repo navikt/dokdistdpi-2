@@ -1,9 +1,10 @@
-package no.nav.dokdistdpi.qdist011.Utils;
+package no.nav.dokdistdpi.utils;
 
 import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
+import no.nav.dokdistdpi.domain.LeverandoerAdresse;
 
 import static java.lang.String.format;
-import static no.nav.dokdistdpi.qdist011.Utils.LeverandoerAdresse.findByOrganisasjonsnummer;
+import static no.nav.dokdistdpi.domain.LeverandoerAdresse.findByOrganisasjonsnummer;
 
 public class VarslingstekstUtil {
 
