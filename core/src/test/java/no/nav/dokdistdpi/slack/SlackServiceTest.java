@@ -12,6 +12,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -23,6 +27,14 @@ class SlackServiceTest {
 
 	private static final String FEILMELDING = "Sdist003 feilet under behandling av kvitteringer med exception=no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException";
 
+	public static final ZoneId EUROPE_OSLO = ZoneId.of("Europe/Oslo");
+	private static final Instant TIDSPUNKT_FOR_SLACKVARSEL = LocalDateTime.of(2025, 1, 1, 13, 37, 15)
+			.atZone(EUROPE_OSLO)
+			.toInstant();
+
+	@Mock
+	Clock clock;
+
 	@Mock
 	MethodsClient slackClient;
 
@@ -30,7 +42,8 @@ class SlackServiceTest {
 
 	@BeforeEach
 	void setup() throws SlackApiException, IOException {
-		slackService = new SlackService(dokdistdpiProperties(), slackClient);
+		slackService = new SlackService(dokdistdpiProperties(), slackClient, clock);
+		when(clock.instant()).thenReturn(TIDSPUNKT_FOR_SLACKVARSEL);
 		when(slackClient.chatPostMessage(any(ChatPostMessageRequest.class))).thenReturn(new ChatPostMessageResponse());
 	}
 
@@ -44,9 +57,11 @@ class SlackServiceTest {
 	}
 
 	@Test
-	void skalSendeToSlackmeldingerHvisDetHarGaattLangNokTidMellomDem() throws SlackApiException, IOException, InterruptedException {
+	void skalSendeToSlackmeldingerHvisDetHarGaattLangNokTidMellomDem() throws SlackApiException, IOException {
 		slackService.sendMelding(FEILMELDING);
-		Thread.sleep(1100);
+
+		var toSekunderSenere = TIDSPUNKT_FOR_SLACKVARSEL.plusMillis(2000);
+		when(clock.instant()).thenReturn(toSekunderSenere);
 		slackService.sendMelding(FEILMELDING);
 
 		verify(slackClient, times(2)).chatPostMessage(any(ChatPostMessageRequest.class));
@@ -56,6 +71,8 @@ class SlackServiceTest {
 		DokdistdpiProperties dokdistdpiProperties = new DokdistdpiProperties();
 		dokdistdpiProperties.getSlack().setToken("test-token");
 		dokdistdpiProperties.getSlack().setEnabled(true);
+		dokdistdpiProperties.getSlack().setMinimumAntallSekunderMellomSlackvarsel(1);
 		return dokdistdpiProperties;
 	}
+
 }

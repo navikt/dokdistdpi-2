@@ -115,6 +115,9 @@ public class DokdistdpiProperties {
 		@NotEmpty
 		private String channel;
 		private boolean enabled;
+
+		@Positive
+		private int minimumAntallSekunderMellomSlackvarsel;
 	}
 
 }
