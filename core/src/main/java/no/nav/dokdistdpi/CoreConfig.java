@@ -1,5 +1,8 @@
 package no.nav.dokdistdpi;
 
+import com.slack.api.Slack;
+import com.slack.api.methods.MethodsClient;
+import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -17,4 +20,8 @@ public class CoreConfig {
 		return Clock.system(DEFAULT_ZONE_ID);
 	}
 
+	@Bean
+	public MethodsClient slackClient(DokdistdpiProperties dokdistdpiProperties) {
+		return Slack.getInstance().methods(dokdistdpiProperties.getSlack().getToken());
+	}
 }
