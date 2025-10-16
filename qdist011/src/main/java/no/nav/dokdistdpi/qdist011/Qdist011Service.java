@@ -15,7 +15,6 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokument;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
@@ -26,7 +25,6 @@ import no.nav.dokdistdpi.exception.functional.KunneIkkeDeserialisereBucketPayloa
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeFinneDokumentException;
 import no.nav.dokdistdpi.exception.functional.UtenforKjernetidFunctionalException;
-import no.nav.dokdistdpi.map.VarselMapper;
 import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.dokdistdpi.service.DigitalPostService;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
@@ -48,11 +46,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static java.util.Objects.isNull;
 import static no.nav.dokdistdpi.consumer.dpi.DigitalPostConstants.NAV_ORGNUMMER;
 import static no.nav.dokdistdpi.consumer.dpi.Organisasjonsnummer.asIso6523;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Authority.ISO_6523_ACTORID_UPIS;
-import static no.nav.dokdistdpi.map.VarselMapper.mapVarsler;
+import static no.nav.dokdistdpi.map.VarselMapper.mapVarslerHvisRiktigDistribusjonstype;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_EKSPEDERT;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.FORSENDELSE_STATUS_OPPRETTET;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
@@ -330,21 +327,4 @@ public class Qdist011Service {
 		return konversasjonsId;
 	}
 
-	private Varsler mapVarslerHvisRiktigDistribusjonstype(HentForsendelseResponse hentForsendelseResponse, VarselInfo varselInfo, SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo) {
-		if (skalgiAvsenderstyrtVarsel(hentForsendelseResponse.getDistribusjonstype())) {
-			return mapVarsler(varselInfo, sikkerDigitalKontaktInfo, hentForsendelseResponse.getDistribusjonstype());
-		} else {
-			return null;
-		}
-	}
-
-	private boolean skalgiAvsenderstyrtVarsel(DistribusjonsTypeKode distribusjonsTypeKode) {
-		if (isNull(distribusjonsTypeKode)) {
-			return true;
-		}
-		return switch (distribusjonsTypeKode) {
-			case VIKTIG, VEDTAK -> true;
-			default -> false;
-		};
-	}
 }
