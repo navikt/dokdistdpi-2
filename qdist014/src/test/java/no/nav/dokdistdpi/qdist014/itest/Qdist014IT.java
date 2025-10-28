@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import jakarta.jms.Queue;
 import jakarta.jms.TextMessage;
 import jakarta.xml.bind.JAXBElement;
+import no.nav.dokdistdpi.consumer.dokmet.DokmetConsumer;
 import no.nav.dokdistdpi.qdist014.itest.config.ApplicationTestConfig;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
@@ -39,6 +40,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -58,6 +62,9 @@ public class Qdist014IT {
 	private static final String NY_FORSENDELSE_ID = "33333";
 	private static String CALL_ID;
 
+	private static final String TKAT020_URL = "/rest/dokumenttypeinfo/";
+	private static final String TKAT021_URL = "/rest/varselinfo/";
+	private static final String OPPDATERVARSELINFO_URL = "/rest/v1/administrerforsendelse/oppdatervarselinfo";
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/%s";
 	private static final String FINNFORSENDELSE_URL = "/rest/v1/administrerforsendelse/finnforsendelse/%s/%s";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
@@ -181,9 +188,12 @@ public class Qdist014IT {
 	}
 
 	@Test
-	void shouldThrowInvalidExceptionWhenForsendelseStatusErKlarForDist() throws IOException {
+	void shouldProcessForsendelseWithForsendelseStatusErKlarForDist() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-feil.json", FORSENDELSE_ID, OK.value());
+		stubGetDokumentTypeInfo("tkat020-happy.json", "1111111");
+		stubGetVarselInfo("tkat021-happy.json", "SDP_000004");
+
 		//Oversendt og bekreftet er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
@@ -199,7 +209,8 @@ public class Qdist014IT {
 
 		verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
 		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
-
+		verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + "1111111")));
+		verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + "SDP_000004")));
 	}
 
 	@Test
@@ -344,6 +355,29 @@ public class Qdist014IT {
 						.withStatus(httpStatusvalue)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString(responsebody))));
+	}
+
+	private void stubGetDokumentTypeInfo(String bodyFileName, String dokumenttypeId) {
+		stubFor(get(urlMatching(TKAT020_URL + dokumenttypeId))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("rdist001/" + bodyFileName)));
+	}
+
+	private void stubGetVarselInfo(String path, String varselTypeId) {
+		stubFor(get(urlMatching(TKAT021_URL + varselTypeId))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("rdist001/" + path)));
+	}
+
+	private void stubPutVarselInfo() {
+		stubFor(put(urlMatching(OPPDATERVARSELINFO_URL))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
 	}
 
 	private void stubPutFeilregistrerforsendelse(int httpStatusValue) {

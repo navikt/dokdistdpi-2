@@ -2,7 +2,6 @@ package no.nav.dokdistdpi.qdist014;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
-import no.nav.dokdistdpi.consumer.dokmet.DokmetConsumer;
 import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
@@ -27,10 +26,7 @@ import java.util.List;
 import static java.lang.Long.valueOf;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.EKSPEDERT;
-import static no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus.KLAR_FOR_DIST;
-import static no.nav.dokdistdpi.map.VarselMapper.mapVarsler;
 import static no.nav.dokdistdpi.map.VarselMapper.mapVarslerHvisRiktigDistribusjonstype;
-import static no.nav.dokdistdpi.qdist014.DpiKvitteringService.isOversendtOrBekreftet;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID;
 
 @Slf4j
