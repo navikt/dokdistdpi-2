@@ -30,7 +30,7 @@
 
 		<camel-spring-boot-bom.version>4.15.0</camel-spring-boot-bom.version>
 		<libraries-bom.version>26.71.0</libraries-bom.version>
-		<tink.version>1.18.0</tink.version>
+		<tink.version>1.19.0</tink.version>
 		<tink-gcpkms.version>1.10.0</tink-gcpkms.version>
 		<commons-compress.version>1.28.0</commons-compress.version>
 		<commons-io.version>2.20.0</commons-io.version>
