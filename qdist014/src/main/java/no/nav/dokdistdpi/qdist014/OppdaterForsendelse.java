@@ -49,63 +49,59 @@ public class OppdaterForsendelse {
 
 	@Handler
 	public void oppdaterForsendelse(DpiMelding dpiMelding, Exchange exchange) {
-		String konversasjonsId = dpiMelding.getKonversasjonsId();
-		String forsendelseId = dpiKvitteringService.finnForsendelse(konversasjonsId);
-		HentForsendelseResponse hentForsendelseResponse = dpiKvitteringService.hentForsendelse(forsendelseId);
-		exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
+		if (isLeveringsKvittering(dpiMelding)) {
+			String konversasjonsId = dpiMelding.getKonversasjonsId();
+			String forsendelseId = dpiKvitteringService.finnForsendelse(konversasjonsId);
+			HentForsendelseResponse hentForsendelseResponse = dpiKvitteringService.hentForsendelse(forsendelseId);
+			exchange.setProperty(PROPERTY_BESTILLINGS_ID, hentForsendelseResponse.getBestillingsId());
 
-		ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
+			ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 
-		switch (forsendelseStatus) {
-			case OVERSENDT, BEKREFTET -> oppdaterForsendelseStatusTilEkspedert(dpiMelding, forsendelseId);
-			case KLAR_FOR_DIST ->
-					oppdaterForsendelseMedDigitalKontaktinfoOgVarsler(hentForsendelseResponse, forsendelseId, dpiMelding);
-		}
-	}
-
-	private void oppdaterForsendelseStatusTilEkspedert(DpiMelding dpiMelding, String forsendelseId) {
-		if (dpiMelding instanceof LeveringsKvittering leveringsKvittering) {
-			if (LEVERING.equals(leveringsKvittering.getKvitteringType())) {
-				dokdistadminConsumer.oppdaterForsendelse(
-						OppdaterForsendelseRequest.builder()
-								.forsendelseId(valueOf(forsendelseId))
-								.forsendelseStatus(EKSPEDERT.name())
-								.build());
+			switch (forsendelseStatus) {
+				case OVERSENDT, BEKREFTET -> oppdaterForsendelseStatusTilEkspedert(forsendelseId);
+				case KLAR_FOR_DIST ->
+						oppdaterForsendelseMedDigitalKontaktinfoOgVarsler(hentForsendelseResponse, forsendelseId);
 			}
 		}
 	}
 
-	private void oppdaterForsendelseMedDigitalKontaktinfoOgVarsler(HentForsendelseResponse hentForsendelseResponse, String forsendelseId, DpiMelding dpiMelding) {
-		if (dpiMelding instanceof LeveringsKvittering leveringsKvittering) {
-			if (LEVERING.equals(leveringsKvittering.getKvitteringType())) {
-				log.info("Qdist014 oppdaterer forsendelseId={} med digital kontaktinfo og varsler", forsendelseId);
+	private boolean isLeveringsKvittering(DpiMelding dpiMelding) {
+		return dpiMelding instanceof LeveringsKvittering leveringsKvittering &&
+				LEVERING.equals(leveringsKvittering.getKvitteringType());
+	}
 
-				DistribusjonInfo distribusjonInfo = digitalPostService.hentDokumenttypeInfo(hentForsendelseResponse);
-				VarselInfo varselInfo = digitalPostService.getVarselInfo(distribusjonInfo);
-				SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfo);
-
-				Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfo, sikkerDigitalKontaktInfo);
-
-				oppdaterForsendelse(Forsendelse.builder()
-						.forsendelseId(Long.valueOf(forsendelseId))
-						.mottakerSertifikat(sikkerDigitalKontaktInfo.getLeverandoerSertifikat())
-						.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())
-						.digital(DigitalPost.builder()
-								.varsler(varsler)
-								.build())
+	private void oppdaterForsendelseStatusTilEkspedert(String forsendelseId) {
+		dokdistadminConsumer.oppdaterForsendelse(
+				OppdaterForsendelseRequest.builder()
+						.forsendelseId(valueOf(forsendelseId))
+						.forsendelseStatus(EKSPEDERT.name())
 						.build());
-
-				log.info("Qdist014 har oppdatert forsendelseId={} med digital kontaktinfo og varsler", forsendelseId);
-			}
-		}
 	}
 
-	private void oppdaterForsendelse(Forsendelse forsendelse) {
+	private void oppdaterForsendelseMedDigitalKontaktinfoOgVarsler(HentForsendelseResponse hentForsendelseResponse, String forsendelseId) {
+		log.info("Qdist014 oppdaterer forsendelseId={} med digital kontaktinfo og varsler", forsendelseId);
+
+		DistribusjonInfo distribusjonInfo = digitalPostService.hentDokumenttypeInfo(hentForsendelseResponse);
+		VarselInfo varselInfo = digitalPostService.getVarselInfo(distribusjonInfo);
+		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfo);
+
+		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfo, sikkerDigitalKontaktInfo);
+
+		Forsendelse forsendelse = Forsendelse.builder()
+				.forsendelseId(Long.valueOf(forsendelseId))
+				.mottakerSertifikat(sikkerDigitalKontaktInfo.getLeverandoerSertifikat())
+				.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())
+				.digital(DigitalPost.builder()
+						.varsler(varsler)
+						.build())
+				.build();
+
 		oppdaterForsendelseDigitalKontaktinfo(forsendelse);
 
 		if (forsendelse.getDigital().getVarsler() != null) {
 			oppdaterForsendelseVarselInfo(forsendelse);
 		}
+		log.info("Qdist014 har oppdatert forsendelseId={} med digital kontaktinfo og varsler", forsendelseId);
 	}
 
 	private void oppdaterForsendelseDigitalKontaktinfo(Forsendelse forsendelse) {
