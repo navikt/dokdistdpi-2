@@ -16,16 +16,16 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class VarselMapper {
 	public static Varsler mapVarsler(VarselInfo varselInfo, SikkerDigitalKontaktInfo digitalKontaktInfo, DistribusjonsTypeKode distribusjonsType) {
-	if (Objects.isNull(varselInfo)) {
-		return null;
-	}
+		if (Objects.isNull(varselInfo)) {
+			return null;
+		}
 
-	String varslingstekst = VarslingstekstUtil.determineVarslingstekst(distribusjonsType, digitalKontaktInfo.getLeverandoerAdresse());
-	return Varsler.builder()
-			.epostvarsel(mapEpostVarsler(varselInfo, digitalKontaktInfo, varslingstekst))
-			.smsvarsel(mapSMSVarsler(varselInfo, digitalKontaktInfo, varslingstekst))
-			.build();
-}
+		String varslingstekst = VarslingstekstUtil.determineVarslingstekst(distribusjonsType, digitalKontaktInfo.getLeverandoerAdresse());
+		return Varsler.builder()
+				.epostvarsel(mapEpostVarsler(varselInfo, digitalKontaktInfo, varslingstekst))
+				.smsvarsel(mapSMSVarsler(varselInfo, digitalKontaktInfo, varslingstekst))
+				.build();
+	}
 
 	public static Varsler mapVarslerHvisRiktigDistribusjonstype(HentForsendelseResponse hentForsendelseResponse, VarselInfo varselInfo, SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo) {
 		if (skalgiAvsenderstyrtVarsel(hentForsendelseResponse.getDistribusjonstype())) {
@@ -62,7 +62,7 @@ public class VarselMapper {
 			return null;
 		}
 
-		return  EpostVarsel.builder()
+		return EpostVarsel.builder()
 				.epostadresse(digitalKontaktInfo.getEpostadresse())
 				.varslingstekst(varslingstekst)
 				.repetisjoner(varselInfo.getAntallDagerListe())

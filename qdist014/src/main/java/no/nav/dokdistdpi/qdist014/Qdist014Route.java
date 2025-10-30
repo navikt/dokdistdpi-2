@@ -36,7 +36,7 @@ public class Qdist014Route extends RouteBuilder {
 	private final Queue qdist014;
 	private final Queue qdist009;
 	private final Queue qdist014FunksjonellFeil;
-	private final OppdaterForsendelseStatus oppdaterForsendelseStatus;
+	private final OppdaterForsendelse oppdaterForsendelse;
 	private final BehandleForretningskvitteringService behandleForretningskvitteringService;
 	private final DpiKvitteringService dpiKvitteringService;
 
@@ -45,7 +45,7 @@ public class Qdist014Route extends RouteBuilder {
 						 Queue qdist014,
 						 Queue qdist009,
 						 Queue qdist014FunksjonellFeil,
-						 OppdaterForsendelseStatus oppdaterForsendelseStatus,
+						 OppdaterForsendelse oppdaterForsendelse,
 						 DpiKvitteringService dpiKvitteringService,
 						 DokdistdpiProperties dokdistDpiProperties,
 						 BehandleForretningskvitteringService behandleForretningskvitteringService) {
@@ -54,7 +54,7 @@ public class Qdist014Route extends RouteBuilder {
 		this.qdist014 = qdist014;
 		this.qdist009 = qdist009;
 		this.qdist014FunksjonellFeil = qdist014FunksjonellFeil;
-		this.oppdaterForsendelseStatus = oppdaterForsendelseStatus;
+		this.oppdaterForsendelse = oppdaterForsendelse;
 		this.dpiKvitteringService = dpiKvitteringService;
 		this.qdist014Properties = dokdistDpiProperties.getQdist014();
 		this.behandleForretningskvitteringService = behandleForretningskvitteringService;
@@ -89,7 +89,7 @@ public class Qdist014Route extends RouteBuilder {
 					.otherwise()
 						.choice()
 							.when(simple("${body.kvitteringType}").isEqualTo(LEVERING))
-								.bean(oppdaterForsendelseStatus)
+								.bean(oppdaterForsendelse)
 								.log(INFO, log,"qdist014 har oppdatert forsendelse med " + getIdsForLogging() + " til EKSPEDERT")
 							.when(or(simple("${body.kvitteringType}").isEqualTo(VARSLINGFEILET), simple("${body.kvitteringType}").isEqualTo(FEILET)))
 								.bean(qdist014Service)
