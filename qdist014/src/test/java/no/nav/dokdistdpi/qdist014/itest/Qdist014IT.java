@@ -39,6 +39,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -58,6 +59,10 @@ public class Qdist014IT {
 	private static final String NY_FORSENDELSE_ID = "33333";
 	private static String CALL_ID;
 
+	private static final String HENT_DOKUMENTTYPEINFO_URL = "/rest/dokumenttypeinfo/%s";
+	private static final String HENT_VARSELINFO_URL = "/rest/varselinfo/";
+	private static final String HENT_PERSONER_MED_SDP_URL = "/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true";
+	private static final String OPPDATERVARSELINFO_URL = "/rest/v1/administrerforsendelse/oppdatervarselinfo";
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/%s";
 	private static final String FINNFORSENDELSE_URL = "/rest/v1/administrerforsendelse/finnforsendelse/%s/%s";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
@@ -93,7 +98,7 @@ public class Qdist014IT {
 	void shouldOppdaterForsendelToEkspedertWhenSDPKvitteringErLevering() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/leveringskvittering.json"));
@@ -110,7 +115,7 @@ public class Qdist014IT {
 	void shouldOppretteNyForsendelseOgSendTilQdist009WhenSDPKvitteringErVarslingfeilet() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
@@ -129,7 +134,7 @@ public class Qdist014IT {
 	void shouldOppretteNyForsendelseOgSendTilQdist009WhenSDPFeilKvittering() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
 		stubPutFeilregistrerforsendelse(OK.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
@@ -147,7 +152,7 @@ public class Qdist014IT {
 	void shouldProcessForsendelseWithForsendelseStatusErOversendt() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
@@ -166,7 +171,7 @@ public class Qdist014IT {
 	void shouldProcessForsendelseWithForsendelseStatusErBekreftet() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
@@ -181,24 +186,29 @@ public class Qdist014IT {
 	}
 
 	@Test
-	void shouldThrowInvalidExceptionWhenForsendelseStatusErKlarForDist() throws IOException {
+	void shouldProcessForsendelseWithForsendelseStatusErKlarForDist() throws IOException {
+		String dokumenttypeId =  "1111111";
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
-		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-feil.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-KlarForDist.json", FORSENDELSE_ID, OK.value());
+		stubGetDokumentTypeInfo("__files/rdist001/hentDokumentTypeInfo-happy.json", dokumenttypeId);
+		stubGetVarselInfo("__files/rdist001/hentVarselInfo-happy.json", "SDP_000004");
+		stubPutVarselInfo();
+		stubGetDigipostDigitalKontaktInformasjon(OK.value());
+
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
-		stubPutFeilregistrerforsendelse(OK.value());
 
 		sendStringMessage(qdist014, classpathToString("__files/kvitteringer/leveringskvittering.json"));
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
-			String response = receive(qdist014FunksjonellFeil);
-			assertNotNull(response);
-			verify(1, postRequestedFor(urlEqualTo(JURIDISK_LOGG_URL)));
+			verify(1, getRequestedFor(urlEqualTo(format(HENT_DOKUMENTTYPEINFO_URL, dokumenttypeId))));
+			verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
+			verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
+			verify(1, getRequestedFor(urlEqualTo(HENT_VARSELINFO_URL + "SDP_000004")));
+			verify(1, postRequestedFor(urlEqualTo(HENT_PERSONER_MED_SDP_URL)));
 		});
 
-		verify(2, getRequestedFor(urlEqualTo(format(FINNFORSENDELSE_URL, OPPSLAGSNOEKKEL_KONVERSASJONSID, KONVERSASJON_ID))));
-		verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 
 	}
 
@@ -206,7 +216,7 @@ public class Qdist014IT {
 	void shouldEndAndLogWhenForsendelseStatusErEkspedert() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-ekspedert.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
@@ -224,7 +234,7 @@ public class Qdist014IT {
 	void shouldEndAndLogWhenForsendelseStatusErOpprettet() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-ugyldig-status.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
@@ -242,7 +252,7 @@ public class Qdist014IT {
 	void shouldThrowFunctionalExceptionWhenFinnForsendelseReturnsNull() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-feil.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", null, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
@@ -262,7 +272,7 @@ public class Qdist014IT {
 	void shouldThrowTechnicalExceptionWhenServerErrorHappens() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", INTERNAL_SERVER_ERROR.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
@@ -283,7 +293,7 @@ public class Qdist014IT {
 	void shouldThrowFunctionalExceptionWhenKvitteringenErNeitherSDPKvitteringNorSDPFeil() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
-		//Oversendt og bekreftet er gyldig status.
+		//Oversendt, bekreftet og klar for dist er gyldig status.
 		stubPostOpprettForsendelse("rdist001/opprettForsendelseResponse-happy.json", OK.value());
 		stubPutOppdaterDigitalLeverandoerAndPostkasseadresse();
 		stubPutFeilregistrerforsendelse(OK.value());
@@ -344,6 +354,37 @@ public class Qdist014IT {
 						.withStatus(httpStatusvalue)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString(responsebody))));
+	}
+
+	private void stubGetDokumentTypeInfo(String responsebody, String dokumenttypeId) throws IOException {
+		stubFor(get(format(HENT_DOKUMENTTYPEINFO_URL, dokumenttypeId))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody(classpathToString(responsebody))));
+	}
+
+	private void stubGetVarselInfo(String responseBody, String varselTypeId) throws IOException {
+		stubFor(get(urlMatching(HENT_VARSELINFO_URL + varselTypeId))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody(classpathToString(responseBody ))));
+	}
+
+	private void stubPutVarselInfo() {
+		stubFor(put(urlMatching(OPPDATERVARSELINFO_URL))
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
+	}
+
+	private void stubGetDigipostDigitalKontaktInformasjon(int status) throws IOException {
+		stubFor(post(HENT_PERSONER_MED_SDP_URL)
+				.willReturn(aResponse()
+						.withStatus(status)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBody(classpathToString("__files/digitalkontaktinformasjonv1/dki-digipost-happy.json"))));
 	}
 
 	private void stubPutFeilregistrerforsendelse(int httpStatusValue) {

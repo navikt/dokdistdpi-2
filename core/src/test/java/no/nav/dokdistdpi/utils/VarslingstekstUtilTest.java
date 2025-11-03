@@ -1,13 +1,13 @@
-package no.nav.dokdistdpi.qdist011;
+package no.nav.dokdistdpi.utils;
 
 import org.junit.jupiter.api.Test;
 
 import static no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode.ANNET;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode.VEDTAK;
 import static no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode.VIKTIG;
-import static no.nav.dokdistdpi.qdist011.Utils.LeverandoerAdresse.DIGIPOST;
-import static no.nav.dokdistdpi.qdist011.Utils.LeverandoerAdresse.EBOKS;
-import static no.nav.dokdistdpi.qdist011.Utils.VarslingstekstUtil.determineVarslingstekst;
+import static no.nav.dokdistdpi.domain.LeverandoerAdresse.DIGIPOST;
+import static no.nav.dokdistdpi.domain.LeverandoerAdresse.EBOKS;
+import static no.nav.dokdistdpi.utils.VarslingstekstUtil.determineVarslingstekst;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VarslingstekstUtilTest {
