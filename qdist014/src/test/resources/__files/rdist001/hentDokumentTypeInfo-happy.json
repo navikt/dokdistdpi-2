@@ -1,0 +1,67 @@
+{
+  "dokumenttypeId": "000073",
+  "dokumentTittel": "Vedtak – omregning til enslig uføretrygdet (automatisk)",
+  "dokumentType": "U",
+  "dokumentKategori": "VB",
+  "sensitivt": true,
+  "utledRegisterInfo": false,
+  "tema": null,
+  "arkivSystem": "JOARK",
+  "dokumentProduksjonsInfo": {
+    "vedlegg": false,
+    "eksternVedlegg": false,
+    "ikkeRedigerbarMalId": "MF_000073",
+    "redigerbarMalId": null,
+    "malLogikkFil": "Pesys01",
+    "malXsdReferanse": "pesysbrev01/v1.000073.xsd",
+    "spraakInfos": [],
+    "distribusjonInfo": {
+      "predefinertDistKanal": null,
+      "portoklasse": "B",
+      "sikkerhetsnivaa": 4,
+      "tosidigPrint": true,
+      "sentralPrintDokumentType": "NAV_STANDARD",
+      "konvoluttvinduType": "X",
+      "distribusjonVarsels": [
+        {
+          "varseltypeId": "DittNAV_000004",
+          "varselForDistribusjonKanal": "DITT_NAV",
+          "changeStamp": {
+            "opprettetAv": "srvdokkat",
+            "opprettetDato": "2024-04-26T16:03:28.166683",
+            "endretAv": null,
+            "endretDato": null
+          }
+        },
+        {
+          "varseltypeId": "SDP_000004",
+          "varselForDistribusjonKanal": "SDP",
+          "changeStamp": {
+            "opprettetAv": "srvdokkat",
+            "opprettetDato": "2024-04-26T16:03:28.16529",
+            "endretAv": null,
+            "endretDato": null
+          }
+        }
+      ],
+      "changeStamp": {
+        "opprettetAv": "srvdokkat",
+        "opprettetDato": "2024-04-26T16:03:28.163747",
+        "endretAv": null,
+        "endretDato": null
+      }
+    },
+    "changeStamp": {
+      "opprettetAv": "srvdokkat",
+      "opprettetDato": "2018-11-29T08:17:56.439",
+      "endretAv": "srvdokkat",
+      "endretDato": "2024-04-26T16:03:28.166853"
+    }
+  },
+  "changeStamp": {
+    "opprettetAv": "srvdokkat",
+    "opprettetDato": "2018-11-29T08:17:56.413",
+    "endretAv": "srvdokkat",
+    "endretDato": "2023-12-11T10:21:21.134493"
+  }
+}

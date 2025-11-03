@@ -31,7 +31,7 @@ public class OppdaterVarselInfoMapper {
 		return new OppdaterVarselInfoRequest(digitalAdresseRequest.getForsendelseId(), mapNotifikasjon(digitalAdresseRequest.getVarsler(), digitalAdresseRequest.getDistribusjonsTypeKode()));
 	}
 
-	private List<Notifikasjon> mapNotifikasjon(Varsler varsler, DistribusjonsTypeKode distribusjonsType) {
+	public List<Notifikasjon> mapNotifikasjon(Varsler varsler, DistribusjonsTypeKode distribusjonsType) {
 		List<Notifikasjon> notifikasjons = new ArrayList<>();
 
 		if (Objects.isNull(varsler)) {
