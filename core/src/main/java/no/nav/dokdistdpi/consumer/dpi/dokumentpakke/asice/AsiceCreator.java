@@ -1,7 +1,6 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.asice;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures.AsicEVedlegg;

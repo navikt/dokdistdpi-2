@@ -3,7 +3,6 @@ package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.asice;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures.CreateSignature;
-import no.nav.dokdistdpi.utils.CertificateUtils;
 import no.nav.dokdistdpi.utils.TestUtils.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
