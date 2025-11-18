@@ -31,7 +31,7 @@ import static org.apache.commons.codec.digest.DigestUtils.sha1;
 @Component
 public class CreateXAdESArtifacts {
 
-	XAdESArtifacts createArtifactsToSign(List<AsicEVedlegg> files, AppCertificate appCertificate) {
+	static XAdESArtifacts createArtifactsToSign(List<AsicEVedlegg> files, AppCertificate appCertificate) {
 
 		try {
 			final DigestMethod sha1DigestMethod = new DigestMethod();
@@ -84,7 +84,7 @@ public class CreateXAdESArtifacts {
 		}).toList();
 	}
 
-	private XMLGregorianCalendar getSigningTime() {
+	private static XMLGregorianCalendar getSigningTime() {
 		GregorianCalendar gregorianCalendar = new GregorianCalendar();
 		try {
 			return DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);

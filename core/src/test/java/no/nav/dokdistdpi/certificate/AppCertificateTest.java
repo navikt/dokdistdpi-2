@@ -2,21 +2,21 @@ package no.nav.dokdistdpi.certificate;
 
 import org.junit.jupiter.api.Test;
 
-import static no.nav.dokdistdpi.utils.CertificateUtils.itestVirksomhetssertifikatBase64Properties;
-import static no.nav.dokdistdpi.utils.CertificateUtils.itestVirksomhetssertifikatProperties;
+import static no.nav.dokdistdpi.utils.CertificateUtils.itestVirksomhetssertifikatBase64AppCertificate;
+import static no.nav.dokdistdpi.utils.CertificateUtils.itestVirksomhetssertifikatAppCertificate;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AppCertificateTest {
 
 	@Test
 	void shouldLoadPKCS12KeyStore() {
-		AppCertificate appCertificate = new AppCertificate(itestVirksomhetssertifikatProperties());
+		AppCertificate appCertificate = (itestVirksomhetssertifikatAppCertificate());
 		assertNotNull(appCertificate.getX509Certificate());
 	}
 
 	@Test
 	void shouldLoadPKCS12KeyStoreAsBase64() {
-		AppCertificate appCertificate = new AppCertificate(itestVirksomhetssertifikatBase64Properties());
+		AppCertificate appCertificate = (itestVirksomhetssertifikatBase64AppCertificate());
 		assertNotNull(appCertificate.getX509Certificate());
 	}
 

@@ -1,6 +1,7 @@
 package no.nav.dokdistdpi.qdist011.itest.config;
 
 import no.nav.dokdistdpi.azure.AzureProperties;
+import no.nav.dokdistdpi.certificate.KeyStoreConfig;
 import no.nav.dokdistdpi.certificate.KeyStoreProperties;
 import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
 import no.nav.dokdistdpi.config.cache.CacheConfig;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.mock;
 		NaisProperties.class
 })
 @Import({CacheConfig.class,
+		KeyStoreConfig.class,
 		JmsItestConfig.class
 })
 @ComponentScan(basePackages = "no.nav.dokdistdpi")

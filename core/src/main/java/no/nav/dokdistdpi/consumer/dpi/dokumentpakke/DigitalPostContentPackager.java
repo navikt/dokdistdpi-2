@@ -33,9 +33,9 @@ public class DigitalPostContentPackager {
 		this.createCMSDocument = createCMSDocument;
 	}
 
-	public byte[] createKryptertDokumentpakke(Forsendelse forsendelse, AppCertificate appCertificate) {
+	public byte[] createKryptertDokumentpakke(Forsendelse forsendelse) {
 		X509Certificate mottakerCertificate = fraBase64X509String(forsendelse.getMottakerSertifikat());
-		try (final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse, appCertificate)) {
+		try (final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse)) {
 			log.info("Oppretter CMS dokument med bestillingsId={} og konversasjonId={}", forsendelse.getBestillingsId(), forsendelse.getKonversasjonId());
 			return createCMSDocument.createCMSByte(((ByteArrayOutputStream) asiceStreamed).toByteArray(), mottakerCertificate);
 		} catch (IOException e) {

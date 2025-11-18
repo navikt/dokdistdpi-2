@@ -83,7 +83,7 @@ public class DpiMeldingsformidler {
 	}
 
 	private byte[] getKryptertDokumentpakke(Forsendelse forsendelse) {
-		return digitalPostContentPackager.createKryptertDokumentpakke(forsendelse, appCertificate);
+		return digitalPostContentPackager.createKryptertDokumentpakke(forsendelse);
 	}
 
 	public Dokumentpakkefingeravtrykk getDokumentpakkefingeravtrykk(byte[] asicStream) {
@@ -99,7 +99,7 @@ public class DpiMeldingsformidler {
 		try {
 			String sbdJson = objectMapper.writeValueAsString(new SimpleStandardBusinessDocument(sbd));
 			JWTClaimsSet claims = JWTClaimsSet.parse(sbdJson);
-			return GenerateJwt.generateJWT(claims, appCertificate);
+			return appCertificate.generateJWT(claims);
 		} catch (JsonProcessingException | ParseException e) {
 			log.warn("SBD til JWT behandling feilet med feilmelding={}", e.getMessage());
 			throw new JsonParserTechnicalException("SBD til JWT behandling feilet med feilmelding={}" + e.getMessage(), e);

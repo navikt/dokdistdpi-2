@@ -1,6 +1,5 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.asice;
 
-import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DigitalPostContentPackager;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.Dokumentpakke;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures.CreateSignature;
@@ -18,6 +17,7 @@ import java.util.List;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument.fromHoveddokument;
 import static no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument.fromVedlegg;
+import static no.nav.dokdistdpi.utils.CertificateUtils.itestVirksomhetssertifikatAppCertificate;
 import static no.nav.dokdistdpi.utils.ForsendelseData.forsendelse;
 import static no.nav.dokdistdpi.utils.TestUtils.zipEntries;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +34,7 @@ class AsiceCreatorTest {
 	private static final String DOKUMENT_2_NAME = "test2.pdf";
 	private static final String DOKUMENT_2_CONTENTS = "test2pdf";
 
-	final CreateSignature createSignature = new CreateSignature();
+	final CreateSignature createSignature = new CreateSignature(itestVirksomhetssertifikatAppCertificate());
 	final AsiceCreator asiceCreator = new AsiceCreator(createSignature);
 	final CreateCMSDocument createCMSDocument = new CreateCMSDocument();
 	final DigitalPostContentPackager digitalPostContentPackage = new DigitalPostContentPackager(asiceCreator, createCMSDocument);
@@ -42,8 +42,7 @@ class AsiceCreatorTest {
 	@Test
 	void shouldCreateAndSignAsice() throws Exception {
 		Dokumentpakke dokumentpakke = getDokumentpakke();
-		final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse(dokumentpakke),
-				new AppCertificate(CertificateUtils.itestVirksomhetssertifikatProperties()));
+		final OutputStream asiceStreamed = asiceCreator.createAsiceStreamed(forsendelse(dokumentpakke));
 
 		final ByteArrayInputStream asice = new ByteArrayInputStream(((ByteArrayOutputStream) asiceStreamed).toByteArray());
 
@@ -67,8 +66,7 @@ class AsiceCreatorTest {
 	void shouldGenerateEncryptedDokumentpakke() {
 		Dokumentpakke dokumentpakke = getDokumentpakke();
 
-		byte[] dokumentpakkeStream = digitalPostContentPackage.createKryptertDokumentpakke(forsendelse(dokumentpakke),
-				new AppCertificate(CertificateUtils.itestVirksomhetssertifikatProperties()));
+		byte[] dokumentpakkeStream = digitalPostContentPackage.createKryptertDokumentpakke(forsendelse(dokumentpakke));
 
 		assertNotNull(dokumentpakkeStream);
 	}

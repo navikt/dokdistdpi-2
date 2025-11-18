@@ -61,18 +61,13 @@ public class CreateSignature {
 	private final DigestMethod sha256DigestMethod;
 	private final CanonicalizationMethod canonicalizationMethod;
 	private final Transform canonicalXmlTransform;
-
+	private final AppCertificate appCertificate;
 	private final DomUtils domUtils;
-	private final CreateXAdESArtifacts createXAdESProperties;
 	private final Schema schema;
 
-	public CreateSignature() {
-		this(new CreateXAdESArtifacts());
-	}
-
-	public CreateSignature(CreateXAdESArtifacts createXAdESProperties) {
+	public CreateSignature(AppCertificate appCertificate) {
+		this.appCertificate = appCertificate;
 		this.domUtils = new DomUtils();
-		this.createXAdESProperties = createXAdESProperties;
 		try {
 			XMLSignatureFactory xmlSignatureFactory = getSignatureFactory();
 			this.sha256DigestMethod = xmlSignatureFactory.newDigestMethod(DigestMethod.SHA256, null);
@@ -93,12 +88,12 @@ public class CreateSignature {
 		}
 	}
 
-	public XAdESSignatures createSignature(final AppCertificate appCertificate, final List<AsicEVedlegg> attachedFiles) throws XmlValideringException {
+	public XAdESSignatures createSignature(final List<AsicEVedlegg> attachedFiles) throws XmlValideringException {
 		XMLSignatureFactory xmlSignatureFactory = getSignatureFactory();
 		SignatureMethod signatureMethod = getSignatureMethod(xmlSignatureFactory);
 
 		// Generer XAdES-dokument som skal signeres, informasjon om sertifikat brukt til signering og informasjon om hva som er signert
-		XAdESArtifacts xadesArtifacts = createXAdESProperties.createArtifactsToSign(attachedFiles, appCertificate);
+		XAdESArtifacts xadesArtifacts = CreateXAdESArtifacts.createArtifactsToSign(attachedFiles, appCertificate);
 
 		// Lag signatur-referanse for alle filer
 		List<Reference> references = references(xmlSignatureFactory, attachedFiles);
@@ -120,7 +115,7 @@ public class CreateSignature {
 		XMLSignature xmlSignature = xmlSignatureFactory.newXMLSignature(signedInfo, keyInfo, singletonList(xmlObject), "Signature", null);
 
 		Document signedDocument = domUtils.newEmptyXmlDocument();
-		DOMSignContext signContext = new DOMSignContext(appCertificate.getKeyPair().getPrivate(), addXAdESSignaturesElement(signedDocument));
+		DOMSignContext signContext = new DOMSignContext(appCertificate.getPrivateKey(), addXAdESSignaturesElement(signedDocument));
 		signContext.setURIDereferencer(signedPropertiesURIDereferencer(xadesArtifacts, xmlSignatureFactory));
 
 		try {
