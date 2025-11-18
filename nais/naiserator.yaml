@@ -6,7 +6,24 @@ metadata:
   labels:
     team: teamdokumenthandtering
 spec:
+  filesFrom:
+    - secret: dokdistdpi-2
+      mountPath: "/var/run/secrets/nais_secrets"
+  envFrom:
+    - secret: slack-alerts
+    - secret: dokdistdpi-2
   env:
+    - name: JAVA_TRUSTSTORE_OPTIONS
+      value: "-Djavax.net.ssl.trustStore=$(NAV_TRUSTSTORE_PATH)
+              -Djavax.net.ssl.trustStorePassword=$(NAV_TRUSTSTORE_PASSWORD)"
+    - name: JDK_JAVA_OPTIONS
+      value: "-Djavax.net.ssl.keyStore=$(NAV_TRUSTSTORE_PATH)
+              -Djavax.net.ssl.keyStorePassword=$(NAV_TRUSTSTORE_PASSWORD)
+              -Djavax.net.ssl.keyStoreType=jks
+              -XX:MaxRAMPercentage=75
+              -XX:MaxHeapFreeRatio=55
+              -Dreactor.schedulers.defaultBoundedElasticOnVirtualThreads=true
+              $(JAVA_PROXY_OPTIONS) $(JAVA_TRUSTSTORE_OPTIONS)"
     - name: AZURE_APP_TOKEN_URL
       value: {{AZURE_APP_TOKEN_URL}}
     - name: DOKDISTDPI_PROXY_HOST
@@ -31,7 +48,6 @@ spec:
       value: {{ DOKDISTDPI_ENDPOINTS_DIGDIR_SCOPE }}
     - name : DOKDISTDPI_ENDPOINTS_DIGDIR_URL
       value: {{ DOKDISTDPI_ENDPOINTS_DIGDIR_URL }}
-    - name: DOKDISTDPI_ENDPOINTS_DOKMET_URL
     - name: DOKDISTDPI_ENDPOINTS_DOKMET_URL
       value: {{ DOKDISTDPI_ENDPOINTS_DOKMET_URL }}
     - name: MQGATEWAY01_CHANNEL_SECURENAME
@@ -68,6 +84,8 @@ spec:
       value: {{ DOKDISTMELLOMLAGER_KEYID }}
     - name: OTEL_RESOURCE_ATTRIBUTES
       value: "deployment.environment.name={{ ENVIRONMENT }}"
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: "/var/run/secrets/nais_secrets/gcloud_serviceaccount.json"
   image: {{ image }}
   ingresses:
     {{#each INGRESSES}}
@@ -107,10 +125,6 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: {{ SRVDOKDISTDPI2 }}
-        mountPath: "/secrets/serviceuser/srvdokdistdpi-2"
-      - kvPath: {{ DOKDISTDPI_VAULT }}
-        mountPath: "/var/run/secrets/nais.io/vault"
       - kvPath: {{ NAV_VIRKSOMHETSSERTIFIKAT_VAULT }}
         mountPath: "/secrets/virksomhetssertifikat"
   observability:
@@ -126,5 +140,3 @@ spec:
   azure:
     application:
       enabled: true
-  envFrom:
-    - secret: slack-alerts
