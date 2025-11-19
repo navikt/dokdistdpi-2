@@ -1,6 +1,7 @@
 package no.nav.dokdistdpi.sdist003.itest.config;
 
 import no.nav.dokdistdpi.azure.AzureProperties;
+import no.nav.dokdistdpi.certificate.KeyStoreConfig;
 import no.nav.dokdistdpi.certificate.KeyStoreProperties;
 import no.nav.dokdistdpi.config.cache.CacheConfig;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
@@ -30,6 +31,7 @@ import org.springframework.retry.annotation.EnableRetry;
 		NaisProperties.class
 })
 @Import({CacheConfig.class,
+		KeyStoreConfig.class,
 		LocalTestCacheConfig.class,
 		JmsItestConfig.class
 })

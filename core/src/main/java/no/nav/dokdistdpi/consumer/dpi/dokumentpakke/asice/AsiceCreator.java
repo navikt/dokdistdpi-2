@@ -1,7 +1,6 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.asice;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.certificate.AppCertificate;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.XAdESSignatures.AsicEVedlegg;
@@ -37,7 +36,7 @@ public class AsiceCreator {
 		this.createSignature = createSignature;
 	}
 
-	public OutputStream createAsiceStreamed(Forsendelse forsendelse, AppCertificate appCertificate) throws IOException {
+	public OutputStream createAsiceStreamed(Forsendelse forsendelse) throws IOException {
 		DpiDokument hoveddokument = forsendelse.getDokumentpakke().getHoveddokument();
 		List<DpiDokument> vedlegg = forsendelse.getDokumentpakke().getVedlegg();
 
@@ -55,7 +54,7 @@ public class AsiceCreator {
 		try {
 			// Lag signatur over alle filene i pakka
 			log.info("Signerer ASiC-E dokumenter med bestillingsId={} ved bruk av private key.", forsendelse.getBestillingsId());
-			XAdESSignatures signatures = createSignature.createSignature(appCertificate, asicEAttachables);
+			XAdESSignatures signatures = createSignature.createSignature(asicEAttachables);
 			asicEAttachables.add(signatures);
 		} catch (XmlValideringException e) {
 			log.error("Klarte ikke å signere ASiC-E element, bestillingsId={}.", forsendelse.getBestillingsId());
