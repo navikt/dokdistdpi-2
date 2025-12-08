@@ -160,7 +160,7 @@ class Qdist011ServiceTest {
 
 		IllegalKontaktInformasjonFunctionalException e = assertThrows(IllegalKontaktInformasjonFunctionalException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
 
-		assertEquals("Manglende sertifikat, leverandoerAdresse eller brukerAdresse", e.getMessage());
+		assertEquals("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler", e.getMessage());
 	}
 
 	@Test

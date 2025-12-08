@@ -5,31 +5,38 @@ import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctiona
 import org.springframework.stereotype.Component;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 public class DigitalKontaktInformasjonValidator {
 
-	public void validateKontaktinfo(SikkerDigitalKontaktInfo digitalKontaktInfo, VarselInfo varselInfo) {
-		if (digitalKontaktInfo != null && digitalKontaktInfo.isReservasjon()) {
+	public void validateKontaktinfo(SikkerDigitalKontaktInfo digitalKontaktinfo, VarselInfo varselinfo) {
+		if (brukerErReservert(digitalKontaktinfo)) {
 			throw new IllegalKontaktInformasjonFunctionalException("Bruker er reservert mot digital kommunikasjon");
 		}
-		if (!hasValidSertifikatAndAdresses(digitalKontaktInfo)) {
-			throw new IllegalKontaktInformasjonFunctionalException("Manglende sertifikat, leverandoerAdresse eller brukerAdresse");
-		}
-		if (varselInfo != null) {
-			verifyEmailAndPhone(digitalKontaktInfo);
-		}
-	}
 
-	private boolean hasValidSertifikatAndAdresses(SikkerDigitalKontaktInfo digitalKontaktInfo) {
-		return isNotBlank(digitalKontaktInfo.getLeverandoerSertifikat()) && isNotBlank(digitalKontaktInfo.getLeverandoerAdresse())
-				&& isNotBlank(digitalKontaktInfo.getBrukerAdresse());
-	}
+		if (leverandoerinfoEllerBrukeradresseMangler(digitalKontaktinfo)) {
+			throw new IllegalKontaktInformasjonFunctionalException("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler");
+		}
 
-	private void verifyEmailAndPhone(SikkerDigitalKontaktInfo digitalKontaktInfo) {
-		if (isBlank(digitalKontaktInfo.getMobiltelefonnummer()) && isBlank(digitalKontaktInfo.getEpostadresse())) {
+		if (baadeEpostOgMobilnummerMangler(varselinfo, digitalKontaktinfo)) {
 			throw new IllegalKontaktInformasjonFunctionalException("Både epostadresse og mobiltelefonnummer kan ikke være null");
 		}
 	}
+
+	private boolean brukerErReservert(SikkerDigitalKontaktInfo digitalKontaktinfo) {
+		return digitalKontaktinfo != null && digitalKontaktinfo.isReservasjon();
+	}
+
+	private boolean leverandoerinfoEllerBrukeradresseMangler(SikkerDigitalKontaktInfo digitalKontaktinfo) {
+		return isBlank(digitalKontaktinfo.getLeverandoerSertifikat())
+			   || isBlank(digitalKontaktinfo.getLeverandoerAdresse())
+			   || isBlank(digitalKontaktinfo.getBrukerAdresse());
+	}
+
+	private boolean baadeEpostOgMobilnummerMangler(VarselInfo varselInfo, SikkerDigitalKontaktInfo digitalKontaktinfo) {
+		return varselInfo != null
+			   && isBlank(digitalKontaktinfo.getMobiltelefonnummer())
+			   && isBlank(digitalKontaktinfo.getEpostadresse());
+	}
+
 }

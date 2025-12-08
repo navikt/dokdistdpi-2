@@ -6,17 +6,14 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokume
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Postadresse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo.DokumentTo;
-import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo.PostadresseTo;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class OpprettForsendelseMapperTest {
 
@@ -29,7 +26,6 @@ class OpprettForsendelseMapperTest {
 	private static final String ARKIV_SYSTEM = "JOARK";
 	private static final String ARKIV_ID = "arkivId";
 	private static final String MOTTAKER_ID_NAVN = "mottakerIdNavn";
-	private static final String ORGANISASJON_NAVN = "organisasjonNavn";
 	private static final String MOTTAKER_ID = "mottakerId";
 	private static final String ADRESSELINJE_1 = "adresselinje1";
 	private static final String ADRESSELINJE_2 = "adresselinje2";
@@ -53,70 +49,76 @@ class OpprettForsendelseMapperTest {
 	public void shouldMapForsendelser() {
 		OpprettForsendelseRequestTo request = mapper.map(createHentForsendelseResponse(), BESTILLINGS_ID);
 
-		assertEquals(request.getBestillingsId(), BESTILLINGS_ID);
-		assertEquals(request.getForsendelseTittel(), FORSENDELSE_TITTEL);
-		assertEquals(request.getBatchId(), BATCH_ID);
-		assertEquals(request.getDokumentProdApp(), DOKUMENT_PROD_APP);
-		assertEquals(request.getBestillendeFagsystem(), BESTILLENDE_FAGSYSTEM);
-		assertEquals(request.getArkivInformasjon().getArkivId(), ARKIV_ID);
-		assertEquals(request.getMottaker().getMottakerId(), MOTTAKER_ID);
-		assertEquals(request.getMottaker().getMottakerNavn(), MOTTAKER_ID_NAVN);
-		assertEquals(request.getOriginalDistribusjonId(), OLD_BESTILLINGS_ID);
-		assertPostadresseTo(request.getPostadresse());
-		assertDokument(request.getDokumenter().get(1));
+		assertThat(request.getBestillingsId()).isEqualTo(BESTILLINGS_ID);
+		assertThat(request.getForsendelseTittel()).isEqualTo(FORSENDELSE_TITTEL);
+		assertThat(request.getBatchId()).isEqualTo(BATCH_ID);
+		assertThat(request.getDokumentProdApp()).isEqualTo(DOKUMENT_PROD_APP);
+		assertThat(request.getBestillendeFagsystem()).isEqualTo(BESTILLENDE_FAGSYSTEM);
+		assertThat(request.getArkivInformasjon().getArkivId()).isEqualTo(ARKIV_ID);
+		assertThat(request.getMottaker().getMottakerId()).isEqualTo(MOTTAKER_ID);
+		assertThat(request.getMottaker().getMottakerNavn()).isEqualTo(MOTTAKER_ID_NAVN);
+		assertThat(request.getOriginalDistribusjonId()).isEqualTo(OLD_BESTILLINGS_ID);
+
+		var postadresse = request.getPostadresse();
+		assertThat(postadresse.getAdresselinje1()).isEqualTo(ADRESSELINJE_1);
+		assertThat(postadresse.getAdresselinje2()).isEqualTo(ADRESSELINJE_2);
+		assertThat(postadresse.getAdresselinje3()).isEqualTo(ADRESSELINJE_3);
+		assertThat(postadresse.getPostnummer()).isEqualTo(POSTNUMMER);
+		assertThat(postadresse.getPoststed()).isEqualTo(POSTSTED);
+		assertThat(postadresse.getLandkode()).isEqualTo(LAND);
+
+		var vedleggNr1 = request.getDokumenter().get(1);
+		assertThat(vedleggNr1.getDokumenttypeId()).isEqualTo(DOKUMENTTYPE_ID_2);
+		assertThat(vedleggNr1.getDokumentObjektReferanse()).isEqualTo(OBJEKT_REFERANSE_2);
+		assertThat(vedleggNr1.getTilknyttetSom()).isEqualTo(TILKNYTTET_SOM_VEDLEGG);
+		assertThat(vedleggNr1.getRekkefolge()).isEqualTo(2);
+		assertThat(vedleggNr1.getArkivDokumentInfoId()).isEqualTo(ARKIV_DOKUMENTINFO_ID_2);
 	}
 
 	@Test
-	public void shouldMapForsendelserWhenAdresseErNull() {
+	public void shouldMapForsendelseWhenAdresseErNull() {
 		HentForsendelseResponse hentForsendelseResponse = createHentForsendelseResponseWithPostadresseNull();
 		OpprettForsendelseRequestTo request = mapper.map(hentForsendelseResponse, BESTILLINGS_ID);
 
-		assertEquals(request.getBestillingsId(), BESTILLINGS_ID);
-		assertEquals(request.getForsendelseTittel(), FORSENDELSE_TITTEL);
-		assertEquals(request.getBatchId(), BATCH_ID);
-		assertEquals(request.getDokumentProdApp(), DOKUMENT_PROD_APP);
-		assertEquals(request.getBestillendeFagsystem(), BESTILLENDE_FAGSYSTEM);
-		assertEquals(request.getArkivInformasjon().getArkivId(), ARKIV_ID);
-		assertEquals(request.getMottaker().getMottakerId(), MOTTAKER_ID);
-		assertEquals(request.getMottaker().getMottakerNavn(), MOTTAKER_ID_NAVN);
-		assertEquals(request.getOriginalDistribusjonId(), OLD_BESTILLINGS_ID);
-		assertNull(request.getPostadresse());
-		assertDokument(request.getDokumenter().get(1));
+		assertThat(request.getBestillingsId()).isEqualTo(BESTILLINGS_ID);
+		assertThat(request.getForsendelseTittel()).isEqualTo(FORSENDELSE_TITTEL);
+		assertThat(request.getBatchId()).isEqualTo(BATCH_ID);
+		assertThat(request.getDokumentProdApp()).isEqualTo(DOKUMENT_PROD_APP);
+		assertThat(request.getBestillendeFagsystem()).isEqualTo(BESTILLENDE_FAGSYSTEM);
+		assertThat(request.getArkivInformasjon().getArkivId()).isEqualTo(ARKIV_ID);
+		assertThat(request.getMottaker().getMottakerId()).isEqualTo(MOTTAKER_ID);
+		assertThat(request.getMottaker().getMottakerNavn()).isEqualTo(MOTTAKER_ID_NAVN);
+		assertThat(request.getOriginalDistribusjonId()).isEqualTo(OLD_BESTILLINGS_ID);
+
+		assertThat(request.getPostadresse()).isNull();
+
+		var vedleggNr1 = request.getDokumenter().get(1);
+		assertThat(vedleggNr1.getDokumenttypeId()).isEqualTo(DOKUMENTTYPE_ID_2);
+		assertThat(vedleggNr1.getDokumentObjektReferanse()).isEqualTo(OBJEKT_REFERANSE_2);
+		assertThat(vedleggNr1.getTilknyttetSom()).isEqualTo(TILKNYTTET_SOM_VEDLEGG);
+		assertThat(vedleggNr1.getRekkefolge()).isEqualTo(2);
+		assertThat(vedleggNr1.getArkivDokumentInfoId()).isEqualTo(ARKIV_DOKUMENTINFO_ID_2);
 	}
 
 	@Test
 	public void shouldThrowExceptionIfHentForsendelseResponseIsNull() {
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(null, BESTILLINGS_ID));
-		assertEquals(exception.getMessage(), "HentForsendelseResponseTo kan ikke være null");
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> mapper.map(null, BESTILLINGS_ID))
+				.withMessage("HentForsendelseResponseTo kan ikke være null");
 	}
 
 	@Test
 	public void shouldThrowExceptionIfBestillingIdIsBlank() {
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(createHentForsendelseResponse(), null));
-		assertEquals(exception.getMessage(), "bestillingsId kan ikke være null");
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> mapper.map(createHentForsendelseResponse(), null))
+				.withMessage("bestillingsId kan ikke være null");
 	}
 
 	@Test
 	public void shouldThrowExceptionIfMottakerIsNull() {
-		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mapper.map(createHentForsendelseResponseWithMottakerNull(), BESTILLINGS_ID));
-		assertEquals(exception.getMessage(), "Mottaker kan ikke være null");
-	}
-
-	private void assertPostadresseTo(PostadresseTo postadresse) {
-		assertEquals(postadresse.getAdresselinje1(), ADRESSELINJE_1);
-		assertEquals(postadresse.getAdresselinje2(), ADRESSELINJE_2);
-		assertEquals(postadresse.getAdresselinje3(), ADRESSELINJE_3);
-		assertEquals(postadresse.getPostnummer(), POSTNUMMER);
-		assertEquals(postadresse.getPoststed(), POSTSTED);
-		assertEquals(postadresse.getLandkode(), LAND);
-	}
-
-	private void assertDokument(DokumentTo dokumentTo) {
-		assertEquals(dokumentTo.getDokumenttypeId(), DOKUMENTTYPE_ID_2);
-		assertEquals(dokumentTo.getDokumentObjektReferanse(), OBJEKT_REFERANSE_2);
-		assertEquals(dokumentTo.getTilknyttetSom(), TILKNYTTET_SOM_VEDLEGG);
-		assertEquals(dokumentTo.getRekkefolge(), 2);
-		assertEquals(dokumentTo.getArkivDokumentInfoId(), ARKIV_DOKUMENTINFO_ID_2);
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> mapper.map(createHentForsendelseResponseWithMottakerNull(), BESTILLINGS_ID))
+				.withMessage("Mottaker kan ikke være null");
 	}
 
 	private HentForsendelseResponse createHentForsendelseResponse() {
@@ -129,8 +131,9 @@ class OpprettForsendelseMapperTest {
 				.dokumentProdApp(DOKUMENT_PROD_APP)
 				.arkivInformasjon(ArkivInformasjon.builder()
 						.arkivSystem(ARKIV_SYSTEM)
-						.arkivId(ARKIV_ID).build())
-				.mottaker(createMottakerTo())
+						.arkivId(ARKIV_ID)
+						.build())
+				.mottaker(createMottaker())
 				.postadresse(createPostadresse())
 				.dokumenter(createDokument())
 				.build();
@@ -145,7 +148,8 @@ class OpprettForsendelseMapperTest {
 				.forsendelseTittel(FORSENDELSE_TITTEL)
 				.dokumentProdApp(DOKUMENT_PROD_APP)
 				.arkivInformasjon(ArkivInformasjon.builder()
-						.arkivId(ARKIV_ID).build())
+						.arkivId(ARKIV_ID)
+						.build())
 				.mottaker(null)
 				.postadresse(createPostadresse())
 				.dokumenter(createDokument())
@@ -163,14 +167,13 @@ class OpprettForsendelseMapperTest {
 				.arkivInformasjon(ArkivInformasjon.builder()
 						.arkivSystem(ARKIV_SYSTEM)
 						.arkivId(ARKIV_ID).build())
-				.mottaker(createMottakerTo())
+				.mottaker(createMottaker())
 				.postadresse(null)
 				.dokumenter(createDokument())
 				.build();
 	}
 
 	private List<Dokument> createDokument() {
-
 		return Arrays.asList(
 				Dokument.builder()
 						.dokumenttypeId(DOKUMENTTYPE_ID_1)
@@ -190,8 +193,6 @@ class OpprettForsendelseMapperTest {
 						.tilknyttetSom(TILKNYTTET_SOM_VEDLEGG)
 						.arkivDokumentInfoId(ARKIV_DOKUMENTINFO_ID_1)
 						.build());
-
-
 	}
 
 	private Postadresse createPostadresse() {
@@ -205,7 +206,7 @@ class OpprettForsendelseMapperTest {
 				.build();
 	}
 
-	private Mottaker createMottakerTo() {
+	private Mottaker createMottaker() {
 		return Mottaker.builder()
 				.mottakerNavn(MOTTAKER_ID_NAVN)
 				.mottakerId(MOTTAKER_ID)
