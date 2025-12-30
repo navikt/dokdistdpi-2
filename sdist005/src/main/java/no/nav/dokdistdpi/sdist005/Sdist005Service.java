@@ -118,7 +118,7 @@ public class Sdist005Service {
 	private List<FeiletForsendelseTo> finnFeiledeForsendelser(List<UekspedertForsendelse> ikkeKvitterteForsendelser) {
 		return ikkeKvitterteForsendelser.stream()
 				.map(f -> {
-					final DokumentInfoTo dokumentInfoTo = f.getDokumenter().get(0);
+					final DokumentInfoTo dokumentInfoTo = f.getDokumenter().getFirst();
 					var feiletForsendelse = hentForsendelseStatuser(dokumentInfoTo.getKonversasjonId());
 					if (feiletForsendelse.isPresent()) {
 						ForsendelseStatusResponse forsendelseStatusResponse = feiletForsendelse.get();

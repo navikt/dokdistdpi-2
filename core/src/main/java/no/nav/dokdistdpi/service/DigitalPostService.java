@@ -8,27 +8,20 @@ import no.nav.dokdistdpi.consumer.dokmet.DokmetConsumer;
 import no.nav.dokdistdpi.consumer.dokmet.DokmetFunctionalException;
 import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.EpostVarsel;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.SmsVarsel;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
-import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
-import no.nav.dokdistdpi.utils.VarslingstekstUtil;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @Slf4j

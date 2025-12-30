@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.7</version>
+		<version>3.5.8</version>
 	</parent>
 
 	<groupId>no.nav.dokdistdpi</groupId>
@@ -40,15 +40,15 @@
 		<resilience4j-bom.version>2.3.0</resilience4j-bom.version>
 		<context-propagation.version>1.2.0</context-propagation.version>
 		<slack-api-client.version>1.46.0</slack-api-client.version>
-		<dok-common.version>1.7.1</dok-common.version>
 
 		<!-- plugins -->
 		<jaxb-xew-plugin.version>2.1</jaxb-xew-plugin.version>
 		<hisrc-jaxb.version>2.2.1</hisrc-jaxb.version>
 
 		<!-- Nav -->
-		<dokmet-api.version>2025.04.29-15.21-2c96c87</dokmet-api.version>
-		<dok-legacy-tjenestespesifikasjoner.version>39-71e82ec</dok-legacy-tjenestespesifikasjoner.version>
+		<dokmet-api.version>2025.11.07-14.12-27ed7b2</dokmet-api.version>
+		<dok-legacy-tjenestespesifikasjoner.version>44-7d14e70</dok-legacy-tjenestespesifikasjoner.version>
+		<dok-common.version>1.7.1</dok-common.version>
 
 		<!-- Test -->
 		<spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
