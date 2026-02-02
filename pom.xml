@@ -29,7 +29,7 @@
 		<java.version>21</java.version>
 
 		<camel-spring-boot-bom.version>4.17.0</camel-spring-boot-bom.version>
-		<libraries-bom.version>26.73.0</libraries-bom.version>
+		<libraries-bom.version>26.74.0</libraries-bom.version>
 		<tink.version>1.20.0</tink.version>
 		<tink-gcpkms.version>1.10.0</tink-gcpkms.version>
 		<commons-compress.version>1.28.0</commons-compress.version>
