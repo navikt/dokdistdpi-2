@@ -52,6 +52,7 @@
 
 		<!-- Test -->
 		<spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
+		<artemis-jakarta.version>2.50.0</artemis-jakarta.version>
 
 		<!-- Plugins -->
 		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
@@ -195,8 +196,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.activemq</groupId>
+			<groupId>org.apache.artemis</groupId>
 			<artifactId>artemis-jakarta-server</artifactId>
+			<version>${artemis-jakarta.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
