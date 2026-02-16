@@ -6,7 +6,7 @@
   "INGRESSES": [
     "https://dokdistdpi-2.dev.intern.nav.no"
   ],
-  "DPI_URL": "https://srest.qa.dataplatfor.ms/dpi/messages",
+  "DPI_URL": "https://sandbox1.ediex.no/api/v2/dpi/messages",
   "DPI_MPCKANAL": "dokdistdpi-q",
   "DOKDISTDPI_ENDPOINTS_JURIDISKLOGG": "https://app-q1.adeo.no/juridisklogg",
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://dev-fss.teamdokumenthandtering.dokdistadmin/.default",

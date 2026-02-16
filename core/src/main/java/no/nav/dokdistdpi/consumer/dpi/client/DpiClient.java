@@ -205,8 +205,11 @@ public class DpiClient {
 			if (webException instanceof BadRequest || webException instanceof Unauthorized) {
 				return new KunneIkkeHenteKvitteringException("Klarte ikke hente kvitteringer. problem=" + problemDetail);
 			} else {
-				// Retry hvis NotFound
-				return new SikkerDigitalPostException("Klarte ikke hente kvitteringer. problem=" + problemDetail);
+				if(problemDetail == null) {
+					return new SikkerDigitalPostException("Klarte ikke hente kvitteringer. status=" + webException.getStatusCode() + ", response=" + webException.getResponseBodyAsString());
+				} else {
+					return new SikkerDigitalPostException("Klarte ikke hente kvitteringer. status=" + webException.getStatusCode() + ", problem=" + problemDetail);
+				}
 			}
 		} else {
 			return new UkjentTekniskFeilException("Henting av kvitteringer feilet med ukjent teknisk feil. Se stacktrace", error);
