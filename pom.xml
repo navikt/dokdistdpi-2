@@ -34,7 +34,7 @@
 		<tink-gcpkms.version>1.10.0</tink-gcpkms.version>
 		<commons-compress.version>1.28.0</commons-compress.version>
 		<commons-io.version>2.21.0</commons-io.version>
-		<com.ibm.mq.jakarta.client.version>9.4.4.1</com.ibm.mq.jakarta.client.version>
+		<com.ibm.mq.jakarta.client.version>9.4.5.0</com.ibm.mq.jakarta.client.version>
 		<logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
 		<nimbus-jose-jwt.version>10.7</nimbus-jose-jwt.version>
 		<resilience4j-bom.version>2.3.0</resilience4j-bom.version>
