@@ -51,7 +51,7 @@
 		<dok-common.version>1.7.1</dok-common.version>
 
 		<!-- Test -->
-		<spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
+		<spring-cloud-contract-wiremock.version>5.0.2</spring-cloud-contract-wiremock.version>
 		<artemis-jakarta.version>2.50.0</artemis-jakarta.version>
 
 		<!-- Plugins -->
