@@ -19,6 +19,8 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -204,6 +206,8 @@ public class DpiClient {
 			ProblemDetail problemDetail = webException.getResponseBodyAs(ProblemDetail.class);
 			if (webException instanceof BadRequest || webException instanceof Unauthorized) {
 				return new KunneIkkeHenteKvitteringException("Klarte ikke hente kvitteringer. problem=" + problemDetail);
+			} else if(webException.getStatusCode() == HttpStatus.SEE_OTHER) {
+				return new SikkerDigitalPostException("Klarte ikke hente kvitteringer. status=" + webException.getStatusCode() + ", Location=" + webException.getHeaders().getLocation());
 			} else {
 				if(problemDetail == null) {
 					return new SikkerDigitalPostException("Klarte ikke hente kvitteringer. status=" + webException.getStatusCode() + ", response=" + webException.getResponseBodyAsString());
