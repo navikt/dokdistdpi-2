@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.client.OppdaterForsendelseAndVarselRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterForsendelseRequest;
 import no.nav.dokdistdpi.consumer.rdist001.map.OppdaterVarselInfoMapper;
+import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.nonNull;
@@ -26,6 +27,8 @@ public class DokdistAdministrerForsendelseUpdater {
 		this.dokdistadminConsumer = dokdistadminConsumer;
 	}
 
+	@SuppressWarnings("unused")
+	@Handler
 	public void updateStatusDigitalpostkasseInfoAndVarselInfo(OppdaterForsendelseAndVarselRequest oppdaterDigitalAdresseRequest) {
 		updateStatusDigitalLeverandoerAndPostkasseadresse(oppdaterDigitalAdresseRequest);
 		log.info("qdist011 har oppdatert digital postkasse info og forsendelseStatus=OVERSENDT med forsendelseId={}", oppdaterDigitalAdresseRequest.getForsendelseId());
