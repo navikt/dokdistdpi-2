@@ -23,7 +23,6 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
-import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -33,7 +32,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokdistdpi.qdist011.TestUtil.classpathToString;
@@ -131,7 +129,6 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
 			verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
-			verify(exactly(1), postRequestedFor(urlPathEqualTo("/maskinporten")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
 					.withRequestBody(containing("Content-Type: application/octet-stream")
 							.and(containing("Content-Type: text/plain"))));

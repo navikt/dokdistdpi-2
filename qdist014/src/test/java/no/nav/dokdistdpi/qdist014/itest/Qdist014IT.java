@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -94,7 +95,7 @@ public class Qdist014IT {
 	}
 
 	@Test
-	void shouldOppdaterForsendelToEkspedertWhenSDPKvitteringErLevering() throws IOException {
+	void shouldOppdaterForsendelseToEkspedertWhenSDPKvitteringErLevering() throws IOException {
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-happy.json", FORSENDELSE_ID, OK.value());
 		//Oversendt, bekreftet og klar for dist er gyldig status.
@@ -206,6 +207,15 @@ public class Qdist014IT {
 			verify(2, getRequestedFor(urlEqualTo(format(HENTFORSENDELSE_URL, FORSENDELSE_ID))));
 			verify(1, getRequestedFor(urlEqualTo(HENT_VARSELINFO_URL + "SDP_000004")));
 			verify(1, postRequestedFor(urlEqualTo(HENT_PERSONER_MED_SDP_URL)));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL))
+					.withRequestBody(equalToJson("""
+							{
+							  "forsendelseId" : 1720847,
+							  "forsendelseStatus" : "EKSPEDERT",
+							  "digitalLeverandoeradresse" : "984661185",
+							  "digitalPostkasseadresse" : "dokdistdpi@digipost.no"
+							}
+							""")));
 		});
 
 

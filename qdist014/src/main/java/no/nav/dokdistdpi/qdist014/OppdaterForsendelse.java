@@ -4,12 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
-import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Varsler;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.LeveringsKvittering;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
+import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.ForsendelseStatus;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.Notifikasjon;
@@ -87,40 +86,29 @@ public class OppdaterForsendelse {
 
 		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfo, sikkerDigitalKontaktInfo);
 
-		Forsendelse forsendelse = Forsendelse.builder()
-				.forsendelseId(Long.valueOf(forsendelseId))
-				.mottakerSertifikat(sikkerDigitalKontaktInfo.getLeverandoerSertifikat())
-				.digitalPostLeverandoerAdresse(sikkerDigitalKontaktInfo.getLeverandoerAdresse())
-				.digital(DigitalPost.builder()
-						.varsler(varsler)
-						.build())
-				.build();
+		oppdaterForsendelseDigitalKontaktinfo(Long.parseLong(forsendelseId), sikkerDigitalKontaktInfo.getLeverandoerAdresse(), sikkerDigitalKontaktInfo.getBrukerAdresse());
 
-		oppdaterForsendelseDigitalKontaktinfo(forsendelse);
-
-		if (forsendelse.getDigital().getVarsler() != null) {
-			oppdaterForsendelseVarselInfo(forsendelse);
+		if (varsler != null) {
+			oppdaterForsendelseVarselInfo(Long.parseLong(forsendelseId), varsler, hentForsendelseResponse.getDistribusjonstype());
 		}
 		log.info("Qdist014 har oppdatert forsendelseId={} med digital kontaktinfo og varsler", forsendelseId);
 	}
 
-	private void oppdaterForsendelseDigitalKontaktinfo(Forsendelse forsendelse) {
+	private void oppdaterForsendelseDigitalKontaktinfo(long forsendelseId, String leverandoerAdresse, String brukerAdresse) {
 		OppdaterForsendelseRequest oppdaterForsendelseRequest = OppdaterForsendelseRequest.builder()
-				.forsendelseId(forsendelse.getForsendelseId())
+				.forsendelseId(forsendelseId)
 				.forsendelseStatus(EKSPEDERT.name())
-				.digitalLeverandoeradresse(forsendelse.getMottakerSertifikat())
-				.digitalPostkasseadresse(forsendelse.getDigitalPostLeverandoerAdresse())
+				.digitalLeverandoeradresse(leverandoerAdresse)
+				.digitalPostkasseadresse(brukerAdresse)
 				.build();
 
 		dokdistadminConsumer.oppdaterForsendelse(oppdaterForsendelseRequest);
 	}
 
-	private void oppdaterForsendelseVarselInfo(Forsendelse forsendelse) {
-		List<Notifikasjon> notifikasjoner = oppdaterVarselInfoMapper.mapNotifikasjon(
-				forsendelse.getDigital().getVarsler(),
-				forsendelse.getDistribusjonsTypeKode());
+	private void oppdaterForsendelseVarselInfo(long forsendelseId, Varsler varsler, DistribusjonsTypeKode distribusjonsTypeKode) {
+		List<Notifikasjon> notifikasjoner = oppdaterVarselInfoMapper.mapNotifikasjon(varsler, distribusjonsTypeKode);
 
-		OppdaterVarselInfoRequest oppdaterVarselInfoRequest = new OppdaterVarselInfoRequest(forsendelse.getForsendelseId(), notifikasjoner);
+		OppdaterVarselInfoRequest oppdaterVarselInfoRequest = new OppdaterVarselInfoRequest(forsendelseId, notifikasjoner);
 
 		dokdistadminConsumer.oppdaterVarselInfo(oppdaterVarselInfoRequest);
 	}
