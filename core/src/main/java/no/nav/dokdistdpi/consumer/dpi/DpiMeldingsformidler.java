@@ -18,6 +18,7 @@ import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
 
@@ -54,6 +55,7 @@ public class DpiMeldingsformidler {
 		this.dpiClient = dpiClient;
 	}
 
+	@SuppressWarnings("unused")
 	@Handler
 	public OppdaterForsendelseAndVarselRequest sendMelding(Forsendelse forsendelse) {
 		byte[] dokumentpakke = getKryptertDokumentpakke(forsendelse);
@@ -67,7 +69,8 @@ public class DpiMeldingsformidler {
 		multipartBodyBuilder.part("forretningsmelding", generateStandardBusinessDocumentJWT(standardBusinessDocument), TEXT_PLAIN);
 		multipartBodyBuilder.part("dokumentpakke", dokumentpakke, APPLICATION_OCTET_STREAM);
 
-		List<ForsendelseStatusResponse> forsendelseStatusResponses = dpiClient.sendDpiForsendelse(multipartBodyBuilder, forsendelse);
+		String sendtKonversasjonId = dpiClient.sendDpiForsendelse(multipartBodyBuilder, forsendelse);
+		List<ForsendelseStatusResponse> forsendelseStatusResponses = dpiClient.hentForsendelseStatus(sendtKonversasjonId);
 		ForsendelseStatusResponse forsendelseStatusResponse = forsendelseStatusResponses.stream()
 				.filter(statusResponse -> SENDT.equals(statusResponse.getStatus()) || OPPRETTET.equals(statusResponse.getStatus()))
 				.findAny().orElse(null);

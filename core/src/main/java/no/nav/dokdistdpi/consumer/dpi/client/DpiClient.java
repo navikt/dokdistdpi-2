@@ -19,6 +19,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -97,7 +98,7 @@ public class DpiClient {
 
 	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1out/post
 	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
-	public List<ForsendelseStatusResponse> sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
+	public String sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
 
 		String uri = UriComponentsBuilder.fromUriString(clientProperties.getUrl())
 				.path(SEND_PATH)
@@ -117,12 +118,12 @@ public class DpiClient {
 			}
 			log.info("Brev sendt til DPI hjørne2 med konversasjonId={}, status={}", konversasjonId, response.getStatusCode());
 
-			return hentForsendelseStatus(konversasjonId);
+			return konversasjonId;
 		} catch (HttpClientErrorException e) {
 			if (e.getStatusCode() == BAD_REQUEST && e.getMessage() != null && e.getMessage().contains(HJORNE2_DUPLICATE_ERROR_MESSAGE)) {
 				log.info("Brev sendt til DPI hjørne2 tidligere, fortsetter behandling. Dette kallet ble avvist på duplikatkontroll hos hjørne2. konversasjonId={}, status={}, melding={}",
 						konversasjonId, e.getStatusCode(), e.getMessage());
-				return hentForsendelseStatus(konversasjonId);
+				return konversasjonId;
 			} else if (e.getStatusCode() == BAD_REQUEST && e.getMessage().contains(HJORNE2_FINGERAVTRYKK_ERROR_MESSAGE)) {
 				// Trigger retry og legger på BQ i stedet
 				throw new SikkerDigitalPostException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage()), e);
@@ -137,6 +138,7 @@ public class DpiClient {
 	}
 
 	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1out~1{id}~1statuses/get
+	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
 	public List<ForsendelseStatusResponse> hentForsendelseStatus(String konversasjonId) {
 		log.info("Skal hente forsendelsestatus for konversasjonId={}", konversasjonId);
 
@@ -168,7 +170,10 @@ public class DpiClient {
 
 	private Throwable mapForsendelseStatuserErrors(Throwable error, String konversasjonId) {
 		if (error instanceof WebClientResponseException webException) {
-			if (webException.getStatusCode().is4xxClientError()) {
+			if (webException instanceof WebClientResponseException.NotFound) {
+				return new SikkerDigitalPostException(format("Finner ikke forsendelse status med konversasjonId=%s hos hjørne2. feilmelding=%s",
+						konversasjonId, webException.getMessage()), webException);
+			} else if (webException.getStatusCode().is4xxClientError()) {
 				return new ForsendelseStatusIkkeFunnetException(format("Finner ikke forsendelse status med konversasjonId=%s hos hjørne2. feilmelding=%s",
 						konversasjonId, webException.getMessage()), webException);
 			} else {
