@@ -139,6 +139,37 @@ public class Qdist011IT {
 
 	@SneakyThrows
 	@Test
+	public void shouldProcessForsendelseOgSendTilDigitalPostOrbyt() {
+		stubAzure();
+		stubGetDigipostDigitalKontaktInformasjon(OK.value());
+		stubGetDokumentTypeInfo("tkat020-happy.json");
+		stubGetVarselInfo("tkat021-happy.json");
+		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
+		stubPutOppdaterForsendelse();
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
+		stubPostMaskinporten();
+		stubPostDPISend();
+		stubGetDPIStatus("dpi_forsendelse_status_offset.json");
+		stubPutVarselInfo();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+
+		await().atMost(30, SECONDS).untilAsserted(() -> {
+			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
+			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
+			verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
+			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
+					.withRequestBody(containing("Content-Type: application/octet-stream")
+							.and(containing("Content-Type: text/plain"))));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
+			verify(1, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
+		});
+	}
+
+	@SneakyThrows
+	@Test
 	public void shouldProcessForsendelseWhenVarselIsNull() {
 		stubAzure();
 		stubGetEBoksDigitalKontaktInformasjon(OK.value());
@@ -301,11 +332,15 @@ public class Qdist011IT {
 	}
 
 	private void stubGetDPIStatus() {
+		stubGetDPIStatus("dpi_forsendelse_status.json");
+	}
+
+	private void stubGetDPIStatus(String fil) {
 		stubFor(get(urlEqualTo("/message/out/" + KONVERSASJON_ID + "/statuses"))
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_PROBLEM_JSON_VALUE)
-						.withBodyFile("dpi/dpi_forsendelse_status.json")));
+						.withBodyFile("dpi/" + fil)));
 	}
 
 	private void stubPostDPISend(int status) {

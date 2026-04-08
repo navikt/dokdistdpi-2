@@ -14,11 +14,15 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToDateTime;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
@@ -70,6 +74,9 @@ public class Sdist005IT {
 			assertNotNull(message);
 			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, getRequestedFor(urlEqualTo("/message/out/" + KONVERSASJON_ID + "/statuses")));
+			verify(putRequestedFor(urlEqualTo(FEILREGISTRERFORSENDELSE_URL))
+					.withRequestBody(matchingJsonPath("$.detaljer", equalTo("Bad Gateway mot postkasse")))
+					.withRequestBody(matchingJsonPath("$.tidspunkt", equalToDateTime("2022-03-30T10:21:59"))));
 		});
 	}
 
