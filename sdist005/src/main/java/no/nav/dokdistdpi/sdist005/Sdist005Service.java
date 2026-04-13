@@ -19,6 +19,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,6 +37,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DISTRIBUSJONS_SDP_KANAL
 @Component
 public class Sdist005Service {
 
+	private static final ZoneId EUROPE_OSLO = ZoneId.of("Europe/Oslo");
 	private final DokdistadminConsumer dokdistadminConsumer;
 	private final HentUekspederteForsendelserConsumer hentUekspederteForsendelserConsumer;
 	private final DpiClient dpiClient;
@@ -50,6 +52,7 @@ public class Sdist005Service {
 		this.opprettForsendelseMapper = new OpprettForsendelseMapper();
 	}
 
+	@SuppressWarnings("unused")
 	@Handler
 	public List<DistribuerTilKanal> hentStatusFraAksesspunkt(Exchange exchange) {
 		log.info("Sdist005 leter etter ukvitterte forsendelser");
@@ -126,7 +129,7 @@ public class Sdist005Service {
 								.forsendelseId(dokumentInfoTo.getForsendelseId())
 								.bestillingsId(dokumentInfoTo.getDokumentId())
 								.feilbeskrivelse(forsendelseStatusResponse.getBeskrivelse())
-								.feiltidspunkt(forsendelseStatusResponse.getTimestamp())
+								.feiltidspunkt(forsendelseStatusResponse.getTimestamp().atZoneSameInstant(EUROPE_OSLO).toLocalDateTime())
 								.build();
 					} else {
 						log.warn("Sdist005 fant ikke-kvittert forsendelse med forsendelseId={}, bestillingsId={} UTEN endelig FEILET status i hjørne2",
