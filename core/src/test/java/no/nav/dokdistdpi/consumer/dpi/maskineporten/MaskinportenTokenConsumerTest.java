@@ -4,7 +4,7 @@ import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 
 @Disabled
 class MaskinportenTokenConsumerTest {

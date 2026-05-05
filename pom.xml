@@ -17,7 +17,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.8</version>
+		<version>4.0.6</version>
 	</parent>
 
 	<groupId>no.nav.dokdistdpi</groupId>
@@ -28,16 +28,16 @@
 	<properties>
 		<java.version>25</java.version>
 
-		<camel-spring-boot-bom.version>4.18.0</camel-spring-boot-bom.version>
+		<camel.version>4.20.0</camel.version>
 		<libraries-bom.version>26.76.0</libraries-bom.version>
 		<tink.version>1.20.0</tink.version>
 		<tink-gcpkms.version>1.10.0</tink-gcpkms.version>
 		<commons-compress.version>1.28.0</commons-compress.version>
 		<commons-io.version>2.21.0</commons-io.version>
 		<com.ibm.mq.jakarta.client.version>9.4.5.0</com.ibm.mq.jakarta.client.version>
-		<logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
+		<logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
 		<nimbus-jose-jwt.version>10.8</nimbus-jose-jwt.version>
-		<resilience4j-bom.version>2.3.0</resilience4j-bom.version>
+		<resilience4j-bom.version>2.4.0</resilience4j-bom.version>
 		<context-propagation.version>1.2.1</context-propagation.version>
 		<slack-api-client.version>1.47.0</slack-api-client.version>
 
@@ -46,12 +46,12 @@
 		<hisrc-jaxb.version>2.2.1</hisrc-jaxb.version>
 
 		<!-- Nav -->
-		<dokmet-api.version>2025.11.07-14.12-27ed7b2</dokmet-api.version>
+		<dokmet-api.version>2026.04.23-09.56-db721a1</dokmet-api.version>
 		<dok-legacy-tjenestespesifikasjoner.version>44-7d14e70</dok-legacy-tjenestespesifikasjoner.version>
 		<dok-common.version>1.7.1</dok-common.version>
 
 		<!-- Test -->
-		<spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
+		<wiremock-spring-boot.version>4.2.1</wiremock-spring-boot.version>
 		<artemis-jakarta.version>2.50.0</artemis-jakarta.version>
 
 		<!-- Plugins -->
@@ -120,7 +120,14 @@
 			<dependency>
 				<groupId>org.apache.camel.springboot</groupId>
 				<artifactId>camel-spring-boot-bom</artifactId>
-				<version>${camel-spring-boot-bom.version}</version>
+				<version>${camel.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.camel.springboot</groupId>
+				<artifactId>camel-spring-boot-dependencies</artifactId>
+				<version>${camel.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -181,9 +188,9 @@
 
 			<!-- test -->
 			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-contract-wiremock</artifactId>
-				<version>${spring-cloud-contract-wiremock.version}</version>
+				<groupId>org.wiremock.integrations</groupId>
+				<artifactId>wiremock-spring-boot</artifactId>
+				<version>${wiremock-spring-boot.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
@@ -208,6 +215,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<argLine>-Dio.netty.allocator.type=pooled</argLine>
+				</configuration>
 			</plugin>
 
 			<plugin>

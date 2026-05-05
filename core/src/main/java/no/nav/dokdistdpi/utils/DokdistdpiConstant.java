@@ -30,7 +30,6 @@ public class DokdistdpiConstant {
 	public static final String PROPERTY_CONVERSATION_ID = "konversasjonId";
 	public static final String PROPERTY_FORSENDELSE_STATUS = "forsendelseStatus";
 
-	public static final int BACKOFF_DELAY = 500;
 	public static final int BACKOFF_MULTIPLIER = 3;
 
 	public static final String HOVEDDOKUMENT = "HOVEDDOKUMENT";

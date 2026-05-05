@@ -42,12 +42,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<!-- Feiler i CreateSignature konstruktør
-				https://github.com/spring-projects/spring-boot/issues/38581
-				-->
-				<configuration>
-					<loaderImplementation>CLASSIC</loaderImplementation>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

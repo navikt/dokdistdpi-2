@@ -7,11 +7,10 @@ import no.nav.dokdistdpi.exception.functional.DigitalKontaktinformasjonFunctiona
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.DigitalKontaktinformasjonTechnicalException;
 import org.slf4j.MDC;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -21,7 +20,6 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
@@ -46,7 +44,7 @@ public class DigitalKontaktinformasjonConsumer {
 		this.restTemplate = restTemplateBuilder.build();
 	}
 
-	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = AbstractDokdistdpiTechnicalException.class)
 	public SikkerDigitalKontaktInfo hentSikkerDigitalPostadresse(final String personidentifikator) {
 		HttpHeaders headers = createHeaders();
 		final String fnrTrimmed = personidentifikator.strip();

@@ -16,15 +16,12 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseResponseTo;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AdminstrerForsendelseTechnicalException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static java.lang.String.format;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -46,7 +43,7 @@ public class DokdistadminConsumer {
 				.build();
 	}
 
-	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = AdminstrerForsendelseTechnicalException.class)
 	public String opprettForsendelse(final OpprettForsendelseRequestTo opprettForsendelseRequest) {
 		var bestillingsId = opprettForsendelseRequest.getBestillingsId();
 
@@ -65,7 +62,7 @@ public class DokdistadminConsumer {
 		return forsendelseId;
 	}
 
-	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = AdminstrerForsendelseTechnicalException.class)
 	public HentForsendelseResponse hentForsendelse(final String forsendelseId) {
 
 		log.info("hentForsendelse henter forsendelse med forsendelseId={}", forsendelseId);
@@ -84,7 +81,7 @@ public class DokdistadminConsumer {
 		return response;
 	}
 
-	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = AdminstrerForsendelseTechnicalException.class)
 	public String finnForsendelse(final FinnForsendelseRequest finnForsendelseRequest) {
 		var oppslagsnoekkel = finnForsendelseRequest.getOppslagsnoekkel().noekkel;
 		var verdi = finnForsendelseRequest.getVerdi();
@@ -106,7 +103,7 @@ public class DokdistadminConsumer {
 		return response;
 	}
 
-	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = AdminstrerForsendelseTechnicalException.class)
 	public void oppdaterForsendelse(OppdaterForsendelseRequest oppdaterForsendelse) {
 		log.info("oppdaterForsendelse oppdaterer forsendelse med forsendelseId={}", oppdaterForsendelse.getForsendelseId());
 
@@ -121,7 +118,7 @@ public class DokdistadminConsumer {
 		log.info("oppdaterForsendelse har oppdatert forsendelse med forsendelseId={}", oppdaterForsendelse.getForsendelseId());
 	}
 
-	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = AdminstrerForsendelseTechnicalException.class)
 	public void feilregistrerForsendelse(FeilregistrerForsendelseRequest feilregistrerForsendelse) {
 		log.info("feilregistrerForsendelse feilregistrerer forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 
@@ -136,7 +133,7 @@ public class DokdistadminConsumer {
 		log.info("feilregistrerForsendelse har feilregistrert forsendelse med forsendelseId={}", feilregistrerForsendelse.getForsendelseId());
 	}
 
-	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = AdminstrerForsendelseTechnicalException.class)
 	public void oppdaterVarselInfo(OppdaterVarselInfoRequest oppdaterVarselInfoRequest) {
 		log.info("oppdaterVarselInfo oppdaterer varselInfo med forsendelseId={}", oppdaterVarselInfoRequest.forsendelseId());
 		webClient.put()

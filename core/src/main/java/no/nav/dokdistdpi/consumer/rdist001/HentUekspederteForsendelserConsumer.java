@@ -8,11 +8,9 @@ import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentUekspederteForsendelserResponse;
 import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.technical.AdminstrerForsendelseTechnicalException;
-import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.boot.http.codec.autoconfigure.HttpCodecsProperties;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.netty.http.client.HttpClientRequest;
@@ -20,7 +18,6 @@ import reactor.netty.http.client.HttpClientRequest;
 import static java.lang.String.format;
 import static java.time.Duration.ofSeconds;
 import static java.util.Collections.emptyList;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -45,14 +42,12 @@ public class HentUekspederteForsendelserConsumer {
 						dokdistdpiProperties.getEndpoints().getDokdistadmin().getScope()))
 				.filter(new NavHeadersFilter())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-				.exchangeStrategies(ExchangeStrategies.builder()
-						.codecs(clientCodecConfigurer -> clientCodecConfigurer.defaultCodecs()
-								.maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
-						.build())
+				.codecs(clientCodecConfigurer -> clientCodecConfigurer.defaultCodecs()
+						.maxInMemorySize((int) httpCodecsProperties.getMaxInMemorySize().toBytes()))
 				.build();
 	}
 
-	@Retryable(retryFor = AdminstrerForsendelseTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = AdminstrerForsendelseTechnicalException.class, multiplier = BACKOFF_MULTIPLIER)
 	public HentUekspederteForsendelserResponse hentForsendelserKvitteringIkkeMottatt(String distribusjonskanal, int antallTimer) {
 		log.info("hentForsendelserKvitteringIkkeMottatt henter uekspederte forsendelser med distribusjonskanal={}, antallTimer={}",
 				distribusjonskanal, antallTimer);

@@ -3,8 +3,8 @@ package no.nav.dokdistdpi.azure;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -37,7 +37,7 @@ public class AzureTokenConsumer implements TokenConsumer {
 				.build();
 	}
 
-	@Retry(name = AZURE_TOKEN_INSTANCE)
+	@Retryable(includes = AzureTokenException.class)
 	@CircuitBreaker(name = AZURE_TOKEN_INSTANCE)
 	@Cacheable(AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE)
 	public String getClientCredentialToken(String scope) {
