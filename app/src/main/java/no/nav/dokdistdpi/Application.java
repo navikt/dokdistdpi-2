@@ -13,10 +13,10 @@ import no.nav.dokdistdpi.config.prop.NaisProperties;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
-import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 
 @EnableConfigurationProperties({
 		ServiceuserProperties.class,
@@ -33,7 +33,7 @@ import org.springframework.retry.annotation.EnableRetry;
 		WebClientConfig.class,
 		OAuthEnabledWebClientConfig.class
 })
-@EnableRetry
+@EnableResilientMethods
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 public class Application {
 	public static void main(String[] args) {

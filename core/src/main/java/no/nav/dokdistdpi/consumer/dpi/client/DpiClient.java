@@ -15,17 +15,15 @@ import no.nav.dokdistdpi.exception.functional.KunneIkkeHenteKvitteringException;
 import no.nav.dokdistdpi.exception.technical.AbstractDokdistdpiTechnicalException;
 import no.nav.dokdistdpi.exception.technical.SikkerDigitalPostException;
 import no.nav.dokdistdpi.exception.technical.UkjentTekniskFeilException;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -41,7 +39,6 @@ import java.util.List;
 import static java.lang.String.format;
 import static no.nav.dokdistdpi.config.OAuthEnabledWebClientConfig.MASKINPORTEN_CLIENT_REGISTRATION;
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.FEILET;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -97,7 +94,7 @@ public class DpiClient {
 	}
 
 	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1out/post
-	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = AbstractDokdistdpiTechnicalException.class, multiplier = BACKOFF_MULTIPLIER)
 	public String sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
 
 		String uri = UriComponentsBuilder.fromUriString(clientProperties.getUrl())
@@ -138,7 +135,7 @@ public class DpiClient {
 	}
 
 	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1out~1{id}~1statuses/get
-	@Retryable(retryFor = AbstractDokdistdpiTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = AbstractDokdistdpiTechnicalException.class, multiplier = BACKOFF_MULTIPLIER)
 	public List<ForsendelseStatusResponse> hentForsendelseStatus(String konversasjonId) {
 		log.info("Skal hente forsendelsestatus for konversasjonId={}", konversasjonId);
 

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
@@ -49,7 +49,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @EnableAutoConfiguration
 @SpringBootTest(classes = {ApplicationTestConfig.class},
 		webEnvironment = RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock
 @ActiveProfiles("itest")
 public class Qdist014IT {
 
@@ -212,6 +212,7 @@ public class Qdist014IT {
 							{
 							  "forsendelseId" : 1720847,
 							  "forsendelseStatus" : "EKSPEDERT",
+							  "konversasjonId" : null,
 							  "digitalLeverandoeradresse" : "984661185",
 							  "digitalPostkasseadresse" : "dokdistdpi@digipost.no"
 							}

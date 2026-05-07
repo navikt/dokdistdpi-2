@@ -5,8 +5,7 @@ import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import no.nav.dokdistdpi.exception.functional.LagreJuridiskLoggFunctionalException;
 import no.nav.dokdistdpi.exception.technical.LagreJuridiskLoggTechnicalException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -14,7 +13,6 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import static java.lang.String.format;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -34,7 +32,7 @@ public class JuridiskLoggConsumer {
 				.build();
 	}
 
-	@Retryable(retryFor = LagreJuridiskLoggTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = LagreJuridiskLoggTechnicalException.class, multiplier = BACKOFF_MULTIPLIER)
 	public LoggMeldingResponse lagreJuridiskLogg(final LoggMeldingRequest loggMeldingRequest) {
 		try {
 			return restClient.post()

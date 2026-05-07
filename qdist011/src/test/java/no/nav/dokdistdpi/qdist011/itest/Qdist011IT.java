@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -54,7 +54,7 @@ import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 @EnableAutoConfiguration
 @SpringBootTest(classes = {ApplicationTestConfig.class},
 		webEnvironment = RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock
 @ActiveProfiles("itest")
 public class Qdist011IT {
 
@@ -310,7 +310,7 @@ public class Qdist011IT {
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-		verify(3, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+		verify(4, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
 		verify(0, postRequestedFor(urlEqualTo("/safgraphql")));
 		verify(0, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 	}

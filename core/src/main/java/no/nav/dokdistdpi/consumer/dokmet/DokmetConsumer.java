@@ -12,8 +12,7 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -22,8 +21,6 @@ import static java.lang.String.format;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT020_CACHE;
 import static no.nav.dokdistdpi.config.cache.CacheConfig.TKAT021_CACHE;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_DELAY;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
@@ -50,7 +47,7 @@ public class DokmetConsumer {
 	}
 
 	@Cacheable(value = TKAT020_CACHE)
-	@Retryable(retryFor = DokmetTechnicalException.class, maxAttempts = 5, backoff = @Backoff(delay = 200))
+	@Retryable(includes = DokmetTechnicalException.class)
 	public DistribusjonInfo hentDokumenttypeInfo(final String dokumenttypeId) {
 
 		return webClient.get()
@@ -64,7 +61,7 @@ public class DokmetConsumer {
 	}
 
 	@Cacheable(TKAT021_CACHE)
-	@Retryable(retryFor = DokmetTechnicalException.class, backoff = @Backoff(delay = BACKOFF_DELAY, multiplier = BACKOFF_MULTIPLIER))
+	@Retryable(includes = DokmetTechnicalException.class)
 	public VarselInfo getVarselInfo(String varselTypeId) {
 		return webClient.get()
 				.uri(VARSELTYPE_INFO_URL, varselTypeId)

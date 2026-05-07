@@ -11,7 +11,7 @@ import no.nav.dokdistdpi.exception.technical.SafJournalpostQueryUnauthorizedExce
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -49,7 +49,7 @@ public class SafGraphqlConsumer {
 				.build();
 	}
 
-	@Retryable(retryFor = SafJournalpostQueryTechnicalException.class)
+	@Retryable(includes = SafJournalpostQueryTechnicalException.class)
 	public SafJournalpostResponse performQuery(GraphQLRequest graphQLRequest) {
 		SafJsonJournalpost response = restClientTexas.post()
 				.uri("/graphql")

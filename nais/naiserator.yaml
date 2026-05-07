@@ -23,6 +23,7 @@ spec:
               -XX:MaxRAMPercentage=75
               -XX:MaxHeapFreeRatio=55
               -Dreactor.schedulers.defaultBoundedElasticOnVirtualThreads=true
+              -Dio.netty.allocator.type=pooled
               $(JAVA_PROXY_OPTIONS) $(JAVA_TRUSTSTORE_OPTIONS)"
     - name: AZURE_APP_TOKEN_URL
       value: {{AZURE_APP_TOKEN_URL}}
@@ -131,8 +132,6 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
-      destinations:
-        - id: "elastic-apm"
     logging:
       destinations:
         - id: elastic
