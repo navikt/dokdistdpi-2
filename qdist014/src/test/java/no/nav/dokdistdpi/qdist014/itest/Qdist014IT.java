@@ -212,7 +212,6 @@ public class Qdist014IT {
 							{
 							  "forsendelseId" : 1720847,
 							  "forsendelseStatus" : "EKSPEDERT",
-							  "konversasjonId" : null,
 							  "digitalLeverandoeradresse" : "984661185",
 							  "digitalPostkasseadresse" : "dokdistdpi@digipost.no"
 							}

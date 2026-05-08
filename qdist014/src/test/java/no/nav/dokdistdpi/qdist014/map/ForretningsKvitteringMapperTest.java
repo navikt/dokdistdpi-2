@@ -1,8 +1,7 @@
 package no.nav.dokdistdpi.qdist014.map;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.dokdistdpi.consumer.dpi.JacksonConfig;
+import tools.jackson.databind.json.JsonMapper;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.LeveringsKvittering;
@@ -26,8 +25,8 @@ class ForretningsKvitteringMapperTest {
 
 	@BeforeEach
 	void setUp() {
-		ObjectMapper dpiObjectMapper = new JacksonConfig().dpiObjectMapper();
-		mapper = new ForretningsKvitteringMapper(new DpiKvitteringMapper(dpiObjectMapper), dpiObjectMapper);
+		JsonMapper jsonMapper = JsonMapper.builder().build();
+		mapper = new ForretningsKvitteringMapper(new DpiKvitteringMapper(jsonMapper), jsonMapper);
 	}
 
 	@Test

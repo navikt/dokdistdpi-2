@@ -1,11 +1,9 @@
 package no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
-
-import java.io.IOException;
 
 public class SimpleSBDSerializer extends StdSerializer<SimpleStandardBusinessDocument> {
 
@@ -14,14 +12,14 @@ public class SimpleSBDSerializer extends StdSerializer<SimpleStandardBusinessDoc
 	}
 
 	@Override
-	public void serialize(SimpleStandardBusinessDocument value, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
+	public void serialize(SimpleStandardBusinessDocument value, JsonGenerator gen, SerializationContext serializationContext) {
 		gen.writeStartObject();
-		gen.writeObjectFieldStart("standardBusinessDocument");
-		gen.writeFieldName("standardBusinessDocumentHeader");
-		gen.writeObject(value.getStandardBusinessDocumentHeader());
+		gen.writeObjectPropertyStart("standardBusinessDocument");
+		gen.writeName("standardBusinessDocumentHeader");
+		gen.writePOJO(value.getStandardBusinessDocumentHeader());
 		if (value.getStandardBusinessDocument().getAny() instanceof DigitalPost) {
-			gen.writeFieldName("digital");
-			gen.writeObject(value.getStandardBusinessDocument().getAny());
+			gen.writeName("digital");
+			gen.writePOJO(value.getStandardBusinessDocument().getAny());
 		} else {
 			throw new UnsupportedOperationException("Kun digitalmelding er støttet.");
 		}

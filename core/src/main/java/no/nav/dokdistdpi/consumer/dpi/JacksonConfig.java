@@ -1,15 +1,15 @@
 package no.nav.dokdistdpi.consumer.dpi;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.ext.javatime.deser.InstantDeserializer;
+import tools.jackson.databind.module.SimpleModule;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -19,26 +19,26 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQueries;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.DEFAULT_ZONE_ID;
 
 @Configuration
 public class JacksonConfig {
 
 	@Bean
-	@Qualifier("dpiObjectMapper")
-	public ObjectMapper dpiObjectMapper() {
-		return new Jackson2ObjectMapperBuilder()
-				.deserializerByType(OffsetDateTime.class, new IsoDateTimeDeserializer())
-				.modulesToInstall(new JavaTimeModule())
-				.serializationInclusion(NON_NULL)
-				.featuresToEnable(
-						SerializationFeature.INDENT_OUTPUT,
-						MapperFeature.DEFAULT_VIEW_INCLUSION)
-				.featuresToDisable(
-						SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
-						SerializationFeature.CLOSE_CLOSEABLE,
-						JsonGenerator.Feature.AUTO_CLOSE_TARGET).build();
+	public JacksonModule dpiOffsetDateTimeModule() {
+		var module = new SimpleModule("DpiOffsetDateTimeModule");
+		module.addDeserializer(OffsetDateTime.class, new IsoDateTimeDeserializer());
+		return module;
+	}
+
+	@Bean
+	public JsonMapperBuilderCustomizer dpiJsonMapperCustomizer() {
+		return builder -> builder
+				.changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+				.enable(SerializationFeature.INDENT_OUTPUT)
+				.enable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+				.disable(SerializationFeature.CLOSE_CLOSEABLE)
+				.disable(StreamWriteFeature.AUTO_CLOSE_TARGET);
 	}
 
 	private static final class IsoDateTimeDeserializer extends InstantDeserializer<OffsetDateTime> {
@@ -51,7 +51,9 @@ public class JacksonConfig {
 					a -> OffsetDateTime.ofInstant(Instant.ofEpochMilli(a.value), a.zoneId),
 					a -> OffsetDateTime.ofInstant(Instant.ofEpochSecond(a.integer, a.fraction), a.zoneId),
 					(d, z) -> d.withOffsetSameInstant(z.getRules().getOffset(d.toLocalDateTime())),
-					true // yes, replace +0000 with Z
+					true, // replace +0000 with Z
+					false, // normalizeZoneId
+					false  // adjustToContextTZOverride
 			);
 		}
 

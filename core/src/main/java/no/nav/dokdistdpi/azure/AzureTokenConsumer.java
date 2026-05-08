@@ -1,7 +1,7 @@
 package no.nav.dokdistdpi.azure;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.resilience.annotation.Retryable;
@@ -25,12 +25,12 @@ public class AzureTokenConsumer implements TokenConsumer {
 	private static final String AZURE_TOKEN_INSTANCE = "azuretoken";
 	private final AzureProperties azureProperties;
 	private final WebClient webClient;
-	private final ObjectMapper objectMapper;
+	private final JsonMapper jsonMapper;
 
 	public AzureTokenConsumer(AzureProperties azureProperties,
-							  WebClient webClient, ObjectMapper objectMapper) {
+							  WebClient webClient, JsonMapper jsonMapper) {
 		this.azureProperties = azureProperties;
-		this.objectMapper = objectMapper;
+		this.jsonMapper = jsonMapper;
 		this.webClient = webClient.mutate()
 				.defaultHeader(CONTENT_TYPE, APPLICATION_FORM_URLENCODED_VALUE)
 				.baseUrl(azureProperties.getOpenidConfigTokenEndpoint())
@@ -56,9 +56,9 @@ public class AzureTokenConsumer implements TokenConsumer {
 				.block();
 
 		try {
-			Map<String, Object> tokenData = objectMapper.readValue(responseJson, Map.class);
+			Map<String, Object> tokenData = jsonMapper.readValue(responseJson, Map.class);
 			return (String) tokenData.get("access_token");
-		} catch (JsonProcessingException | ClassCastException e) {
+		} catch (JacksonException | ClassCastException e) {
 			throw new AzureTokenException(format("Klarte ikke parse token fra Azure. Feilmelding=%s", e.getMessage()), e);
 		}
 	}

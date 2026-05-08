@@ -1,7 +1,7 @@
 package no.nav.dokdistdpi.qdist014;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
 import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
@@ -17,24 +17,24 @@ public class BehandleForretningskvitteringService {
 
 	private final ForretningsKvitteringMapper forretningsKvitteringMapper;
 	private final LagreJuridiskLoggService lagreJuridiskLoggService;
-	private final ObjectMapper dpiObjectMapper;
+	private final JsonMapper jsonMapper;
 
 	public BehandleForretningskvitteringService(ForretningsKvitteringMapper forretningsKvitteringMapper,
 												LagreJuridiskLoggService lagreJuridiskLoggService,
-												ObjectMapper dpiObjectMapper) {
+												JsonMapper jsonMapper) {
 		this.forretningsKvitteringMapper = forretningsKvitteringMapper;
 		this.lagreJuridiskLoggService = lagreJuridiskLoggService;
-		this.dpiObjectMapper = dpiObjectMapper;
+		this.jsonMapper = jsonMapper;
 	}
 
 	@Handler
 	public DpiMelding behandleForretningskvittering(String sbdJsonString, Exchange exchange) {
 		try {
-			SimpleStandardBusinessDocument simpleSbd = dpiObjectMapper.readValue(sbdJsonString, SimpleStandardBusinessDocument.class);
+			SimpleStandardBusinessDocument simpleSbd = jsonMapper.readValue(sbdJsonString, SimpleStandardBusinessDocument.class);
 			lagreJuridiskLoggService.lagreJuridiskLogg(new JuridiskLoggMetadata(simpleSbd.getDokumentKonversasjonId(), simpleSbd.getSender(), simpleSbd.getReceiver()), sbdJsonString);
 			exchange.setProperty(PROPERTY_CONVERSATION_ID, simpleSbd.getConversationId());
 			return forretningsKvitteringMapper.mapForretningsKvittering(simpleSbd, sbdJsonString);
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 		}
 	}

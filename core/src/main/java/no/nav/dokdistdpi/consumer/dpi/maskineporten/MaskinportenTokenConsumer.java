@@ -56,9 +56,6 @@ public class MaskinportenTokenConsumer {
 									 RestTemplateBuilder restTemplateBuilder) {
 		this.maskinportenProperties = maskinportenProperties;
 		this.restTemplate = restTemplateBuilder
-				.messageConverters(
-						new FormHttpMessageConverter(),
-						new MappingJackson2HttpMessageConverter())
 				.errorHandler(new OidcErrorHandler())
 				.build();
 	}

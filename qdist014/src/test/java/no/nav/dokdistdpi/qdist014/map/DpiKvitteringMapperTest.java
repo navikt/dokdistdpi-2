@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.qdist014.map;
 
-import no.nav.dokdistdpi.consumer.dpi.JacksonConfig;
+import tools.jackson.databind.json.JsonMapper;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class DpiKvitteringMapperTest {
 
-	private final DpiKvitteringMapper dpiKvitteringMapper = new DpiKvitteringMapper(new JacksonConfig().dpiObjectMapper());
+	private final DpiKvitteringMapper dpiKvitteringMapper = new DpiKvitteringMapper(JsonMapper.builder().build());
 
 	@Test
 	void shouldMapLeveringskvittering() {

@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.consumer.saf.graphql;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.saf.journalpost.SafJournalpostResponse;
@@ -35,14 +35,14 @@ public class SafGraphqlConsumer {
 	private static final String CLASSIFICATION_VALIDATIONERROR = "ValidationError";
 
 	private final RestClient restClientTexas;
-	private final ObjectMapper objectMapper;
+	private final JsonMapper jsonMapper;
 	private final DokdistdpiProperties.AppEndpoint safEndpoint;
 
 	public SafGraphqlConsumer(RestClient restClientTexas,
-							  ObjectMapper objectMapper,
+							  JsonMapper jsonMapper,
 							  DokdistdpiProperties dokdistdpiProperties) {
 		this.safEndpoint = dokdistdpiProperties.getEndpoints().getSaf();
-		this.objectMapper = objectMapper;
+		this.jsonMapper = jsonMapper;
 		this.restClientTexas = restClientTexas.mutate()
 				.baseUrl(safEndpoint.getUrl())
 				.defaultHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -86,7 +86,7 @@ public class SafGraphqlConsumer {
 	}
 
 	private void handleError(ClientHttpResponse res) throws IOException {
-		ProblemDetail problemDetail = objectMapper.readValue(res.getBody(), ProblemDetail.class);
+		ProblemDetail problemDetail = jsonMapper.readValue(res.getBody(), ProblemDetail.class);
 		if (res.getStatusCode().is5xxServerError()) {
 			throw new SafJournalpostQueryTechnicalException(format("Tjenesten SAF (graphQL) feilet med status: %s, feilmelding: %s", problemDetail.getStatus(), problemDetail.getDetail()));
 		}
