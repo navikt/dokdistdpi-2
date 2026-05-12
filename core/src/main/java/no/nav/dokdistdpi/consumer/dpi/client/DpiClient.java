@@ -7,7 +7,7 @@ import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.config.prop.DpiClientProperties;
+import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusIkkeFunnetException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
@@ -77,17 +77,17 @@ public class DpiClient {
 	private final WebClient oauth2WebClient;
 	private final Retry retry;
 	private final CircuitBreaker circuitBreaker;
-	private final DpiClientProperties clientProperties;
+	private final DokdistdpiProperties.Dpi dpiConfig;
 
 	public DpiClient(WebClient oauth2WebClient,
 					 RestTemplateBuilder restTemplateBuilder,
-					 DpiClientProperties clientProperties,
+					 DokdistdpiProperties dokdistdpiProperties,
 					 CircuitBreakerRegistry circuitBreakerRegistry,
 					 RetryRegistry retryRegistry) {
-		this.clientProperties = clientProperties;
+		this.dpiConfig = dokdistdpiProperties.getEndpoints().getDpi();
 		this.restTemplate = restTemplateBuilder.build();
 		this.oauth2WebClient = oauth2WebClient.mutate()
-				.baseUrl(clientProperties.getUrl())
+				.baseUrl(dpiConfig.getUrl())
 				.build();
 		this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(RESILIENCE4J_INSTANCE);
 		this.retry = retryRegistry.retry(RESILIENCE4J_INSTANCE);
@@ -97,9 +97,9 @@ public class DpiClient {
 	@Retryable(includes = AbstractDokdistdpiTechnicalException.class, multiplier = BACKOFF_MULTIPLIER)
 	public String sendDpiForsendelse(MultipartBodyBuilder multipartBodyBuilder, Forsendelse forsendelse) {
 
-		String uri = UriComponentsBuilder.fromUriString(clientProperties.getUrl())
+		String uri = UriComponentsBuilder.fromUriString(dpiConfig.getUrl())
 				.path(SEND_PATH)
-				.queryParam(QUERY_PARAM_KANAL, clientProperties.getMpckanal())
+				.queryParam(QUERY_PARAM_KANAL, dpiConfig.getMpckanal())
 				.toUriString();
 
 		String konversasjonId = forsendelse.getKonversasjonId();
@@ -188,8 +188,8 @@ public class DpiClient {
 		return oauth2WebClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.pathSegment(MESSAGES_PATH_IN)
-						.queryParam(QUERY_PARAM_KANAL, clientProperties.getMpckanal())
-						.queryParam(QUERY_PARAM_PAGESIZE, clientProperties.getPagesize())
+						.queryParam(QUERY_PARAM_KANAL, dpiConfig.getMpckanal())
+						.queryParam(QUERY_PARAM_PAGESIZE, dpiConfig.getPagesize())
 						.queryParam(QUERY_PARAM_PAGE, page)
 						.build())
 				.accept(APPLICATION_JSON, APPLICATION_PROBLEM_JSON)

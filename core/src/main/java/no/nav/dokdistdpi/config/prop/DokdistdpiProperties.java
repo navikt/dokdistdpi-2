@@ -44,9 +44,7 @@ public class DokdistdpiProperties {
 	@Data
 	public static class Sdist003 {
 		private boolean autostartup;
-		/**
-		 * Tid mellom hver poll av kvitteringer fra DPI. Eksempel: 10m
-		 */
+		/// Tid mellom hver poll av kvitteringer fra DPI. Eksempel: 10m
 		@NotNull
 		private Duration polldelay;
 	}
@@ -54,17 +52,13 @@ public class DokdistdpiProperties {
 	@Data
 	public static class Sdist005 {
 		private boolean autostartup;
-		/**
-		 * Tid mellom hver poll av uvkitterte meldinger.
-		 */
+		/// Tid mellom hver poll av ukvitterte meldinger. Eksempel: 10m
 		@NotNull
 		private Duration polldelay;
 
-		/**
-		 * https://camel.apache.org/components/3.16.x/scheduler-component.html
-		 *
-		 * @return camel URI som konfigurerer sdist005
-		 */
+		/// [camel scheduler](https://camel.apache.org/components/3.16.x/scheduler-component.html)
+		///
+		/// @return camel URI som konfigurerer sdist005 polling
 		public String camelUri() {
 			return "scheduler://sdist005?timeUnit=SECONDS" +
 					"&initialDelay=5" +
@@ -74,13 +68,15 @@ public class DokdistdpiProperties {
 
 	@Data
 	public static class Endpoints {
+		@Valid
+		private final Dpi dpi = new Dpi();
+
 		@NotEmpty
 		String dokmetUrl;
+
 		@NotEmpty
 		String juridisklogg;
-		/**
-		 * URL til dokdistadmin api.
-		 */
+
 		@NotNull
 		private AppEndpoint dokdistadmin;
 
@@ -89,20 +85,15 @@ public class DokdistdpiProperties {
 
 		@NotNull
 		private AppEndpoint digdir;
-
 	}
 
 	@Data
 	public static class AppEndpoint {
-		/**
-		 * Url til tjeneste som har azure autorisasjon
-		 */
+		/// Url til tjeneste som har azure autorisasjon
 		@NotEmpty
 		private String url;
 
-		/**
-		 * Scope til azure client credential flow
-		 */
+		/// Scope til azure client credential flow
 		@NotEmpty
 		private String scope;
 	}
@@ -120,4 +111,15 @@ public class DokdistdpiProperties {
 		private int minimumAntallSekunderMellomSlackvarsel;
 	}
 
+	@Data
+	public static class Dpi {
+		@NotEmpty
+		private String url;
+
+		@NotEmpty
+		private String mpckanal;
+
+		@Positive
+		private int pagesize;
+	}
 }
