@@ -1,13 +1,11 @@
 package no.nav.dokdistdpi.sdist003;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.json.JsonMapper;
 import com.nimbusds.jose.JOSEObject;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.jms.JMSException;
 import jakarta.jms.Queue;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.dokdistdpi.config.prop.DpiClientProperties;
+import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.dpi.client.DpiClient;
 import no.nav.dokdistdpi.consumer.dpi.client.HentKvitteringResponse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.sbdh.SimpleStandardBusinessDocument;
@@ -19,6 +17,8 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.text.ParseException;
 import java.util.concurrent.Callable;
@@ -31,20 +31,20 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 public class Sdist003Service {
 
 	private static final int MAX_PAGES = 100;
-	private final DpiClientProperties dpiClientProperties;
+	private final DokdistdpiProperties.Dpi dpiConfig;
 	private final DpiClient dpiClient;
 	private final ProducerTemplate producerTemplate;
 	private final Queue qdist014;
 	private final JsonMapper jsonMapper;
 	private final SlackService slackService;
 
-	public Sdist003Service(DpiClientProperties dpiClientProperties,
+	public Sdist003Service(DokdistdpiProperties dokdistdpiProperties,
 						   DpiClient dpiClient,
 						   ProducerTemplate producerTemplate,
 						   Queue qdist014,
 						   JsonMapper jsonMapper,
 						   SlackService slackService) {
-		this.dpiClientProperties = dpiClientProperties;
+		this.dpiConfig = dokdistdpiProperties.getEndpoints().getDpi();
 		this.dpiClient = dpiClient;
 		this.producerTemplate = producerTemplate;
 		this.qdist014 = qdist014;
@@ -80,7 +80,7 @@ public class Sdist003Service {
 	}
 
 	private boolean scheduleNewPagePredicate(Long antallKvitteringer, AtomicInteger page) {
-		return antallKvitteringer == dpiClientProperties.getPagesize() && page.get() < MAX_PAGES;
+		return antallKvitteringer == dpiConfig.getPagesize() && page.get() < MAX_PAGES;
 	}
 
 	private String getForretningsmeldingFromJwt(HentKvitteringResponse hentKvitteringResponse) {

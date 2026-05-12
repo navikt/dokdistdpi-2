@@ -6,8 +6,8 @@
   "INGRESSES": [
     "https://dokdistdpi-2.intern.nav.no"
   ],
-  "DPI_URL": "https://srest.dataplatfor.ms/dpi/messages",
-  "DPI_MPCKANAL": "dokdistdpi-p",
+  "DOKDISTDPI_ENDPOINTS_DPI_URL": "https://srest.dataplatfor.ms/dpi/messages",
+  "DOKDISTDPI_ENDPOINTS_DPI_MPCKANAL": "dokdistdpi-p",
   "DOKDISTDPI_ENDPOINTS_JURIDISKLOGG": "https://app.adeo.no/juridisklogg",
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://prod-fss.teamdokumenthandtering.dokdistadmin/.default",
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_URL": "http://dokdistadmin.teamdokumenthandtering.svc.nais.local/rest/v1/administrerforsendelse",

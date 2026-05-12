@@ -6,15 +6,14 @@ import no.nav.dokdistdpi.config.OAuthEnabledWebClientConfig;
 import no.nav.dokdistdpi.config.WebClientConfig;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.config.prop.DokdistmellomlagerProperties;
-import no.nav.dokdistdpi.config.prop.DpiClientProperties;
 import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.config.prop.MqGatewayProperties;
 import no.nav.dokdistdpi.config.prop.NaisProperties;
 import no.nav.dokdistdpi.config.prop.ServiceuserProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.resilience.annotation.EnableResilientMethods;
 
@@ -22,7 +21,6 @@ import org.springframework.resilience.annotation.EnableResilientMethods;
 		ServiceuserProperties.class,
 		MaskinportenProperties.class,
 		MqGatewayProperties.class,
-		DpiClientProperties.class,
 		KeyStoreProperties.class,
 		DokdistmellomlagerProperties.class,
 		DokdistdpiProperties.class,
@@ -36,7 +34,7 @@ import org.springframework.resilience.annotation.EnableResilientMethods;
 @EnableResilientMethods
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 public class Application {
-	public static void main(String[] args) {
+	static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
 }

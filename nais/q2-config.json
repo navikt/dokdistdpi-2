@@ -6,8 +6,8 @@
   "INGRESSES": [
     "https://dokdistdpi-2.dev.intern.nav.no"
   ],
-  "DPI_URL": "https://sandbox1.ediex.no/api/v2/dpi/messages",
-  "DPI_MPCKANAL": "dokdistdpi-q",
+  "DOKDISTDPI_ENDPOINTS_DPI_URL": "https://sandbox1.ediex.no/api/v2/dpi/messages",
+  "DOKDISTDPI_ENDPOINTS_DPI_MPCKANAL": "dokdistdpi-q",
   "DOKDISTDPI_ENDPOINTS_JURIDISKLOGG": "https://app-q1.adeo.no/juridisklogg",
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_SCOPE": "api://dev-fss.teamdokumenthandtering.dokdistadmin/.default",
   "DOKDISTDPI_ENDPOINTS_DOKDISTADMIN_URL": "http://dokdistadmin.teamdokumenthandtering.svc.nais.local/rest/v1/administrerforsendelse",
@@ -25,7 +25,7 @@
   "DOKDISTDPI_QDIST011_DIST_TIL_DPI_KBQ_QUEUENAME": "QA.Q2_DOKDISTDPI.QDIST011_DIST_TIL_DPI_KBQ",
   "DOKDISTDPI_QDIST014_KVITTERING_FRA_DPI_QUEUENAME": "QA.Q2_DOKDISTDPI.QDIST014_KVITTERING_FRA_DPI",
   "DOKDISTDPI_QDIST014_FUNK_FEIL_QUEUENAME": "QA.Q2_DOKDISTDPI.QDIST014_KVITTERING_FUNK_FEIL",
-  "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.Q1_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
+  "DOKDISTSENTRALPRINT_QDIST009_DIST_S_PRINT_QUEUENAME": "QA.Q2_DOKDISTSENTRALPRINT.QDIST009_DIST_S_PRINT",
   "NAV_VIRKSOMHETSSERTIFIKAT_VAULT": "/secret/virksomhetssertifikat/preprod/shared",
   "NAV_VIRKSOMHETSSERTIFIKAT_CREDENTIALS": "/secrets/virksomhetssertifikat/credentials_2024-03.json",
   "NAV_VIRKSOMHETSSERTIFIKAT_KEY": "/secrets/virksomhetssertifikat/1956923288254923191157769-2024-03-19.p12.b64",
