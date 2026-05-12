@@ -1,8 +1,8 @@
 package no.nav.dokdistdpi.qdist014.map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType;
@@ -23,10 +23,10 @@ class DpiKvitteringMapper {
 														   "Nav setter ikke aapningskvittering og kan ikke behandle denne";
 	static final String MOTTAKSKVITTERING_ERROR_MESSAGE = "Denne kvitteringen leveres tilbake så fort utskrift og forsendelsestjenesten har mottatt forsendelsen og validert at den kan skrives ut. " +
 														  "Nav benytter seg ikke utskriftstjenesten til DPI og kan ikke behandle denne";
-	private final ObjectMapper dpiObjectMapper;
+	private final JsonMapper jsonMapper;
 
-	public DpiKvitteringMapper(ObjectMapper dpiObjectMapper) {
-		this.dpiObjectMapper = dpiObjectMapper;
+	public DpiKvitteringMapper(JsonMapper jsonMapper) {
+		this.jsonMapper = jsonMapper;
 	}
 
 	DpiKvittering mapKvittering(KvitteringType kvitteringType, String jsonPayload) {
@@ -43,29 +43,29 @@ class DpiKvitteringMapper {
 				// https://docs.digdir.no/dpi_feil.html
 				case FEILET -> mapFeilet(jsonPayload);
 			};
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 		}
 	}
 
-	private DpiKvittering mapVarslingfeilet(String jsonPayload) throws JsonProcessingException {
-		JsonNode jsonNode = dpiObjectMapper.readTree(jsonPayload);
+	private DpiKvittering mapVarslingfeilet(String jsonPayload) {
+		JsonNode jsonNode = jsonMapper.readTree(jsonPayload);
 		JsonNode varslingfeiletJsonNode = jsonNode.path(SBD).path(VARSLINGFEILET.getValue());
-		VarslingFeiletKvittering varslingfeiletKvittering = dpiObjectMapper.convertValue(varslingfeiletJsonNode, VarslingFeiletKvittering.class);
+		VarslingFeiletKvittering varslingfeiletKvittering = jsonMapper.convertValue(varslingfeiletJsonNode, VarslingFeiletKvittering.class);
 		return new DpiKvittering(null, varslingfeiletKvittering, null);
 	}
 
-	private DpiKvittering mapLevering(String jsonPayload) throws JsonProcessingException {
-		JsonNode jsonNode = dpiObjectMapper.readTree(jsonPayload);
+	private DpiKvittering mapLevering(String jsonPayload) {
+		JsonNode jsonNode = jsonMapper.readTree(jsonPayload);
 		JsonNode leveringJsonNode = jsonNode.path(SBD).path(LEVERING.getValue());
-		LeveringsKvittering leveringKvittering = dpiObjectMapper.convertValue(leveringJsonNode, LeveringsKvittering.class);
+		LeveringsKvittering leveringKvittering = jsonMapper.convertValue(leveringJsonNode, LeveringsKvittering.class);
 		return new DpiKvittering(null, null, leveringKvittering);
 	}
 
-	private DpiKvittering mapFeilet(String jsonPayload) throws JsonProcessingException {
-		JsonNode jsonNode = dpiObjectMapper.readTree(jsonPayload);
+	private DpiKvittering mapFeilet(String jsonPayload) {
+		JsonNode jsonNode = jsonMapper.readTree(jsonPayload);
 		JsonNode feilJsonNode = jsonNode.path(SBD).path(FEILET.getValue());
-		DpiFeilKvittering feilKvittering = dpiObjectMapper.convertValue(feilJsonNode, DpiFeilKvittering.class);
+		DpiFeilKvittering feilKvittering = jsonMapper.convertValue(feilJsonNode, DpiFeilKvittering.class);
 		return new DpiKvittering(feilKvittering, null, null);
 	}
 }

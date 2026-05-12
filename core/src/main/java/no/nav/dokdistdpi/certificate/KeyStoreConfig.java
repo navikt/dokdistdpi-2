@@ -1,10 +1,9 @@
 package no.nav.dokdistdpi.certificate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,10 +21,10 @@ public class KeyStoreConfig {
 		if (!Files.exists(credentialsJsonPath)) {
 			throw new IllegalArgumentException("credentials med path=" + credentials + " finnes ikke");
 		}
-		ObjectMapper objectMapper = new ObjectMapper();
+		JsonMapper jsonMapper = JsonMapper.builder().build();
 		try {
-			return objectMapper.readValue(credentialsJsonPath.toFile(), KeyStoreCredentials.class);
-		} catch (IOException e) {
+			return jsonMapper.readValue(credentialsJsonPath.toFile(), KeyStoreCredentials.class);
+		} catch (RuntimeException e) {
 			// Rethrower ikke exception for å ikke risikere at innhold dumpes til loggen
 			throw new IllegalArgumentException("Klarte ikke lese credentials json");
 		}

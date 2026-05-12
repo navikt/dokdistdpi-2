@@ -1,7 +1,7 @@
 package no.nav.dokdistdpi.sdist003;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import com.nimbusds.jose.JOSEObject;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.jms.JMSException;
@@ -35,20 +35,20 @@ public class Sdist003Service {
 	private final DpiClient dpiClient;
 	private final ProducerTemplate producerTemplate;
 	private final Queue qdist014;
-	private final ObjectMapper dpiObjectMapper;
+	private final JsonMapper jsonMapper;
 	private final SlackService slackService;
 
 	public Sdist003Service(DpiClientProperties dpiClientProperties,
 						   DpiClient dpiClient,
 						   ProducerTemplate producerTemplate,
 						   Queue qdist014,
-						   ObjectMapper dpiObjectMapper,
+						   JsonMapper jsonMapper,
 						   SlackService slackService) {
 		this.dpiClientProperties = dpiClientProperties;
 		this.dpiClient = dpiClient;
 		this.producerTemplate = producerTemplate;
 		this.qdist014 = qdist014;
-		this.dpiObjectMapper = dpiObjectMapper;
+		this.jsonMapper = jsonMapper;
 		this.slackService = slackService;
 	}
 
@@ -93,12 +93,12 @@ public class Sdist003Service {
 
 	private Kvittering mapPayloadToSimpleSbd(String forretningsmeldingPayload) {
 		try {
-			Kvittering kvittering = new Kvittering(dpiObjectMapper.readValue(forretningsmeldingPayload, SimpleStandardBusinessDocument.class), forretningsmeldingPayload);
+			Kvittering kvittering = new Kvittering(jsonMapper.readValue(forretningsmeldingPayload, SimpleStandardBusinessDocument.class), forretningsmeldingPayload);
 			String konversasjonId = kvittering.simpleSbd().getConversationId();
 			String type = kvittering.simpleSbd().getType();
 			log.info("Sdist003 har mottatt kvittering fra dpi aksesspunkt. konversasjonId={} og type={}", konversasjonId, type);
 			return kvittering;
-		} catch (JsonProcessingException e) {
+		} catch (JacksonException e) {
 			throw new JsonParserTechnicalException("Feilet å mappe kvittering forretningsmelding payload til SimpleStandardBusinessDocument", e);
 		}
 	}

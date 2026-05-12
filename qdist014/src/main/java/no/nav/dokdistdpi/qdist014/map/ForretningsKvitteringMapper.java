@@ -1,7 +1,7 @@
 package no.nav.dokdistdpi.qdist014.map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiKvittering;
@@ -31,18 +31,18 @@ public class ForretningsKvitteringMapper {
 	private static final Pattern EPOST_REGEX = Pattern.compile("[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*");
 
 	private final DpiKvitteringMapper dpiKvitteringMapper;
-	private final ObjectMapper dpiObjectMapper;
+	private final JsonMapper jsonMapper;
 
 	public ForretningsKvitteringMapper(DpiKvitteringMapper dpiKvitteringMapper,
-									   ObjectMapper dpiObjectMapper) {
-		this.dpiObjectMapper = dpiObjectMapper;
+									   JsonMapper jsonMapper) {
+		this.jsonMapper = jsonMapper;
 		this.dpiKvitteringMapper = dpiKvitteringMapper;
 	}
 
 	DpiMelding mapForretningsKvittering(String sbdJsonString) {
 		try {
-			return mapForretningsKvittering(dpiObjectMapper.readValue(sbdJsonString, SimpleStandardBusinessDocument.class), sbdJsonString);
-		} catch (JsonProcessingException e) {
+			return mapForretningsKvittering(jsonMapper.readValue(sbdJsonString, SimpleStandardBusinessDocument.class), sbdJsonString);
+		} catch (JacksonException e) {
 			throw new JsonParserTechnicalException("Feilet å mappe StandardBusinessDocument", e);
 		}
 	}

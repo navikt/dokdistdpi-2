@@ -1,7 +1,5 @@
 package no.nav.dokdistdpi.consumer.dpi;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.certificate.AppCertificate;
@@ -18,9 +16,10 @@ import no.nav.dokdistdpi.exception.technical.JsonParserTechnicalException;
 import org.apache.camel.Handler;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import javax.xml.crypto.dsig.DigestMethod;
 import java.security.MessageDigest;
@@ -40,15 +39,15 @@ public class DpiMeldingsformidler {
 	private final StandardBusinessDocumentMapper sbdMapper;
 	private final DigitalPostContentPackager digitalPostContentPackager;
 	private final AppCertificate appCertificate;
-	private final ObjectMapper objectMapper;
+	private final JsonMapper objectMapper;
 	private final DpiClient dpiClient;
 
 	@Autowired
-	public DpiMeldingsformidler(ObjectMapper dpiObjectMapper,
+	public DpiMeldingsformidler(JsonMapper jsonMapper,
 								StandardBusinessDocumentMapper sbdMapper,
 								DigitalPostContentPackager digitalPostContentPackager,
 								AppCertificate appCertificate, DpiClient dpiClient) {
-		this.objectMapper = dpiObjectMapper;
+		this.objectMapper = jsonMapper;
 		this.sbdMapper = sbdMapper;
 		this.digitalPostContentPackager = digitalPostContentPackager;
 		this.appCertificate = appCertificate;
@@ -103,7 +102,7 @@ public class DpiMeldingsformidler {
 			String sbdJson = objectMapper.writeValueAsString(new SimpleStandardBusinessDocument(sbd));
 			JWTClaimsSet claims = JWTClaimsSet.parse(sbdJson);
 			return appCertificate.generateJWT(claims);
-		} catch (JsonProcessingException | ParseException e) {
+		} catch (JacksonException | ParseException e) {
 			log.warn("SBD til JWT behandling feilet med feilmelding={}", e.getMessage());
 			throw new JsonParserTechnicalException("SBD til JWT behandling feilet med feilmelding={}" + e.getMessage(), e);
 		}

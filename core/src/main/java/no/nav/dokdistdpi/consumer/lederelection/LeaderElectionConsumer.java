@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.consumer.lederelection;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,15 +13,15 @@ import java.net.InetAddress;
 @Component
 public class LeaderElectionConsumer {
 	private final WebClient webClient;
-	private final ObjectMapper mapper;
+	private final JsonMapper jsonMapper;
 
 	public LeaderElectionConsumer(WebClient.Builder webClientBuilder,
-								  ObjectMapper mapper,
+								  JsonMapper jsonMapper,
 								  @Value("${elector.path}") String electorPath) {
 		this.webClient = webClientBuilder
 				.baseUrl(electorPath.startsWith("http") ? electorPath : "http://" + electorPath)
 				.build();
-		this.mapper = mapper;
+		this.jsonMapper = jsonMapper;
 	}
 
 	/**
@@ -39,9 +39,7 @@ public class LeaderElectionConsumer {
 				.bodyToMono(String.class)
 				.map(response -> {
 					try {
-						String leader = mapper.readTree(response).get("name").asText();
-						// Kommer warning her i IntelliJ men sannsynligvis ikke nødvendig å publishe denne på en egen scheduler
-						// pga blir ikke kalt ofte
+						String leader = jsonMapper.readTree(response).get("name").asText();
 						String hostname = InetAddress.getLocalHost().getHostName();
 						return hostname.equals(leader);
 					} catch (Exception e) {
