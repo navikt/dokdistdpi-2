@@ -36,7 +36,7 @@
 		<commons-io.version>2.22.0</commons-io.version>
 		<com.ibm.mq.jakarta.client.version>9.4.5.1</com.ibm.mq.jakarta.client.version>
 		<logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
-		<nimbus-jose-jwt.version>10.8</nimbus-jose-jwt.version>
+		<nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
 		<resilience4j-bom.version>2.4.0</resilience4j-bom.version>
 		<context-propagation.version>1.2.1</context-propagation.version>
 		<slack-api-client.version>1.48.1</slack-api-client.version>
