@@ -51,7 +51,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 		webEnvironment = RANDOM_PORT)
 @EnableWireMock
 @ActiveProfiles("itest")
-public class Qdist014IT {
+class Qdist014IT {
 
 	private static final String FORSENDELSE_ID = "1720847";
 	private static final String KONVERSASJON_ID = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
@@ -84,7 +84,7 @@ public class Qdist014IT {
 	private Queue backoutQueue;
 
 	@BeforeEach
-	public void setupBefore() {
+	void setupBefore() {
 		CALL_ID = UUID.randomUUID().toString();
 		stubNaisTexasToken();
 		WireMock.reset();
@@ -187,7 +187,7 @@ public class Qdist014IT {
 
 	@Test
 	void shouldProcessForsendelseWithForsendelseStatusErKlarForDist() throws IOException {
-		String dokumenttypeId =  "1111111";
+		String dokumenttypeId = "1111111";
 		stubGetFinnForsendelse("__files/rdist001/finnForsendelseresponse-happy.json", KONVERSASJON_ID, OK.value());
 		stubGetHentForsendelse("__files/rdist001/hentForsendelseresponse-KlarForDist.json", FORSENDELSE_ID, OK.value());
 		stubGetDokumentTypeInfo("__files/rdist001/hentDokumentTypeInfo-happy.json", dokumenttypeId);
@@ -212,6 +212,7 @@ public class Qdist014IT {
 							{
 							  "forsendelseId" : 1720847,
 							  "forsendelseStatus" : "EKSPEDERT",
+							  "ekspedertDato" : "2021-04-11T13:29:58.753",
 							  "digitalLeverandoeradresse" : "984661185",
 							  "digitalPostkasseadresse" : "dokdistdpi@digipost.no"
 							}
@@ -378,7 +379,7 @@ public class Qdist014IT {
 				.willReturn(aResponse()
 						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBody(classpathToString(responseBody ))));
+						.withBody(classpathToString(responseBody))));
 	}
 
 	private void stubPutVarselInfo() {

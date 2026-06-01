@@ -49,10 +49,10 @@ public class Qdist014Service {
 		exchange.setProperty(PROPERTY_BESTILLINGS_ID, bestillingId);
 		String forsendelseId = dpiKvitteringService.finnForsendelse(konversasjonsId);
 		HentForsendelseResponse hentForsendelseResponse = dpiKvitteringService.hentForsendelse(forsendelseId);
-		OpprettForsendelseRequestTo opprettForsendelseRequestTo = mapper.map(hentForsendelseResponse, bestillingId);
 		ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 
 		if (isOversendtOrBekreftet(forsendelseStatus)) {
+			OpprettForsendelseRequestTo opprettForsendelseRequestTo = mapper.map(hentForsendelseResponse, bestillingId);
 			DistribuerTilKanal distribuerTilKanal = validateReceiptAndCreateFallback(dpiMelding, opprettForsendelseRequestTo, forsendelseId);
 			exchange.setProperty(PROPERTY_FORSENDELSE_ID, distribuerTilKanal.getForsendelseId());
 			return distribuerTilKanal;

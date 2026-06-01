@@ -20,6 +20,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.lang.Long.valueOf;
@@ -57,9 +58,10 @@ public class OppdaterForsendelse {
 			ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 
 			switch (forsendelseStatus) {
-				case OVERSENDT, BEKREFTET -> oppdaterForsendelseStatusTilEkspedert(forsendelseId);
+				case OVERSENDT, BEKREFTET ->
+						oppdaterForsendelseStatusTilEkspedert(forsendelseId, dpiMelding.getTidspunkt().toLocalDateTime());
 				case KLAR_FOR_DIST ->
-						oppdaterForsendelseMedDigitalKontaktinfoOgVarsler(hentForsendelseResponse, forsendelseId);
+						oppdaterForsendelseMedDigitalKontaktinfoOgVarsler(hentForsendelseResponse, forsendelseId, dpiMelding.getTidspunkt().toLocalDateTime());
 			}
 		}
 	}
@@ -69,15 +71,18 @@ public class OppdaterForsendelse {
 				LEVERING.equals(leveringsKvittering.getKvitteringType());
 	}
 
-	private void oppdaterForsendelseStatusTilEkspedert(String forsendelseId) {
+	private void oppdaterForsendelseStatusTilEkspedert(String forsendelseId, LocalDateTime ekspedertDato) {
 		dokdistadminConsumer.oppdaterForsendelse(
 				OppdaterForsendelseRequest.builder()
 						.forsendelseId(valueOf(forsendelseId))
 						.forsendelseStatus(EKSPEDERT.name())
+						.ekspedertDato(ekspedertDato)
 						.build());
 	}
 
-	private void oppdaterForsendelseMedDigitalKontaktinfoOgVarsler(HentForsendelseResponse hentForsendelseResponse, String forsendelseId) {
+	private void oppdaterForsendelseMedDigitalKontaktinfoOgVarsler(HentForsendelseResponse hentForsendelseResponse,
+																   String forsendelseId,
+																   LocalDateTime ekspedertDato) {
 		log.info("Qdist014 oppdaterer forsendelseId={} med digital kontaktinfo og varsler", forsendelseId);
 
 		DistribusjonInfo distribusjonInfo = digitalPostService.hentDokumenttypeInfo(hentForsendelseResponse);
@@ -86,7 +91,8 @@ public class OppdaterForsendelse {
 
 		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfo, sikkerDigitalKontaktInfo);
 
-		oppdaterForsendelseDigitalKontaktinfo(Long.parseLong(forsendelseId), sikkerDigitalKontaktInfo.getLeverandoerAdresse(), sikkerDigitalKontaktInfo.getBrukerAdresse());
+		oppdaterForsendelseDigitalKontaktinfo(Long.parseLong(forsendelseId), sikkerDigitalKontaktInfo.getLeverandoerAdresse(),
+				sikkerDigitalKontaktInfo.getBrukerAdresse(), ekspedertDato);
 
 		if (varsler != null) {
 			oppdaterForsendelseVarselInfo(Long.parseLong(forsendelseId), varsler, hentForsendelseResponse.getDistribusjonstype());
@@ -94,10 +100,12 @@ public class OppdaterForsendelse {
 		log.info("Qdist014 har oppdatert forsendelseId={} med digital kontaktinfo og varsler", forsendelseId);
 	}
 
-	private void oppdaterForsendelseDigitalKontaktinfo(long forsendelseId, String leverandoerAdresse, String brukerAdresse) {
+	private void oppdaterForsendelseDigitalKontaktinfo(long forsendelseId, String leverandoerAdresse,
+													   String brukerAdresse, LocalDateTime ekspedertDato) {
 		OppdaterForsendelseRequest oppdaterForsendelseRequest = OppdaterForsendelseRequest.builder()
 				.forsendelseId(forsendelseId)
 				.forsendelseStatus(EKSPEDERT.name())
+				.ekspedertDato(ekspedertDato)
 				.digitalLeverandoeradresse(leverandoerAdresse)
 				.digitalPostkasseadresse(brukerAdresse)
 				.build();
