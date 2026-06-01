@@ -12,15 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.wiremock.spring.EnableWireMock;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.wiremock.spring.EnableWireMock;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
@@ -57,7 +56,6 @@ class Qdist014IT {
 	private static final String KONVERSASJON_ID = "37efbd4c-413d-4e2c-bbc5-257ef4a65a45";
 	private static final String OPPSLAGSNOEKKEL_KONVERSASJONSID = "konversasjonsId";
 	private static final String NY_FORSENDELSE_ID = "33333";
-	private static String CALL_ID;
 
 	private static final String HENT_DOKUMENTTYPEINFO_URL = "/rest/dokumenttypeinfo/%s";
 	private static final String HENT_VARSELINFO_URL = "/rest/varselinfo/";
@@ -85,10 +83,7 @@ class Qdist014IT {
 
 	@BeforeEach
 	void setupBefore() {
-		CALL_ID = UUID.randomUUID().toString();
 		stubNaisTexasToken();
-		WireMock.reset();
-		WireMock.resetAllRequests();
 		WireMock.removeAllMappings();
 		stubAzure();
 		stubPostJuridiskLogg();
@@ -212,7 +207,7 @@ class Qdist014IT {
 							{
 							  "forsendelseId" : 1720847,
 							  "forsendelseStatus" : "EKSPEDERT",
-							  "ekspedertDato" : "2021-04-11T13:29:58.753",
+							  "ekspedertDato" : "2021-04-11T15:29:58.753",
 							  "digitalLeverandoeradresse" : "984661185",
 							  "digitalPostkasseadresse" : "dokdistdpi@digipost.no"
 							}
@@ -449,16 +444,9 @@ class Qdist014IT {
 	}
 
 	private void sendStringMessage(Queue queue, final String message) {
-		sendStringMessage(queue, message, null);
-	}
-
-	private void sendStringMessage(Queue queue, final String message, final String callId) {
 		jmsTemplate.send(queue, session -> {
 			TextMessage msg = session.createTextMessage();
 			msg.setText(message);
-			if (callId != null) {
-				msg.setStringProperty(CALL_ID, callId);
-			}
 			return msg;
 		});
 	}

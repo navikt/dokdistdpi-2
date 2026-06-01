@@ -21,6 +21,7 @@ import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import static java.lang.Long.valueOf;
@@ -32,6 +33,8 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.PROPERTY_BESTILLINGS_ID
 @Slf4j
 @Component
 public class OppdaterForsendelse {
+
+	private static final String OSLO_ZONE_ID = "Europe/Oslo";
 
 	private final DokdistadminConsumer dokdistadminConsumer;
 	private final DpiKvitteringService dpiKvitteringService;
@@ -57,11 +60,14 @@ public class OppdaterForsendelse {
 
 			ForsendelseStatus forsendelseStatus = ForsendelseStatus.valueOf(hentForsendelseResponse.getForsendelseStatus());
 
+			final LocalDateTime ekspedertDato = dpiMelding.getTidspunkt()
+					.atZoneSameInstant(ZoneId.of(OSLO_ZONE_ID))
+					.toLocalDateTime();
+
 			switch (forsendelseStatus) {
-				case OVERSENDT, BEKREFTET ->
-						oppdaterForsendelseStatusTilEkspedert(forsendelseId, dpiMelding.getTidspunkt().toLocalDateTime());
+				case OVERSENDT, BEKREFTET -> oppdaterForsendelseStatusTilEkspedert(forsendelseId, ekspedertDato);
 				case KLAR_FOR_DIST ->
-						oppdaterForsendelseMedDigitalKontaktinfoOgVarsler(hentForsendelseResponse, forsendelseId, dpiMelding.getTidspunkt().toLocalDateTime());
+						oppdaterForsendelseMedDigitalKontaktinfoOgVarsler(hentForsendelseResponse, forsendelseId, ekspedertDato);
 			}
 		}
 	}
