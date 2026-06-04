@@ -1,6 +1,5 @@
 package no.nav.dokdistdpi.qdist014.map;
 
-import tools.jackson.databind.json.JsonMapper;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiFeilKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiKvittering;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.DpiMelding;
@@ -11,8 +10,9 @@ import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.VarslingFeil
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.FEILET;
 import static no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.kvittering.KvitteringType.LEVERING;
@@ -71,7 +71,7 @@ class DpiKvitteringMapperTest {
 	}
 
 	private static void assertCommonDpiMelding(DpiMelding dpiMelding) {
-		assertThat(dpiMelding.getTidspunkt()).isEqualTo(ZonedDateTime.parse("2021-04-11T15:29:58.753+02:00"));
+		assertThat(dpiMelding.getTidspunkt()).isEqualTo(OffsetDateTime.parse("2021-04-11T15:29:58.753+02:00"));
 		assertThat(dpiMelding.getAvsender().getVirksomhetsidentifikator().getAuthority()).isEqualTo("iso6523-actorid-upis");
 		assertThat(dpiMelding.getAvsender().getVirksomhetsidentifikator().getValue()).isEqualTo("0192:999888999");
 		assertThat(dpiMelding.getVirksomhetmottaker().getVirksomhetsidentifikator().getAuthority()).isEqualTo("iso3166-1-alfa2");
