@@ -1,30 +1,16 @@
 package no.nav.dokdistdpi.consumer.dkif;
 
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo.SikkerDigitalKontaktInfoBuilder;
-import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static no.nav.dokdistdpi.utils.ForsendelseData.makePreferertKanalSet;
-import static no.nav.dokdistdpi.utils.ForsendelseData.varslingsTekster;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class DigitalKontaktInformasjonValidatorTest {
-
-	private static final String VARSELTYPE_ID = "varseltypeId";
-	private static final boolean STOPP_REPETERENDE_VARSEL = false;
-	private static final String EPOST_VARSLINGSTEKST = "epostVarslingstekst";
-	private static final String SMS_VARSLINGSTEKST = "smsVarslingstekst";
-	private static final List<Integer> ANTALL_DAGER_LISTE = Arrays.asList(1, 2, 3);
-	private static final String PREFERERT_KANAL_SMS = "SMS";
-	private static final String PREFERERT_KANAL_EPOST = "EPOST";
 
 	private static final String EPOSTADRESSE = "epostValue";
 	private static final String MOBILNUMMER = "mobilValue";
@@ -37,75 +23,80 @@ class DigitalKontaktInformasjonValidatorTest {
 	private final DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator = new DigitalKontaktInformasjonValidator();
 
 	@Test
-	public void skalValidereOk() {
-		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder().build();
+	void skalValidereOk() {
+		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder().kanVarsles(true).build();
 
-		assertDoesNotThrow(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo, lagVarselinfo()));
+		assertDoesNotThrow(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo));
 	}
 
 	@Test
-	public void skalValidereOkHvisVarselinfoErNull() {
-		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder().build();
+	void skalValidereOkHvisVarselinfoErNull() {
+		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder()
+				.kanVarsles(true)
+				.build();
 
-		assertDoesNotThrow(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo, null));
+		assertDoesNotThrow(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo));
 	}
 
 	@Test
-	public void skalFeileHvisBrukerErReservert() {
+	void skalFeileHvisBrukerErReservert() {
 		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder()
 				.reservasjon(true)
+				.kanVarsles(false)
 				.build();
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
-				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo, lagVarselinfo()))
+				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
 				.withMessage("Bruker er reservert mot digital kommunikasjon");
 	}
 
 	@Test
-	public void skalFeileHvisLeverandoersertifikatMangler() {
+	void skalFeileHvisLeverandoersertifikatMangler() {
 		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder()
 				.leverandoerSertifikat(null)
+				.kanVarsles(false)
 				.build();
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
-				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo, lagVarselinfo()))
+				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
 				.withMessage("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler");
 	}
 
 	@Test
-	public void skalFeileHvisLeverandoeradresseMangler() {
+	void skalFeileHvisLeverandoeradresseMangler() {
 		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder()
 				.leverandoerAdresse(null)
+				.kanVarsles(true)
 				.build();
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
-				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo, lagVarselinfo()))
+				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
 				.withMessage("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler");
 	}
 
 	@Test
-	public void skalFeileHvisBrukeradresseMangler() {
+	void skalFeileHvisBrukeradresseMangler() {
 		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder()
 				.brukerAdresse(null)
-				.build();
+				.kanVarsles(true).build();
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
-				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo, lagVarselinfo()))
+				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
 				.withMessage("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler");
 	}
 
 	@ParameterizedTest
 	@ValueSource(strings = {"", " "})
 	@NullSource
-	public void skalFeileHvisBaadeEpostOgMobiltelefonnummerMangler(String epostOgMobil) {
+	void skalFeileHvisBaadeEpostOgMobiltelefonnummerMangler(String epostOgMobil) {
 		var sikkerDigitalKontaktinfo =
 				lagSikkerDigitalKontaktInfoBuilder()
 						.epostadresse(epostOgMobil)
 						.mobiltelefonnummer(epostOgMobil)
-						.build();
+						.kanVarsles(true).build();
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
-				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo, lagVarselinfo()))
+				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
 				.withMessage("Både epostadresse og mobiltelefonnummer kan ikke være null");
 	}
 
@@ -120,13 +111,14 @@ class DigitalKontaktInformasjonValidatorTest {
 				.sertifikat(HAR_SERTIFIKAT);
 	}
 
-	private VarselInfo lagVarselinfo() {
-		return VarselInfo.builder()
-				.varselTypeId(VARSELTYPE_ID)
-				.stoppRepeterendeVarsel(STOPP_REPETERENDE_VARSEL)
-				.varslingsTekst(varslingsTekster(EPOST_VARSLINGSTEKST, SMS_VARSLINGSTEKST))
-				.antallDagerListe(ANTALL_DAGER_LISTE)
-				.preferertKanal(makePreferertKanalSet(PREFERERT_KANAL_EPOST, PREFERERT_KANAL_SMS))
+	@Test
+	void skalIkkeKreveVarslingskanalerNaarKanVarslesErFalse() {
+		var info = lagSikkerDigitalKontaktInfoBuilder()
+				.kanVarsles(false)
+				.epostadresse(null)
+				.mobiltelefonnummer(null)
 				.build();
+
+		assertDoesNotThrow(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(info));
 	}
 }

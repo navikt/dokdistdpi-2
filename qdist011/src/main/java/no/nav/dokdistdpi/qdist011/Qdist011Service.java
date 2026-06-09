@@ -111,11 +111,11 @@ public class Qdist011Service {
 
 		String maskinportenToken = digitalPostService.getMaskinportenToken();
 
+		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse);
+
 		DistribusjonInfo distribusjonInfo = digitalPostService.hentDokumenttypeInfo(hentForsendelseResponse);
 
 		VarselInfo varselInfo = digitalPostService.getVarselInfo(distribusjonInfo);
-
-		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfo);
 
 		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfo, sikkerDigitalKontaktInfo);
 		Dokumentpakke dokumentpakke = getDocumentpakkeFromBucket(hentForsendelseResponse);
@@ -308,7 +308,7 @@ public class Qdist011Service {
 		try {
 			dokDistDokumentFraBucket = JsonSerializer.deserialize(jsonPayload, DokDistDokumentFraBucket.class);
 			dokDistDokumentFraBucket.setDokumentObjektReferanse(objektReferanse);
-		} catch (IllegalStateException e) {
+		} catch (IllegalStateException _) {
 			throw new KunneIkkeDeserialisereBucketPayloadException(format("Kunne ikke deserialisere jsonPayload fra bucket for dokument med dokumentobjektreferanse=%s. Dokumentet er ikke persistert til bucket med korrekt format!", objektReferanse));
 		}
 		return dokDistDokumentFraBucket;

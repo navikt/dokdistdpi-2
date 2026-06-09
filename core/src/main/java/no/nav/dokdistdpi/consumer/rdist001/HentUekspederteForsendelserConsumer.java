@@ -6,8 +6,8 @@ import no.nav.dokdistdpi.common.NavHeadersFilter;
 import no.nav.dokdistdpi.config.WebClientAzureAuthentication;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentUekspederteForsendelserResponse;
-import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
-import no.nav.dokdistdpi.exception.technical.AdminstrerForsendelseTechnicalException;
+import no.nav.dokdistdpi.exception.functional.AdministrerForsendelseFunctionalException;
+import no.nav.dokdistdpi.exception.technical.AdministrerForsendelseTechnicalException;
 import org.springframework.boot.http.codec.autoconfigure.HttpCodecsProperties;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -47,7 +47,7 @@ public class HentUekspederteForsendelserConsumer {
 				.build();
 	}
 
-	@Retryable(includes = AdminstrerForsendelseTechnicalException.class, multiplier = BACKOFF_MULTIPLIER)
+	@Retryable(includes = AdministrerForsendelseTechnicalException.class, multiplier = BACKOFF_MULTIPLIER)
 	public HentUekspederteForsendelserResponse hentForsendelserKvitteringIkkeMottatt(String distribusjonskanal, int antallTimer) {
 		log.info("hentForsendelserKvitteringIkkeMottatt henter uekspederte forsendelser med distribusjonskanal={}, antallTimer={}",
 				distribusjonskanal, antallTimer);
@@ -61,7 +61,7 @@ public class HentUekspederteForsendelserConsumer {
 				.retrieve()
 				.bodyToMono(HentUekspederteForsendelserResponse.class)
 				.defaultIfEmpty(EMPTY_UEKSPEDERTEFORSENDELSER) // Håndtering av HttpStatus NO_CONTENT (204)
-				.doOnError(this::handleError)
+				.onErrorMap(this::mapError)
 				.block();
 
 		log.info("hentForsendelserKvitteringIkkeMottatt har hentet {} uekspederte forsendelser med distribusjonskanal={}, antallTimer={}",
@@ -70,27 +70,17 @@ public class HentUekspederteForsendelserConsumer {
 		return response;
 	}
 
-	private void handleError(Throwable error) {
-		if (!(error instanceof WebClientResponseException response)) {
-			String feilmelding = format("Kall mot rdist001 feilet teknisk med feilmelding=%s", error.getMessage());
-
-			log.warn(feilmelding);
-
-			throw new AdminstrerForsendelseTechnicalException(feilmelding, error);
-		}
-
-		String feilmelding = format("Kall mot rdist001 feilet %s med status=%s, feilmelding=%s, response=%s",
-				response.getStatusCode().is4xxClientError() ? "funksjonelt" : "teknisk",
-				response.getStatusCode(),
-				response.getMessage(),
-				response.getResponseBodyAsString());
-
-		log.warn(feilmelding);
-
-		if (response.getStatusCode().is4xxClientError()) {
-			throw new AdminstrerForsendelseFunctionalException(feilmelding, error);
+	private Throwable mapError(Throwable error) {
+		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
+			return new AdministrerForsendelseFunctionalException(
+					format("Kall mot hentUekspederteforsendelser feilet funksjonell med status=%s, feilmelding=%s",
+							response.getStatusCode(),
+							response.getMessage()),
+					error);
 		} else {
-			throw new AdminstrerForsendelseTechnicalException(feilmelding, error);
+			return new AdministrerForsendelseTechnicalException(
+					format("Kall mot AdministrerForsendelse feilet teknisk med feilmelding=%s", error.getMessage()),
+					error);
 		}
 	}
 }

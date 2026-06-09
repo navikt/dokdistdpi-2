@@ -20,7 +20,6 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.APP_NAME;
-import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CONSUMER_ID;
@@ -30,7 +29,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Component
 public class DigitalKontaktinformasjonConsumer {
 
-	private final DigitalKontaktinfoMapper digitalPostKontaktinfoMapper;
 	private final TokenConsumer tokenConsumer;
 	private final RestTemplate restTemplate;
 	private final DokdistdpiProperties.AppEndpoint digdirEndpoint;
@@ -38,14 +36,13 @@ public class DigitalKontaktinformasjonConsumer {
 	public DigitalKontaktinformasjonConsumer(DokdistdpiProperties dokdistdpiProperties,
 											 TokenConsumer tokenConsumer,
 											 RestTemplateBuilder restTemplateBuilder) {
-		this.digitalPostKontaktinfoMapper = new DigitalKontaktinfoMapper();
 		this.digdirEndpoint = dokdistdpiProperties.getEndpoints().getDigdir();
 		this.tokenConsumer = tokenConsumer;
 		this.restTemplate = restTemplateBuilder.build();
 	}
 
 	@Retryable(includes = AbstractDokdistdpiTechnicalException.class)
-	public SikkerDigitalKontaktInfo hentSikkerDigitalPostadresse(final String personidentifikator) {
+	public DigitalKontaktInfoResponse.DigitalKontaktinfo hentSikkerDigitalPostadresse(final String personidentifikator) {
 		HttpHeaders headers = createHeaders();
 		final String fnrTrimmed = personidentifikator.strip();
 
@@ -55,7 +52,7 @@ public class DigitalKontaktinformasjonConsumer {
 			DigitalKontaktInfoResponse response = restTemplate.postForEntity(digdirEndpoint.getUrl() + "/rest/v1/personer?inkluderSikkerDigitalPost=true", request, DigitalKontaktInfoResponse.class).getBody();
 
 			if (isValidRespons(response, fnrTrimmed)) {
-				return digitalPostKontaktinfoMapper.mapDigitalKontaktinfo(response.getPersoner().get(fnrTrimmed), personidentifikator);
+				return response.getPersoner().get(fnrTrimmed);
 			} else {
 				throw new DigitalKontaktinformasjonFunctionalException(format("Funksjonell feil ved kall mot DigitalKontaktinformasjonV1.kontaktinformasjon. Feilmelding=%s",
 						getErrorMsg(response, fnrTrimmed)));

@@ -8,6 +8,7 @@ import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.consumer.dpi.DpiMeldingsformidler;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistAdministrerForsendelseUpdater;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
+import no.nav.dokdistdpi.exception.functional.BrukerHarIngenDigitalpostkasseException;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusEkspedertKanIkkeDistribueresException;
 import no.nav.dokdistdpi.exception.functional.UtenforKjernetidFunctionalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
@@ -38,6 +39,7 @@ public class Qdist011Route extends RouteBuilder {
 	private final Queue qdist011UtenforKjernetid;
 	private final Qdist011Service qdist011Service;
 	private final DpiMeldingsformidler dpiMeldingsformidler;
+	private final DistribuerTilPrintService distribuerTilPrintService;
 	private final DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater;
 
 	@Autowired
@@ -47,6 +49,7 @@ public class Qdist011Route extends RouteBuilder {
 						 Queue qdist011UtenforKjernetid,
 						 Qdist011Service qdist011Service,
 						 DpiMeldingsformidler dpiMeldingsformidler,
+						 DistribuerTilPrintService distribuerTilPrintService,
 						 DokdistAdministrerForsendelseUpdater administrerForsendelseUpdater) {
 		this.qdist011Properties = dokdistDpiProperties.getQdist011();
 		this.qdist011 = qdist011;
@@ -54,6 +57,7 @@ public class Qdist011Route extends RouteBuilder {
 		this.qdist011UtenforKjernetid = qdist011UtenforKjernetid;
 		this.qdist011Service = qdist011Service;
 		this.dpiMeldingsformidler = dpiMeldingsformidler;
+		this.distribuerTilPrintService = distribuerTilPrintService;
 		this.administrerForsendelseUpdater = administrerForsendelseUpdater;
 	}
 
@@ -94,6 +98,13 @@ public class Qdist011Route extends RouteBuilder {
 				.handled(true)
 				.to("jms:" + qdist011FunksjonellFeil.getQueueName());
 
+		onException(BrukerHarIngenDigitalpostkasseException.class)
+				.log(WARN, "Bruker mangler digital postkasse og forsendelse med" + getIdsForLogging() + "distribuerer til PRINT.")
+				.useOriginalMessage()
+				.handled(true)
+				.setBody(exchangeProperty(PROPERTY_FORSENDELSE_ID))
+				.to("direct:distribuer-til-print");
+
 		from("jms:" + qdist011.getQueueName() + "?transacted=true&concurrentConsumers=1")
 				.autoStartup(qdist011Properties.isAutostartup())
 				.routeId(QDIST011_SERVICE_ID)
@@ -111,6 +122,14 @@ public class Qdist011Route extends RouteBuilder {
 						.log(INFO, log, "qdist011 har oppdatert varselInfo, forsendelseStatus=OVERSENDT og avslutter behandling av forsendelse med " + getIdsForLogging())
 					.otherwise()
 						.log(WARN, log, "qdist011 kan ikke oppdatere status til OVERSENDT for forsendelse fra DPI med " + getIdsForLogging())
+				.end();
+
+		from("direct:distribuer-til-print")
+				.routeId("distribuer-til-print")
+				.setExchangePattern(InOnly)
+				.bean(distribuerTilPrintService)
+				.to("jms:" + qdist011FunksjonellFeil.getQueueName())
+				.log(INFO, log, "Forsendelse med " + logForsendelseId() + " skal distribueres via print etter at det ble oppdaget at mottaker ikke har digital postkasse.")
 				.end();
 		//@formatter:on
 	}

@@ -1,9 +1,9 @@
 package no.nav.dokdistdpi.qdist011;
 
 import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
+import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInfoResponse;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
-import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
 import no.nav.dokdistdpi.consumer.dokmet.DokmetConsumer;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
@@ -11,7 +11,6 @@ import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
-import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.dokdistdpi.qdist011.saf.SafJournalpostQueryServiceImplQdist011;
@@ -149,8 +148,8 @@ class Qdist011ServiceTest {
 
 	@Test
 	void shoudThrowExceptionIfLeverandoerSertifikatIsNull() {
-		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = createSikkerDigitalKontaktInfo();
-		sikkerDigitalKontaktInfo.setLeverandoerSertifikat(null);
+		DigitalKontaktInfoResponse.DigitalKontaktinfo sikkerDigitalKontaktInfo = createSikkerDigitalKontaktInfo();
+		sikkerDigitalKontaktInfo.getSikkerDigitalPostkasse().setLeverandoerSertifikat(null);
 
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
@@ -158,9 +157,9 @@ class Qdist011ServiceTest {
 		when(dokmetConsumer.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
 		when(dokmetConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
 
-		IllegalKontaktInformasjonFunctionalException e = assertThrows(IllegalKontaktInformasjonFunctionalException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
 
-		assertEquals("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler", e.getMessage());
+		assertEquals("LeverandoerSertifikat kan ikke være null", e.getMessage());
 	}
 
 	@Test
@@ -170,6 +169,7 @@ class Qdist011ServiceTest {
 		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(dokmetConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
+		when(dokmetConsumer.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
 
 		Forsendelse forsendelse = qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange);
 

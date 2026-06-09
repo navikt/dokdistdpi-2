@@ -19,6 +19,7 @@ public class DigitalKontaktInfoResponse {
 	@Data
 	@Builder
 	public static class DigitalKontaktinfo {
+		private String personident;
 		private String epostadresse;
 		private boolean kanVarsles;
 		private String mobiltelefonnummer;
