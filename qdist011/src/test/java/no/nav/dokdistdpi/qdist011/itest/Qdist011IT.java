@@ -99,6 +99,8 @@ public class Qdist011IT {
 	void setupBefore() {
 		CALL_ID = UUID.randomUUID().toString();
 		stubNaisTexasToken();
+		clearQueue(qdist011FunksjonellFeil);
+		clearQueue(backoutQueue);
 
 		when(encryptedBucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString()))
 				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
@@ -505,5 +507,17 @@ public class Qdist011IT {
 			response = ((JAXBElement) response).getValue();
 		}
 		return (T) response;
+	}
+
+	private void clearQueue(Queue queue) {
+		long originalReceiveTimeout = jmsTemplate.getReceiveTimeout();
+		jmsTemplate.setReceiveTimeout(100);
+		try {
+			while (jmsTemplate.receiveAndConvert(queue) != null) {
+				// drain queue
+			}
+		} finally {
+			jmsTemplate.setReceiveTimeout(originalReceiveTimeout);
+		}
 	}
 }
