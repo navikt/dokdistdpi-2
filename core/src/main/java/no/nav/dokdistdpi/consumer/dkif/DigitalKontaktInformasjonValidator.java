@@ -1,5 +1,6 @@
 package no.nav.dokdistdpi.consumer.dkif;
 
+import no.nav.dokdistdpi.exception.functional.BrukerReservertMotDigitalpostkasseException;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +11,7 @@ public class DigitalKontaktInformasjonValidator {
 
 	public void validateKontaktinfo(SikkerDigitalKontaktInfo digitalKontaktinfo) {
 		if (brukerErReservert(digitalKontaktinfo)) {
-			throw new IllegalKontaktInformasjonFunctionalException("Bruker er reservert mot digital kommunikasjon");
+			throw new BrukerReservertMotDigitalpostkasseException("Bruker er reservert mot digital kommunikasjon");
 		}
 
 		if (leverandoerinfoEllerBrukeradresseMangler(digitalKontaktinfo)) {

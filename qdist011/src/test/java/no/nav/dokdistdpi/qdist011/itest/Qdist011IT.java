@@ -201,9 +201,27 @@ public class Qdist011IT {
 
 	@SneakyThrows
 	@Test
-	void shouldDistribuerForsendelseWhenSikkerDigitalPostErNull() {
+	void shouldDistribuerForsendelseToPrintWhenSikkerDigitalPostErNull() {
 		stubAzure();
-		stubGetSikkerDigitalPostkasseIsNull(OK.value());
+		stubGetSikkerDigitalPostkasseIsNull("dki-sikkerdigitalpostkasse-null.json", OK.value());
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
+		stubPostMaskinporten();
+		stubPostDistribuerTilNyKanal();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
+			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(1, postRequestedFor(urlEqualTo(DISTRIBUERT_TIL_NY_KANAL)));
+		});
+	}
+
+	@Test
+	void shouldDistribuerForsendelseToPrintWhenReservertMotDigitalPostkassen() {
+		stubAzure();
+		stubGetSikkerDigitalPostkasseIsNull("dki-digipost-reservert-true.json", OK.value());
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
 		stubPostDistribuerTilNyKanal();
@@ -438,12 +456,12 @@ public class Qdist011IT {
 						.withBodyFile("digitalkontaktinformasjonv1/dki-eboks.json")));
 	}
 
-	private void stubGetSikkerDigitalPostkasseIsNull(int status) {
+	private void stubGetSikkerDigitalPostkasseIsNull(String path, int status) {
 		stubFor(post(DIGDIR_KRR_URL)
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("digitalkontaktinformasjonv1/dki-sikkerdigitalpostkasse-null.json")));
+						.withBodyFile("digitalkontaktinformasjonv1/" + path)));
 	}
 
 	void stubAzure() {

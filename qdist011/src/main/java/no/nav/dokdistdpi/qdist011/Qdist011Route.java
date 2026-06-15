@@ -9,6 +9,7 @@ import no.nav.dokdistdpi.consumer.dpi.DpiMeldingsformidler;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistAdministrerForsendelseUpdater;
 import no.nav.dokdistdpi.exception.functional.AbstractDokdistdpiFunctionalException;
 import no.nav.dokdistdpi.exception.functional.BrukerHarIngenDigitalpostkasseException;
+import no.nav.dokdistdpi.exception.functional.BrukerReservertMotDigitalpostkasseException;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusEkspedertKanIkkeDistribueresException;
 import no.nav.dokdistdpi.exception.functional.UtenforKjernetidFunctionalException;
 import no.nav.meldinger.virksomhet.dokdistfordeling.qdist008.out.DistribuerTilKanal;
@@ -98,7 +99,7 @@ public class Qdist011Route extends RouteBuilder {
 				.handled(true)
 				.to("jms:" + qdist011FunksjonellFeil.getQueueName());
 
-		onException(BrukerHarIngenDigitalpostkasseException.class)
+		onException(BrukerHarIngenDigitalpostkasseException.class, BrukerReservertMotDigitalpostkasseException.class)
 				.log(WARN, "Bruker mangler digital postkasse og forsendelse med" + getIdsForLogging() + "distribuerer til PRINT.")
 				.useOriginalMessage()
 				.handled(true)
