@@ -1,6 +1,7 @@
 package no.nav.dokdistdpi.consumer.dkif;
 
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo.SikkerDigitalKontaktInfoBuilder;
+import no.nav.dokdistdpi.exception.functional.BrukerReservertMotDigitalpostkasseException;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,7 +46,7 @@ class DigitalKontaktInformasjonValidatorTest {
 				.kanVarsles(false)
 				.build();
 
-		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
+		assertThatExceptionOfType(BrukerReservertMotDigitalpostkasseException.class)
 				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
 				.withMessage("Bruker er reservert mot digital kommunikasjon");
 	}
