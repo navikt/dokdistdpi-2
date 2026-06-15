@@ -75,7 +75,7 @@ public class Qdist011IT {
 	private static final String OPPDATERVARSELINFO_URL = "/rest/v1/administrerforsendelse/oppdatervarselinfo";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
 	private static final String DISTRIBUERT_TIL_NY_KANAL = "/rest/v1/administrerforsendelse/distribuertilnykanal";
-	private static final String DIGITAL_POSTKASSE_URL = "/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true";
+	private static final String DIGDIR_KRR_URL = "/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true";
 	private static final String TKAT020_URL = "/rest/dokumenttypeinfo/";
 	private static final String TKAT021_URL = "/rest/varselinfo/";
 
@@ -129,7 +129,7 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo(DIGITAL_POSTKASSE_URL)));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
 					.withRequestBody(containing("Content-Type: application/octet-stream")
@@ -160,7 +160,7 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo(DIGITAL_POSTKASSE_URL)));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
 					.withRequestBody(containing("Content-Type: application/octet-stream")
@@ -191,7 +191,7 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo(DIGITAL_POSTKASSE_URL)));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
@@ -212,7 +212,7 @@ public class Qdist011IT {
 
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-			verify(1, postRequestedFor(urlEqualTo(DIGITAL_POSTKASSE_URL)));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, postRequestedFor(urlEqualTo(DISTRIBUERT_TIL_NY_KANAL)));
 		});
@@ -238,7 +238,7 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo(DIGITAL_POSTKASSE_URL)));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
@@ -269,7 +269,7 @@ public class Qdist011IT {
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-		verify(1, postRequestedFor(urlEqualTo(DIGITAL_POSTKASSE_URL)));
+		verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 		verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 		verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 	}
@@ -322,7 +322,7 @@ public class Qdist011IT {
 		});
 
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(4, postRequestedFor(urlEqualTo(DIGITAL_POSTKASSE_URL)));
+		verify(4, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 	}
 
 	private void stubPostDPISend() {
@@ -423,7 +423,7 @@ public class Qdist011IT {
 	}
 
 	private void stubGetDigipostDigitalKontaktInformasjon(int status) {
-		stubFor(post(DIGITAL_POSTKASSE_URL)
+		stubFor(post(DIGDIR_KRR_URL)
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -431,7 +431,7 @@ public class Qdist011IT {
 	}
 
 	private void stubGetEBoksDigitalKontaktInformasjon(int status) {
-		stubFor(post(DIGITAL_POSTKASSE_URL)
+		stubFor(post(DIGDIR_KRR_URL)
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -439,7 +439,7 @@ public class Qdist011IT {
 	}
 
 	private void stubGetSikkerDigitalPostkasseIsNull(int status) {
-		stubFor(post(DIGITAL_POSTKASSE_URL)
+		stubFor(post(DIGDIR_KRR_URL)
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
