@@ -100,7 +100,7 @@ public class Qdist011Route extends RouteBuilder {
 				.to("jms:" + qdist011FunksjonellFeil.getQueueName());
 
 		onException(BrukerHarIngenDigitalpostkasseException.class, BrukerReservertMotDigitalpostkasseException.class)
-				.log(WARN, "Bruker mangler digital postkasse og forsendelse med" + getIdsForLogging() + "distribuerer til PRINT.")
+				.log(WARN, "Bruker mangler digital postkasse og forsendelse med " + getIdsForLogging() + "distribuerer til PRINT.")
 				.useOriginalMessage()
 				.handled(true)
 				.setBody(exchangeProperty(PROPERTY_FORSENDELSE_ID))
