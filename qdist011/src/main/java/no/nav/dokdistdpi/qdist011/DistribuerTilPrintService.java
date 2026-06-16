@@ -1,10 +1,11 @@
 package no.nav.dokdistdpi.qdist011;
 
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
-import no.nav.dokdistdpi.consumer.rdist001.domain.DistribuerTilNyKanalRequest;
 import no.nav.dokdistdpi.exception.functional.AdministrerForsendelseFunctionalException;
 import org.apache.camel.Handler;
 import org.springframework.stereotype.Component;
+
+import static no.nav.dokdistdpi.consumer.rdist001.domain.DistribuerTilNyKanalRequest.arsakManglendeDigitalPostkasse;
 
 @Component
 public class DistribuerTilPrintService {
@@ -19,7 +20,7 @@ public class DistribuerTilPrintService {
 	public void sendForsendelseTilPrint(String forsendelseId) {
 		try {
 			long id = Long.parseLong(forsendelseId);
-			dokdistadminConsumer.distribuerTilNyKanal(DistribuerTilNyKanalRequest.arsakMeldingsfeil(id));
+			dokdistadminConsumer.distribuerTilNyKanal(arsakManglendeDigitalPostkasse(id));
 		} catch (NumberFormatException e) {
 			throw new AdministrerForsendelseFunctionalException("Ugyldig forsendelseId for distribusjon til print: " + forsendelseId, e);
 		}

@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.wiremock.spring.EnableWireMock;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.wiremock.spring.EnableWireMock;
 
 import java.util.UUID;
 
@@ -292,6 +292,26 @@ public class Qdist011IT {
 		verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 		verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 		verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
+	}
+
+	@Test
+	void shouldThrowValideringsExceptionWhenKanVarselIsTrueAndMobiltelefonnummerAndEpostadresseIsNull() {
+		stubAzure();
+		stubGetSikkerDigitalPostkasseIsNull("dki-digipost-kanvarsles-true.json", OK.value());
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
+		stubPostMaskinporten();
+		stubPostDistribuerTilNyKanal();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+
+		await().atMost(100, SECONDS).untilAsserted(() -> {
+			String response = receive(qdist011FunksjonellFeil);
+			assertNotNull(response);
+			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
+			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+		});
+
 	}
 
 	@SneakyThrows

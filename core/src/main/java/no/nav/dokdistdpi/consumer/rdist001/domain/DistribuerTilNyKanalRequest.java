@@ -10,14 +10,14 @@ public record DistribuerTilNyKanalRequest(
 		String arsakBeskrivelse) {
 
 	public static final String MELDINGSFEIL = "MELDINGSFEIL";
-	public static final String ARSAK_PUBLISERING_FEILET = "Mottaker har ikke sikker digital postkasse og kan derfor ikke motta digital post";
+	public static final String ARSAK_PUBLISERING_FEILET = "Mottaker har ikke Digital postkasse til innbygger";
 
 	@JsonProperty
 	public String kanal() {
 		return "PRINT";
 	}
 
-	public static DistribuerTilNyKanalRequest arsakMeldingsfeil(long forsendelseId) {
+	public static DistribuerTilNyKanalRequest arsakManglendeDigitalPostkasse(long forsendelseId) {
 		return DistribuerTilNyKanalRequest.builder()
 				.forsendelseId(forsendelseId)
 				.arsak(MELDINGSFEIL)

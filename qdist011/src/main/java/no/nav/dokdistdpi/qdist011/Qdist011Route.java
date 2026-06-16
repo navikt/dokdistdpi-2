@@ -104,7 +104,8 @@ public class Qdist011Route extends RouteBuilder {
 				.useOriginalMessage()
 				.handled(true)
 				.setBody(exchangeProperty(PROPERTY_FORSENDELSE_ID))
-				.to("direct:distribuer-til-print");
+				.bean(distribuerTilPrintService)
+				.end();
 
 		from("jms:" + qdist011.getQueueName() + "?transacted=true&concurrentConsumers=1")
 				.autoStartup(qdist011Properties.isAutostartup())
@@ -123,14 +124,6 @@ public class Qdist011Route extends RouteBuilder {
 						.log(INFO, log, "qdist011 har oppdatert varselInfo, forsendelseStatus=OVERSENDT og avslutter behandling av forsendelse med " + getIdsForLogging())
 					.otherwise()
 						.log(WARN, log, "qdist011 kan ikke oppdatere status til OVERSENDT for forsendelse fra DPI med " + getIdsForLogging())
-				.end();
-
-		from("direct:distribuer-til-print")
-				.routeId("distribuer-til-print")
-				.setExchangePattern(InOnly)
-				.bean(distribuerTilPrintService)
-				.to("jms:" + qdist011FunksjonellFeil.getQueueName())
-				.log(INFO, log, "Forsendelse med " + logForsendelseId() + " skal distribueres via print etter at det ble oppdaget at mottaker ikke har digital postkasse.")
 				.end();
 		//@formatter:on
 	}
