@@ -205,7 +205,7 @@ public class Qdist011IT {
 	@Test
 	void shouldDistribuerForsendelseToPrintWhenSikkerDigitalPostErNull() {
 		stubAzure();
-		stubGetSikkerDigitalPostkasseIsNull("dki-sikkerdigitalpostkasse-null.json", OK.value());
+		stubGetSikkerDigitalPostkasse("dki-sikkerdigitalpostkasse-null.json", OK.value());
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
 		stubPostDistribuerTilNyKanal();
@@ -223,7 +223,7 @@ public class Qdist011IT {
 	@Test
 	void shouldDistribuerForsendelseToPrintWhenReservertMotDigitalPostkassen() {
 		stubAzure();
-		stubGetSikkerDigitalPostkasseIsNull("dki-digipost-reservert-true.json", OK.value());
+		stubGetSikkerDigitalPostkasse("dki-digipost-reservert-true.json", OK.value());
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
 		stubPostDistribuerTilNyKanal();
@@ -295,9 +295,9 @@ public class Qdist011IT {
 	}
 
 	@Test
-	void shouldThrowValideringsExceptionWhenKanVarselIsTrueAndMobiltelefonnummerAndEpostadresseIsNull() {
+	void shouldThrowIllegalKontaktInformasjonExceptionWhenKanVarslesIsTrueAndMobiltelefonnummerAndEpostadresseIsNull() {
 		stubAzure();
-		stubGetSikkerDigitalPostkasseIsNull("dki-digipost-kanvarsles-true.json", OK.value());
+		stubGetSikkerDigitalPostkasse("dki-digipost-kanvarsles-true.json", OK.value());
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
 		stubPostDistribuerTilNyKanal();
@@ -478,7 +478,7 @@ public class Qdist011IT {
 						.withBodyFile("digitalkontaktinformasjonv1/dki-eboks.json")));
 	}
 
-	private void stubGetSikkerDigitalPostkasseIsNull(String path, int status) {
+	private void stubGetSikkerDigitalPostkasse(String path, int status) {
 		stubFor(post(DIGDIR_KRR_URL)
 				.willReturn(aResponse()
 						.withStatus(status)

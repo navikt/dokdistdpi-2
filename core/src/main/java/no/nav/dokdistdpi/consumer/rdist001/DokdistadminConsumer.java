@@ -16,7 +16,7 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.OppdaterVarselInfoRequest;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseRequestTo;
 import no.nav.dokdistdpi.consumer.rdist001.domain.OpprettForsendelseResponseTo;
 import no.nav.dokdistdpi.exception.functional.AdministrerForsendelseFunctionalException;
-import no.nav.dokdistdpi.exception.functional.KanIkkeDistribuereTilNyKanalException;
+import no.nav.dokdistdpi.exception.functional.ForsendelseErAlleredeDistribuertException;
 import no.nav.dokdistdpi.exception.technical.AdministrerForsendelseTechnicalException;
 import org.springframework.http.HttpStatus;
 import org.springframework.resilience.annotation.Retryable;
@@ -168,10 +168,10 @@ public class DokdistadminConsumer {
 		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
 			if(response.getStatusCode() == HttpStatus.CONFLICT) {
 				String responseBody = response.getResponseBodyAsString();
-				throw new KanIkkeDistribuereTilNyKanalException("distribuerTilNyKanal feilet. " + responseBody, response);
+				throw new ForsendelseErAlleredeDistribuertException("distribuerTilNyKanal feilet. " + responseBody, response);
 			}
 			return new AdministrerForsendelseFunctionalException(
-					format("Kall mot AdministrerForsendelse feilet funksjonell med status=%s, feilmelding=%s",
+					format("Kall mot AdministrerForsendelse feilet funksjonelt med status=%s, feilmelding=%s",
 							response.getStatusCode(),
 							response.getMessage()),
 					error);

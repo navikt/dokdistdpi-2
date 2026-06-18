@@ -25,7 +25,7 @@ class DigitalKontaktInformasjonValidatorTest {
 
 	@Test
 	void skalValidereOk() {
-		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder().kanVarsles(true).build();
+		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder().build();
 
 		assertDoesNotThrow(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo));
 	}
@@ -33,7 +33,6 @@ class DigitalKontaktInformasjonValidatorTest {
 	@Test
 	void skalValidereOkHvisVarselinfoErNull() {
 		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder()
-				.kanVarsles(true)
 				.build();
 
 		assertDoesNotThrow(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo));
@@ -67,7 +66,6 @@ class DigitalKontaktInformasjonValidatorTest {
 	void skalFeileHvisLeverandoeradresseMangler() {
 		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder()
 				.leverandoerAdresse(null)
-				.kanVarsles(true)
 				.build();
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
@@ -79,7 +77,7 @@ class DigitalKontaktInformasjonValidatorTest {
 	void skalFeileHvisBrukeradresseMangler() {
 		var sikkerDigitalKontaktinfo = lagSikkerDigitalKontaktInfoBuilder()
 				.brukerAdresse(null)
-				.kanVarsles(true).build();
+				.build();
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
 				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
@@ -94,7 +92,7 @@ class DigitalKontaktInformasjonValidatorTest {
 				lagSikkerDigitalKontaktInfoBuilder()
 						.epostadresse(epostOgMobil)
 						.mobiltelefonnummer(epostOgMobil)
-						.kanVarsles(true).build();
+						.build();
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
 				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
@@ -109,7 +107,8 @@ class DigitalKontaktInformasjonValidatorTest {
 				.leverandoerAdresse(LEVERANDOERADRESSE)
 				.leverandoerSertifikat(LEVERANDOERSERTIFIKAT)
 				.brukerAdresse(BRUKERADRESSE)
-				.sertifikat(HAR_SERTIFIKAT);
+				.sertifikat(HAR_SERTIFIKAT)
+				.kanVarsles(true);
 	}
 
 	@Test
