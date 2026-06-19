@@ -9,14 +9,12 @@ import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.utils.VarslingstekstUtil;
 
-import java.util.Objects;
-
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class VarselMapper {
 	public static Varsler mapVarsler(VarselInfo varselInfo, SikkerDigitalKontaktInfo digitalKontaktInfo, DistribusjonsTypeKode distribusjonsType) {
-		if (Objects.isNull(varselInfo)) {
+		if (isNull(varselInfo)) {
 			return null;
 		}
 

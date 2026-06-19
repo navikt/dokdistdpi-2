@@ -1,6 +1,7 @@
 package no.nav.dokdistdpi.service;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInfoResponse;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
 import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
@@ -12,7 +13,7 @@ import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
-import no.nav.dokdistdpi.exception.functional.AdminstrerForsendelseFunctionalException;
+import no.nav.dokdistdpi.exception.functional.AdministrerForsendelseFunctionalException;
 import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ import java.util.Optional;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
+import static no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinfoMapper.mapDigitalKontaktinfo;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 
@@ -42,12 +44,13 @@ public class DigitalPostService {
 		this.dokmetConsumer = dokmetConsumer;
 	}
 
-	public SikkerDigitalKontaktInfo hentDigitalKontaktInfo(HentForsendelseResponse hentForsendelseResponse, VarselInfo varselInfo) {
+	public SikkerDigitalKontaktInfo hentDigitalKontaktInfo(HentForsendelseResponse hentForsendelseResponse) {
 		String mottakerId = getMottakerId(hentForsendelseResponse);
 		assertNotBlank("mottakerId", mottakerId);
-		SikkerDigitalKontaktInfo digitalKontaktInfo = digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(mottakerId);
-		digitalKontaktInformasjonValidator.validateKontaktinfo(digitalKontaktInfo, varselInfo);
-		return digitalKontaktInfo;
+		DigitalKontaktInfoResponse.DigitalKontaktinfo digitalKontaktInfo = digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(mottakerId);
+		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = mapDigitalKontaktinfo(digitalKontaktInfo);
+		digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktInfo);
+		return sikkerDigitalKontaktInfo;
 	}
 
 	public String getMaskinportenToken() {
@@ -68,10 +71,9 @@ public class DigitalPostService {
 	}
 
 
-
 	private String getMottakerId(HentForsendelseResponse hentMottakerResponse) {
 		if (hentMottakerResponse == null) {
-			throw new AdminstrerForsendelseFunctionalException("Mottaker kan ikke være null");
+			throw new AdministrerForsendelseFunctionalException("Mottaker kan ikke være null");
 		}
 
 		Mottaker mottaker = hentMottakerResponse.getMottaker();

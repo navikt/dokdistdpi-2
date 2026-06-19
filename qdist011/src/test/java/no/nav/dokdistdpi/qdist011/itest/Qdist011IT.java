@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.wiremock.spring.EnableWireMock;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.wiremock.spring.EnableWireMock;
 
 import java.util.UUID;
 
@@ -74,6 +74,8 @@ public class Qdist011IT {
 	private static final String HENTFORSENDELSE_URL = "/rest/v1/administrerforsendelse/" + FORSENDELSE_ID;
 	private static final String OPPDATERVARSELINFO_URL = "/rest/v1/administrerforsendelse/oppdatervarselinfo";
 	private static final String OPPDATERFORSENDELSE_URL = "/rest/v1/administrerforsendelse/oppdaterforsendelse";
+	private static final String DISTRIBUERT_TIL_NY_KANAL = "/rest/v1/administrerforsendelse/distribuertilnykanal";
+	private static final String DIGDIR_KRR_URL = "/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true";
 	private static final String TKAT020_URL = "/rest/dokumenttypeinfo/";
 	private static final String TKAT021_URL = "/rest/varselinfo/";
 
@@ -94,9 +96,11 @@ public class Qdist011IT {
 	private Queue backoutQueue;
 
 	@BeforeEach
-	public void setupBefore() {
+	void setupBefore() {
 		CALL_ID = UUID.randomUUID().toString();
 		stubNaisTexasToken();
+		clearQueue(qdist011FunksjonellFeil);
+		clearQueue(backoutQueue);
 
 		when(encryptedBucketStorage.downloadObject(eq(DOKUMENT_OBJEKT_REFERANSE_HOVEDDOK), anyString()))
 				.thenReturn(JsonSerializer.serialize(DokDistDokumentFraBucket.builder().pdf(HOVEDDOK_TEST_CONTENT.getBytes()).build()));
@@ -108,7 +112,7 @@ public class Qdist011IT {
 
 	@SneakyThrows
 	@Test
-	public void shouldProcessForsendelseOgSendTilDigitalPost() {
+	void shouldProcessForsendelseOgSendTilDigitalPost() {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("tkat020-happy.json");
@@ -127,7 +131,7 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
 					.withRequestBody(containing("Content-Type: application/octet-stream")
@@ -139,7 +143,7 @@ public class Qdist011IT {
 
 	@SneakyThrows
 	@Test
-	public void shouldProcessForsendelseOgSendTilDigitalPostOrbyt() {
+	void shouldProcessForsendelseOgSendTilDigitalPostOrbyt() {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("tkat020-happy.json");
@@ -158,7 +162,7 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
 					.withRequestBody(containing("Content-Type: application/octet-stream")
@@ -170,7 +174,7 @@ public class Qdist011IT {
 
 	@SneakyThrows
 	@Test
-	public void shouldProcessForsendelseWhenVarselIsNull() {
+	void shouldProcessForsendelseWhenVarselIsNull() {
 		stubAzure();
 		stubGetEBoksDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("tkat020-happy.json");
@@ -189,11 +193,48 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
 			verify(0, putRequestedFor(urlEqualTo(OPPDATERVARSELINFO_URL)));
+		});
+	}
+
+	@SneakyThrows
+	@Test
+	void shouldDistribuerForsendelseToPrintWhenSikkerDigitalPostErNull() {
+		stubAzure();
+		stubGetSikkerDigitalPostkasse("dki-sikkerdigitalpostkasse-null.json", OK.value());
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
+		stubPostMaskinporten();
+		stubPostDistribuerTilNyKanal();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
+			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(1, postRequestedFor(urlEqualTo(DISTRIBUERT_TIL_NY_KANAL)));
+		});
+	}
+
+	@Test
+	void shouldDistribuerForsendelseToPrintWhenReservertMotDigitalPostkasse() {
+		stubAzure();
+		stubGetSikkerDigitalPostkasse("dki-digipost-reservert-true.json", OK.value());
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
+		stubPostMaskinporten();
+		stubPostDistribuerTilNyKanal();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+
+		await().atMost(10, SECONDS).untilAsserted(() -> {
+			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
+			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(1, postRequestedFor(urlEqualTo(DISTRIBUERT_TIL_NY_KANAL)));
 		});
 	}
 
@@ -217,7 +258,7 @@ public class Qdist011IT {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 			verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-			verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 			verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 			verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 			verify(1, putRequestedFor(urlEqualTo(OPPDATERFORSENDELSE_URL)));
@@ -227,7 +268,7 @@ public class Qdist011IT {
 
 	@SneakyThrows
 	@Test
-	public void shouldThrowValideringsfeilException() {
+	void shouldThrowValideringsfeilException() {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("tkat020-happy.json");
@@ -248,14 +289,34 @@ public class Qdist011IT {
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
 		verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-		verify(1, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
+		verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 		verify(1, postRequestedFor(urlEqualTo("/saf/graphql")));
 		verify(1, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
 	}
 
+	@Test
+	void shouldThrowIllegalKontaktInformasjonExceptionWhenKanVarslesIsTrueAndMobiltelefonnummerAndEpostadresseIsNull() {
+		stubAzure();
+		stubGetSikkerDigitalPostkasse("dki-digipost-kanvarsles-true.json", OK.value());
+		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
+		stubPostMaskinporten();
+		stubPostDistribuerTilNyKanal();
+
+		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
+
+		await().atMost(100, SECONDS).untilAsserted(() -> {
+			String response = receive(qdist011FunksjonellFeil);
+			assertNotNull(response);
+			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
+			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
+			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+		});
+
+	}
+
 	@SneakyThrows
 	@Test
-	public void shouldThrowExceptionIfMaskinportenIsNull() {
+	void shouldThrowExceptionIfMaskinportenIsNull() {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(OK.value());
 		stubGetDokumentTypeInfo("tkat020-happy.json");
@@ -277,7 +338,7 @@ public class Qdist011IT {
 
 	@SneakyThrows
 	@Test
-	public void shouldThrowAdministrerforsendelseNotFoundException() {
+	void shouldThrowAdministrerforsendelseNotFoundException() {
 		stubAzure();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", NOT_FOUND.value());
 
@@ -288,18 +349,11 @@ public class Qdist011IT {
 
 	@SneakyThrows
 	@Test
-	public void shouldThrowTechnicalExceptionWhenDigitalKontaktInfoIsNotAccessable() {
+	void shouldThrowTechnicalExceptionWhenDigitalKontaktInfoIsNotAccessable() {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(INTERNAL_SERVER_ERROR.value());
-		stubGetDokumentTypeInfo("tkat020-happy.json");
-		stubGetVarselInfo("tkat021-happy.json");
-		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
-		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
 		stubPostMaskinporten();
-		stubPostDPISend();
-		stubGetDPIStatus();
-		stubPutVarselInfo();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		await().atMost(10, SECONDS).untilAsserted(() -> {
@@ -308,11 +362,7 @@ public class Qdist011IT {
 		});
 
 		verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		verify(1, getRequestedFor(urlEqualTo(TKAT020_URL + DOKUMENTTYPE_ID_HOVEDDOK)));
-		verify(1, getRequestedFor(urlEqualTo(TKAT021_URL + VARSEL_TYPE_ID)));
-		verify(4, postRequestedFor(urlEqualTo("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")));
-		verify(0, postRequestedFor(urlEqualTo("/safgraphql")));
-		verify(0, postRequestedFor(urlEqualTo("/message/out?kanal=dokdistdpi-t")));
+		verify(4, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
 	}
 
 	private void stubPostDPISend() {
@@ -413,7 +463,7 @@ public class Qdist011IT {
 	}
 
 	private void stubGetDigipostDigitalKontaktInformasjon(int status) {
-		stubFor(post("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")
+		stubFor(post(DIGDIR_KRR_URL)
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -421,11 +471,19 @@ public class Qdist011IT {
 	}
 
 	private void stubGetEBoksDigitalKontaktInformasjon(int status) {
-		stubFor(post("/digdir/rest/v1/personer?inkluderSikkerDigitalPost=true")
+		stubFor(post(DIGDIR_KRR_URL)
 				.willReturn(aResponse()
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("digitalkontaktinformasjonv1/dki-eboks.json")));
+	}
+
+	private void stubGetSikkerDigitalPostkasse(String path, int status) {
+		stubFor(post(DIGDIR_KRR_URL)
+				.willReturn(aResponse()
+						.withStatus(status)
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("digitalkontaktinformasjonv1/" + path)));
 	}
 
 	void stubAzure() {
@@ -442,6 +500,13 @@ public class Qdist011IT {
 						.withStatus(httpStatusvalue)
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBody(classpathToString(responsebody))));
+	}
+
+	private void stubPostDistribuerTilNyKanal() {
+		stubFor(post(DISTRIBUERT_TIL_NY_KANAL)
+				.willReturn(aResponse()
+						.withStatus(OK.value())
+						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
 	}
 
 	private void sendStringMessage(Queue queue, final String message, final String callId) {
@@ -462,5 +527,17 @@ public class Qdist011IT {
 			response = ((JAXBElement) response).getValue();
 		}
 		return (T) response;
+	}
+
+	private void clearQueue(Queue queue) {
+		long originalReceiveTimeout = jmsTemplate.getReceiveTimeout();
+		jmsTemplate.setReceiveTimeout(100);
+		try {
+			while (jmsTemplate.receiveAndConvert(queue) != null) {
+				// drain queue
+			}
+		} finally {
+			jmsTemplate.setReceiveTimeout(originalReceiveTimeout);
+		}
 	}
 }

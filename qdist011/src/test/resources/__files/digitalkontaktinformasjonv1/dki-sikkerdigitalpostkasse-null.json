@@ -1,0 +1,12 @@
+{
+  "personer": {
+    "11111111111": {
+      "epostadresse": "er@mocked.data",
+      "kanVarsles": true,
+      "mobiltelefonnummer": "54621378",
+      "personident": "11111111111",
+      "reservert": false,
+      "spraak": "nb"
+    }
+  }
+}

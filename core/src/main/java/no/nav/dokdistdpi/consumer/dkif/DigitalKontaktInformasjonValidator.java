@@ -1,6 +1,6 @@
 package no.nav.dokdistdpi.consumer.dkif;
 
-import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
+import no.nav.dokdistdpi.exception.functional.BrukerReservertMotDigitalpostkasseException;
 import no.nav.dokdistdpi.exception.functional.IllegalKontaktInformasjonFunctionalException;
 import org.springframework.stereotype.Component;
 
@@ -9,17 +9,17 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Component
 public class DigitalKontaktInformasjonValidator {
 
-	public void validateKontaktinfo(SikkerDigitalKontaktInfo digitalKontaktinfo, VarselInfo varselinfo) {
+	public void validateKontaktinfo(SikkerDigitalKontaktInfo digitalKontaktinfo) {
 		if (brukerErReservert(digitalKontaktinfo)) {
-			throw new IllegalKontaktInformasjonFunctionalException("Bruker er reservert mot digital kommunikasjon");
+			throw new BrukerReservertMotDigitalpostkasseException("Bruker er reservert mot digital kommunikasjon");
 		}
 
 		if (leverandoerinfoEllerBrukeradresseMangler(digitalKontaktinfo)) {
 			throw new IllegalKontaktInformasjonFunctionalException("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler");
 		}
 
-		if (baadeEpostOgMobilnummerMangler(varselinfo, digitalKontaktinfo)) {
-			throw new IllegalKontaktInformasjonFunctionalException("Både epostadresse og mobiltelefonnummer kan ikke være null");
+		if (baadeEpostOgMobilnummerMangler(digitalKontaktinfo)) {
+			throw new IllegalKontaktInformasjonFunctionalException("Både epostadresse og mobiltelefonnummer kan ikke være null dersom kanVarsles er true");
 		}
 	}
 
@@ -29,14 +29,14 @@ public class DigitalKontaktInformasjonValidator {
 
 	private boolean leverandoerinfoEllerBrukeradresseMangler(SikkerDigitalKontaktInfo digitalKontaktinfo) {
 		return isBlank(digitalKontaktinfo.getLeverandoerSertifikat())
-			   || isBlank(digitalKontaktinfo.getLeverandoerAdresse())
-			   || isBlank(digitalKontaktinfo.getBrukerAdresse());
+				|| isBlank(digitalKontaktinfo.getLeverandoerAdresse())
+				|| isBlank(digitalKontaktinfo.getBrukerAdresse());
 	}
 
-	private boolean baadeEpostOgMobilnummerMangler(VarselInfo varselInfo, SikkerDigitalKontaktInfo digitalKontaktinfo) {
-		return varselInfo != null
-			   && isBlank(digitalKontaktinfo.getMobiltelefonnummer())
-			   && isBlank(digitalKontaktinfo.getEpostadresse());
+	private boolean baadeEpostOgMobilnummerMangler(SikkerDigitalKontaktInfo digitalKontaktinfo) {
+		return digitalKontaktinfo.isKanVarsles()
+				&& isBlank(digitalKontaktinfo.getMobiltelefonnummer())
+				&& isBlank(digitalKontaktinfo.getEpostadresse());
 	}
 
 }

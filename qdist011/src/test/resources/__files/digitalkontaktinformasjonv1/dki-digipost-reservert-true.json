@@ -5,10 +5,10 @@
       "kanVarsles": true,
       "mobiltelefonnummer": "54621378",
       "personident": "11111111111",
-      "reservert": false,
+      "reservert": true,
       "sikkerDigitalPostkasse": {
-        "adresse": "dokdistdpi@eboks.no",
-        "leverandoerAdresse": "922020175",
+        "adresse": "dokdistdpi@digipost.no",
+        "leverandoerAdresse": "984661185",
         "leverandoerSertifikat": "MIICwjCCAaqgAwIBAgIUdjkhIzakHQtrAkzC3Xvxmdq64KMwDQYJKoZIhvcNAQELBQAwGzEZMBcGA1UEAwwQdGVzdC5leGFtcGxlLmNvbTAeFw0yNjA2MTYwNjU1MDdaFw0yNzA2MTYwNjU1MDdaMBsxGTAXBgNVBAMMEHRlc3QuZXhhbXBsZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDAYrfiftY85vLW1RmYBi3UWHzzHzidpdwfJ41JkuTC7Mm6zwOxU+G7CtlukPBL/NWDLnO83+0MmQ4orVAMcYn/W+HeqETFleBBSxzq+edyVqbV4JQi3q5IuHDi/PSOd1P16x2XLU07vGcH8KYHUOWqEm2XiVdrXqXexpG64aryldtONTq5krj3wFJkWyDqk7yXlMItF/XT7i4udHlkwlkjQEpo5GfRFcZPOvpZ9wLY7a2ua+E9xd1vA+sVZ+g6BycEJD6bn7Uh9MPWMQ89gxdb+444zD6k0ILq5W2zNYz4dIBWSx8xOwWWwM/Eh4G4oCks3y7r93ScDU6uWnq0dVbnAgMBAAEwDQYJKoZIhvcNAQELBQADggEBABoEP6LssZuC/j2OgyUknRFKYsfbhtPoUKTO4hmo2XlgVaWjtsm+Xiw9+PJ4iVlccy3Nn/oZk3Lb1Fkgz4GfVPpgvGcVtiMrpCHmO8AI8X1A0DCepZHl2cLmxsc4gJHNAY3ObhzJMA76ZtEgKaAIsHawfwBGFysHmfdSNMuMXyI8H9AdxLGH7zGq488wd3xDXTj38AK9iA1AXPHjwly7nCy5dZE2aOW7IUw2QZIyNWLiKfKyr+GimGwFd6Ycq0FLiCJHPQuFvgQEjaIXDvz4JwdfODoCL1AVptXU9V3liR9OeSV8FSxtLRTZVCyJd677tRSo+uXuE6X/bmaskb//7u0="
       },
       "spraak": "nb"

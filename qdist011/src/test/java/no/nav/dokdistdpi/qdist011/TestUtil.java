@@ -1,7 +1,8 @@
 package no.nav.dokdistdpi.qdist011;
 
 import lombok.SneakyThrows;
-import no.nav.dokdistdpi.consumer.dkif.SikkerDigitalKontaktInfo;
+import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInfoResponse;
+import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInfoResponse.SikkerDigitalPostkasse;
 import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
 import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
@@ -55,7 +56,6 @@ public final class TestUtil {
 	public static final String MASKINPORTEN_TOKEN = "aølkdsølkdsj==";
 	public static final String MASKINPORTEN_SCOPE = "digitalpostinnbygger:send";
 
-	private static final boolean HAS_SERTIFIKAT = true;
 	private static final boolean RESERVASJON = false;
 	private static final String EPOST_VALUE = "epostValue";
 	public static final String MOBIL_VALUE = "mobilValue";
@@ -86,16 +86,18 @@ public final class TestUtil {
 	}
 
 
-	public static SikkerDigitalKontaktInfo createSikkerDigitalKontaktInfo() {
-		return SikkerDigitalKontaktInfo.builder()
-				.personidentifikator(MOTTAKER_FNR)
-				.brukerAdresse(POSTKASSEADRESSE)
-				.reservasjon(RESERVASJON)
+	public static DigitalKontaktInfoResponse.DigitalKontaktinfo createSikkerDigitalKontaktInfo() {
+		return DigitalKontaktInfoResponse.DigitalKontaktinfo.builder()
+				.reservert(RESERVASJON)
+				.kanVarsles(true)
+				.personident(MOTTAKER_FNR)
 				.epostadresse(EPOST_VALUE)
 				.mobiltelefonnummer(MOBIL_VALUE)
-				.leverandoerAdresse(MOTTAKER_ORGNO)
-				.leverandoerSertifikat(classpathToString("sertifikat/mottakercertificate"))
-				.sertifikat(HAS_SERTIFIKAT)
+				.sikkerDigitalPostkasse(SikkerDigitalPostkasse.builder()
+						.leverandoerAdresse(MOTTAKER_ORGNO)
+						.adresse(POSTKASSEADRESSE)
+						.leverandoerSertifikat(classpathToString("sertifikat/mottakercertificate"))
+						.build())
 				.build();
 	}
 

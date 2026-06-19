@@ -93,7 +93,7 @@ public class OppdaterForsendelse {
 
 		DistribusjonInfo distribusjonInfo = digitalPostService.hentDokumenttypeInfo(hentForsendelseResponse);
 		VarselInfo varselInfo = digitalPostService.getVarselInfo(distribusjonInfo);
-		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse, varselInfo);
+		SikkerDigitalKontaktInfo sikkerDigitalKontaktInfo = digitalPostService.hentDigitalKontaktInfo(hentForsendelseResponse);
 
 		Varsler varsler = mapVarslerHvisRiktigDistribusjonstype(hentForsendelseResponse, varselInfo, sikkerDigitalKontaktInfo);
 
