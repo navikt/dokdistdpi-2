@@ -19,7 +19,7 @@ public class DigitalKontaktInformasjonValidator {
 		}
 
 		if (baadeEpostOgMobilnummerMangler(digitalKontaktinfo)) {
-			throw new IllegalKontaktInformasjonFunctionalException("Både epostadresse og mobiltelefonnummer kan ikke være null");
+			throw new IllegalKontaktInformasjonFunctionalException("Både epostadresse og mobiltelefonnummer kan ikke være null dersom kanVarsles er true");
 		}
 	}
 

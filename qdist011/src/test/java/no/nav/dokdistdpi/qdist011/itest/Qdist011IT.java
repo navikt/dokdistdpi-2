@@ -221,7 +221,7 @@ public class Qdist011IT {
 	}
 
 	@Test
-	void shouldDistribuerForsendelseToPrintWhenReservertMotDigitalPostkassen() {
+	void shouldDistribuerForsendelseToPrintWhenReservertMotDigitalPostkasse() {
 		stubAzure();
 		stubGetSikkerDigitalPostkasse("dki-digipost-reservert-true.json", OK.value());
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());

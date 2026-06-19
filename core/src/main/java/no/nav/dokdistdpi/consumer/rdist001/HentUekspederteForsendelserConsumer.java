@@ -73,7 +73,7 @@ public class HentUekspederteForsendelserConsumer {
 	private Throwable mapError(Throwable error) {
 		if (error instanceof WebClientResponseException response && response.getStatusCode().is4xxClientError()) {
 			return new AdministrerForsendelseFunctionalException(
-					format("Kall mot hentUekspederteforsendelser feilet funksjonell med status=%s, feilmelding=%s",
+					format("Kall mot hentUekspederteforsendelser feilet funksjonelt med status=%s, feilmelding=%s",
 							response.getStatusCode(),
 							response.getMessage()),
 					error);

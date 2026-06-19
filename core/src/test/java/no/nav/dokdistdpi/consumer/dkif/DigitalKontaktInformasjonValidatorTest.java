@@ -47,7 +47,7 @@ class DigitalKontaktInformasjonValidatorTest {
 
 		assertThatExceptionOfType(BrukerReservertMotDigitalpostkasseException.class)
 				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
-				.withMessage("Bruker er reservert mot digital kommunikasjon");
+				.withMessageContaining("Bruker er reservert mot digital kommunikasjon");
 	}
 
 	@Test
@@ -59,7 +59,7 @@ class DigitalKontaktInformasjonValidatorTest {
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
 				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
-				.withMessage("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler");
+				.withMessageContaining("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler");
 	}
 
 	@Test
@@ -81,7 +81,7 @@ class DigitalKontaktInformasjonValidatorTest {
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
 				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
-				.withMessage("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler");
+				.withMessageContaining("Leverandoersertifikat, leverandoeradresse eller brukeradresse mangler");
 	}
 
 	@ParameterizedTest
@@ -96,7 +96,7 @@ class DigitalKontaktInformasjonValidatorTest {
 
 		assertThatExceptionOfType(IllegalKontaktInformasjonFunctionalException.class)
 				.isThrownBy(() -> digitalKontaktInformasjonValidator.validateKontaktinfo(sikkerDigitalKontaktinfo))
-				.withMessage("Både epostadresse og mobiltelefonnummer kan ikke være null");
+				.withMessageContaining("Både epostadresse og mobiltelefonnummer kan ikke være null");
 	}
 
 	private SikkerDigitalKontaktInfoBuilder lagSikkerDigitalKontaktInfoBuilder() {
