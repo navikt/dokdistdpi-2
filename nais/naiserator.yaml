@@ -12,6 +12,7 @@ spec:
   envFrom:
     - secret: slack-alerts
     - secret: dokdistdpi-2
+    - configmap: dokdistdpi-2
   env:
     - name: JAVA_TRUSTSTORE_OPTIONS
       value: "-Djavax.net.ssl.trustStore=$(NAV_TRUSTSTORE_PATH)
