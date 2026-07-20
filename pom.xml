@@ -30,7 +30,7 @@
 
 		<camel.version>4.21.0</camel.version>
 		<libraries-bom.version>26.85.0</libraries-bom.version>
-		<tink.version>1.22.0</tink.version>
+		<tink.version>1.23.0</tink.version>
 		<tink-gcpkms.version>1.11.0</tink-gcpkms.version>
 		<commons-compress.version>1.28.0</commons-compress.version>
 		<commons-io.version>2.22.0</commons-io.version>
