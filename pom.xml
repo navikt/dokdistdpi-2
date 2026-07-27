@@ -51,7 +51,7 @@
 		<dok-common.version>1.7.1</dok-common.version>
 
 		<!-- Test -->
-		<wiremock-spring-boot.version>4.2.1</wiremock-spring-boot.version>
+		<wiremock-spring-boot.version>4.2.2</wiremock-spring-boot.version>
 		<artemis-jakarta.version>2.55.0</artemis-jakarta.version>
 
 		<!-- Plugins -->
