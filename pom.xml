@@ -29,7 +29,7 @@
 		<java.version>25</java.version>
 
 		<camel.version>4.21.0</camel.version>
-		<libraries-bom.version>26.85.1</libraries-bom.version>
+		<libraries-bom.version>26.86.0</libraries-bom.version>
 		<tink.version>1.23.0</tink.version>
 		<tink-gcpkms.version>1.11.0</tink-gcpkms.version>
 		<commons-compress.version>1.28.0</commons-compress.version>
