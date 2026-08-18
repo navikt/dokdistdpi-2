@@ -71,9 +71,9 @@ public final class TestUtil {
 	public static final String DOKUMENTTYPE_ID = "DokumenttypeId";
 
 	public static final String BESTILLINGS_ID = UUID.randomUUID().toString();
-	public static final String MOTTAKER_FNR = "04036125433";
+	public static final String MOTTAKER_FNR = "11111111111";
 	private static final String MOTTAKER_TYPE = "Person";
-	public static final String POSTKASSEADRESSE = "ove.jonsen#6K5A";
+	public static final String POSTKASSEADRESSE = "test.testesen#123A";
 	public static final String MOTTAKER_ORGNO = "984661185";
 	public static final String KONVERSASJON_ID = UUID.randomUUID().toString();
 

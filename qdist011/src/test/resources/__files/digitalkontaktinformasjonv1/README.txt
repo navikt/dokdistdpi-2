@@ -1,0 +1,1 @@
+leverandoerSertifikat i disse filene er selvsignerte med Subject: CN=test.example.com
