@@ -28,7 +28,7 @@
 	<properties>
 		<java.version>25</java.version>
 
-		<camel.version>4.21.0</camel.version>
+		<camel.version>4.22.0</camel.version>
 		<libraries-bom.version>26.85.1</libraries-bom.version>
 		<tink.version>1.23.0</tink.version>
 		<tink-gcpkms.version>1.12.0</tink-gcpkms.version>
