@@ -274,7 +274,7 @@ public class Qdist011Service {
 			throw new ForsendelseStatusEkspedertKanIkkeDistribueresException(format("Forsendelse med forsendelseId=%s, status=%s er ekspedert og behandlingen avsluttes",
 					forsendelseId, forsendelseStatus));
 		} else if (FORSENDELSE_STATUS_OPPRETTET.equals(forsendelseStatus)) {
-			throw new KunneIkkeDistribuereForsendelseException(format("Kunne ikke distribuere forsendelse med forsendelseId=%s, status=%s", forsendelseId, forsendelseStatus));
+			throw new KunneIkkeDistribuereForsendelseException(format("Kunne ikke distribuere forsendelse med forsendelseId=%s, fordi den har status=%s", forsendelseId, forsendelseStatus));
 		}
 	}
 
