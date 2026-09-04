@@ -44,6 +44,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -376,7 +377,7 @@ public class Qdist011IT {
 	private void stubPostDPIDuplicate() {
 		stubFor(post(urlEqualTo("/message/out?kanal=dokdistdpi-t"))
 				.willReturn(aResponse()
-						.withStatus(BAD_REQUEST.value())
+						.withStatus(CONFLICT.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 						.withBodyFile("dpi/dpi_out_duplicate.json")));
 	}

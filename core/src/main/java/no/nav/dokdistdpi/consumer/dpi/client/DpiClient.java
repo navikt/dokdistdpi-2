@@ -42,6 +42,7 @@ import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.FEILET;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
@@ -57,8 +58,7 @@ import static org.springframework.web.reactive.function.client.WebClientResponse
 @Component
 public class DpiClient {
 
-	private static final String LOG_FEIL_MELDING = "Kunne ikke sende til DPI hjørne-2 med status={}, konversasjonId={} og feilmelding={}";
-	private static final String EXCEPTION_FEIL_MELDING = "Kunne ikke sende til DPI hjørne-2 med status=%s, konversasjonId=%s og feilmelding=%s";
+	private static final String EXCEPTION_FEILMELDING = "Kunne ikke sende til DPI hjørne-2 med status=%s, konversasjonId=%s og feilmelding=%s";
 	private static final String SEND_PATH = "/out";
 	private static final String MESSAGES_PATH_IN = "in";
 	private static final String MESSAGES_PATH_OUT = "out";
@@ -69,7 +69,7 @@ public class DpiClient {
 	private static final String QUERY_PARAM_PAGESIZE = "page_size";
 	// Siden hjørne2 ikke har et veldefinert felt som indikerer duplikate forsendelser så matches det på meldingen under.
 	// Ved feil her så sjekk med Digdir og om dette er endret hos hjørne2 leverandør.
-	private static final String HJORNE2_DUPLICATE_ERROR_MESSAGE = "ERROR: duplicate key value violates unique constraint";
+	private static final String HJORNE2_DUPLICATE_ERROR_MESSAGE = "409002: Document ";
 	public static final String HJORNE2_FINGERAVTRYKK_ERROR_MESSAGE = "Upload was not accepted, SHA-256 digest of dokumentpakke was";
 	private static final String RESILIENCE4J_INSTANCE = "dpi";
 
@@ -110,27 +110,28 @@ public class DpiClient {
 			ResponseEntity<String> response = restTemplate.exchange(uri, POST, httpEntity, String.class);
 
 			if (!CREATED.equals(response.getStatusCode())) {
-				log.error(LOG_FEIL_MELDING, response.getStatusCode(), konversasjonId, response.getBody());
-				throw new KunneIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING, response.getStatusCode(), konversasjonId, response.getBody()));
+				String exceptionMessage = EXCEPTION_FEILMELDING.formatted(response.getStatusCode(), konversasjonId, response.getBody());
+				log.error(exceptionMessage);
+				throw new KunneIkkeDistribuereForsendelseException(exceptionMessage);
 			}
 			log.info("Brev sendt til DPI hjørne2 med konversasjonId={}, status={}", konversasjonId, response.getStatusCode());
 
 			return konversasjonId;
 		} catch (HttpClientErrorException e) {
-			if (e.getStatusCode() == BAD_REQUEST && e.getMessage() != null && e.getMessage().contains(HJORNE2_DUPLICATE_ERROR_MESSAGE)) {
+			if (e.getStatusCode() == CONFLICT && e.getMessage() != null && e.getMessage().contains(HJORNE2_DUPLICATE_ERROR_MESSAGE)) {
 				log.info("Brev sendt til DPI hjørne2 tidligere, fortsetter behandling. Dette kallet ble avvist på duplikatkontroll hos hjørne2. konversasjonId={}, status={}, melding={}",
 						konversasjonId, e.getStatusCode(), e.getMessage());
 				return konversasjonId;
 			} else if (e.getStatusCode() == BAD_REQUEST && e.getMessage().contains(HJORNE2_FINGERAVTRYKK_ERROR_MESSAGE)) {
 				// Trigger retry og legger på BQ i stedet
-				throw new SikkerDigitalPostException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage()), e);
+				throw new SikkerDigitalPostException(format(EXCEPTION_FEILMELDING, e.getStatusCode(), konversasjonId, e.getMessage()), e);
 			}
 
-			log.error(LOG_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage());
-			throw new KunneIkkeDistribuereForsendelseException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage()), e);
+			String exceptionMessage = EXCEPTION_FEILMELDING.formatted(e.getStatusCode(), konversasjonId, e.getMessage());
+			log.error(exceptionMessage, e);
+			throw new KunneIkkeDistribuereForsendelseException(exceptionMessage, e);
 		} catch (HttpServerErrorException e) {
-			log.error(LOG_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage());
-			throw new SikkerDigitalPostException(format(EXCEPTION_FEIL_MELDING, e.getStatusCode(), konversasjonId, e.getMessage()), e);
+			throw new SikkerDigitalPostException(EXCEPTION_FEILMELDING.formatted(e.getStatusCode(), konversasjonId, e.getMessage()), e);
 		}
 	}
 
