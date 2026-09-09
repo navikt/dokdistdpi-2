@@ -8,6 +8,7 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
+import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.exception.functional.ForsendelseStatusIkkeFunnetException;
 import no.nav.dokdistdpi.exception.functional.KunneIkkeDistribuereForsendelseException;
@@ -37,8 +38,8 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 import static java.lang.String.format;
-import static no.nav.dokdistdpi.config.OAuthEnabledWebClientConfig.MASKINPORTEN_CLIENT_REGISTRATION;
 import static no.nav.dokdistdpi.consumer.dpi.client.StatusType.FEILET;
+import static no.nav.dokdistdpi.consumer.naistoken.NaisTexasRequestInterceptor.TARGET_SCOPE;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.BACKOFF_MULTIPLIER;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -47,7 +48,6 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 import static org.springframework.web.reactive.function.client.WebClientResponseException.BadRequest;
 import static org.springframework.web.reactive.function.client.WebClientResponseException.Unauthorized;
 
@@ -74,21 +74,24 @@ public class DpiClient {
 	private static final String RESILIENCE4J_INSTANCE = "dpi";
 
 	private final RestTemplate restTemplate;
-	private final WebClient oauth2WebClient;
+	private final WebClient texasAuthorizedWebClient;
 	private final Retry retry;
 	private final CircuitBreaker circuitBreaker;
 	private final DokdistdpiProperties.Dpi dpiConfig;
+	private final MaskinportenProperties maskinportenProperties;
 
-	public DpiClient(WebClient oauth2WebClient,
+	public DpiClient(WebClient texasAuthorizedWebClient,
 					 RestTemplateBuilder restTemplateBuilder,
 					 DokdistdpiProperties dokdistdpiProperties,
+					 MaskinportenProperties maskinportenProperties,
 					 CircuitBreakerRegistry circuitBreakerRegistry,
 					 RetryRegistry retryRegistry) {
 		this.dpiConfig = dokdistdpiProperties.getEndpoints().getDpi();
 		this.restTemplate = restTemplateBuilder.build();
-		this.oauth2WebClient = oauth2WebClient.mutate()
+		this.texasAuthorizedWebClient = texasAuthorizedWebClient.mutate()
 				.baseUrl(dpiConfig.getUrl())
 				.build();
+		this.maskinportenProperties = maskinportenProperties;
 		this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(RESILIENCE4J_INSTANCE);
 		this.retry = retryRegistry.retry(RESILIENCE4J_INSTANCE);
 	}
@@ -140,12 +143,12 @@ public class DpiClient {
 	public List<ForsendelseStatusResponse> hentForsendelseStatus(String konversasjonId) {
 		log.info("Skal hente forsendelsestatus for konversasjonId={}", konversasjonId);
 
-		List<ForsendelseStatusResponse> response = oauth2WebClient.get()
+		List<ForsendelseStatusResponse> response = texasAuthorizedWebClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.pathSegment(MESSAGES_PATH_OUT, "{konversasjonId}", MESSAGES_PATH_OUT_STATUSES)
 						.build(konversasjonId))
 				.accept(APPLICATION_JSON, APPLICATION_PROBLEM_JSON)
-				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
+				.attribute(TARGET_SCOPE, maskinportenProperties.scopes())
 				.retrieve()
 				.bodyToMono(new ParameterizedTypeReference<List<ForsendelseStatusResponse>>() {
 				})
@@ -186,7 +189,7 @@ public class DpiClient {
 
 	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1in/get
 	public Flux<HentKvitteringResponse> hentKvitteringerAsync(final int page) {
-		return oauth2WebClient.get()
+		return texasAuthorizedWebClient.get()
 				.uri(uriBuilder -> uriBuilder
 						.pathSegment(MESSAGES_PATH_IN)
 						.queryParam(QUERY_PARAM_KANAL, dpiConfig.getMpckanal())
@@ -194,7 +197,7 @@ public class DpiClient {
 						.queryParam(QUERY_PARAM_PAGE, page)
 						.build())
 				.accept(APPLICATION_JSON, APPLICATION_PROBLEM_JSON)
-				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
+				.attribute(TARGET_SCOPE, maskinportenProperties.scopes())
 				.retrieve()
 				.bodyToFlux(HentKvitteringResponse.class)
 				.onErrorMap(this::mapHentKvitteringerErrors)
@@ -218,9 +221,9 @@ public class DpiClient {
 
 	// https://docs.digdir.no/resources/begrep/sikkerDigitalPost/nyinf/api/openapi_spec.html#/paths/~1messages~1in~1{id}~1read/post
 	public Mono<String> markerKvitteringMottattAsync(String konversasjonId) {
-		return oauth2WebClient.post()
+		return texasAuthorizedWebClient.post()
 				.uri(uriBuilder -> uriBuilder.pathSegment(MESSAGES_PATH_IN, "{konversasjonId}", MESSAGES_PATH_IN_READ).build(konversasjonId))
-				.attributes(clientRegistrationId(MASKINPORTEN_CLIENT_REGISTRATION))
+				.attribute(TARGET_SCOPE, maskinportenProperties.scopes())
 				.retrieve()
 				.bodyToMono(Void.class)
 				.onErrorMap(error -> mapMarkerKvitteringMottattErrors(error, konversasjonId))

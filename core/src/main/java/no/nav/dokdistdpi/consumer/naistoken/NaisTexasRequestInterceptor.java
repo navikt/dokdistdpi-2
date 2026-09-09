@@ -9,6 +9,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import java.io.IOException;
 import java.util.Map;
 
+import static no.nav.dokdistdpi.consumer.naistoken.NaisTexasConsumer.TARGET_PATTERN;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.CALL_ID;
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.NAV_CALL_ID;
 
@@ -27,8 +28,11 @@ public class NaisTexasRequestInterceptor implements ClientHttpRequestInterceptor
 		Map<String, Object> attributes = request.getAttributes();
 		if (attributes.containsKey(TARGET_SCOPE)) {
 			String targetScope = (String) attributes.get(TARGET_SCOPE);
-			String token = naisTexasConsumer.getSystemToken(targetScope);
-			request.getHeaders().setBearerAuth(token);
+			if (TARGET_PATTERN.matcher(targetScope).matches()) {
+				request.getHeaders().setBearerAuth(naisTexasConsumer.getSystemToken(targetScope));
+			} else {
+				request.getHeaders().setBearerAuth(naisTexasConsumer.getMaskinportenToken(targetScope));
+			}
 		}
 		request.getHeaders().set(NAV_CALL_ID, MDC.get(CALL_ID));
 		return execution.execute(request, body);

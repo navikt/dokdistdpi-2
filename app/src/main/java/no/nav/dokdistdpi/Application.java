@@ -2,7 +2,6 @@ package no.nav.dokdistdpi;
 
 import no.nav.dokdistdpi.azure.AzureProperties;
 import no.nav.dokdistdpi.certificate.KeyStoreProperties;
-import no.nav.dokdistdpi.config.OAuthEnabledWebClientConfig;
 import no.nav.dokdistdpi.config.WebClientConfig;
 import no.nav.dokdistdpi.config.prop.DokdistdpiProperties;
 import no.nav.dokdistdpi.config.prop.DokdistmellomlagerProperties;
@@ -29,7 +28,6 @@ import org.springframework.resilience.annotation.EnableResilientMethods;
 })
 @Import({CoreConfig.class,
 		WebClientConfig.class,
-		OAuthEnabledWebClientConfig.class
 })
 @EnableResilientMethods
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)

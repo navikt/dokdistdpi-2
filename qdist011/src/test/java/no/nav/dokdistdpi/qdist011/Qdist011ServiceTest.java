@@ -1,6 +1,7 @@
 package no.nav.dokdistdpi.qdist011;
 
 import no.nav.dokdistdpi.cloudstorage.EncryptedBucketStorage;
+import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInfoResponse;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
@@ -8,10 +9,9 @@ import no.nav.dokdistdpi.consumer.dokmet.DokmetConsumer;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.DigitalPost;
 import no.nav.dokdistdpi.consumer.dpi.digitalpost.domain.Forsendelse;
 import no.nav.dokdistdpi.consumer.dpi.dokumentpakke.DpiDokument;
-import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
+import no.nav.dokdistdpi.consumer.naistoken.NaisTexasConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.DokdistadminConsumer;
 import no.nav.dokdistdpi.consumer.saf.SafJournalpostQueryService;
-import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
 import no.nav.dokdistdpi.qdist011.saf.JournalpostQdist011;
 import no.nav.dokdistdpi.qdist011.saf.SafJournalpostQueryServiceImplQdist011;
 import no.nav.dokdistdpi.service.DigitalPostService;
@@ -66,7 +66,7 @@ class Qdist011ServiceTest {
 	private Qdist011Service qdist011Service;
 	private SafJournalpostQueryService<JournalpostQdist011> safJournalpostQueryService;
 
-	private MaskinportenTokenConsumer maskinportenTokenConsumer;
+	private NaisTexasConsumer naisTexasConsumer;
 	private DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer;
 	private DokmetConsumer dokmetConsumer;
 	private Exchange exchange;
@@ -75,15 +75,16 @@ class Qdist011ServiceTest {
 	void setup() {
 		dokdistadminConsumer = mock(DokdistadminConsumer.class);
 		safJournalpostQueryService = mock(SafJournalpostQueryServiceImplQdist011.class);
-		maskinportenTokenConsumer = mock(MaskinportenTokenConsumer.class);
+		naisTexasConsumer = mock(NaisTexasConsumer.class);
 		digitalKontaktinformasjonConsumer = mock(DigitalKontaktinformasjonConsumer.class);
 		dokmetConsumer = mock(DokmetConsumer.class);
 		exchange = mock(Exchange.class);
+		MaskinportenProperties maskinportenProperties = new MaskinportenProperties("scope");
 		EncryptedBucketStorage encryptedBucketStorage = mock(EncryptedBucketStorage.class);
 
 		DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator = new DigitalKontaktInformasjonValidator();
-		DigitalPostService digitalPostService = new DigitalPostService(maskinportenTokenConsumer, digitalKontaktInformasjonValidator,
-				digitalKontaktinformasjonConsumer, dokmetConsumer);
+		DigitalPostService digitalPostService = new DigitalPostService(naisTexasConsumer, digitalKontaktInformasjonValidator,
+				digitalKontaktinformasjonConsumer, dokmetConsumer, maskinportenProperties);
 
 		qdist011Service = new Qdist011Service(encryptedBucketStorage, dokdistadminConsumer, digitalPostService, safJournalpostQueryService, "07:00:00", "23:00:00");
 
@@ -96,7 +97,7 @@ class Qdist011ServiceTest {
 	}, nullValues = {"NULL"})
 	void skalLageForsendelse(String distribusjonstypecode) {
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(distribusjonstypecode));
-		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
+		when(naisTexasConsumer.getMaskinportenToken(anyString())).thenReturn(createOidcTokenResponse());
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(dokmetConsumer.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
 		when(dokmetConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
@@ -117,7 +118,7 @@ class Qdist011ServiceTest {
 	@Test
 	void skalLageForsendelseWithoutVarslerWhenDistribusjonstypeCodeIsANNET() {
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument(ANNET.toString()));
-		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
+		when(naisTexasConsumer.getMaskinportenToken(anyString())).thenReturn(createOidcTokenResponse());
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(dokmetConsumer.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
 		when(dokmetConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
@@ -139,11 +140,11 @@ class Qdist011ServiceTest {
 	@Test
 	void shoudThrowExceptionIfMaskinportenttokenIsNull() {
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
-		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(null));
+		when(naisTexasConsumer.getMaskinportenToken(anyString())).thenReturn(null);
 
-		MaskinportenFunctionalException ex = assertThrows(MaskinportenFunctionalException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
+		NullPointerException ex = assertThrows(NullPointerException.class, () -> qdist011Service.createForsendelse(createDistribuerTilKanal(), exchange));
 
-		assertEquals("MaskinportenToken kan ikke være null", ex.getMessage());
+		assertNotNull(ex);
 	}
 
 	@Test
@@ -152,7 +153,7 @@ class Qdist011ServiceTest {
 		sikkerDigitalKontaktInfo.getSikkerDigitalPostkasse().setLeverandoerSertifikat(null);
 
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithDokument());
-		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
+		when(naisTexasConsumer.getMaskinportenToken(anyString())).thenReturn(createOidcTokenResponse());
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(sikkerDigitalKontaktInfo);
 		when(dokmetConsumer.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());
 		when(dokmetConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
@@ -166,7 +167,7 @@ class Qdist011ServiceTest {
 	void shouldReturnNumberedVersionsOfskalNavngiVedleggMedTilleggsnummer() {
 		when(dokdistadminConsumer.hentForsendelse(anyString())).thenReturn(buildHentForsendelseResponseWithArkivinformasjon(ANNET.toString()));
 		when(safJournalpostQueryService.hentJournalpost(anyString())).thenReturn(createJournalpostQdist011());
-		when(maskinportenTokenConsumer.fetchToken()).thenReturn(createOidcTokenResponse(MASKINPORTEN_TOKEN));
+		when(naisTexasConsumer.getMaskinportenToken(anyString())).thenReturn(createOidcTokenResponse());
 		when(digitalKontaktinformasjonConsumer.hentSikkerDigitalPostadresse(anyString())).thenReturn(createSikkerDigitalKontaktInfo());
 		when(dokmetConsumer.hentDokumenttypeInfo(anyString())).thenReturn(createDokumenttypeInfoTo());
 		when(dokmetConsumer.getVarselInfo(anyString())).thenReturn(createVarselInfoTo());

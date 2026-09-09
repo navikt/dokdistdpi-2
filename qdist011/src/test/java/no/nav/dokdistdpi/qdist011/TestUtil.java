@@ -5,7 +5,7 @@ import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInfoResponse;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInfoResponse.SikkerDigitalPostkasse;
 import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
-import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
+import no.nav.dokdistdpi.consumer.naistoken.NaisTexasToken;
 import no.nav.dokdistdpi.consumer.rdist001.domain.DistribusjonsTypeKode;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Dokument;
@@ -54,7 +54,6 @@ public final class TestUtil {
 	public static final String TITTEL = "Tittel";
 
 	public static final String MASKINPORTEN_TOKEN = "aølkdsølkdsj==";
-	public static final String MASKINPORTEN_SCOPE = "digitalpostinnbygger:send";
 
 	private static final boolean RESERVASJON = false;
 	private static final String EPOST_VALUE = "epostValue";
@@ -77,12 +76,8 @@ public final class TestUtil {
 	public static final String MOTTAKER_ORGNO = "984661185";
 	public static final String KONVERSASJON_ID = UUID.randomUUID().toString();
 
-	public static OidcTokenResponse createOidcTokenResponse(String accessToken) {
-		OidcTokenResponse oidcTokenResponse = new OidcTokenResponse();
-		oidcTokenResponse.setAccessToken(accessToken);
-		oidcTokenResponse.setScope(MASKINPORTEN_SCOPE);
-		oidcTokenResponse.setExpiresIn(30);
-		return oidcTokenResponse;
+	public static String createOidcTokenResponse() {
+		return new NaisTexasToken(MASKINPORTEN_TOKEN).accessToken();
 	}
 
 

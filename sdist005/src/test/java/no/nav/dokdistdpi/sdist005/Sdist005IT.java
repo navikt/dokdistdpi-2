@@ -2,13 +2,14 @@ package no.nav.dokdistdpi.sdist005;
 
 import jakarta.jms.Queue;
 import jakarta.xml.bind.JAXBElement;
+import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.wiremock.spring.EnableWireMock;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.wiremock.spring.EnableWireMock;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -61,7 +62,8 @@ public class Sdist005IT {
 	public void shouldGetKvitteringFromDpiAccessPoint() throws UnknownHostException {
 		stubLeaderElection();
 		stubAzure();
-		stubPostMaskinporten();
+		stubNaisTexasToken();
+
 		stubHentUekspederteForsendelser();
 		stubHentForsendelseStatus(KONVERSASJON_ID);
 		stubHentForsendelse();
@@ -72,7 +74,7 @@ public class Sdist005IT {
 		await().atMost(15, SECONDS).untilAsserted(() -> {
 			String message = receive(qdist009);
 			assertNotNull(message);
-			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
+			verify(1, postRequestedFor(urlEqualTo("/texas-token")));
 			verify(1, getRequestedFor(urlEqualTo("/message/out/" + KONVERSASJON_ID + "/statuses")));
 			verify(putRequestedFor(urlEqualTo(FEILREGISTRERFORSENDELSE_URL))
 					.withRequestBody(matchingJsonPath("$.detaljer", equalTo("Bad Gateway mot postkasse")))
@@ -80,12 +82,12 @@ public class Sdist005IT {
 		});
 	}
 
-	private void stubPostMaskinporten() {
-		stubFor(post(urlMatching("/maskinporten"))
+	void stubNaisTexasToken() {
+		stubFor(post("/texas-token")
 				.willReturn(aResponse()
 						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("maskinporten/maskinporten_happy_response.json")));
+						.withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+						.withBodyFile("nais-texas/texas_response.json")));
 	}
 
 	private void stubPutOppdaterDigitalLeverandoerAndPostkasseadresse() {
