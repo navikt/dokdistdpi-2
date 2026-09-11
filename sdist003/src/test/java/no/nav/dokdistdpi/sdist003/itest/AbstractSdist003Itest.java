@@ -8,11 +8,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.wiremock.spring.EnableWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.wiremock.spring.EnableWireMock;
 import reactor.util.Loggers;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -34,7 +34,6 @@ import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE;
 @ActiveProfiles("itest")
 public abstract class AbstractSdist003Itest {
 
-	static final String MASKINPORTEN_URL = "/maskinporten";
 	static final String DPI_BEKREFT_URL = "/message/in/ff88849c-e281-4809-8555-7cd54952b916/read";
 	static final String DPI_KVITTERINGER_URL = "/message/in?kanal=dokdistdpi-t&page_size=10";
 
@@ -50,6 +49,7 @@ public abstract class AbstractSdist003Itest {
 		WireMock.reset();
 		WireMock.resetAllRequests();
 		WireMock.removeAllMappings();
+		stubNaisTexasToken();
 	}
 
 	protected static void stubDpiKvitteringPage0(String filename) {
@@ -93,11 +93,12 @@ public abstract class AbstractSdist003Itest {
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
 	}
 
-	protected static void stubPostMaskinporten() {
-		stubFor(post(urlMatching(MASKINPORTEN_URL))
-				.willReturn(aResponse().withStatus(OK.value())
+	void stubNaisTexasToken() {
+		stubFor(post("/texas-token")
+				.willReturn(aResponse()
+						.withStatus(OK.value())
 						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("maskinporten/maskinporten_happy_response.json")));
+						.withBodyFile("nais-texas/texas_response.json")));
 	}
 
 	@SuppressWarnings("unchecked")

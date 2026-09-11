@@ -1,6 +1,7 @@
 package no.nav.dokdistdpi.service;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.dokdistdpi.config.prop.MaskinportenProperties;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInfoResponse;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktInformasjonValidator;
 import no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinformasjonConsumer;
@@ -9,13 +10,12 @@ import no.nav.dokdistdpi.consumer.dokmet.DokmetConsumer;
 import no.nav.dokdistdpi.consumer.dokmet.DokmetFunctionalException;
 import no.nav.dokdistdpi.consumer.dokmet.tkat20.DistribusjonInfo;
 import no.nav.dokdistdpi.consumer.dokmet.tkat21.VarselInfo;
-import no.nav.dokdistdpi.consumer.dpi.maskineporten.MaskinportenTokenConsumer;
-import no.nav.dokdistdpi.consumer.dpi.maskineporten.OidcTokenResponse;
+import no.nav.dokdistdpi.consumer.naistoken.NaisTexasConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
 import no.nav.dokdistdpi.exception.functional.AdministrerForsendelseFunctionalException;
-import no.nav.dokdistdpi.exception.functional.MaskinportenFunctionalException;
-import org.springframework.stereotype.Component;
+import no.nav.dokdistdpi.exception.functional.NaisTexasTechnicalException;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
@@ -25,23 +25,26 @@ import static no.nav.dokdistdpi.consumer.dkif.DigitalKontaktinfoMapper.mapDigita
 import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 
-@Component
 @Slf4j
+@Service
 public class DigitalPostService {
 
-	private final MaskinportenTokenConsumer maskinportenTokenConsumer;
+	private final NaisTexasConsumer naisTexasConsumer;
 	private final DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer;
 	private final DokmetConsumer dokmetConsumer;
 	private final DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator;
+	private final MaskinportenProperties maskinportenProperties;
 
-	public DigitalPostService(MaskinportenTokenConsumer maskinportenTokenConsumer,
+	public DigitalPostService(NaisTexasConsumer naisTexasConsumer,
 							  DigitalKontaktInformasjonValidator digitalKontaktInformasjonValidator,
 							  DigitalKontaktinformasjonConsumer digitalKontaktinformasjonConsumer,
-							  DokmetConsumer dokmetConsumer) {
-		this.maskinportenTokenConsumer = maskinportenTokenConsumer;
+							  DokmetConsumer dokmetConsumer,
+							  MaskinportenProperties maskinportenProperties) {
+		this.naisTexasConsumer = naisTexasConsumer;
 		this.digitalKontaktInformasjonValidator = digitalKontaktInformasjonValidator;
 		this.digitalKontaktinformasjonConsumer = digitalKontaktinformasjonConsumer;
 		this.dokmetConsumer = dokmetConsumer;
+		this.maskinportenProperties = maskinportenProperties;
 	}
 
 	public SikkerDigitalKontaktInfo hentDigitalKontaktInfo(HentForsendelseResponse hentForsendelseResponse) {
@@ -54,9 +57,8 @@ public class DigitalPostService {
 	}
 
 	public String getMaskinportenToken() {
-		return Optional.of(maskinportenTokenConsumer.fetchToken())
-				.map(OidcTokenResponse::getAccessToken)
-				.orElseThrow(() -> new MaskinportenFunctionalException("MaskinportenToken kan ikke være null"));
+		return Optional.of(naisTexasConsumer.getMaskinportenToken(maskinportenProperties.scopes()))
+				.orElseThrow(() -> new NaisTexasTechnicalException("Maskinporten token kan ikke være null"));
 	}
 
 	public VarselInfo getVarselInfo(DistribusjonInfo distribusjonInfo) {
@@ -69,7 +71,6 @@ public class DigitalPostService {
 				.map(dokument -> dokmetConsumer.hentDokumenttypeInfo(dokument.getDokumenttypeId())).findAny()
 				.orElseThrow(() -> new DokmetFunctionalException("DokumenttypeInfo kan ikke være null"));
 	}
-
 
 	private String getMottakerId(HentForsendelseResponse hentMottakerResponse) {
 		if (hentMottakerResponse == null) {

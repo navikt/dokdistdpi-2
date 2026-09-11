@@ -35,7 +35,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.dokdistdpi.qdist011.TestUtil.classpathToString;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -121,7 +120,6 @@ public class Qdist011IT {
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
-		stubPostMaskinporten();
 		stubPostDPISend();
 		stubGetDPIStatus();
 		stubPutVarselInfo();
@@ -152,7 +150,6 @@ public class Qdist011IT {
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
-		stubPostMaskinporten();
 		stubPostDPISend();
 		stubGetDPIStatus("dpi_forsendelse_status_offset.json");
 		stubPutVarselInfo();
@@ -184,7 +181,6 @@ public class Qdist011IT {
 		stubPutOppdaterForsendelse();
 		stubPutVarselInfo();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
-		stubPostMaskinporten();
 		stubPostDPISend();
 		stubGetDPIStatus();
 
@@ -208,7 +204,6 @@ public class Qdist011IT {
 		stubAzure();
 		stubGetSikkerDigitalPostkasse("dki-sikkerdigitalpostkasse-null.json", OK.value());
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
-		stubPostMaskinporten();
 		stubPostDistribuerTilNyKanal();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
@@ -216,7 +211,6 @@ public class Qdist011IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
-			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, postRequestedFor(urlEqualTo(DISTRIBUERT_TIL_NY_KANAL)));
 		});
 	}
@@ -226,7 +220,6 @@ public class Qdist011IT {
 		stubAzure();
 		stubGetSikkerDigitalPostkasse("dki-digipost-reservert-true.json", OK.value());
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
-		stubPostMaskinporten();
 		stubPostDistribuerTilNyKanal();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
@@ -234,7 +227,6 @@ public class Qdist011IT {
 		await().atMost(10, SECONDS).untilAsserted(() -> {
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
-			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 			verify(1, postRequestedFor(urlEqualTo(DISTRIBUERT_TIL_NY_KANAL)));
 		});
 	}
@@ -248,7 +240,6 @@ public class Qdist011IT {
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
-		stubPostMaskinporten();
 		stubPostDPIDuplicate();
 		stubGetDPIStatus();
 		stubPutVarselInfo();
@@ -277,7 +268,6 @@ public class Qdist011IT {
 		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
 		stubPutOppdaterForsendelse();
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
-		stubPostMaskinporten();
 		stubPostDPISend(BAD_REQUEST.value());
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
@@ -300,7 +290,6 @@ public class Qdist011IT {
 		stubAzure();
 		stubGetSikkerDigitalPostkasse("dki-digipost-kanvarsles-true.json", OK.value());
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
-		stubPostMaskinporten();
 		stubPostDistribuerTilNyKanal();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
@@ -310,31 +299,8 @@ public class Qdist011IT {
 			assertNotNull(response);
 			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
 			verify(1, postRequestedFor(urlEqualTo(DIGDIR_KRR_URL)));
-			verify(1, postRequestedFor(urlEqualTo("/maskinporten")));
 		});
 
-	}
-
-	@SneakyThrows
-	@Test
-	void shouldThrowExceptionIfMaskinportenIsNull() {
-		stubAzure();
-		stubGetDigipostDigitalKontaktInformasjon(OK.value());
-		stubGetDokumentTypeInfo("tkat020-happy.json");
-		stubGetVarselInfo("tkat021-happy.json");
-		stubPostSafJournalpost("saf/safGraphQlResponse-happy.json");
-		stubPutOppdaterForsendelse();
-		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
-		stubPostMaskinportenFeil(BAD_REQUEST.value());
-		stubPostDPISend();
-
-		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
-
-		await().atMost(10, SECONDS).untilAsserted(() -> {
-			String response = receive(qdist011FunksjonellFeil);
-			assertThat(response).contains("<forsendelseId>33333</forsendelseId>");
-			verify(1, getRequestedFor(urlEqualTo(HENTFORSENDELSE_URL)));
-		});
 	}
 
 	@SneakyThrows
@@ -354,7 +320,6 @@ public class Qdist011IT {
 		stubAzure();
 		stubGetDigipostDigitalKontaktInformasjon(INTERNAL_SERVER_ERROR.value());
 		stubGetHentForsendelse("__files/rdist001/getForsendelse-resending.json", OK.value());
-		stubPostMaskinporten();
 
 		sendStringMessage(qdist011, classpathToString("__files/qdist011/qdist011-happy.xml"), null);
 		await().atMost(10, SECONDS).untilAsserted(() -> {
@@ -400,22 +365,6 @@ public class Qdist011IT {
 						.withStatus(status)
 						.withHeader(CONTENT_TYPE, APPLICATION_PROBLEM_JSON_VALUE)
 						.withBodyFile("dpi/dpi_out_status400.json")));
-	}
-
-	private void stubPostMaskinporten() {
-		stubFor(post(urlMatching("/maskinporten"))
-				.willReturn(aResponse()
-						.withStatus(OK.value())
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("maskinporten/maskinporten_happy_response.json")));
-	}
-
-	private void stubPostMaskinportenFeil(int status) {
-		stubFor(post(urlMatching("/maskinporten"))
-				.willReturn(aResponse()
-						.withStatus(status)
-						.withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-						.withBodyFile("maskinporten/maskinporten_feil.json")));
 	}
 
 	private void stubPutOppdaterForsendelse() {

@@ -34,10 +34,8 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 
 	@Test
 	void shouldProcessPage0With8LeveringskvitteringAnd1Feil() {
-		stubPostMaskinporten();
 		stubDpiKvitteringPage0("8_leveringskvittering_1_feil.json");
 		stubPostMottattKvitteringMultiple();
-
 		Flux<String> kvitteringer = sdist003Service.behandleKvitteringer();
 		kvitteringer.subscribe();
 
@@ -56,12 +54,10 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 
 	@Test
 	void shouldProcess3PagesWithLeveringskvittering() {
-		stubPostMaskinporten();
 		stubDpiKvitteringPage(0, "0_10_leveringskvittering.json");
 		stubDpiKvitteringPage(1, "1_10_leveringskvittering.json");
 		stubDpiKvitteringPage(2, "2_5_leveringskvittering.json");
 		stubPostMottattKvitteringMultiple();
-
 		Flux<String> kvitteringer = sdist003Service.behandleKvitteringer();
 		kvitteringer.subscribe();
 
@@ -80,9 +76,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 
 	@Test
 	void shouldDoNoProcessingWhenDpiKvitteringReturnsNoContent() {
-		stubPostMaskinporten();
 		stubDpiKvitteringStatus(NO_CONTENT);
-
 		Flux<String> kvitteringer = sdist003Service.behandleKvitteringer();
 		kvitteringer.subscribe();
 
@@ -94,9 +88,7 @@ public class Sdist003ServiceIT extends AbstractSdist003Itest {
 
 	@Test
 	void shouldDoNoProcessingWhenKvitteringPage0ReturnsProblem() {
-		stubPostMaskinporten();
 		stubDpiKvitteringProblemPage0(INTERNAL_SERVER_ERROR);
-
 		Flux<String> kvitteringer = sdist003Service.behandleKvitteringer();
 		kvitteringer.subscribe();
 		await().during(2, TimeUnit.SECONDS).untilAsserted(() -> {

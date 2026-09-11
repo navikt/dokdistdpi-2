@@ -22,7 +22,6 @@ public class CacheConfig {
 
 	public static final String TKAT020_CACHE = "dokumenttypeInfoCache";
 	public static final String TKAT021_CACHE = "varselinfoCache";
-	public static final String MASKINPORTEN_CACHE = "maskinportenCache";
 	public static final String LIGHTWEIGHT_SAF_JOURNALPOST_QDIST011_CACHE = "LightweightSafJournalpostQdist011Cache";
 	public static final String SAF_JOURNALPOST_QDIST011_CACHE = "SafJournalpostQueryServiceImplQdist011Cache";
 	public static final String AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE = "AZUREAD";
@@ -47,10 +46,6 @@ public class CacheConfig {
 						.build()),
 				new CaffeineCache(SAF_JOURNALPOST_QDIST011_CACHE, Caffeine.newBuilder()
 						.expireAfterWrite(30, SECONDS)
-						.recordStats()
-						.build()),
-				new CaffeineCache(MASKINPORTEN_CACHE, Caffeine.newBuilder()
-						.expireAfterWrite(120, SECONDS)
 						.recordStats()
 						.build()),
 				new CaffeineCache(AZURE_CLIENT_CREDENTIAL_TOKEN_CACHE, Caffeine.newBuilder()
