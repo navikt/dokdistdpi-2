@@ -14,8 +14,8 @@ import no.nav.dokdistdpi.consumer.naistoken.NaisTexasConsumer;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse;
 import no.nav.dokdistdpi.consumer.rdist001.domain.HentForsendelseResponse.Mottaker;
 import no.nav.dokdistdpi.exception.functional.AdministrerForsendelseFunctionalException;
-import no.nav.dokdistdpi.exception.functional.NaisTexasFunctionalException;
-import org.springframework.stereotype.Component;
+import no.nav.dokdistdpi.exception.functional.NaisTexasTechnicalException;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
@@ -26,7 +26,7 @@ import static no.nav.dokdistdpi.utils.DokdistdpiConstant.HOVEDDOKUMENT;
 import static no.nav.dokdistdpi.utils.DokdistdpiUtils.assertNotBlank;
 
 @Slf4j
-@Component
+@Service
 public class DigitalPostService {
 
 	private final NaisTexasConsumer naisTexasConsumer;
@@ -58,7 +58,7 @@ public class DigitalPostService {
 
 	public String getMaskinportenToken() {
 		return Optional.of(naisTexasConsumer.getMaskinportenToken(maskinportenProperties.scopes()))
-				.orElseThrow(() -> new NaisTexasFunctionalException("Maskinporten token kan ikke være null"));
+				.orElseThrow(() -> new NaisTexasTechnicalException("Maskinporten token kan ikke være null"));
 	}
 
 	public VarselInfo getVarselInfo(DistribusjonInfo distribusjonInfo) {

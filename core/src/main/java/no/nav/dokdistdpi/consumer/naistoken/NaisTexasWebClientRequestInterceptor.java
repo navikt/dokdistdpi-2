@@ -1,5 +1,6 @@
 package no.nav.dokdistdpi.consumer.naistoken;
 
+import no.nav.dokdistdpi.exception.functional.NaisTexasTechnicalException;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
@@ -22,7 +23,10 @@ public class NaisTexasWebClientRequestInterceptor implements ExchangeFilterFunct
 	public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
 		return Mono.fromCallable(() -> addHeaders(request))
 				.subscribeOn(Schedulers.boundedElastic())
-				.flatMap(next::exchange);
+				.flatMap(next::exchange)
+				.onErrorMap(error ->
+						new NaisTexasTechnicalException(String.format("Kunne ikke legge token i headers. feilmelding=%s", error.getMessage()), error)
+				);
 	}
 
 	private ClientRequest addHeaders(ClientRequest request) {
