@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+	<systemSuffix systemIdSuffix="xmldsig-core-schema.xsd" uri="../felles/xmldsig-core-schema.xsd"/>
+	<systemSuffix systemIdSuffix="sdpfelles.xsd" uri="../felles/sdpfelles.xsd"/>
+</catalog>

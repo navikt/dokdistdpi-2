@@ -34,6 +34,7 @@
 						</goals>
 						<configuration>
 							<schemaDirectory>src/main/resources/xsd</schemaDirectory>
+							<catalog>src/main/resources/xsd/catalog.xml</catalog>
 							<schemaIncludes>
 								<schemaInclude>XAdES.xsd</schemaInclude>
 								<schemaInclude>sdpmanifest.xsd</schemaInclude>
