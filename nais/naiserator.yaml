@@ -25,6 +25,9 @@ spec:
               -XX:MaxHeapFreeRatio=55
               -Dreactor.schedulers.defaultBoundedElasticOnVirtualThreads=true
               -Dio.netty.allocator.type=pooled
+              -Dcom.ibm.mq.cfg.TCP.ClntSndBuffSize=32768
+              -Dcom.ibm.mq.cfg.TCP.ClntRcvBuffSize=32768
+              -Dcom.ibm.msg.client.commonservices.log.outputName=System.out
               $(JAVA_PROXY_OPTIONS) $(JAVA_TRUSTSTORE_OPTIONS)"
     - name: AZURE_APP_TOKEN_URL
       value: {{AZURE_APP_TOKEN_URL}}
