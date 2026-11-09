@@ -28,6 +28,7 @@ import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -135,6 +136,10 @@ public class DpiClient {
 			throw new KunneIkkeDistribuereForsendelseException(exceptionMessage, e);
 		} catch (HttpServerErrorException e) {
 			throw new SikkerDigitalPostException(EXCEPTION_FEILMELDING.formatted(e.getStatusCode(), konversasjonId, e.getMessage()), e);
+		} catch (ResourceAccessException e) {
+			// For å få retry ved følgende feil:
+			// org.springframework.web.client.ResourceAccessException: I/O error on POST request for "https://edi.edigard.com/api/v2/dpi/messages/out": edi.edigard.com:443 failed to respond
+			throw new SikkerDigitalPostException("Kunne ikke sende til DPI hjørne-2 med konversasjonId=%s og feilmelding=%s".formatted(konversasjonId, e.getMessage()), e);
 		}
 	}
 
