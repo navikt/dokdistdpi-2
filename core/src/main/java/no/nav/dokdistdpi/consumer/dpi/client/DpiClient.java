@@ -139,6 +139,7 @@ public class DpiClient {
 		} catch (ResourceAccessException e) {
 			// For å få retry ved følgende feil:
 			// org.springframework.web.client.ResourceAccessException: I/O error on POST request for "https://edi.edigard.com/api/v2/dpi/messages/out": edi.edigard.com:443 failed to respond
+			log.warn("Retry for ResourceAccessException for konversasjonId={}", konversasjonId);
 			throw new SikkerDigitalPostException("Kunne ikke sende til DPI hjørne-2 med konversasjonId=%s og feilmelding=%s".formatted(konversasjonId, e.getMessage()), e);
 		}
 	}
